@@ -1,0 +1,117 @@
+#ifndef __PARSE_H__
+#define __PARSE_H__
+
+#include <stdint.h>
+#include <string.h>
+
+#include "decode.h"
+
+#define USE_STATIC_DECODE_MAP 1
+
+#include <map>
+typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
+typedef std::map<uint16_t, decode> map_decoder;
+
+#if USE_STATIC_DECODE_MAP
+static map_decoder   decoders;
+#endif
+
+typedef struct {
+	unsigned int channel;
+	uint32_t frequency;
+	const char *modulation;
+} channel_info_t;
+typedef std::map<uint16_t, channel_info_t> map_channel_info;
+
+typedef std::map<uint16_t, uint16_t> map_eit_pids; /* pid, eit-x */
+
+class parse
+{
+public:
+	parse();
+	~parse();
+
+	unsigned int get_fed_pkt_count() const { return fed_pkt_count; };
+	uint16_t get_ts_id() const { return ts_id; };
+
+	int feed(int, uint8_t*);
+	void reset();
+
+	unsigned int xine_dump(uint16_t ts_id) { return xine_dump(ts_id, &channel_info[ts_id]); };
+	unsigned int xine_dump(); /* full channel dump  */
+	void epg_dump(); /* full channel dump  */
+
+	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
+	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; };
+
+	void set_scan_mode(bool onoff) { scan_mode = onoff; };
+	void set_epg_mode(bool onoff)  { epg_mode = onoff; };
+//got_all_eit()
+	bool is_psip_ready() { return ((has_pat) &&
+				       ((has_vct) || (!expect_vct)) &&
+				       (decoders[get_ts_id()].complete_pmt())); };
+	bool is_epg_ready() { return ((is_psip_ready()) &&
+				      (decoders[get_ts_id()].got_all_eit())); };
+	void cleanup();
+private:
+#if !USE_STATIC_DECODE_MAP
+	map_decoder   decoders;
+#endif
+	static void take_pat(void*, dvbpsi_pat_t*);
+	static void take_pmt(void*, dvbpsi_pmt_t*);
+	static void take_eit(void*, dvbpsi_eit_t*);
+	static void take_nit(void*, dvbpsi_nit_t*);
+	static void take_sdt(void*, dvbpsi_sdt_t*);
+	static void take_tot(void*, dvbpsi_tot_t*);
+	static void take_vct(void*, dvbpsi_atsc_vct_t*);
+	static void take_eit(void*, dvbpsi_atsc_eit_t*);
+	static void take_ett(void*, dvbpsi_atsc_ett_t*);
+	static void take_stt(void*, dvbpsi_atsc_stt_t*);
+	static void take_mgt(void*, dvbpsi_atsc_mgt_t*);
+
+	static void attach_table(void*, dvbpsi_handle, uint8_t, uint16_t);
+
+	bool take_pat(dvbpsi_pat_t*, bool);
+	bool take_pmt(dvbpsi_pmt_t*, bool);
+	bool take_eit(dvbpsi_eit_t*, bool);
+	bool take_nit(dvbpsi_nit_t*, bool);
+	bool take_sdt(dvbpsi_sdt_t*, bool);
+	bool take_tot(dvbpsi_tot_t*, bool);
+	bool take_vct(dvbpsi_atsc_vct_t*, bool);
+	bool take_eit(dvbpsi_atsc_eit_t*, bool);
+	bool take_ett(dvbpsi_atsc_ett_t*, bool);
+	bool take_stt(dvbpsi_atsc_stt_t*, bool);
+	bool take_mgt(dvbpsi_atsc_mgt_t*, bool);
+
+	void attach_table(dvbpsi_handle, uint8_t, uint16_t);
+
+	unsigned int xine_dump(uint16_t, channel_info_t*);
+
+	void set_ts_id(uint16_t new_ts_id) { fprintf(stderr, "%s(%04x|%d)\n", __func__, new_ts_id, new_ts_id); ts_id = new_ts_id; memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t)); };
+	void detach_demux();
+
+	channel_info_t new_channel_info;
+	map_channel_info channel_info;
+
+	unsigned int fed_pkt_count;
+
+	dvbpsi_handle h_pat;
+	map_dvbpsi    h_pmt;
+	map_dvbpsi    h_demux;
+
+	time_t stream_time;
+	uint16_t ts_id;
+
+	bool epg_mode;
+	bool scan_mode;
+	bool has_pat;
+	bool has_vct;
+	bool expect_vct;
+
+//	uint8_t grab_next_eit(uint8_t current_eit_x);
+	map_eit_pids eit_pids;
+
+	int dumped_eit;
+};
+
+#endif//__PARSE_H__

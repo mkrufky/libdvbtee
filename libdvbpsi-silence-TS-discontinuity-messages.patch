@@ -1,0 +1,19 @@
+---
+ libdvbpsi/src/dvbpsi.c |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- dvbtee.orig/libdvbpsi/src/dvbpsi.c
++++ dvbtee/libdvbpsi/src/dvbpsi.c
+@@ -176,10 +176,12 @@
+ 
+   if(i_expected_counter != h_dvbpsi->i_continuity_counter)
+   {
++#if 0
+     DVBPSI_ERROR_ARG("PSI decoder",
+                      "TS discontinuity (received %d, expected %d) for PID %d",
+                      h_dvbpsi->i_continuity_counter, i_expected_counter,
+                      ((uint16_t)(p_data[1] & 0x1f) << 8) | p_data[2]);
++#endif
+     h_dvbpsi->b_discontinuity = 1;
+     if(h_dvbpsi->p_current_section)
+     {
