@@ -28,21 +28,30 @@ The tables are copyrighted by (from A/65C Annex C Page 91 footnote 19):
 *********************************************************************
 
 */
+#if 0
 #include "config.h"
+#else
+#define ICONV_INPUT_CAST char **
+//#define ICONV_INPUT_CAST const char **
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
 #include <iconv.h>
 
+#if 0
 #include "logging.h"
 #include "objects.h"
+#endif
 #include "atsctext.h"
 
 /*******************************************************************************
 * Prototypes                                                                   *
 *******************************************************************************/
+#if 0
 static void ATSCMultipleStringsDestructor(ATSCMultipleStrings_t *strings);
+#endif
 static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported);
 static void HuffmanDecode(uint8_t *dest, uint8_t *src, int destLen, int srcLen, int comp);
 
@@ -337,8 +346,10 @@ static const char ATSCTEXT[] = "ATSCText";
 *******************************************************************************/
 int ATSCMultipleStringsInit(void)
 {
+#if 0
     ObjectRegisterTypeDestructor(ATSCMultipleStrings_t, 
         (ObjectDestructor_t)ATSCMultipleStringsDestructor);
+#endif
     Utf16ToUtf8CD = iconv_open("UTF-8", "UTF-16BE");
     if ((long) Utf16ToUtf8CD == -1)
     {
@@ -364,23 +375,40 @@ void ATSCMultipleStringsDeInit(void)
     iconv_close(AsciiToUtf8CD);    
 }
 
+#if 0
 ATSCMultipleStrings_t *ATSCMultipleStringsConvert(uint8_t *data, uint8_t len)
 {
     ATSCMultipleStrings_t *result;
+#else
+ATSCMultipleStrings_t *ATSCMultipleStringsConvert(ATSCMultipleStrings_t *result, uint8_t *data, uint8_t len)
+{
+#endif
     int stringIndex;
     uint8_t *pos = data + 1;
 
     pthread_mutex_lock(&mutex);
+#if 0
     result = ObjectCreateType(ATSCMultipleStrings_t);
+#endif
     result->number_of_strings = data[0];
+#if 0
     result->strings = calloc( result->number_of_strings, sizeof(ATSCString_t));
+#else
+    result->strings = (ATSCString_t*)calloc( result->number_of_strings, sizeof(ATSCString_t));
+#endif
+#if 0
     LogModule(LOG_DEBUGV, ATSCTEXT, "Start of conversion: Number of strings = %d\n", data[0]);
+#endif
     for (stringIndex = 0; stringIndex < result->number_of_strings; stringIndex ++)
     {
         int segments;
         int segmentIndex;
         int sbIndex;
+#if 0
         bool supported = TRUE;
+#else
+        bool supported = true;
+#endif
         
         result->strings[stringIndex].lang[0] = pos[0];
         result->strings[stringIndex].lang[1] = pos[1];        
@@ -390,7 +418,9 @@ ATSCMultipleStrings_t *ATSCMultipleStringsConvert(uint8_t *data, uint8_t len)
 
         TextBuffer[0] = 0;
         sbIndex = 0;
+#if 0
         LogModule(LOG_DEBUGV, ATSCTEXT, "Number of segments = %d\n", segments);
+#endif
         for (segmentIndex = 0; segmentIndex < segments; segmentIndex ++)
         {
             pos = AppendSegment(pos, &sbIndex, &supported);
@@ -407,7 +437,9 @@ ATSCMultipleStrings_t *ATSCMultipleStringsConvert(uint8_t *data, uint8_t len)
         }
         
     }
+#if 0
     LogModule(LOG_DEBUGV, ATSCTEXT, "End of conversion\n");
+#endif
     pthread_mutex_unlock(&mutex);    
     return result;    
 }
@@ -416,6 +448,7 @@ ATSCMultipleStrings_t *ATSCMultipleStringsConvert(uint8_t *data, uint8_t len)
 /*******************************************************************************
 * Local Functions                                                              *
 *******************************************************************************/
+#if 0
 static void ATSCMultipleStringsDestructor(ATSCMultipleStrings_t *strings)
 {
     int i;
@@ -425,6 +458,7 @@ static void ATSCMultipleStringsDestructor(ATSCMultipleStrings_t *strings)
     }
     free(strings->strings);
 }
+#endif
 
 static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
 {
@@ -443,8 +477,10 @@ static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
         
     rawText = segment + 3;
     segment += 3 + numberBytes;
+#if 0
     LogModule(LOG_DEBUGV, ATSCTEXT, "Segment: compressionType=%d mode=%d numberBytes=%d *sbIndex=%d\n",
         compressionType, mode, numberBytes, *sbIndex);
+#endif
     switch (mode)
     {
         case 0x07 ... 0x08: /* Reserved */
@@ -457,19 +493,29 @@ static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
         case 0x48:          /* Assigned to ATSC standard for South Korea */
         case 0x49 ... 0xdf: /* Reserved for future ATSC use. */
         case 0xe0 ... 0xfe: /* Used in other systems */
+#if 0
             LogModule(LOG_DEBUGV, ATSCTEXT, "Unsupported mode!(%d)\n", mode);
             *supported = FALSE;
+#else
+            *supported = false;
+#endif
             break;
         case 0xff:          /* Not applicable */
+#if 0
             LogModule(LOG_DEBUGV, ATSCTEXT, "ASCII to UTF8(%d)\n", mode);
+#endif
             textStandard = AsciiToUtf8CD;
             break;
         case 0x3f:
+#if 0
             LogModule(LOG_DEBUGV, ATSCTEXT, "UTF16 to UTF8(%d)\n", mode);
+#endif
             textStandard = Utf16ToUtf8CD;
             break;
         default:
+#if 0
             LogModule(LOG_DEBUGV, ATSCTEXT, "UCS2 to UTF8(%d)\n", mode);
+#endif
             textStandard =  Ucs2ToUtf8CD;
             break;
     }
@@ -500,7 +546,11 @@ static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
             inBytesLeft = strlen(DecompressionBuffer);
             break;
         default:
+#if 0
             *supported = FALSE;
+#else
+            *supported = false;
+#endif
             break;
     }
     

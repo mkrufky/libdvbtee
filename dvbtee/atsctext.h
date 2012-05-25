@@ -55,7 +55,11 @@ typedef struct ATSCMultipleStrings_s
  * @return A pointer to a ATSCMultipleStrings_t or NULL.
  * To free the returned structure ObjectRefDec should be used.
  */
+#if 0
 ATSCMultipleStrings_t *ATSCMultipleStringsConvert(uint8_t *data, uint8_t len);
+#else
+ATSCMultipleStrings_t *ATSCMultipleStringsConvert(ATSCMultipleStrings_t *result, uint8_t *data, uint8_t len);
+#endif
 
 /**
  * @internal
