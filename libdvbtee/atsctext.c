@@ -338,10 +338,15 @@ static unsigned char huffman2co[1526] = {
 static char TextBuffer[1024]; 
 static char SegmentBuffer[512];
 static char DecompressionBuffer[512];
+#if 0
 static iconv_t *Utf16ToUtf8CD;
 static iconv_t *Ucs2ToUtf8CD;
 static iconv_t *AsciiToUtf8CD;
-
+#else
+static iconv_t Utf16ToUtf8CD;
+static iconv_t Ucs2ToUtf8CD;
+static iconv_t AsciiToUtf8CD;
+#endif
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static const char ATSCTEXT[] = "ATSCText";
