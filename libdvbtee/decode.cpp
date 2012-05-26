@@ -524,6 +524,7 @@ void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
 		}
 	}
 	fprintf(stdout, "\n");
+	fflush(stdout);
 }
 
 void decode::dump_epg(uint16_t source_id)
