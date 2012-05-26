@@ -578,7 +578,11 @@ static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
     outBytes = TextBuffer + *sbIndex;
 
     ret = iconv(textStandard, (ICONV_INPUT_CAST) &inBytes, &inBytesLeft, &outBytes, &outBytesLeft);
+#if 0
     if (ret != -1)
+#else
+    if (ret != (size_t)-1)
+#endif
     {
         *outBytes = 0;
         *sbIndex += (long)outBytes - (long)(TextBuffer + *sbIndex);
