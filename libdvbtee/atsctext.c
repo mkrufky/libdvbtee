@@ -45,6 +45,9 @@ The tables are copyrighted by (from A/65C Annex C Page 91 footnote 19):
 #if 0
 #include "logging.h"
 #include "objects.h"
+#else
+#include "debug.h"
+#define LogModule(a, b, fmt, arg...) __dprintf(DBG_ATSCTEXT, fmt, ##arg)
 #endif
 #include "atsctext.h"
 
@@ -398,7 +401,7 @@ ATSCMultipleStrings_t *ATSCMultipleStringsConvert(ATSCMultipleStrings_t *result,
 #else
     result->strings = (ATSCString_t*)calloc( result->number_of_strings, sizeof(ATSCString_t));
 #endif
-#if 0
+#ifdef LogModule
     LogModule(LOG_DEBUGV, ATSCTEXT, "Start of conversion: Number of strings = %d\n", data[0]);
 #endif
     for (stringIndex = 0; stringIndex < result->number_of_strings; stringIndex ++)
@@ -420,7 +423,7 @@ ATSCMultipleStrings_t *ATSCMultipleStringsConvert(ATSCMultipleStrings_t *result,
 
         TextBuffer[0] = 0;
         sbIndex = 0;
-#if 0
+#ifdef LogModule
         LogModule(LOG_DEBUGV, ATSCTEXT, "Number of segments = %d\n", segments);
 #endif
         for (segmentIndex = 0; segmentIndex < segments; segmentIndex ++)
@@ -439,7 +442,7 @@ ATSCMultipleStrings_t *ATSCMultipleStringsConvert(ATSCMultipleStrings_t *result,
         }
         
     }
-#if 0
+#ifdef LogModule
     LogModule(LOG_DEBUGV, ATSCTEXT, "End of conversion\n");
 #endif
     pthread_mutex_unlock(&mutex);    
@@ -479,7 +482,7 @@ static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
         
     rawText = segment + 3;
     segment += 3 + numberBytes;
-#if 0
+#ifdef LogModule
     LogModule(LOG_DEBUGV, ATSCTEXT, "Segment: compressionType=%d mode=%d numberBytes=%d *sbIndex=%d\n",
         compressionType, mode, numberBytes, *sbIndex);
 #endif
@@ -495,27 +498,27 @@ static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
         case 0x48:          /* Assigned to ATSC standard for South Korea */
         case 0x49 ... 0xdf: /* Reserved for future ATSC use. */
         case 0xe0 ... 0xfe: /* Used in other systems */
-#if 0
+#ifdef LogModule
             LogModule(LOG_DEBUGV, ATSCTEXT, "Unsupported mode!(%d)\n", mode);
-            *supported = FALSE;
-#else
+//            *supported = FALSE;
+//#else
             *supported = false;
 #endif
             break;
         case 0xff:          /* Not applicable */
-#if 0
+#ifdef LogModule
             LogModule(LOG_DEBUGV, ATSCTEXT, "ASCII to UTF8(%d)\n", mode);
 #endif
             textStandard = AsciiToUtf8CD;
             break;
         case 0x3f:
-#if 0
+#ifdef LogModule
             LogModule(LOG_DEBUGV, ATSCTEXT, "UTF16 to UTF8(%d)\n", mode);
 #endif
             textStandard = Utf16ToUtf8CD;
             break;
         default:
-#if 0
+#ifdef LogModule
             LogModule(LOG_DEBUGV, ATSCTEXT, "UCS2 to UTF8(%d)\n", mode);
 #endif
             textStandard =  Ucs2ToUtf8CD;

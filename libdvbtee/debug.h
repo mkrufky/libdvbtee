@@ -23,6 +23,7 @@
 #define DBG_PARSE  2
 #define DBG_FEED   4
 #define DBG_TUNE   8
+#define DBG_ATSCTEXT 16
 
 #define dbg 0
 
