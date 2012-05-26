@@ -618,7 +618,11 @@ static void HuffmanDecode(uint8_t *dest, uint8_t *src, int destLen, int srcLen, 
     }
 
     /* should be pointing to correct tables now */
+#if 0
     for (i=0; i < (srcLen<<3); i++)
+#else
+    for (i=0; i < ((unsigned int)srcLen<<3); i++)
+#endif
     {
         if (p > 127)
         { 
