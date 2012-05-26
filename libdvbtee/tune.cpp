@@ -26,6 +26,9 @@
 #include <map>
 
 #include "tune.h"
+#include "debug.h"
+
+#define dprintf(fmt, arg...) __dprintf(DBG_TUNE, fmt, ##arg)
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
@@ -40,13 +43,13 @@ tune::tune()
   , demux_id(-1)
   , dvr_id(-1)
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 //	channels.clear();
 }
 
 tune::~tune()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 	stop_feed();
 	close_fe();
 //	channels.clear();
@@ -54,7 +57,7 @@ tune::~tune()
 
 tune::tune(const tune&)
 {
-	fprintf(stderr, "%s(copy)\n", __func__);
+	dprintf("(copy)");
 
 //	channels.clear();
 	feeder.parser.cleanup();
@@ -62,7 +65,7 @@ tune::tune(const tune&)
 
 tune& tune::operator= (const tune& cSource)
 {
-	fprintf(stderr, "%s(operator=)\n", __func__);
+	dprintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -75,7 +78,7 @@ tune& tune::operator= (const tune& cSource)
 
 bool tune::set_device_ids(int adap, int fe, int demux, int dvr)
 {
-	fprintf(stderr, "%s(%d, %d, %d, %d)\n", __func__, adap, fe, demux, dvr);
+	dprintf("(%d, %d, %d, %d)", adap, fe, demux, dvr);
 
 	adap_id  = adap;
 	fe_id    = fe;
@@ -185,7 +188,7 @@ int tune::start_feed()
 {
 	char filename[80]; // max path length??
 
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 	demux_fd = -1;
 
 	sprintf(filename, "/dev/dvb/adapter%i/demux%i", adap_id, demux_id);

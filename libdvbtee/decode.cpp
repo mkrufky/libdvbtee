@@ -27,13 +27,15 @@
 
 #include "functions.h"
 #include "decode.h"
+#include "debug.h"
+
+#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
 
 decode::decode()
   : eit_x(0)
 {
-#if DBG
-	fprintf(stderr, "%s()\n", __func__);
-#endif
+	dprintf("()");
+
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
 	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	memset(&decoded_mgt, 0, sizeof(decoded_mgt_t));
@@ -68,10 +70,9 @@ decode::decode()
 
 decode::~decode()
 {
-#if DBG
-	fprintf(stderr, "%s(%04x|%05d)\n", __func__,
+	dprintf("(%04x|%05d)",
 		decoded_pat.ts_id, decoded_pat.ts_id);
-#endif
+
 	for (int i = 0; i < 0x80; i++) {
 		for (map_decoded_atsc_eit::iterator iter =
 			decoded_atsc_eit[i].begin();
@@ -98,9 +99,8 @@ decode::~decode()
 
 decode::decode(const decode&)
 {
-#if DBG
-	fprintf(stderr, "%s(copy)\n", __func__);
-#endif
+	dprintf("(copy)");
+
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
 	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	memset(&decoded_mgt, 0, sizeof(decoded_mgt_t));
@@ -137,9 +137,7 @@ decode::decode(const decode&)
 
 decode& decode::operator= (const decode& cSource)
 {
-#if DBG
-	fprintf(stderr, "%s(operator=)\n", __func__);
-#endif
+	dprintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -184,18 +182,18 @@ decode& decode::operator= (const decode& cSource)
 bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 {
 	stream_time = atsc_datetime_utc(p_stt->i_system_time);
-#if DBG
-	fprintf(stderr, "%s: %s", __func__, ctime(&stream_time));
-#endif
+
+	dprintf("%s", ctime(&stream_time));
+
 	return true;
 }
 
 bool decode::take_tot(dvbpsi_tot_t* p_tot)
 {
 	stream_time = datetime_utc(p_tot->i_utc_time);
-#if DBG
-	fprintf(stderr, "%s: %s", __func__, ctime(&stream_time));
-#endif
+
+	dprintf("%s", ctime(&stream_time));
+
 	return true;
 }
 
@@ -204,10 +202,9 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 {
 	if ((decoded_pat.version == p_pat->i_version) &&
 	    (decoded_pat.ts_id   == p_pat->i_ts_id)) {
-#if DBG
-		fprintf(stderr, "%s: v%d, ts_id: %d: ALREADY DECODED\n",
-			__func__, p_pat->i_version, p_pat->i_ts_id);
-#endif
+
+		dprintf("v%d, ts_id: %d: ALREADY DECODED",
+			p_pat->i_version, p_pat->i_ts_id);
 		return false;
 	}
 #if 1//DBG
@@ -238,10 +235,9 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 {
 	if ((decoded_pmt[p_pmt->i_program_number].version == p_pmt->i_version) &&
 	    (decoded_pmt[p_pmt->i_program_number].program == p_pmt->i_program_number)) {
-#if DBG
-		fprintf(stderr, "%s: v%d, service_id %d, pcr_pid %d: ALREADY DECODED\n", __func__,
+
+		dprintf("v%d, service_id %d, pcr_pid %d: ALREADY DECODED",
 			p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
-#endif
 		return false;
 	}
 #if 1//DBG
@@ -277,15 +273,15 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 {
 	if ((decoded_vct.version == p_vct->i_version) &&
 	    (decoded_vct.ts_id   == p_vct->i_ts_id)) {
-#if DBG
-		fprintf(stderr, "%s: v%d, ts_id %d, b_cable_vct %d: ALREADY DECODED\n", __func__,
+
+		dprintf("v%d, ts_id %d, b_cable_vct %d: ALREADY DECODED\n",
 			p_vct->i_version, p_vct->i_ts_id, p_vct->b_cable_vct);
-#endif
 		return false;
 	}
+#if 1//DBG
 	fprintf(stderr, "%s: v%d, ts_id %d, b_cable_vct %d\n", __func__,
 		p_vct->i_version, p_vct->i_ts_id, p_vct->b_cable_vct);
-
+#endif
 	decoded_vct.version   = p_vct->i_version;
 	decoded_vct.ts_id     = p_vct->i_ts_id;
 	decoded_vct.cable_vct = p_vct->b_cable_vct;
@@ -337,9 +333,8 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 {
 	if ((decoded_mgt.version == p_mgt->i_version) &&
 	    (!decoded_mgt.tables.empty())) {
-#if DBG
-		fprintf(stderr, "%s: v%d: ALREADY DECODED\n", __func__, p_mgt->i_version);
-#endif
+
+		dprintf("v%d: ALREADY DECODED", p_mgt->i_version);
 		return false;
 	}
 	fprintf(stderr, "%s: v%d\n", __func__, p_mgt->i_version);
@@ -374,14 +369,13 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 
 bool decode::take_nit(dvbpsi_nit_t* p_nit)
 {
-#if 1
 	if ((decoded_nit.version    == p_nit->i_version) &&
 	    (decoded_nit.network_id == p_nit->i_network_id)) {
-		fprintf(stderr, "%s: v%d, network_id %d: ALREADY DECODED\n", __func__,
+
+		dprintf("v%d, network_id %d: ALREADY DECODED\n",
 			p_nit->i_version, p_nit->i_network_id );
 		return false;
 	}
-#endif
 	fprintf(stderr, "%s: v%d, network_id %d\n", __func__,
 		p_nit->i_version, p_nit->i_network_id );
 
@@ -404,7 +398,8 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
 	if ((decoded_sdt.version    == p_sdt->i_version) &&
 	    (decoded_sdt.network_id == p_sdt->i_network_id)){
-		fprintf(stderr, "%s: v%d | ts_id %d | network_id %d: ALREADY DECODED", __func__,
+
+		dprintf("v%d | ts_id %d | network_id %d: ALREADY DECODED",
 			p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id );
 		return false;
 	}
@@ -436,7 +431,7 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	decoded_eit_t decoded_eit;
 #if 1
 	if (decoded_eit.version == p_eit->i_version) { // FIXME
-		fprintf(stderr, "%s: v%d | ts_id %d | network_id %d service_id %d: ALREADY DECODED", __func__,
+		dprintf("v%d | ts_id %d | network_id %d service_id %d: ALREADY DECODED",
 			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id );
 		return false;
 	}
@@ -459,29 +454,30 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 		decoded_eit.events[p_event->i_event_id].length_sec     = p_event->i_duration;
 		decoded_eit.events[p_event->i_event_id].running_status = p_event->i_running_status;
 		decoded_eit.events[p_event->i_event_id].f_free_ca      = p_event->b_free_ca;
-
+#if 0
 		time_t start = datetime_utc(decoded_eit.events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(decoded_eit.events[p_event->i_event_id].start_time + decoded_eit.events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
 
 		//FIXME: descriptors
-#if 0
+		unsigned char name[256];
+		unsigned char text[256];
+
 		dvbpsi_descriptor_t* p_descriptor = p_event->p_first_descriptor;
-		while ( p_descriptor )
-		  {
-		    if ( p_descriptor->i_tag == DT_ShortEvent )
-		      {
-			dvbpsi_short_event_dr_t* pdr = dvbpsi_DecodeShortEventDr( p_descriptor );
-			memcpy( p_epg->lang, pdr->i_iso_639_code, 3 );
-			GetDescriptorText( pdr->i_event_name, pdr->i_event_name_length, p_epg->name );
-			GetDescriptorText( pdr->i_text, pdr->i_text_length, p_epg->text );
-		      }
-		    p_descriptor = p_descriptor->p_next;
-		  }
-#endif
+		while (p_descriptor) {
+			if (p_descriptor->i_tag == 0x4d /*DT_ShortEvent*/) {
+
+				dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
+				memcpy(lang, dr->i_iso_639_code, 3);
+				get_descriptor_text(dr->i_event_name, dr->i_event_name_length, name);
+				get_descriptor_text(dr->i_text, dr->i_text_length, text);
+			}
+			p_descriptor = p_descriptor->p_next;
+		}
+
 		struct tm tms = *localtime(&start);
 		struct tm tme = *localtime(&end);
-		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, ""/*name*/ );
-
+		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name);
+#endif
 		p_event = p_event->p_next;
 	}
 	return true;
@@ -592,8 +588,8 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes  = p_event->i_title_length;
 			memcpy(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title, p_event->i_title, 256); // FIXME
 #if DBG
-			time_t start = GetAtscDateTimeUTC( decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/ );
-			time_t end   = GetAtscDateTimeUTC( decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time + decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/ );
+			time_t start = atsc_datetime_utc(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
+			time_t end   = atsc_datetime_utc(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time + decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
 
 			unsigned char name[256];
 			memset(name, 0, sizeof(char) * 256);

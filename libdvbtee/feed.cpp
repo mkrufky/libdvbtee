@@ -27,33 +27,36 @@
 #include <string.h>
 
 #include "feed.h"
+#include "debug.h"
+
+#define dprintf(fmt, arg...) __dprintf(DBG_FEED, fmt, ##arg)
 
 feed::feed()
   : f_kill_thread(false)
   , fd(-1)
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	memset(filename, 0, sizeof(filename));
 }
 
 feed::~feed()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	close_file();
 }
 
 void feed::set_filename(char* new_file)
 {
-	fprintf(stderr, "%s(%s)\n", __func__, new_file);
+	dprintf("(%s)", new_file);
 
 	strcpy(filename, new_file);
 };
 
 int feed::open_file()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	fd = -1;
 
@@ -67,7 +70,7 @@ int feed::open_file()
 
 void feed::close_file()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	close(fd);
 	fd = -1;
@@ -99,7 +102,7 @@ int feed::start()
 
 void feed::stop()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	stop_without_wait();
 
@@ -111,7 +114,7 @@ void feed::stop()
 #define BUFSIZE (188 * 312)
 void *feed::feed_thread()
 {
-	fprintf(stderr, "%s(fd=%d)\n", __func__, fd);
+	dprintf("(fd=%d)", fd);
 
 	while (!f_kill_thread) {
 		unsigned char buf[BUFSIZE];
@@ -172,7 +175,7 @@ void *feed::feed_thread()
 
 void *feed::stdin_feed_thread()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	while (!f_kill_thread) {
 		unsigned char buf[BUFSIZE];
@@ -198,7 +201,7 @@ void *feed::stdin_feed_thread()
 
 int feed::start_stdin()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	if (NULL == freopen(NULL, "rb", stdin)) {
 		fprintf(stderr, "failed to open stdin!\n");

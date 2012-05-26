@@ -28,6 +28,9 @@
 
 #include "parse.h"
 #include "functions.h"
+#include "debug.h"
+
+#define dprintf(fmt, arg...) __dprintf(DBG_PARSE, fmt, ##arg)
 
 #define PID_PAT  0x00
 #define PID_CAT  0x01
@@ -108,9 +111,8 @@ void printpids()
 /* -- TABLE HANDLERS -- */
 bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s)\n", __func__, (decoded) ? "post" : "pre");
-#endif
+	dprintf("(%s)", (decoded) ? "post" : "pre");
+
 	if (decoded) return true;
 
 	return true;
@@ -118,9 +120,8 @@ bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 
 bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s)\n", __func__, (decoded) ? "post" : "pre");
-#endif
+	dprintf("(%s)", (decoded) ? "post" : "pre");
+
 	if (decoded) return true;
 
 	return true;
@@ -128,33 +129,22 @@ bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 
 bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): v%d, ts_id: %d\n",
-		__func__, (decoded) ? "post" : "pre",
+	dprintf("(%s): v%d, ts_id: %d",
+		(decoded) ? "post" : "pre",
 		p_pat->i_version, p_pat->i_ts_id);
-#endif
+
 	if (!decoded) {
 		set_ts_id(p_pat->i_ts_id);
 		h_demux[PID_ATSC] = dvbpsi_AttachDemux(attach_table, this);
 		return true;
 	}
-#if 0 // convert to read from decoded pat instead of decoding again
-	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
-	while (p_program) {
 
-		if (p_program->i_number > 0) // FIXME: > 0 ???
-			h_pmt[p_program->i_pid] =
-				dvbpsi_AttachPMT(p_program->i_number, take_pmt, this);
-
-		p_program = p_program->p_next;
-	}
-#else
 	for (map_decoded_pat_programs::const_iterator iter =
 	       decoders[p_pat->i_ts_id].get_decoded_pat()->programs.begin();
 	     iter != decoders[p_pat->i_ts_id].get_decoded_pat()->programs.end(); ++iter)
 		if (iter->first > 0) // FIXME: > 0 ???
 			h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
-#endif
+
 	has_pat = true;
 
 	return true;
@@ -162,25 +152,23 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 
 bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): v%d, service_id %d, pcr_pid %d\n",
-		__func__, (decoded) ? "post" : "pre",
+	dprintf("(%s): v%d, service_id %d, pcr_pid %d",
+		(decoded) ? "post" : "pre",
 		p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
-#endif
+
 	if (!decoded) return true;
 
-	/* if we're going to stream a program, we should make sure its pid is comign thru after analyzing the decoded pmt's */
+	/* FIXME: if we're going to stream a program, we should make sure its pid is coming thru after analyzing the decoded pmt's */
 
 	return true;
 }
 
 bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): v%d, ts_id %d, b_cable_vct %d\n",
-		__func__, (decoded) ? "post" : "pre",
+	dprintf("(%s): v%d, ts_id %d, b_cable_vct %d",
+		(decoded) ? "post" : "pre",
 		p_vct->i_version, p_vct->i_ts_id, p_vct->b_cable_vct);
-#endif
+
 	if (!decoded) {
 		set_ts_id(p_vct->i_ts_id);
 		return true;
@@ -192,14 +180,12 @@ bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 
 bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): v%d\n",
-		__func__, (decoded) ? "post" : "pre",
+	dprintf("(%s): v%d",
+		(decoded) ? "post" : "pre",
 		p_mgt->i_version);
-#endif
-	if (!decoded) {
-		return true;
-	}
+
+	if (!decoded) return true;
+
 	bool b_expecting_vct = false;
 
 	eit_pids.clear();
@@ -214,14 +200,12 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 			b_expecting_vct = true;
 			b_attach_demux  = true;
 			break;
-#if 1
-		case 0x0100 ... 0x017f: /* EIT-0 to EIT-127 */
+		case 0x0100:		/* EIT-0 */
+		case 0x0101:		/* EIT-1 */
+		case 0x0102:		/* EIT-2 */
+		case 0x0103:		/* EIT-3 */
+		case 0x0104 ... 0x017f:	/* EIT-4 to EIT-127 */
 			eit_pids[iter->second.pid] = iter->first - 0x0100;
-#else
-		case 0x0101 ... 0x017f: /* EIT-1 to EIT-127 */
-			break;
-		case 0x0100: /* EIT-0 */
-#endif
 			if ((scan_mode) && (!epg_mode))
 				break;
 #if 0
@@ -229,13 +213,9 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 #endif
 				b_attach_demux  = true;
 			break;
-#if 0
 		case 0x0200 ... 0x027f: /* ETT-0 to ETT-127 */
-#else
-		case 0x0201 ... 0x027f: /* ETT-1 to ETT-127 */
-		case 0x0200: /* ETT-0 */
 			break;
-#endif
+
 			if (scan_mode)
 				break;
 			/* FALL THRU */
@@ -273,9 +253,8 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 
 bool parse::take_nit(dvbpsi_nit_t* p_nit, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): TODO\n", __func__, (decoded) ? "post" : "pre");
-#endif
+	dprintf("(%s): TODO", (decoded) ? "post" : "pre");
+
 	if (decoded) return true;
 
 	return true;
@@ -283,9 +262,8 @@ bool parse::take_nit(dvbpsi_nit_t* p_nit, bool decoded)
 
 bool parse::take_sdt(dvbpsi_sdt_t* p_sdt, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): TODO\n", __func__, (decoded) ? "post" : "pre");
-#endif
+	dprintf("(%s): TODO", (decoded) ? "post" : "pre");
+
 	if (decoded) return true;
 
 	return true;
@@ -293,9 +271,8 @@ bool parse::take_sdt(dvbpsi_sdt_t* p_sdt, bool decoded)
 
 bool parse::take_eit(dvbpsi_eit_t* p_eit, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): TODO\n", __func__, (decoded) ? "post" : "pre");
-#endif
+	dprintf("(%s): TODO", (decoded) ? "post" : "pre");
+
 	if (decoded) return true;
 
 	return true;
@@ -303,46 +280,21 @@ bool parse::take_eit(dvbpsi_eit_t* p_eit, bool decoded)
 
 bool parse::take_eit(dvbpsi_atsc_eit_t* p_eit, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): v%d, source_id %d\n", __func__,
+	dprintf("(%s): v%d, source_id %d",
 		(decoded) ? "post" : "pre",
 		p_eit->i_version, p_eit->i_source_id);
-#endif
-	if (decoded) {
-#if 0
-#if 0
-		uint8_t new_eit_x = grab_next_eit(decoders[ts_id].get_current_eit_x());
-		if (new_eit_x == 0x80)
-			decoders[ts_id].set_current_eit_x(0);
-		else
-			decoders[ts_id].set_current_eit_x(new_eit_x);
-#else
-		uint8_t current_eit_x = decoders[ts_id].get_current_eit_x();
-		if (decoders[ts_id].eit_x_complete(current_eit_x)) {
-			for (map_eit_pids::const_iterator iter = eit_pids.begin(); iter != eit_pids.end(); ++iter)
-				if (iter->second == current_eit_x) {
-					eit_pids.erase(iter->first);
-					if (h_demux.count(iter->first)) {
-						//dvbpsi_DetachDemux(h_demux[iter->first]);
-						h_demux.erase(iter->first);
-					}
-				}
-		}
-		epg_complete = (eit_pids.size() == 0);
-#endif
-#endif
-		return true;
-	}
+
+	if (decoded) return true;
+
 	return true;
 }
 
 bool parse::take_ett(dvbpsi_atsc_ett_t* p_ett, bool decoded)
 {
-#if DBG
-	fprintf(stderr, "%s(%s): v%d, ID: %d\n", __func__,
+	dprintf("(%s): v%d, ID: %d",
 		(decoded) ? "post" : "pre",
 		p_ett->i_version, p_ett->i_etm_id);
-#endif
+
 	if (decoded) return true;
 
 	return true;
@@ -487,7 +439,7 @@ parse::parse()
   , expect_vct(true)
   , dumped_eit(0)
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	memset(&new_channel_info, 0, sizeof(channel_info_t));
 
@@ -503,7 +455,7 @@ parse::parse()
 
 parse::~parse()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 #if DBG
 	xine_dump();
 #endif
@@ -518,7 +470,7 @@ parse::~parse()
 
 void parse::detach_demux()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	for (map_dvbpsi::const_iterator iter = h_demux.begin(); iter != h_demux.end(); ++iter)
 		dvbpsi_DetachDemux(iter->second);
@@ -533,7 +485,7 @@ void parse::detach_demux()
 
 void parse::cleanup()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	detach_demux();
 	decoders.clear();
@@ -542,7 +494,7 @@ void parse::cleanup()
 
 void parse::reset()
 {
-	fprintf(stderr, "%s()\n", __func__);
+	dprintf("()");
 
 	detach_demux();
 
