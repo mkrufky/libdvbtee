@@ -34,7 +34,7 @@ fi
 if [ -e libdvbpsi ]; then
     cd libdvbpsi
 else
-    git clone git://linuxtv.org/mkrufky/libdvbpsi.git
+    git clone git://github.com/mkrufky/libdvbpsi.git
     cd libdvbpsi
     git checkout atsc
     patch -p2 < ../libdvbpsi-silence-TS-discontinuity-messages.patch
