@@ -10,7 +10,7 @@ SB_ROOT = $(DVBTEE_ROOT)
 SB_LIBDIR = $(SB_ROOT)/usr/lib
 
 
-INSTALL_DIR = $(SB_ROOT)/usr/bin
+INSTALL_DIR = $(SB_ROOT)/usr/lib
 
 INCLUDES= -I../usr/include
 GPPFLAGS= $(INCLUDES) -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread
@@ -18,21 +18,38 @@ CPPFLAGS= $(INCLUDES) -g -Os -Wall -Wno-deprecated -fpermissive -Wno-deprecated-
 LDADD= -L../usr/lib -ldvbpsi
 LIBS= -L../usr/lib -ldvbpsi
 
-all:	dvbtee
+objects = parse.o functions.o decode.o channels.o feed.o tune.o atsctext.o
 
-clean:
-	rm -f dvbtee *.o
+lib_name = libdvbtee
 
-distclean: clean
+libraries = $(lib_name).so $(lib_name).a
 
-DVBTEE= parse.o functions.o decode.o channels.o feed.o tune.o atsctext.o
+library: $(libraries)
 
-dvbtee:	$(DVBTEE)
-	$(GPP) $(INCLUDES) $(CPPFLAGS) dvbtee.cpp $(DVBTEE) -o $(@) $(LIBS)
+testapp:
+	make -C testapp
+
+$(libraries): $(objects)
+
+CPPFLAGS += -fPIC $(DEBUG)
+
+%.o: %.c
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -MMD -o $@ $< $(filter-out %.h %.c,$^)
+%: %.o
+	$(CC) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
+%: %.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD $(LDFLAGS) -o $@ $< $(filter-out %.h %.c,$^) $(LOADLIBES) $(LDLIBS)
+%.so:
+	$(CC) -shared -o $@ $^
+%.a:
+	$(AR) rcs $@ $^
+clean::
+	$(RM) -f $(prerequisites) $(objects) $(libraries) $(binaries) $(removing) *~ *.d
+
+debug: clean
+	DEBUG="-DDEBUG -DVERBOSE=1"  make
 
 install:
-	if test ! -d $(INSTALL_DIR) ; then mkdir -p  $(INSTALL_DIR) ; fi
-	@cp -u -v dvbtee $(INSTALL_DIR)
-	$(STRIP) $(INSTALL_DIR)/dvbtee
+	cp libdvbtee.so $(INSTALL_DIR)
 
-.PHONY: all clean distclean install
+all: library
