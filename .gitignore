@@ -1,0 +1,30 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# dunno what this is
+*.d
+
+# quilt / patch remnants
+*.orig
+patches/
+.pc/
+
+# dirs
+libdvbpsi/
+usr/
+
+# compiled binary
+dvbtee/dvbtee
+
+# other build stuff
+.x86
