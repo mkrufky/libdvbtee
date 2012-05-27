@@ -630,6 +630,17 @@ void parse::epg_dump()
 
 }
 
+bool parse::is_psip_ready()
+{
+	return ((has_pat) && ((has_vct) || (!expect_vct)) && (decoders[get_ts_id()].complete_pmt()));
+};
+
+bool parse::is_epg_ready()
+{
+	return ((is_psip_ready()) && (decoders[get_ts_id()].got_all_eit()));
+};
+
+
 int parse::feed(int count, uint8_t* p_data)
 {
 	if (count <= 0) {

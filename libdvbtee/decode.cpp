@@ -63,6 +63,10 @@ decode::decode()
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
 
+	memset(&decoded_pmt, 0, sizeof(map_decoded_pmt));
+	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
+	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
+
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
@@ -130,6 +134,10 @@ decode::decode(const decode&)
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
 
+	memset(&decoded_pmt, 0, sizeof(map_decoded_pmt));
+	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
+	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
+
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
@@ -170,6 +178,10 @@ decode& decode::operator= (const decode& cSource)
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
+
+	memset(&decoded_pmt, 0, sizeof(map_decoded_pmt));
+	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
+	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
@@ -636,15 +648,21 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 /* -- -- -- */
 bool decode::complete_pmt()
 {
+#if 0
+	return ((decoded_pat.programs.size()) && (decoded_pat.programs.size() == decoded_pmt.size()));
+#else
 	if (rcvd_pmt.size() == 0)
 		return false;
 	for (map_rcvd::const_iterator iter = rcvd_pmt.begin(); iter != rcvd_pmt.end(); ++iter)
 		if (!iter->second) {
-			//fprintf(stderr, "%s: missing pmt for program %d\n", __func__, iter->first);
+#if DBG
+			fprintf(stderr, "%s: missing pmt for program %d\n", __func__, iter->first);
+#endif
 			return false;
 		}
 
 	return true;
+#endif
 }
 
 bool decode::eit_x_complete(uint8_t current_eit_x)
@@ -670,8 +688,13 @@ bool decode::got_all_eit()
 	for (map_decoded_mgt_tables::const_iterator iter = decoded_mgt.tables.begin(); iter != decoded_mgt.tables.end(); ++iter) {
 		switch (iter->first) {
 		case 0x0100 ... 0x017f: /* EIT-0 to EIT-127 */
-			if (!eit_x_complete(0x0100 - iter->first))
+			if (!eit_x_complete(iter->first - 0x0100)) {
+#if DBG
+				fprintf(stderr, "%s: eit #%d MISSING\n", __func__,
+					iter->first - 0x0100);
+#endif
 				return false;
+			}
 		}
 	}
 	return true;

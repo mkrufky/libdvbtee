@@ -68,11 +68,9 @@ public:
 	void set_scan_mode(bool onoff) { scan_mode = onoff; };
 	void set_epg_mode(bool onoff)  { epg_mode = onoff; };
 //got_all_eit()
-	bool is_psip_ready() { return ((has_pat) &&
-				       ((has_vct) || (!expect_vct)) &&
-				       (decoders[get_ts_id()].complete_pmt())); };
-	bool is_epg_ready() { return ((is_psip_ready()) &&
-				      (decoders[get_ts_id()].got_all_eit())); };
+	bool is_psip_ready();
+	bool is_epg_ready();
+
 	void cleanup();
 private:
 #if !USE_STATIC_DECODE_MAP
