@@ -464,11 +464,12 @@ parse::~parse()
 	xine_dump();
 #endif
 	cleanup();
-#if 1
 #if DBG
 	printpids();
 #endif
-	fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
+#if 1//DBG
+	if (fed_pkt_count)
+		fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
 }
 
