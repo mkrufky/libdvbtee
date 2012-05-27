@@ -456,6 +456,9 @@ ATSCMultipleStrings_t *ATSCMultipleStringsConvert(ATSCMultipleStrings_t *result,
 *******************************************************************************/
 #if 0
 static void ATSCMultipleStringsDestructor(ATSCMultipleStrings_t *strings)
+#else
+void ATSCMultipleStringsDestructor(ATSCMultipleStrings_t *strings)
+#endif
 {
     int i;
     for (i = 0; i < strings->number_of_strings; i ++)
@@ -464,7 +467,6 @@ static void ATSCMultipleStringsDestructor(ATSCMultipleStrings_t *strings)
     }
     free(strings->strings);
 }
-#endif
 
 static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
 {

@@ -61,6 +61,7 @@ typedef struct ATSCMultipleStrings_s
 ATSCMultipleStrings_t *ATSCMultipleStringsConvert(uint8_t *data, uint8_t len);
 #else
 ATSCMultipleStrings_t *ATSCMultipleStringsConvert(ATSCMultipleStrings_t *result, uint8_t *data, uint8_t len);
+void ATSCMultipleStringsDestructor(ATSCMultipleStrings_t *strings);
 #endif
 
 /**

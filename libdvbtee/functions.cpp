@@ -125,7 +125,10 @@ time_t atsc_datetime_utc(uint32_t in_time)
 int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text)
 {
 	ATSCMultipleStrings_t atsc_strings;
-	ATSCMultipleStringsConvert(&atsc_strings, (uint8_t*)data, len);
-	strcpy((char*)text, atsc_strings.strings[0].text);
+	if (ATSCMultipleStringsConvert(&atsc_strings, (uint8_t*)data, len)->number_of_strings)
+		strcpy((char*)text, atsc_strings.strings[0].text);
+	else
+		strcpy((char*)text, "");
+	ATSCMultipleStringsDestructor(&atsc_strings);
 	return 0;
 }
