@@ -69,11 +69,13 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 void signal_callback_handler(int signum)
 {
 	struct dvbtee_context* context = context_map[getpid()];
+	bool signal_dbg = true;
 
 	const char *signal_desc;
 	switch (signum) {
 	case SIGINT:  /* Program interrupt. (ctrl-c) */
 		signal_desc = "SIGINT";
+		signal_dbg = false;
 		break;
 	case SIGABRT: /* Process detects error and reports by calling abort */
 		signal_desc = "SIGABRT";
@@ -97,7 +99,8 @@ void signal_callback_handler(int signum)
 		signal_desc = "UNKNOWN";
 		break;
 	}
-	fprintf(stderr, "%s: caught signal %d: %s\n", __func__, signum, signal_desc);
+	if (signal_dbg)
+		fprintf(stderr, "%s: caught signal %d: %s\n", __func__, signum, signal_desc);
 
 	cleanup(context, true);
 
