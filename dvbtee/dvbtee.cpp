@@ -211,6 +211,8 @@ int main(int argc, char **argv)
 	int num_tuners           = -1;
 	unsigned int timeout     = 0;
 
+	unsigned int wait_event  = 0;
+
 	char filename[256];
 	memset(&filename, 0, sizeof(filename));
 
@@ -236,8 +238,11 @@ int main(int argc, char **argv)
 			b_read_dvr = true;
 			break;
 		case 'E': /* enable EPG scan */
+#if 0
 			b_scan = true; // FIXME
+#endif
 			scan_epg = true;
+			wait_event = FEED_EVENT_EPG;
 			break;
 		case 'f': /* frontend */
 			fe_id = strtoul(optarg, NULL, 0);
@@ -321,7 +326,7 @@ int main(int argc, char **argv)
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
 		if (0 == context.tuner.start_feed()) {
-			context.tuner.feeder.wait_for_streaming_or_timeout(timeout);
+			context.tuner.feeder.wait_for_event_or_timeout(timeout, wait_event);
 			context.tuner.stop_feed();
 		}
 		if (channel) /* if we tuned the frontend ourselves then close it */
