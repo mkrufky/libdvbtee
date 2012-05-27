@@ -183,7 +183,7 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 	for (int i = 0; i < num_tuners; i++) {
 		int _count = tuners[i].feeder.parser.xine_dump();
 		count += _count;
-		fprintf(stderr, "tuner %d found %d services\n", i, count);
+		fprintf(stderr, "tuner %d found %d services\n", i, _count);
 	}
 #else
 	count += tuners[0].feeder.parser.xine_dump();
