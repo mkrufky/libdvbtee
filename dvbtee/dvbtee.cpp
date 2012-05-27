@@ -261,7 +261,8 @@ int main(int argc, char **argv)
 		case 's': /* scan, optional arg when using multiple tuners: 1 for speed, 2 for redundancy, 3 for speed AND redundancy, 4 for optimized speed / partial redundancy */
 			b_scan = true;
 			scan_method = (optarg) ? strtoul(optarg, NULL, 0) : 0;
-			fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
+			if (scan_method)
+				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
 			break;
 		default:  /* bad cmd line option */
 			return -1;
