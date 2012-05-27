@@ -236,5 +236,12 @@ bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_eve
 		}
 		usleep(200*1000);
 	}
-	return f_kill_thread;
+	switch (wait_event) {
+	case FEED_EVENT_PSIP:
+		return parser.is_psip_ready();
+	case FEED_EVENT_EPG:
+		return parser.is_epg_ready();
+	default:
+		return f_kill_thread;
+	}
 }
