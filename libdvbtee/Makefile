@@ -4,13 +4,7 @@ CC        = $(CXX)
 STRIP     = $(CROSS_COMPILE)strip
 
 
-# Path to sandbox root
-SB_ROOT = $(DVBTEE_ROOT)
-# lib dir
-SB_LIBDIR = $(SB_ROOT)/usr/lib
-
-
-INSTALL_DIR = $(SB_ROOT)/usr/lib
+INSTALL_DIR = $(DVBTEE_ROOT)/usr/lib
 
 INCLUDES= -I../usr/include
 GPPFLAGS= $(INCLUDES) -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread
@@ -26,8 +20,7 @@ libraries = $(lib_name).so $(lib_name).a
 
 library: $(libraries)
 
-testapp:
-	make -C testapp
+include $(wildcard *.d)
 
 $(libraries): $(objects)
 
@@ -35,10 +28,14 @@ CPPFLAGS += -fPIC $(DEBUG)
 
 %.o: %.c
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -MMD -o $@ $< $(filter-out %.h %.c,$^)
+%.o: %.cpp
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) -MMD -o $@ $< $(filter-out %.h %.cpp,$^)
 %: %.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LOADLIBES) $(LDLIBS)
 %: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD $(LDFLAGS) -o $@ $< $(filter-out %.h %.c,$^) $(LOADLIBES) $(LDLIBS)
+%: %.cpp
+	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD $(LDFLAGS) -o $@ $< $(filter-out %.h %.cpp,$^) $(LOADLIBES) $(LDLIBS)
 %.so:
 	$(CC) -shared -o $@ $^
 %.a:
