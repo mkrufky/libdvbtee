@@ -19,18 +19,57 @@
  *
  *****************************************************************************/
 
-#define DBG_DECODE	1
-#define DBG_PARSE	2
-#define DBG_FEED	4
-#define DBG_TUNE	8
-#define DBG_ATSCTEXT	16
-#define DBG_OUTPUT	32
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#define dbg 0
+#include "output.h"
+#include "debug.h"
 
-#define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
+#define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
-#define __dprintf(lvl, fmt, arg...) do {					\
-	if (dbg & lvl)							\
-		__printf(stderr, "%s: " fmt "\n", __func__, ##arg);	\
-} while (0)
+output::output()
+  : f_kill_thread(false)
+{
+	dprintf("()");
+}
+
+output::~output()
+{
+	dprintf("()");
+}
+
+#if 0
+output::output(const output&)
+{
+	dprintf("(copy)");
+}
+
+output& output::operator= (const output& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	return *this;
+}
+#endif
+
+//static
+void* output::output_thread(void *p_this)
+{
+	return static_cast<output*>(p_this)->output_thread();
+}
+
+void* output::output_thread()
+{
+	pthread_exit(NULL);
+}
+
+int output::push(uint8_t* p_data)
+{
+	return 0;
+}

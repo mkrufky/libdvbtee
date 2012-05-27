@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "decode.h"
+#include "output.h"
 
 #define USE_STATIC_DECODE_MAP 1
 
@@ -130,6 +131,8 @@ private:
 
 	int dumped_eit;
 	int eit_collection_limit;
+
+	output out;
 };
 
 #endif//__PARSE_H__

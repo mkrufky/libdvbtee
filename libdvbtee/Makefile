@@ -12,7 +12,8 @@ CPPFLAGS= $(INCLUDES) -g -Os -Wall -Wno-deprecated -fpermissive -Wno-deprecated-
 LDADD= -L../usr/lib -ldvbpsi
 LIBS= -L../usr/lib -ldvbpsi
 
-objects = parse.o functions.o decode.o channels.o feed.o tune.o atsctext.o
+objects = parse.o functions.o decode.o channels.o feed.o tune.o atsctext.o \
+	  output.o
 
 lib_name = libdvbtee
 

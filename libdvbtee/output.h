@@ -19,18 +19,26 @@
  *
  *****************************************************************************/
 
-#define DBG_DECODE	1
-#define DBG_PARSE	2
-#define DBG_FEED	4
-#define DBG_TUNE	8
-#define DBG_ATSCTEXT	16
-#define DBG_OUTPUT	32
+#ifndef __OUTPUT_H__
+#define __OUTPUT_H__
 
-#define dbg 0
+#include <pthread.h>
+#include <stdint.h>
 
-#define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
+class output
+{
+public:
+	output();
+	~output();
 
-#define __dprintf(lvl, fmt, arg...) do {					\
-	if (dbg & lvl)							\
-		__printf(stderr, "%s: " fmt "\n", __func__, ##arg);	\
-} while (0)
+	int push(uint8_t* p_data);
+
+private:
+	pthread_t h_thread;
+	bool f_kill_thread;
+
+	void *output_thread();
+	static void *output_thread(void*);
+};
+
+#endif /*__OUTPUT_H__ */

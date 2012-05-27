@@ -197,6 +197,8 @@ int main(int argc, char **argv)
 	bool b_read_dvr = false;
 	bool b_scan     = false;
 	bool scan_epg   = false;
+	bool b_output_file   = false;
+	bool b_output_stdout = false;
 
 	/* LinuxDVB context: */
 	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
@@ -217,10 +219,14 @@ int main(int argc, char **argv)
 
 	char filename[256];
 	memset(&filename, 0, sizeof(filename));
+
+	char outfilename[256];
+	memset(&outfilename, 0, sizeof(outfilename));
+
 #define VERSION "0.0.2"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E::o::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -267,6 +273,13 @@ int main(int argc, char **argv)
 			eit_limit = (optarg) ? strtoul(optarg, NULL, 0) : -1;
 			if (eit_limit >= 0)
 				fprintf(stderr, "EIT LIMIT: %d...\n", eit_limit);
+			break;
+		case 'o': /* output filtered data, optional arg is a filename */
+			if (optarg) {
+				strcpy(outfilename, optarg);
+				b_output_file = true;
+			} else
+				b_output_stdout = true;
 			break;
 		default:  /* bad cmd line option */
 			return -1;

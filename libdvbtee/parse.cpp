@@ -666,11 +666,14 @@ int parse::feed(int count, uint8_t* p_data)
 		if (PID_PAT == pid)
 			dvbpsi_PushPacket(h_pat, p);
 		else {
+			bool send_pkt = false;
 			map_dvbpsi::const_iterator iter;
 
 			iter = h_pmt.find(pid);
-			if (iter != h_pmt.end())
+			if (iter != h_pmt.end()) {
 				dvbpsi_PushPacket(iter->second, p);
+				send_pkt = true;
+			}
 
 			map_eit_pids::const_iterator iter_eit;
 			iter_eit = eit_pids.find(pid);
@@ -689,8 +692,14 @@ int parse::feed(int count, uint8_t* p_data)
 			}
 
 			iter = h_demux.find(pid);
-			if (iter != h_demux.end())
+			if (iter != h_demux.end()) {
 				dvbpsi_PushPacket(iter->second, p);
+				send_pkt = true;
+			}
+
+			if ((false) && (send_pkt)) {
+				out.push(p);
+			}
 		}
 #if DBG
 		addpid(pid);
