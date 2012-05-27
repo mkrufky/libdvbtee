@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
-	if ((b_scan) || (b_read_dvr))
+	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr))
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
 	if ((b_scan) && (channel) && (!scan_max)) {
 		if (!wait_event)
