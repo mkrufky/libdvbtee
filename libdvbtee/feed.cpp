@@ -218,3 +218,23 @@ int feed::start_stdin()
 
 	return ret;
 }
+
+bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_event) {
+	time_t start_time = time(NULL);
+	while ((!f_kill_thread) &&
+	       ((timeout == 0) || (time(NULL) - start_time) < ((int)timeout) )) {
+
+		switch (wait_event) {
+		case FEED_EVENT_PSIP:
+			if (parser.is_psip_ready()) return true;
+			break;
+		case FEED_EVENT_EPG:
+			if (parser.is_epg_ready()) return true;
+			break;
+		default:
+			break;
+		}
+		usleep(200*1000);
+	}
+	return f_kill_thread;
+}

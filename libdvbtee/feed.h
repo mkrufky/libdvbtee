@@ -53,15 +53,15 @@ public:
 
 	parse parser;
 
-	inline bool wait_for_streaming_or_timeout(unsigned int timeout)
-		{ time_t start_time = time(NULL); while ((!f_kill_thread) && ((timeout == 0) || (time(NULL) - start_time) < ((int)timeout) )) usleep(200*1000); return f_kill_thread; }
+#define FEED_EVENT_PSIP 1
+#define FEED_EVENT_EPG  2
+	bool wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_event);
 
-	inline bool wait_for_psip(unsigned int time_ms)
-		{ time_t start_time = time(NULL); while ((!parser.is_psip_ready()) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) )) usleep(200*1000); return parser.is_psip_ready(); }
+	inline bool wait_for_streaming_or_timeout(unsigned int timeout) { return wait_for_event_or_timeout(timeout, 0); }
 
-	inline bool wait_for_epg(unsigned int time_ms)
-		{ time_t start_time = time(NULL); while ((!parser.is_epg_ready()) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) )) usleep(200*1000); return parser.is_epg_ready(); }
+	inline bool wait_for_psip(unsigned int time_ms) { return wait_for_event_or_timeout(time_ms / 1000, FEED_EVENT_PSIP); }
 
+	inline bool wait_for_epg(unsigned int time_ms) { return wait_for_event_or_timeout(time_ms / 1000, FEED_EVENT_EPG); }
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
