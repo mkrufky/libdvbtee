@@ -30,6 +30,10 @@
 #include "functions.h"
 #include "debug.h"
 
+#if USE_STATIC_DECODE_MAP
+static map_decoder   decoders;
+#endif
+
 #define dprintf(fmt, arg...) __dprintf(DBG_PARSE, fmt, ##arg)
 
 #define PID_PAT  0x00

@@ -33,10 +33,6 @@
 typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
 typedef std::map<uint16_t, decode> map_decoder;
 
-#if USE_STATIC_DECODE_MAP
-static map_decoder   decoders;
-#endif
-
 typedef struct {
 	unsigned int channel;
 	uint32_t frequency;
