@@ -68,6 +68,8 @@ public:
 	bool is_epg_ready();
 
 	void cleanup();
+
+	void limit_eit(int limit) { eit_collection_limit = limit; }
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
@@ -127,6 +129,7 @@ private:
 	map_eit_pids eit_pids;
 
 	int dumped_eit;
+	int eit_collection_limit;
 };
 
 #endif//__PARSE_H__

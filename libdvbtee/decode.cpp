@@ -683,12 +683,14 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 #endif
 }
 
-bool decode::got_all_eit()
+bool decode::got_all_eit(int limit)
 {
+	if (decoded_mgt.tables.size() == 0)
+		return false;
 	for (map_decoded_mgt_tables::const_iterator iter = decoded_mgt.tables.begin(); iter != decoded_mgt.tables.end(); ++iter) {
 		switch (iter->first) {
 		case 0x0100 ... 0x017f: /* EIT-0 to EIT-127 */
-			if (!eit_x_complete(iter->first - 0x0100)) {
+			if (((limit == -1) || (limit >= iter->first - 0x0100)) && (!eit_x_complete(iter->first - 0x0100))) {
 #if DBG
 				fprintf(stderr, "%s: eit #%d MISSING\n", __func__,
 					iter->first - 0x0100);

@@ -112,7 +112,7 @@ void signal_callback_handler(int signum)
 
 
 void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan_method,
-	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg)
+	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg, int eit_limit)
 {
 	int count = 0;
 	int partial_redundancy = 0;
@@ -130,6 +130,7 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 		int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
 		tuners[i].set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
+		tuners[i].feeder.parser.limit_eit(eit_limit);
 	}
 	switch (scan_method) {
 	case 1: /* speed */
@@ -212,6 +213,7 @@ int main(int argc, char **argv)
 	unsigned int timeout     = 0;
 
 	unsigned int wait_event  = 0;
+	int eit_limit            = -1;
 
 	char filename[256];
 	memset(&filename, 0, sizeof(filename));
@@ -219,7 +221,7 @@ int main(int argc, char **argv)
 	fprintf(stderr, "\n"
 			"dvbtee\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -236,13 +238,6 @@ int main(int argc, char **argv)
 		case 'C': /* channel / scan max */
 			scan_max = strtoul(optarg, NULL, 0);
 			b_read_dvr = true;
-			break;
-		case 'E': /* enable EPG scan */
-#if 0
-			b_scan = true; // FIXME
-#endif
-			scan_epg = true;
-			wait_event = FEED_EVENT_EPG;
 			break;
 		case 'f': /* frontend */
 			fe_id = strtoul(optarg, NULL, 0);
@@ -264,6 +259,16 @@ int main(int argc, char **argv)
 			if (scan_method)
 				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
 			break;
+		case 'E': /* enable EPG scan */
+#if 0
+			b_scan = true; // FIXME
+#endif
+			scan_epg = true;
+			wait_event = FEED_EVENT_EPG;
+			eit_limit = (optarg) ? strtoul(optarg, NULL, 0) : -1;
+			if (eit_limit >= 0)
+				fprintf(stderr, "EIT LIMIT: %d...\n", eit_limit);
+			break;
 		default:  /* bad cmd line option */
 			return -1;
 		}
@@ -281,15 +286,17 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
-	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr))
+	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
+		context.tuner.feeder.parser.limit_eit(eit_limit);
+	}
 	if ((b_scan) && (channel) && (!scan_max)) {
 		if (!wait_event)
 			wait_event = FEED_EVENT_PSIP;
 	} else
 	if (b_scan) {
 		if (num_tuners >= 0)
-			multiscan(&context, num_tuners, scan_method, scan_flags, scan_min, scan_max, scan_epg);
+			multiscan(&context, num_tuners, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit);
 		else
 			context.tuner.scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
 		goto exit;

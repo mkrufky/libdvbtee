@@ -204,18 +204,13 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 			b_expecting_vct = true;
 			b_attach_demux  = true;
 			break;
-		case 0x0100:		/* EIT-0 */
-		case 0x0101:		/* EIT-1 */
-		case 0x0102:		/* EIT-2 */
-		case 0x0103:		/* EIT-3 */
-		case 0x0104 ... 0x017f:	/* EIT-4 to EIT-127 */
-			eit_pids[iter->second.pid] = iter->first - 0x0100;
+		case 0x0100 ... 0x017f:	/* EIT-0 to EIT-127 */
 			if ((scan_mode) && (!epg_mode))
 				break;
-#if 0
-			if (0 == decoders[ts_id].get_current_eit_x())
-#endif
+			if ((eit_collection_limit == -1) || (eit_collection_limit >= iter->first - 0x0100)) {
+				eit_pids[iter->second.pid] = iter->first - 0x0100;
 				b_attach_demux  = true;
+			}
 			break;
 		case 0x0200 ... 0x027f: /* ETT-0 to ETT-127 */
 			break;
@@ -442,6 +437,7 @@ parse::parse()
   , has_vct(false)
   , expect_vct(true)
   , dumped_eit(0)
+  , eit_collection_limit(-1)
 {
 	dprintf("()");
 
@@ -642,7 +638,7 @@ bool parse::is_psip_ready()
 
 bool parse::is_epg_ready()
 {
-	return ((is_psip_ready()) && (decoders[get_ts_id()].got_all_eit()));
+	return ((is_psip_ready()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)));
 };
 
 

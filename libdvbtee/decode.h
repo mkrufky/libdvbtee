@@ -275,7 +275,7 @@ public:
 
 	void dump_eit_x(uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
-	bool got_all_eit();
+	bool got_all_eit(int limit = -1);
 
 	void dump_epg(uint16_t source_id);
 	void dump_epg();
