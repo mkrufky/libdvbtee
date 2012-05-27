@@ -282,6 +282,10 @@ int main(int argc, char **argv)
 #endif
 	if ((b_scan) || (b_read_dvr))
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
+	if ((b_scan) && (channel) && (!scan_max)) {
+		if (!wait_event)
+			wait_event = FEED_EVENT_PSIP;
+	} else
 	if (b_scan) {
 		if (num_tuners >= 0)
 			multiscan(&context, num_tuners, scan_method, scan_flags, scan_min, scan_max, scan_epg);
@@ -340,6 +344,10 @@ int main(int argc, char **argv)
 			context._file_feeder.stop();
 		}
 	}
+	if (b_scan) // scan channel mode, normal scan would have goto'd to exit
+		context.tuner.feeder.parser.xine_dump();
+	if (scan_epg)
+		context.tuner.feeder.parser.epg_dump();
 exit:
 //	cleanup(&context);
 #if 1 /* FIXME */
