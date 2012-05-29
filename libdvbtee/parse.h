@@ -71,6 +71,8 @@ public:
 	void cleanup();
 
 	void limit_eit(int limit) { eit_collection_limit = limit; }
+
+	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
@@ -133,6 +135,8 @@ private:
 	int eit_collection_limit;
 
 	output out;
+
+	bool process_err_pkts;
 };
 
 #endif//__PARSE_H__

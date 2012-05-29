@@ -438,6 +438,7 @@ parse::parse()
   , expect_vct(true)
   , dumped_eit(0)
   , eit_collection_limit(-1)
+  , process_err_pkts(false)
 {
 	dprintf("()");
 
@@ -660,7 +661,7 @@ int parse::feed(int count, uint8_t* p_data)
 
 		if (p[1] & 0x80) {
 			fprintf(stderr, "\tTEI\t");//"%s: TEI detected, dropping packet\n", __func__);
-			continue;
+			if (!process_err_pkts) continue;
 		}
 
 		if (PID_PAT == pid)
