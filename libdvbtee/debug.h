@@ -26,7 +26,7 @@
 #define DBG_ATSCTEXT	16
 #define DBG_OUTPUT	32
 
-#define dbg 0
+extern unsigned int dbg;
 
 #define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
 

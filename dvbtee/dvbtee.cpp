@@ -227,7 +227,7 @@ int main(int argc, char **argv)
 #define VERSION "0.0.2"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E::o::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E::o::d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -281,6 +281,12 @@ int main(int argc, char **argv)
 				b_output_file = true;
 			} else
 				b_output_stdout = true;
+			break;
+		case 'd':
+			if (optarg)
+				libdvbtee_set_debug_level(strtoul(optarg, NULL, 0));
+			else
+				libdvbtee_set_debug_level(255);
 			break;
 		default:  /* bad cmd line option */
 			return -1;

@@ -31,6 +31,13 @@
 
 #define dprintf(fmt, arg...) __dprintf(DBG_FEED, fmt, ##arg)
 
+unsigned int dbg = 0;
+
+void libdvbtee_set_debug_level(unsigned int debug)
+{
+	dbg = debug;
+}
+
 feed::feed()
   : f_kill_thread(false)
   , fd(-1)

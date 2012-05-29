@@ -26,6 +26,8 @@
 #include <unistd.h>
 #include "parse.h"
 
+void libdvbtee_set_debug_level(unsigned int debug);
+
 class feed
 {
 public:
@@ -53,6 +55,7 @@ public:
 	inline bool wait_for_psip(unsigned int time_ms) { return wait_for_event_or_timeout(time_ms / 1000, FEED_EVENT_PSIP); }
 
 	inline bool wait_for_epg(unsigned int time_ms) { return wait_for_event_or_timeout(time_ms / 1000, FEED_EVENT_EPG); }
+
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
