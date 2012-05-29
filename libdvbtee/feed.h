@@ -26,15 +26,6 @@
 #include <unistd.h>
 #include "parse.h"
 
-#if 0
-if ((open_file("filename")) || (open_file("newfilename"))) {
-	start();
-	...
-	stop();
-	close_file();
-}
-#endif
-
 class feed
 {
 public:
