@@ -28,7 +28,7 @@
 
 #include "parse.h"
 #include "functions.h"
-#include "debug.h"
+#include "log.h"
 
 #if USE_STATIC_DECODE_MAP
 static map_decoder   decoders;

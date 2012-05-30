@@ -26,7 +26,7 @@
 #include <fcntl.h>
 
 #include "output.h"
-#include "debug.h"
+#include "log.h"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 

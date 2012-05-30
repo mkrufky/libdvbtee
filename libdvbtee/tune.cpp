@@ -26,7 +26,7 @@
 #include <map>
 
 #include "tune.h"
-#include "debug.h"
+#include "log.h"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_TUNE, fmt, ##arg)
 
