@@ -286,7 +286,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 	if ((decoded_vct.version == p_vct->i_version) &&
 	    (decoded_vct.ts_id   == p_vct->i_ts_id)) {
 
-		dprintf("v%d, ts_id %d, b_cable_vct %d: ALREADY DECODED\n",
+		dprintf("v%d, ts_id %d, b_cable_vct %d: ALREADY DECODED",
 			p_vct->i_version, p_vct->i_ts_id, p_vct->b_cable_vct);
 		return false;
 	}
@@ -384,7 +384,7 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 	if ((decoded_nit.version    == p_nit->i_version) &&
 	    (decoded_nit.network_id == p_nit->i_network_id)) {
 
-		dprintf("v%d, network_id %d: ALREADY DECODED\n",
+		dprintf("v%d, network_id %d: ALREADY DECODED",
 			p_nit->i_version, p_nit->i_network_id );
 		return false;
 	}
@@ -416,7 +416,7 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 		return false;
 	}
 #if 1//DBG
-	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d", __func__,
+	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d\n", __func__,
 		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id );
 #endif
 	decoded_sdt.ts_id      = p_sdt->i_ts_id;
@@ -449,7 +449,7 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	}
 #endif
 #if 1//DBG
-	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d service_id %d", __func__,
+	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d service_id %d\n", __func__,
 		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id );
 #endif
 	decoded_eit.service_id    = p_eit->i_service_id;
