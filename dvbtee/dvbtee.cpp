@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
-		if (context.tuner.tune_atsc(
+		if (context.tuner.tune_channel(
 				(scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
 			if (!context.tuner.wait_for_lock_or_timeout(2000)) {
 				context.tuner.close_fe();

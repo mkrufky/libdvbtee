@@ -67,6 +67,20 @@ static int atsc_qam_base_offset(const unsigned int channel)
 	return base_offset;
 }
 
+static int dvbt_base_offset(const unsigned int channel)
+{
+	int base_offset;
+
+	if (channel < 13)
+		base_offset = 142500000;
+	else if (channel < 70)
+		base_offset = 306000000;
+	else
+		base_offset = 0; /* FIXME */
+
+	return base_offset;
+}
+
 unsigned int atsc_vsb_chan_to_freq(const unsigned int channel)
 {
 	return (unsigned int)((int)channel*6000000 + atsc_vsb_base_offset(channel));
@@ -90,6 +104,26 @@ unsigned int atsc_qam_freq_to_chan(const unsigned int frequency)
 {
 	for (int channel=2; channel <= 133; channel++) {
 		if (atsc_qam_chan_to_freq(channel) == frequency)
+			return channel;
+	}
+	return 0;
+}
+
+#if 0
+#define VHF_LOWER_FREQUENCY 177500 /* channel 5 */
+#define VHF_UPPER_FREQUENCY 226500 /* channel 12 */
+#define UHF_LOWER_FREQUENCY 474000 /* channel 21 */
+#define UHF_UPPER_FREQUENCY 858000 /* channel 69 */
+#endif
+unsigned int dvbt_chan_to_freq(const unsigned int channel)
+{
+	return (unsigned int)((int)channel* ((channel <= 12) ? 7000000 : 8000000) + dvbt_base_offset(channel));
+}
+
+unsigned int dvbt_freq_to_chan(const unsigned int frequency)
+{
+	for (int channel=5; channel <= 69; channel++) {
+		if (dvbt_chan_to_freq(channel) == frequency)
 			return channel;
 	}
 	return 0;

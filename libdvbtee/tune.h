@@ -56,7 +56,7 @@ public:
 
 	bool wait_for_lock_or_timeout(unsigned int);
 
-	bool tune_atsc(fe_modulation_t, unsigned int);
+	bool tune_channel(fe_modulation_t, unsigned int);
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
@@ -91,6 +91,11 @@ private:
 	//map_chan_to_ts_id channels;
 
 	fe_status_t fe_status();
+
+	fe_type_t fe_type;
+
+	bool tune_atsc(fe_modulation_t, unsigned int);
+	bool tune_dvbt(unsigned int);
 };
 
 #endif /*__TUNE_H__ */

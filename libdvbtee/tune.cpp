@@ -124,8 +124,9 @@ int tune::open_fe()
 
 	fprintf(stderr, "%s: using %s\n", __func__, filename);
 
-	if (fe_info.type == FE_ATSC) {
-
+	switch (fe_info.type) {
+	case FE_ATSC:
+	case FE_OFDM:
 		struct dvb_frontend_parameters fe_params;
 
 		memset(&fe_params, 0, sizeof(struct dvb_frontend_parameters));
@@ -134,10 +135,10 @@ int tune::open_fe()
 			fprintf(stderr, "open_frontend: FE_GET_FRONTEND failed\n");
 			goto fail;
 		}
+		fe_type = fe_info.type;
 		return fe_fd;
-
-	} else {
-		fprintf(stderr, "frontend is not an ATSC device\n");
+	default:
+		fprintf(stderr, "frontend is not a supported device type!\n");
 	}
 fail:
 	return close_fe();
@@ -241,6 +242,19 @@ fail_demux:
 	return -1;
 }
 
+bool tune::tune_channel(fe_modulation_t modulation, unsigned int channel)
+{
+	switch (fe_type) {
+	case FE_ATSC:
+		return tune_atsc(modulation, channel);
+	case FE_OFDM:
+		return tune_dvbt(channel);
+	default:
+		fprintf(stderr, "unsupported FE TYPE\n");
+		return false;
+	}
+}
+
 bool tune::tune_atsc(fe_modulation_t modulation, unsigned int channel)
 {
 	struct dvb_frontend_parameters fe_params;
@@ -261,6 +275,30 @@ bool tune::tune_atsc(fe_modulation_t modulation, unsigned int channel)
 		return false;
 	}
 	fe_params.u.vsb.modulation = modulation;
+
+	if (ioctl(fe_fd, FE_SET_FRONTEND, &fe_params) < 0) {
+		fprintf(stderr, "tune: FE_SET_FRONTEND failed\n");
+		return false;
+	}
+	else fprintf(stderr, "tuned to %d\n", fe_params.frequency);
+
+	return true;
+}
+
+bool tune::tune_dvbt(unsigned int channel)
+{
+	struct dvb_frontend_parameters fe_params;
+
+	memset(&fe_params, 0, sizeof(struct dvb_frontend_parameters));
+
+	fe_params.frequency = dvbt_chan_to_freq(channel);
+	fe_params.u.ofdm.bandwidth             = ((channel <= 12) ? BANDWIDTH_7_MHZ : BANDWIDTH_8_MHZ);
+	fe_params.u.ofdm.code_rate_HP          = FEC_AUTO;
+	fe_params.u.ofdm.code_rate_LP          = FEC_AUTO;
+	fe_params.u.ofdm.constellation         = QAM_AUTO;
+	fe_params.u.ofdm.transmission_mode     = TRANSMISSION_MODE_AUTO;
+	fe_params.u.ofdm.guard_interval        = GUARD_INTERVAL_AUTO;
+	fe_params.u.ofdm.hierarchy_information = HIERARCHY_AUTO;
 
 	if (ioctl(fe_fd, FE_SET_FRONTEND, &fe_params) < 0) {
 		fprintf(stderr, "tune: FE_SET_FRONTEND failed\n");
@@ -298,7 +336,7 @@ void* tune::scan_thread()
 
 		fprintf(stderr, "scan channel %d...\n", channel);
 
-		if ((!f_kill_thread) && ((tune_atsc((scan_mode == SCAN_VSB) ? VSB_8 : QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
+		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? VSB_8 : QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
 
 			if (f_kill_thread)
 				break;
