@@ -126,6 +126,8 @@ private:
 	bool scan_mode;
 	bool has_pat;
 	bool has_vct;
+	bool has_sdt;
+	bool has_nit;
 	bool expect_vct;
 
 //	uint8_t grab_next_eit(uint8_t current_eit_x);

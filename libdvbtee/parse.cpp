@@ -252,18 +252,29 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 
 bool parse::take_nit(dvbpsi_nit_t* p_nit, bool decoded)
 {
-	dprintf("(%s): TODO", (decoded) ? "post" : "pre");
+	dprintf("(%s): v%d, network_id %d",
+		(decoded) ? "post" : "pre",
+		p_nit->i_version, p_nit->i_network_id);
 
 	if (decoded) return true;
+
+	has_nit = true;
 
 	return true;
 }
 
 bool parse::take_sdt(dvbpsi_sdt_t* p_sdt, bool decoded)
 {
-	dprintf("(%s): TODO", (decoded) ? "post" : "pre");
+	dprintf("(%s): v%d | ts_id %d | network_id %d",
+		(decoded) ? "post" : "pre",
+		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
 
-	if (decoded) return true;
+	if (!decoded) {
+		set_ts_id(p_sdt->i_ts_id);
+		return true;
+	}
+
+	has_sdt = true;
 
 	return true;
 }
@@ -435,6 +446,8 @@ parse::parse()
   , scan_mode(false)
   , has_pat(false)
   , has_vct(false)
+  , has_sdt(false)
+  , has_nit(false)
   , expect_vct(true)
   , dumped_eit(0)
   , eit_collection_limit(-1)
@@ -569,13 +582,16 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 					if (!apid) apid = iter_pmt_es->second.pid;
 					break;
 				}
+		char channelno[7]; /* XXX.XXX */
 		map_decoded_vct_channels::const_iterator iter_vct = decoders[ts_id].get_decoded_vct()->channels.find(program_number);
-		if (iter_vct == decoders[ts_id].get_decoded_vct()->channels.end())
-			continue;
+		if (iter_vct != decoders[ts_id].get_decoded_vct()->channels.end()) {
+			sprintf(channelno, "%d.%d", iter_vct->second.chan_major, iter_vct->second.chan_minor);
+		} else { // FIXME: use SDT info
+			sprintf(channelno, "%d", channel);
+		}
 
-		fprintf(stdout, "%d.%d:%d:%s:%d:%d:%d\n",
-			iter_vct->second.chan_major,
-			iter_vct->second.chan_minor,
+		fprintf(stdout, "%s:%d:%s:%d:%d:%d\n",
+			channelno,
 			freq,//iter_vct->second.carrier_freq,
 			modulation,
 			vpid, apid, program_number);
@@ -634,7 +650,9 @@ void parse::epg_dump()
 
 bool parse::is_psip_ready()
 {
-	return ((has_pat) && ((has_vct) || (!expect_vct)) && (decoders[get_ts_id()].complete_pmt()));
+	return ((has_pat) &&
+		(((has_vct) || (!expect_vct)) || ((has_sdt) && (has_nit))) &&
+		(decoders[get_ts_id()].complete_pmt()));
 };
 
 bool parse::is_epg_ready()

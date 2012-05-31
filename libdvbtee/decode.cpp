@@ -356,7 +356,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 
 	dvbpsi_atsc_mgt_table_t* p_table = p_mgt->p_first_table;
 	if (p_table)
-		fprintf(stderr, "  table type |   pid  | ver | bytes\n" );
+		fprintf(stderr, "  table type |   pid  | ver | bytes\n");
 	while (p_table) {
 		fprintf(stderr, "    0x%04x   | 0x%04x | %3d | %d\n",
 				p_table->i_table_type, p_table->i_table_type_pid,
@@ -385,15 +385,14 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 	    (decoded_nit.network_id == p_nit->i_network_id)) {
 
 		dprintf("v%d, network_id %d: ALREADY DECODED",
-			p_nit->i_version, p_nit->i_network_id );
+			p_nit->i_version, p_nit->i_network_id);
 		return false;
 	}
 	fprintf(stderr, "%s: v%d, network_id %d\n", __func__,
-		p_nit->i_version, p_nit->i_network_id );
+		p_nit->i_version, p_nit->i_network_id);
 
-	decoded_nit.version = p_nit->i_version;
-	decoded_nit.version = p_nit->i_version;
-	//FIXME: descriptors
+	decoded_nit.version    = p_nit->i_version;
+	decoded_nit.network_id = p_nit->i_network_id;
 
 	dvbpsi_nit_ts_t* p_ts = p_nit->p_first_ts;
 	while (p_ts) {
@@ -401,6 +400,7 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 		decoded_nit.ts_list[p_ts->i_ts_id].ts_id           = p_ts->i_ts_id;
 		decoded_nit.ts_list[p_ts->i_ts_id].orig_network_id = p_ts->i_orig_network_id;
 
+		//FIXME: descriptors contain alt frequencies & LCNs
 		p_ts = p_ts->p_next;
 	}
 	return true;
@@ -409,15 +409,15 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
 	if ((decoded_sdt.version    == p_sdt->i_version) &&
-	    (decoded_sdt.network_id == p_sdt->i_network_id)){
+	    (decoded_sdt.network_id == p_sdt->i_network_id)) {
 
 		dprintf("v%d | ts_id %d | network_id %d: ALREADY DECODED",
-			p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id );
+			p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
 		return false;
 	}
 #if 1//DBG
 	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d\n", __func__,
-		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id );
+		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
 #endif
 	decoded_sdt.ts_id      = p_sdt->i_ts_id;
 	decoded_sdt.version    = p_sdt->i_version;
@@ -432,7 +432,9 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 		decoded_sdt.services[p_service->i_service_id].f_eit_present  = p_service->b_eit_present;
 		decoded_sdt.services[p_service->i_service_id].running_status = p_service->i_running_status;
 		decoded_sdt.services[p_service->i_service_id].f_free_ca      = p_service->b_free_ca;
-		//FIXME: descriptors
+
+		//FIXME: service descriptors contain service provider name & service name
+
 		p_service = p_service->p_next;
 	}
 	return true;
