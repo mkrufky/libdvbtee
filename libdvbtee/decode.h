@@ -140,7 +140,7 @@ typedef struct
 	// FIXME: descriptors...
 } decoded_eit_event_t;
 
-typedef std::map<uint16_t, decoded_eit_event_t> map_decoded_eit_events; /* event_id, decoded_atsc_eit_event_t */
+typedef std::map<uint16_t, decoded_eit_event_t> map_decoded_eit_events; /* event_id, decoded_eit_event_t */
 
 typedef struct
 {
@@ -151,6 +151,8 @@ typedef struct
 	uint8_t				last_table_id;
 	map_decoded_eit_events		events;
 } decoded_eit_t;
+
+typedef std::map<uint16_t, decoded_eit_t> map_decoded_eit; /* service_id, decoded_eit_t */
 
 typedef struct
 {
@@ -271,6 +273,7 @@ public:
 	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; };
 
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
+	const map_decoded_eit*      get_decoded_eit()      { return &decoded_eit;      };
 
 	const uint8_t get_current_eit_x() { return eit_x; };
 	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; };
@@ -295,6 +298,7 @@ private:
 	map_rcvd rcvd_pmt;
 
 	map_decoded_atsc_eit decoded_atsc_eit[128];
+	map_decoded_eit      decoded_eit;
 	//decoded_atsc_eit_t decoded_atsc_eit;
 	uint8_t eit_x;
 #if 0
