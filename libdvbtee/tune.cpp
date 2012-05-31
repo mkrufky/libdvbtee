@@ -349,7 +349,10 @@ void* tune::scan_thread()
 							       (scan_mode == SCAN_VSB) ? "8VSB" : "QAM256");
 				break;
 			case FE_OFDM:
-				feeder.parser.set_channel_info(channel, dvbt_chan_to_freq(channel), "QAM_AUTO");
+				feeder.parser.set_channel_info(channel, dvbt_chan_to_freq(channel),
+							       ((channel <= 12) ?
+								"INVERSION_AUTO:BANDWIDTH_7_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO" :
+								"INVERSION_AUTO:BANDWIDTH_8_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO"));
 				break;
 			}
 			if (0 == start_feed()) {
