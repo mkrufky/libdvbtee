@@ -29,6 +29,7 @@
 #include "log.h"
 
 #include "dvbpsi/dr_48.h" /* service descriptor */
+#include "dvbpsi/dr_4d.h" /* short event descriptor */
 #include "dvbpsi/dr_62.h" /* frequency list descriptor */
 #include "dvbpsi/dr_83.h" /* LCN descriptor */
 
@@ -72,6 +73,23 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
+bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_ShortEvent)
+		return false;
+
+	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
+
+	memcpy(_4d.lang, dr->i_iso_639_code, 3);
+	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, _4d.name);
+	get_descriptor_text(dr->i_text, dr->i_text_length, _4d.text);
+
+	fprintf(stderr, "%s: %s, %s, %s\n", __func__, _4d.lang, _4d.name, _4d.text);
+
+	return true;
+}
+
+
 bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 {
 	if (p_descriptor->i_tag != DT_FrequencyList)
@@ -113,6 +131,9 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 		switch (p_descriptor->i_tag) {
 		case DT_Service:
 			service(p_descriptor);
+			break;
+		case DT_ShortEvent:
+			short_event(p_descriptor);
 			break;
 		case DT_FrequencyList:
 			freq_list(p_descriptor);

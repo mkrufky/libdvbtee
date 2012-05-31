@@ -30,6 +30,12 @@
 typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 
+typedef struct
+{
+	unsigned char lang[4];
+	unsigned char name[256];
+	unsigned char text[256];
+} dr4d_t;
 
 class desc
 {
@@ -42,8 +48,10 @@ public:
 	//FIXME:	const map_lcn* get_lcn() { return &lcn; };
 	map_lcn lcn;
 
+	dr4d_t _4d;
 private:
 	bool service(dvbpsi_descriptor_t*);
+	bool short_event(dvbpsi_descriptor_t*);
 	bool freq_list(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
 };

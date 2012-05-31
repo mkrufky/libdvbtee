@@ -471,30 +471,16 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 		decoded_eit.events[p_event->i_event_id].length_sec     = p_event->i_duration;
 		decoded_eit.events[p_event->i_event_id].running_status = p_event->i_running_status;
 		decoded_eit.events[p_event->i_event_id].f_free_ca      = p_event->b_free_ca;
-#if 0
+
 		time_t start = datetime_utc(decoded_eit.events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(decoded_eit.events[p_event->i_event_id].start_time + decoded_eit.events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
 
-		//FIXME: descriptors
-		unsigned char name[256];
-		unsigned char text[256];
-
-		dvbpsi_descriptor_t* p_descriptor = p_event->p_first_descriptor;
-		while (p_descriptor) {
-			if (p_descriptor->i_tag == 0x4d /*DT_ShortEvent*/) {
-
-				dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
-				memcpy(lang, dr->i_iso_639_code, 3);
-				get_descriptor_text(dr->i_event_name, dr->i_event_name_length, name);
-				get_descriptor_text(dr->i_text, dr->i_text_length, text);
-			}
-			p_descriptor = p_descriptor->p_next;
-		}
+		descriptors.decode(p_event->p_first_descriptor);
 
 		struct tm tms = *localtime(&start);
 		struct tm tme = *localtime(&end);
-		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name);
-#endif
+		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, descriptors._4d.name);
+
 		p_event = p_event->p_next;
 	}
 	return true;
