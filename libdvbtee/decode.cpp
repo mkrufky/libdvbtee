@@ -59,6 +59,15 @@ decode::decode()
 		decoded_atsc_eit[i].clear();
 	}
 
+	for (int i = 0; i < 34; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -66,12 +75,10 @@ decode::decode()
 	memset(&decoded_pmt, 0, sizeof(map_decoded_pmt));
 	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
 	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
-	memset(&decoded_eit, 0, sizeof(map_decoded_eit));
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
-	decoded_eit.clear();
 }
 
 decode::~decode()
@@ -88,6 +95,15 @@ decode::~decode()
 		decoded_atsc_eit[i].clear();
 	}
 
+	for (int i = 0; i < 34; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -98,8 +114,8 @@ decode::~decode()
 	decoded_vct.channels.clear();
 	decoded_mgt.tables.clear();
 	//decoded_atsc_eit.events.clear();
+	//decoded_eit.events.clear();
 	decoded_ett.clear();
-	decoded_eit.clear();
 	decoded_nit.ts_list.clear();
 	decoded_sdt.services.clear();
 }
@@ -133,6 +149,15 @@ decode::decode(const decode&)
 		decoded_atsc_eit[i].clear();
 	}
 
+	for (int i = 0; i < 34; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -140,12 +165,10 @@ decode::decode(const decode&)
 	memset(&decoded_pmt, 0, sizeof(map_decoded_pmt));
 	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
 	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
-	memset(&decoded_eit, 0, sizeof(map_decoded_eit));
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
-	decoded_eit.clear();
 }
 
 decode& decode::operator= (const decode& cSource)
@@ -180,6 +203,15 @@ decode& decode::operator= (const decode& cSource)
 		decoded_atsc_eit[i].clear();
 	}
 
+	for (int i = 0; i < 34; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -187,12 +219,10 @@ decode& decode::operator= (const decode& cSource)
 	memset(&decoded_pmt, 0, sizeof(map_decoded_pmt));
 	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
 	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
-	memset(&decoded_eit, 0, sizeof(map_decoded_eit));
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
-	decoded_eit.clear();
 
 	return *this;
 }
@@ -452,32 +482,32 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 
 bool decode::take_eit(dvbpsi_eit_t* p_eit)
 {
-	if (decoded_eit[p_eit->i_service_id].version == p_eit->i_version) {
-		dprintf("v%d | ts_id %d | network_id %d service_id %d: ALREADY DECODED",
-			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id );
+	if (decoded_eit[eit_x][p_eit->i_service_id].version == p_eit->i_version) {
+		fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d: ALREADY DECODED\n", __func__, eit_x,
+			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id);
 		return false;
 	}
 #if 1//DBG
-	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d service_id %d\n", __func__,
-		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id );
+	fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d\n", __func__, eit_x,
+		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id);
 #endif
-	decoded_eit[p_eit->i_service_id].service_id    = p_eit->i_service_id;
-	decoded_eit[p_eit->i_service_id].version       = p_eit->i_version;
-	decoded_eit[p_eit->i_service_id].ts_id         = p_eit->i_ts_id;
-	decoded_eit[p_eit->i_service_id].network_id    = p_eit->i_network_id;
-	decoded_eit[p_eit->i_service_id].last_table_id = p_eit->i_last_table_id;
+	decoded_eit[eit_x][p_eit->i_service_id].service_id    = p_eit->i_service_id;
+	decoded_eit[eit_x][p_eit->i_service_id].version       = p_eit->i_version;
+	decoded_eit[eit_x][p_eit->i_service_id].ts_id         = p_eit->i_ts_id;
+	decoded_eit[eit_x][p_eit->i_service_id].network_id    = p_eit->i_network_id;
+	decoded_eit[eit_x][p_eit->i_service_id].last_table_id = p_eit->i_last_table_id;
 
 	dvbpsi_eit_event_t* p_event = p_eit->p_first_event;
 	while (p_event) {
 
-		decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].event_id       = p_event->i_event_id;
-		decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].start_time     = p_event->i_start_time;
-		decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].length_sec     = p_event->i_duration;
-		decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].running_status = p_event->i_running_status;
-		decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].f_free_ca      = p_event->b_free_ca;
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].event_id       = p_event->i_event_id;
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time     = p_event->i_start_time;
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec     = p_event->i_duration;
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].running_status = p_event->i_running_status;
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].f_free_ca      = p_event->b_free_ca;
 
-		time_t start = datetime_utc(decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
-		time_t end   = datetime_utc(decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].start_time + decoded_eit[p_eit->i_service_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
+		time_t start = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
+		time_t end   = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time + decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
 
 		descriptors.decode(p_event->p_first_descriptor);
 
