@@ -43,9 +43,9 @@ public:
 	map_lcn lcn;
 
 private:
-	bool desc_service(dvbpsi_descriptor_t*);
-	bool desc_freq_list(dvbpsi_descriptor_t*);
-	bool desc_lcn(dvbpsi_descriptor_t*);
+	bool service(dvbpsi_descriptor_t*);
+	bool freq_list(dvbpsi_descriptor_t*);
+	bool _lcn(dvbpsi_descriptor_t*);
 };
 
 #endif /* __DECODE_H__ */

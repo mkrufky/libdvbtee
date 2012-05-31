@@ -54,7 +54,7 @@ desc::~desc()
 	dprintf("()");
 }
 
-bool desc::desc_service(dvbpsi_descriptor_t* p_descriptor)
+bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 {
 	unsigned char provider_name[256];
 	unsigned char service_name[256];
@@ -72,7 +72,7 @@ bool desc::desc_service(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc::desc_freq_list(dvbpsi_descriptor_t* p_descriptor)
+bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 {
 	if (p_descriptor->i_tag != DT_FrequencyList)
 		return false;
@@ -88,7 +88,7 @@ bool desc::desc_freq_list(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc::desc_lcn(dvbpsi_descriptor_t* p_descriptor)
+bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 {
 	if (p_descriptor->i_tag != DT_LogicalChannelNumber)
 		return false;
@@ -112,13 +112,13 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 	while (p_descriptor) {
 		switch (p_descriptor->i_tag) {
 		case DT_Service:
-			desc_service(p_descriptor);
+			service(p_descriptor);
 			break;
 		case DT_FrequencyList:
-			desc_freq_list(p_descriptor);
+			freq_list(p_descriptor);
 			break;
 		case DT_LogicalChannelNumber:
-			desc_lcn(p_descriptor);
+			_lcn(p_descriptor);
 			break;
 		}
 		p_descriptor = p_descriptor->p_next;
