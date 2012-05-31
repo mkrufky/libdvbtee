@@ -312,6 +312,7 @@ int main(int argc, char **argv)
 	if ((b_scan) && (channel) && (!scan_max)) {
 		if (!wait_event)
 			wait_event = FEED_EVENT_PSIP;
+		scan_max = scan_min; /* scan_min is equal to channel */
 	} else
 	if (b_scan) {
 		if (num_tuners >= 0)
