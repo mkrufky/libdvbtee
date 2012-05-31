@@ -27,13 +27,14 @@
 #define DBG_FEED	4
 #define DBG_TUNE	8
 #define DBG_ATSCTEXT	16
-#define DBG_OUTPUT	32
+#define DBG_DESC	32
+#define DBG_OUTPUT	64
 
 extern unsigned int dbg;
 
 #define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
 
-#define __dprintf(lvl, fmt, arg...) do {					\
+#define __dprintf(lvl, fmt, arg...) do {				\
 	if (dbg & lvl)							\
 		__printf(stderr, "%s: " fmt "\n", __func__, ##arg);	\
 } while (0)

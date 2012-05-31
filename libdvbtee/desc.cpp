@@ -35,7 +35,7 @@
 
 #include "desc.h"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE/*DBG_DESC*/, fmt, ##arg)
+#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 
 #define DT_Service                    0x48
 #define DT_ShortEvent                 0x4d
