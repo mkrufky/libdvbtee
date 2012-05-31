@@ -27,6 +27,7 @@
 
 #include "functions.h"
 #include "decode.h"
+#include "desc.h"
 #include "log.h"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
@@ -400,7 +401,9 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 		decoded_nit.ts_list[p_ts->i_ts_id].ts_id           = p_ts->i_ts_id;
 		decoded_nit.ts_list[p_ts->i_ts_id].orig_network_id = p_ts->i_orig_network_id;
 
-		//FIXME: descriptors contain alt frequencies & LCNs
+		/* descriptors contain frequency lists & LCNs */
+		decode_descriptors(p_ts->p_first_descriptor);
+
 		p_ts = p_ts->p_next;
 	}
 	return true;
@@ -433,7 +436,8 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 		decoded_sdt.services[p_service->i_service_id].running_status = p_service->i_running_status;
 		decoded_sdt.services[p_service->i_service_id].f_free_ca      = p_service->b_free_ca;
 
-		//FIXME: service descriptors contain service provider name & service name
+		/* service descriptors contain service provider name & service name */
+		decode_descriptors(p_service->p_first_descriptor);
 
 		p_service = p_service->p_next;
 	}

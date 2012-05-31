@@ -23,6 +23,14 @@
 #define __DESC_H__
 
 #include <stdint.h>
-#include "dvbpsi/descriptor.h"
+//#include "dvbpsi/descriptor.h"
+
+void decode_descriptors(dvbpsi_descriptor_t* p_descriptor);
+#if 0
+bool desc_service(dvbpsi_descriptor_t* p_descriptor,
+		  unsigned char* provider_name, unsigned char* service_name);
+bool desc_freq_list(dvbpsi_descriptor_t* p_descriptor);
+bool desc_lcn(dvbpsi_descriptor_t* p_descriptor);
+#endif
 
 #endif /* __DECODE_H__ */

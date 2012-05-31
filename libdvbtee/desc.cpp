@@ -25,8 +25,94 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "desc.h"
+#include "functions.h"
 #include "log.h"
+
+#include "dvbpsi/dr_48.h" /* service descriptor */
+#include "dvbpsi/dr_62.h" /* frequency list descriptor */
+#include "dvbpsi/dr_83.h" /* LCN descriptor */
+
+#include "desc.h"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DECODE/*DBG_DESC*/, fmt, ##arg)
 
+#define DT_Service                    0x48
+#define DT_ShortEvent                 0x4d
+#define DT_Teletext                   0x56
+#define DT_FrequencyList              0x62
+#define DT_LogicalChannelNumber       0x83
+
+#if 0
+bool desc_service(dvbpsi_descriptor_t* p_descriptor,
+		  unsigned char* provider_name, unsigned char* service_name)
+{
+#else
+bool desc_service(dvbpsi_descriptor_t* p_descriptor)
+{
+	unsigned char provider_name[256];
+	unsigned char service_name[256];
+#endif
+	if (p_descriptor->i_tag != DT_Service)
+		return false;
+
+	dvbpsi_service_dr_t* dr = dvbpsi_DecodeServiceDr(p_descriptor);
+
+	get_descriptor_text(dr->i_service_provider_name, dr->i_service_provider_name_length, provider_name);
+	get_descriptor_text(dr->i_service_name,          dr->i_service_name_length,          service_name);
+
+	fprintf(stderr, "%s: %s, %s\n", __func__, provider_name, service_name);
+
+	return true;
+}
+
+bool desc_freq_list(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_FrequencyList)
+		return false;
+
+	dvbpsi_frequency_list_dr_t* dr = dvbpsi_DecodeFrequencyListDr(p_descriptor);
+	for (int i = 0; i < dr->i_number_of_frequencies; ++i) {
+#if 0
+		= dr->p_center_frequencies[i]
+#else
+		fprintf(stderr, "%s: %d\n", __func__, dr->p_center_frequencies[i]);
+#endif
+	}
+	return true;
+}
+
+bool desc_lcn(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_LogicalChannelNumber)
+		return false;
+
+	dvbpsi_lcn_dr_t* lcn = dvbpsi_DecodeLCNDr(p_descriptor);
+	for (int i = 0; i < lcn->i_number_of_entries; i ++) {
+#if 0
+		= lcn->p_entries[i].i_service_id;
+		= lcn->p_entries[i].i_logical_channel_number;
+#else
+		fprintf(stderr, "%s: %d, %d\n", __func__, lcn->p_entries[i].i_service_id, lcn->p_entries[i].i_logical_channel_number);
+#endif
+	}
+
+	return true;
+}
+
+void decode_descriptors(dvbpsi_descriptor_t* p_descriptor)
+{
+	while (p_descriptor) {
+		switch (p_descriptor->i_tag) {
+		case DT_Service:
+			desc_service(p_descriptor);
+			break;
+		case DT_FrequencyList:
+			desc_freq_list(p_descriptor);
+			break;
+		case DT_LogicalChannelNumber:
+			desc_lcn(p_descriptor);
+			break;
+		}
+		p_descriptor = p_descriptor->p_next;
+	}
+}
