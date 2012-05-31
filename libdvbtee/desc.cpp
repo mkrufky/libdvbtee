@@ -68,7 +68,7 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 	get_descriptor_text(dr->i_service_provider_name, dr->i_service_provider_name_length, provider_name);
 	get_descriptor_text(dr->i_service_name,          dr->i_service_name_length,          service_name);
 
-	fprintf(stderr, "%s: %s, %s\n", __func__, provider_name, service_name);
+	dprintf("%s, %s", provider_name, service_name);
 
 	return true;
 }
@@ -84,7 +84,7 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, _4d.name);
 	get_descriptor_text(dr->i_text, dr->i_text_length, _4d.text);
 
-	fprintf(stderr, "%s: %s, %s, %s\n", __func__, _4d.lang, _4d.name, _4d.text);
+	dprintf("%s, %s, %s", _4d.lang, _4d.name, _4d.text);
 
 	return true;
 }
@@ -100,7 +100,7 @@ bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 #if 0
 		= dr->p_center_frequencies[i]
 #else
-		fprintf(stderr, "%s: %d\n", __func__, dr->p_center_frequencies[i]);
+		dprintf("%d", dr->p_center_frequencies[i]);
 #endif
 	}
 	return true;
@@ -118,7 +118,7 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 		= lcn->p_entries[i].i_logical_channel_number;
 #else
 		lcn[dr->p_entries[i].i_service_id] = dr->p_entries[i].i_logical_channel_number;
-		fprintf(stderr, "%s: %d, %d\n", __func__, dr->p_entries[i].i_service_id, lcn[dr->p_entries[i].i_service_id]);
+		dprintf("%d, %d", dr->p_entries[i].i_service_id, lcn[dr->p_entries[i].i_service_id]);
 #endif
 	}
 
