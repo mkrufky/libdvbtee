@@ -25,12 +25,27 @@
 #include <stdint.h>
 //#include "dvbpsi/descriptor.h"
 
-void decode_descriptors(dvbpsi_descriptor_t* p_descriptor);
-#if 0
-bool desc_service(dvbpsi_descriptor_t* p_descriptor,
-		  unsigned char* provider_name, unsigned char* service_name);
-bool desc_freq_list(dvbpsi_descriptor_t* p_descriptor);
-bool desc_lcn(dvbpsi_descriptor_t* p_descriptor);
-#endif
+#include <map>
+
+typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
+typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
+
+
+class desc
+{
+public:
+	desc();
+	~desc();
+
+	void decode(dvbpsi_descriptor_t*);
+
+	//FIXME:	const map_lcn* get_lcn() { return &lcn; };
+	map_lcn lcn;
+
+private:
+	bool desc_service(dvbpsi_descriptor_t*);
+	bool desc_freq_list(dvbpsi_descriptor_t*);
+	bool desc_lcn(dvbpsi_descriptor_t*);
+};
 
 #endif /* __DECODE_H__ */

@@ -353,7 +353,7 @@ void* tune::scan_thread()
 				break;
 			}
 			if (0 == start_feed()) {
-				int timeout = (scan_epg) ? 16 : 4;
+				int timeout = (scan_epg) ? 16 : 8;
 				while ((!f_kill_thread) && (timeout)) {
 					if (scan_epg)
 						feeder.wait_for_epg(1000);

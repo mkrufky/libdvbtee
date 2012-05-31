@@ -42,6 +42,8 @@
 #include "dvbpsi/atsc_rrt.h"
 #endif
 
+#include "desc.h"
+
 #include <map>
 
 /* -- PAT -- */
@@ -279,6 +281,9 @@ public:
 
 	void dump_epg(uint16_t source_id);
 	void dump_epg();
+
+	//FIXME-move to private
+	desc descriptors;
 private:
 	time_t stream_time;
 

@@ -42,16 +42,23 @@
 #define DT_FrequencyList              0x62
 #define DT_LogicalChannelNumber       0x83
 
-#if 0
-bool desc_service(dvbpsi_descriptor_t* p_descriptor,
-		  unsigned char* provider_name, unsigned char* service_name)
+
+desc::desc()
+//  : f_kill_thread(false)
 {
-#else
-bool desc_service(dvbpsi_descriptor_t* p_descriptor)
+	dprintf("()");
+}
+
+desc::~desc()
+{
+	dprintf("()");
+}
+
+bool desc::desc_service(dvbpsi_descriptor_t* p_descriptor)
 {
 	unsigned char provider_name[256];
 	unsigned char service_name[256];
-#endif
+
 	if (p_descriptor->i_tag != DT_Service)
 		return false;
 
@@ -65,7 +72,7 @@ bool desc_service(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc_freq_list(dvbpsi_descriptor_t* p_descriptor)
+bool desc::desc_freq_list(dvbpsi_descriptor_t* p_descriptor)
 {
 	if (p_descriptor->i_tag != DT_FrequencyList)
 		return false;
@@ -81,25 +88,26 @@ bool desc_freq_list(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc_lcn(dvbpsi_descriptor_t* p_descriptor)
+bool desc::desc_lcn(dvbpsi_descriptor_t* p_descriptor)
 {
 	if (p_descriptor->i_tag != DT_LogicalChannelNumber)
 		return false;
 
-	dvbpsi_lcn_dr_t* lcn = dvbpsi_DecodeLCNDr(p_descriptor);
-	for (int i = 0; i < lcn->i_number_of_entries; i ++) {
+	dvbpsi_lcn_dr_t* dr = dvbpsi_DecodeLCNDr(p_descriptor);
+	for (int i = 0; i < dr->i_number_of_entries; i ++) {
 #if 0
 		= lcn->p_entries[i].i_service_id;
 		= lcn->p_entries[i].i_logical_channel_number;
 #else
-		fprintf(stderr, "%s: %d, %d\n", __func__, lcn->p_entries[i].i_service_id, lcn->p_entries[i].i_logical_channel_number);
+		lcn[dr->p_entries[i].i_service_id] = dr->p_entries[i].i_logical_channel_number;
+		fprintf(stderr, "%s: %d, %d\n", __func__, dr->p_entries[i].i_service_id, lcn[dr->p_entries[i].i_service_id]);
 #endif
 	}
 
 	return true;
 }
 
-void decode_descriptors(dvbpsi_descriptor_t* p_descriptor)
+void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
 	while (p_descriptor) {
 		switch (p_descriptor->i_tag) {
