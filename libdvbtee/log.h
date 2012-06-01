@@ -29,6 +29,7 @@
 #define DBG_ATSCTEXT	16
 #define DBG_DESC	32
 #define DBG_OUTPUT	64
+#define DBG_TIME	128
 
 extern unsigned int dbg;
 

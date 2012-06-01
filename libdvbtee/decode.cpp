@@ -29,7 +29,21 @@
 #include "decode.h"
 #include "log.h"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+bool fshowtime;
+
+#define dprintf(fmt, arg...)					\
+do {								\
+	__dprintf(DBG_DECODE, fmt, ##arg);			\
+	fshowtime = true;					\
+} while (0)
+
+#define dbg_time(fmt, arg...)					\
+do {								\
+	if ((fshowtime) | (dbg & DBG_TIME)) {			\
+		__dprintf((DBG_DECODE | DBG_TIME), fmt, ##arg);	\
+		fshowtime = false;				\
+	}							\
+} while (0)
 
 decode::decode()
   : eit_x(0)
@@ -232,7 +246,7 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 {
 	stream_time = atsc_datetime_utc(p_stt->i_system_time);
 
-	dprintf("%s", ctime(&stream_time));
+	dbg_time("%s", ctime(&stream_time));
 
 	return true;
 }
@@ -241,7 +255,7 @@ bool decode::take_tot(dvbpsi_tot_t* p_tot)
 {
 	stream_time = datetime_utc(p_tot->i_utc_time);
 
-	dprintf("%s", ctime(&stream_time));
+	dbg_time("%s", ctime(&stream_time));
 
 	return true;
 }
