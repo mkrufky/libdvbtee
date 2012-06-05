@@ -63,7 +63,6 @@ static map_decoder   decoders;
 #define TID_BAT  0x4A
 #define TID_EIT  0x4E
 #define TID_EITx 0x4F
-#define TID_EIT_MAX 0x6f
   //  0x50 - 0x5F
   //  0x60 - 0x6F
 #define TID_TDT  0x70
@@ -324,8 +323,21 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 		break;
 	}
 	switch (i_table_id) {
-	case TID_EIT...TID_EIT_MAX:
-		decoders[ts_id].set_current_eit_x(i_table_id - TID_EIT);
+#if 0
+	case 0x60 ... 0x6f: /* eit | other  | sched */
+	case 0x4f:          /* eit | other  | p/f   */
+		break;
+	case 0x50 ... 0x5f: /* eit | actual | sched */
+	{
+		int eit_x = decoders[ts_id].get_current_eit_x();
+		if (decoders[ts_id].eit_x_complete(eit_x))
+			decoders[ts_id].set_current_eit_x(++eit_x);
+		if ((i_table_id - TID_EIT) == eit_x)
+			dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
+		break;
+	}
+#endif
+	case TID_EIT:     /* eit | actual | p/f */
 		dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
 		break;
 	case TID_NIT:

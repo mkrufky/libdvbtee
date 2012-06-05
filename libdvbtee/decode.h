@@ -282,7 +282,8 @@ public:
 	bool eit_x_complete(uint8_t current_eit_x);
 	bool got_all_eit(int limit = -1);
 
-	void dump_epg(uint16_t source_id);
+	void dump_epg_atsc(uint16_t source_id);
+	void dump_epg_dvb(uint16_t source_id);
 	void dump_epg();
 
 	//FIXME-move to private
@@ -304,6 +305,8 @@ private:
 #if 0
 	decoded_atsc_eit_callback atsc_eit_callback;
 #endif
+	unsigned int services_w_eit_pf;
+	unsigned int services_w_eit_sched;
 	//map_rcvd rcvd_eit;
 	map_decoded_atsc_ett decoded_ett;
 

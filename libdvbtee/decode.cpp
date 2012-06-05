@@ -47,6 +47,8 @@ do {								\
 
 decode::decode()
   : eit_x(0)
+  , services_w_eit_pf(0)
+  , services_w_eit_sched(0)
 {
 	dprintf("()");
 
@@ -476,6 +478,8 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 	decoded_sdt.version    = p_sdt->i_version;
 	decoded_sdt.network_id = p_sdt->i_network_id;
 
+	int _services_w_eit_pf    = 0;
+	int _services_w_eit_sched = 0;
 	//fprintf(stderr, "  service_id | service_name");
 	dvbpsi_sdt_service_t* p_service = p_sdt->p_first_service;
 	while (p_service) {
@@ -486,19 +490,30 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 		decoded_sdt.services[p_service->i_service_id].running_status = p_service->i_running_status;
 		decoded_sdt.services[p_service->i_service_id].f_free_ca      = p_service->b_free_ca;
 
+		if (decoded_sdt.services[p_service->i_service_id].f_eit_present)
+			_services_w_eit_pf++;
+
+		if (decoded_sdt.services[p_service->i_service_id].f_eit_sched)
+			_services_w_eit_sched++;
+
 		/* service descriptors contain service provider name & service name */
 		descriptors.decode(p_service->p_first_descriptor);
 
 		p_service = p_service->p_next;
 	}
+	services_w_eit_pf    = _services_w_eit_pf;
+	services_w_eit_sched = _services_w_eit_sched;
 	return true;
 }
 
 bool decode::take_eit(dvbpsi_eit_t* p_eit)
 {
-	if (decoded_eit[eit_x][p_eit->i_service_id].version == p_eit->i_version) {
+	if ((decoded_eit[eit_x][p_eit->i_service_id].version == p_eit->i_version) &&
+	    (decoded_eit[eit_x][p_eit->i_service_id].service_id == p_eit->i_service_id)) {
+#if 1//DBG
 		fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d: ALREADY DECODED\n", __func__, eit_x,
 			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id);
+#endif
 		return false;
 	}
 #if 1//DBG
@@ -519,7 +534,7 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec     = p_event->i_duration;
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].running_status = p_event->i_running_status;
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].f_free_ca      = p_event->b_free_ca;
-
+#if DBG
 		time_t start = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time + decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
 
@@ -527,8 +542,9 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 
 		struct tm tms = *localtime(&start);
 		struct tm tme = *localtime(&end);
-		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, descriptors._4d.name);
 
+		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, descriptors._4d.name);
+#endif
 		p_event = p_event->p_next;
 	}
 	return true;
@@ -536,9 +552,10 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 
 void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
 {
-#if DBG
+#if 1//DBG
 	fprintf(stderr, "%s-%d\n", __func__, eit_x);
 #endif
+	if (decoded_vct.channels.size()) {
 	map_decoded_vct_channels::const_iterator iter_vct;
 	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct) {
 
@@ -573,12 +590,48 @@ void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
 			struct tm tme = *localtime( &end  );
 			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 		}
-	}
+	}} else {
+	map_decoded_sdt_services::const_iterator iter_sdt;
+	for (iter_sdt = decoded_sdt.services.begin(); iter_sdt != decoded_sdt.services.end(); ++iter_sdt) {
+		if ((!iter_sdt->second.f_eit_present) ||
+		    ((source_id) && (source_id != iter_sdt->second.service_id)))
+			continue;
+
+		unsigned char service_name[8] = { 0 };
+#if 0
+		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
+		service_name[7] = 0;
+#endif
+		fprintf(stdout, "%s-%d: id:%d - %d: %s\n", __func__,
+			eit_x, iter_sdt->second.service_id,
+			0,//LCN,
+			service_name);
+
+		map_decoded_eit_events::const_iterator iter_eit;
+		for (iter_eit = decoded_eit[eit_x][iter_sdt->second.service_id].events.begin();
+		     iter_eit != decoded_eit[eit_x][iter_sdt->second.service_id].events.end();
+		     ++iter_eit) {
+
+			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
+			time_t end   = datetime_utc(iter_eit->second.start_time + iter_eit->second.length_sec /*+ (60 * tz_offset)*/);
+
+			unsigned char name[256];
+			memset(name, 0, sizeof(char) * 256);
+#if 0
+			decode_multiple_string(iter_eit->second.title, iter_eit->second.title_bytes, name);
+#endif
+			//FIXME: descriptors
+
+			struct tm tms = *localtime( &start );
+			struct tm tme = *localtime( &end  );
+			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+		}
+	}}
 	fprintf(stdout, "\n");
 	fflush(stdout);
 }
 
-void decode::dump_epg(uint16_t source_id)
+void decode::dump_epg_atsc(uint16_t source_id)
 {
 	unsigned int eit_num = 0;
 
@@ -588,11 +641,28 @@ void decode::dump_epg(uint16_t source_id)
 	}
 }
 
+void decode::dump_epg_dvb(uint16_t service_id)
+{
+	unsigned int eit_num = 0;
+
+	while ((eit_num < 34) && (decoded_eit[eit_num].count(service_id))) {
+		dump_eit_x(eit_num, service_id);
+		eit_num++;
+	}
+}
+
 void decode::dump_epg()
 {
+	if (decoded_vct.channels.size()) {
 	map_decoded_vct_channels::const_iterator iter_vct;
 	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct)
-		dump_epg(iter_vct->second.source_id);
+		dump_epg_atsc(iter_vct->second.source_id);
+	} else {
+	map_decoded_sdt_services::const_iterator iter_sdt;
+	for (iter_sdt = decoded_sdt.services.begin(); iter_sdt != decoded_sdt.services.end(); ++iter_sdt) {
+		if (iter_sdt->second.f_eit_present)
+			dump_epg_dvb(iter_sdt->second.service_id);
+	}}
 }
 
 
@@ -716,9 +786,10 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 		}
 	return true;
 #else
-	return ((decoded_atsc_eit[current_eit_x].size()) &&
-		(decoded_atsc_eit[current_eit_x].size() ==
-		 decoded_vct.channels.size()));
+	return (((decoded_atsc_eit[current_eit_x].size()) &&
+		 (decoded_atsc_eit[current_eit_x].size() == decoded_vct.channels.size())) ||
+		(((decoded_eit[current_eit_x].size()) && (services_w_eit_pf /*services_w_eit_sched*/)) &&
+		 (decoded_eit[current_eit_x].size() == services_w_eit_pf)));
 #endif
 }
 
