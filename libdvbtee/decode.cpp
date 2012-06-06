@@ -831,6 +831,7 @@ bool decode::got_all_eit(int limit)
 	return true;
 }
 
+#if 0
 bool decode::complete_psip()
 {
 //	bool complete = true;
@@ -872,3 +873,4 @@ bool decode::complete_psip()
 	}
 	return false;
 }
+#endif

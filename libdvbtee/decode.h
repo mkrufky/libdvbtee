@@ -271,7 +271,9 @@ public:
 	bool take_rrt(dvbpsi_atsc_mgt_t*);
 #endif
 	bool complete_pmt();
+#if 0
 	bool complete_psip();
+#endif
 
 	const decoded_pat_t*   get_decoded_pat() { return &decoded_pat; };
 	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; };
