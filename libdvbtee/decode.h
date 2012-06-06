@@ -317,6 +317,9 @@ private:
 	decoded_sdt_t   decoded_sdt;
 	decoded_nit_t   decoded_nit;
 
+	void dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
+	void dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
+
 	void dump_epg_atsc(uint16_t source_id);
 	void dump_epg_dvb(uint16_t source_id);
 };

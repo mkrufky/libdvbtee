@@ -555,6 +555,70 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	return true;
 }
 
+bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
+{
+	if ((decoded_atsc_eit[eit_x][p_eit->i_source_id].version   == p_eit->i_version) &&
+	    (decoded_atsc_eit[eit_x][p_eit->i_source_id].source_id == p_eit->i_source_id)) {
+#if DBG
+		fprintf(stderr, "%s-%d: v%d, source_id %d: ALREADY DECODED\n", __func__,
+			eit_x, p_eit->i_version, p_eit->i_source_id);
+#endif
+		return false;
+	}
+#if DBG
+	map_decoded_vct_channels::const_iterator iter_vct;
+	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct)
+		if (iter_vct->second.source_id == p_eit->i_source_id)
+			break;
+
+	if (iter_vct == decoded_vct.channels.end()) {
+		fprintf(stderr, "%s-%d: v%d, id:%d\n", __func__,
+			eit_x, p_eit->i_version, p_eit->i_source_id);
+	} else {
+		unsigned char service_name[8] = { 0 };
+		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
+		service_name[7] = 0;
+
+		fprintf(stderr, "%s-%d: v%d, id:%d - %d.%d: %s\n", __func__,
+			eit_x, p_eit->i_version, p_eit->i_source_id,
+			iter_vct->second.chan_major,
+			iter_vct->second.chan_minor,
+			service_name);
+	}
+#endif
+	decoded_atsc_eit[eit_x][p_eit->i_source_id].version   = p_eit->i_version;
+	decoded_atsc_eit[eit_x][p_eit->i_source_id].source_id = p_eit->i_source_id;
+
+	dvbpsi_atsc_eit_event_t* p_event = p_eit->p_first_event;
+	while (p_event) {
+
+			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].event_id     = p_event->i_event_id;
+			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time   = p_event->i_start_time;
+			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].etm_location = p_event->i_etm_location;
+			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].length_sec   = p_event->i_length_seconds;
+			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes  = p_event->i_title_length;
+			memcpy(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title, p_event->i_title, 256); // FIXME
+#if DBG
+			time_t start = atsc_datetime_utc(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
+			time_t end   = atsc_datetime_utc(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time + decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
+
+			unsigned char name[256];
+			memset(name, 0, sizeof(char) * 256);
+			decode_multiple_string(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title, decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes, name);
+			//p_epg->text[0] = 0;
+
+			//FIXME: descriptors
+
+			struct tm tms = *localtime( &start );
+			struct tm tme = *localtime( &end  );
+			fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+#endif
+		p_event = p_event->p_next;
+	}
+	return true;
+}
+
+#if 0
 void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
 {
 #if 1//DBG
@@ -630,6 +694,102 @@ void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
 	fprintf(stdout, "\n");
 	fflush(stdout);
 }
+#endif
+
+void decode::dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id)
+{
+#if 1//DBG
+	fprintf(stderr, "%s-%d\n", __func__, eit_x);
+#endif
+	map_decoded_vct_channels::const_iterator iter_vct;
+	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct) {
+
+		if ((source_id) && (source_id != iter_vct->second.source_id))
+			continue;
+
+		unsigned char service_name[8] = { 0 };
+		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
+		service_name[7] = 0;
+
+		fprintf(stdout, "%s-%d: id:%d - %d.%d: %s\n", __func__,
+			eit_x, iter_vct->second.source_id,
+			iter_vct->second.chan_major,
+			iter_vct->second.chan_minor,
+			service_name);
+
+		map_decoded_atsc_eit_events::const_iterator iter_eit;
+		for (iter_eit = decoded_atsc_eit[eit_x][iter_vct->second.source_id].events.begin();
+		     iter_eit != decoded_atsc_eit[eit_x][iter_vct->second.source_id].events.end();
+		     ++iter_eit) {
+
+			time_t start = atsc_datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
+			time_t end   = atsc_datetime_utc(iter_eit->second.start_time + iter_eit->second.length_sec /*+ (60 * tz_offset)*/);
+
+			unsigned char name[256];
+			memset(name, 0, sizeof(char) * 256);
+			decode_multiple_string(iter_eit->second.title, iter_eit->second.title_bytes, name);
+
+			//FIXME: descriptors
+
+			struct tm tms = *localtime( &start );
+			struct tm tme = *localtime( &end  );
+			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+		}
+	}
+}
+
+void decode::dump_eit_x_dvb(uint8_t eit_x, uint16_t service_id)
+{
+#if 1//DBG
+	fprintf(stderr, "%s-%d\n", __func__, eit_x);
+#endif
+	map_decoded_sdt_services::const_iterator iter_sdt;
+	for (iter_sdt = decoded_sdt.services.begin(); iter_sdt != decoded_sdt.services.end(); ++iter_sdt) {
+		if ((!iter_sdt->second.f_eit_present) ||
+		    ((service_id) && (service_id != iter_sdt->second.service_id)))
+			continue;
+
+#if 0
+		unsigned char service_name[8] = { 0 };
+		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
+		service_name[7] = 0;
+#endif
+		fprintf(stdout, "%s-%d: id:%d - %d: %s\n", __func__,
+			eit_x, iter_sdt->second.service_id,
+			descriptors.lcn[iter_sdt->second.service_id],
+			iter_sdt->second.service_name);
+
+		map_decoded_eit_events::const_iterator iter_eit;
+		for (iter_eit = decoded_eit[eit_x][iter_sdt->second.service_id].events.begin();
+		     iter_eit != decoded_eit[eit_x][iter_sdt->second.service_id].events.end();
+		     ++iter_eit) {
+
+			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
+			time_t end   = datetime_utc(iter_eit->second.start_time + iter_eit->second.length_sec /*+ (60 * tz_offset)*/);
+
+			//FIXME: descriptors
+
+			struct tm tms = *localtime( &start );
+			struct tm tme = *localtime( &end  );
+			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, iter_eit->second.name.c_str()/*, iter_eit->second.text.c_str()*/ );
+		}
+	}
+}
+
+void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
+{
+#if DBG
+	fprintf(stderr, "%s-%d\n", __func__, eit_x);
+#endif
+	if (decoded_vct.channels.size()) {
+		dump_eit_x_atsc(eit_x, source_id);
+	} else {
+		dump_eit_x_dvb(eit_x, source_id); /* service_id */
+	}
+
+	fprintf(stdout, "\n");
+	fflush(stdout);
+}
 
 void decode::dump_epg_atsc(uint16_t source_id)
 {
@@ -665,69 +825,6 @@ void decode::dump_epg()
 	}}
 }
 
-
-bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
-{
-	if ((decoded_atsc_eit[eit_x][p_eit->i_source_id].version   == p_eit->i_version) &&
-	    (decoded_atsc_eit[eit_x][p_eit->i_source_id].source_id == p_eit->i_source_id)) {
-#if DBG
-		fprintf(stderr, "%s-%d: v%d, source_id %d: ALREADY DECODED\n", __func__,
-			eit_x, p_eit->i_version, p_eit->i_source_id);
-#endif
-		return false;
-	}
-#if DBG
-	map_decoded_vct_channels::const_iterator iter_vct;
-	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct)
-		if (iter_vct->second.source_id == p_eit->i_source_id)
-			break;
-
-	if (iter_vct == decoded_vct.channels.end()) {
-		fprintf(stderr, "%s-%d: v%d, id:%d\n", __func__,
-			eit_x, p_eit->i_version, p_eit->i_source_id);
-	} else {
-		unsigned char service_name[8] = { 0 };
-		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
-		service_name[7] = 0;
-
-		fprintf(stderr, "%s-%d: v%d, id:%d - %d.%d: %s\n", __func__,
-			eit_x, p_eit->i_version, p_eit->i_source_id,
-			iter_vct->second.chan_major,
-			iter_vct->second.chan_minor,
-			service_name);
-	}
-#endif
-	decoded_atsc_eit[eit_x][p_eit->i_source_id].version   = p_eit->i_version;
-	decoded_atsc_eit[eit_x][p_eit->i_source_id].source_id = p_eit->i_source_id;
-
-	dvbpsi_atsc_eit_event_t* p_event = p_eit->p_first_event;
-	while (p_event) {
-
-			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].event_id     = p_event->i_event_id;
-			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time   = p_event->i_start_time;
-			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].etm_location = p_event->i_etm_location;
-			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].length_sec   = p_event->i_length_seconds;
-			decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes  = p_event->i_title_length;
-			memcpy(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title, p_event->i_title, 256); // FIXME
-#if DBG
-			time_t start = atsc_datetime_utc(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
-			time_t end   = atsc_datetime_utc(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].start_time + decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
-
-			unsigned char name[256];
-			memset(name, 0, sizeof(char) * 256);
-			decode_multiple_string(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title, decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes, name);
-			//p_epg->text[0] = 0;
-
-			//FIXME: descriptors
-
-			struct tm tms = *localtime( &start );
-			struct tm tme = *localtime( &end  );
-			fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
-#endif
-		p_event = p_event->p_next;
-	}
-	return true;
-}
 
 bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 {
