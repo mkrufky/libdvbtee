@@ -288,8 +288,6 @@ public:
 	bool eit_x_complete(uint8_t current_eit_x);
 	bool got_all_eit(int limit = -1);
 
-	void dump_epg_atsc(uint16_t source_id);
-	void dump_epg_dvb(uint16_t source_id);
 	void dump_epg();
 
 	//FIXME-move to private
@@ -318,6 +316,9 @@ private:
 
 	decoded_sdt_t   decoded_sdt;
 	decoded_nit_t   decoded_nit;
+
+	void dump_epg_atsc(uint16_t source_id);
+	void dump_epg_dvb(uint16_t source_id);
 };
 
 #endif /* __DECODE_H__ */
