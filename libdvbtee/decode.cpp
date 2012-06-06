@@ -718,7 +718,7 @@ void decode::dump_epg_atsc(uint16_t source_id)
 	unsigned int eit_num = 0;
 
 	while ((eit_num < 128) && (decoded_atsc_eit[eit_num].count(source_id))) {
-		dump_eit_x(eit_num, source_id);
+		dump_eit_x_atsc(eit_num, source_id);
 		eit_num++;
 	}
 }
@@ -728,7 +728,7 @@ void decode::dump_epg_dvb(uint16_t service_id)
 	unsigned int eit_num = 0;
 
 	while ((eit_num < 34) && (decoded_eit[eit_num].count(service_id))) {
-		dump_eit_x(eit_num, service_id);
+		dump_eit_x_dvb(eit_num, service_id);
 		eit_num++;
 	}
 }
