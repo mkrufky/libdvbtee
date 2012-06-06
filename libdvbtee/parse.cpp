@@ -190,6 +190,8 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 
 	if (!decoded) return true;
 
+	has_mgt = false;
+
 	bool b_expecting_vct = false;
 
 	eit_pids.clear();
@@ -246,6 +248,7 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 			/* else already attached */
 	}
 	expect_vct = b_expecting_vct;
+	has_mgt = true;
 
 	return true;
 }
