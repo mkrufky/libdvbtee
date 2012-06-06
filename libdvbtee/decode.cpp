@@ -814,8 +814,10 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 
 bool decode::got_all_eit(int limit)
 {
-	if (decoded_mgt.tables.size() == 0)
-		return false;
+	if (decoded_mgt.tables.size() == 0) {
+		if ((decoded_sdt.services.size()) && (decoded_nit.ts_list.size())) return true; else // FIXME
+			return false;
+	}
 	for (map_decoded_mgt_tables::const_iterator iter = decoded_mgt.tables.begin(); iter != decoded_mgt.tables.end(); ++iter) {
 		switch (iter->first) {
 		case 0x0100 ... 0x017f: /* EIT-0 to EIT-127 */
