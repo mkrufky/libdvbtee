@@ -22,6 +22,7 @@
 #ifndef __DECODE_H__
 #define __DECODE_H__
 
+#include <string>
 #include <time.h>
 
 #include "dvbpsi/dvbpsi.h"
@@ -138,6 +139,8 @@ typedef struct
 	uint8_t				running_status;
 	unsigned int                    f_free_ca:1;
 	// FIXME: descriptors...
+	std::string                     name;
+	std::string                     text;
 } decoded_eit_event_t;
 
 typedef std::map<uint16_t, decoded_eit_event_t> map_decoded_eit_events; /* event_id, decoded_eit_event_t */

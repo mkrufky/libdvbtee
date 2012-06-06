@@ -534,11 +534,14 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec     = p_event->i_duration;
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].running_status = p_event->i_running_status;
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].f_free_ca      = p_event->b_free_ca;
+
+		descriptors.decode(p_event->p_first_descriptor);
+
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].name.assign(descriptors._4d.name);
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].text.assign(descriptors._4d.text);
 #if DBG
 		time_t start = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time + decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
-
-		descriptors.decode(p_event->p_first_descriptor);
 
 		struct tm tms = *localtime(&start);
 		struct tm tme = *localtime(&end);
@@ -615,16 +618,11 @@ void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
 			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
 			time_t end   = datetime_utc(iter_eit->second.start_time + iter_eit->second.length_sec /*+ (60 * tz_offset)*/);
 
-			unsigned char name[256];
-			memset(name, 0, sizeof(char) * 256);
-#if 0
-			decode_multiple_string(iter_eit->second.title, iter_eit->second.title_bytes, name);
-#endif
 			//FIXME: descriptors
 
 			struct tm tms = *localtime( &start );
 			struct tm tme = *localtime( &end  );
-			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, iter_eit->second.name.c_str()/*, iter_eit->second.text.c_str()*/ );
 		}
 	}}
 	fprintf(stdout, "\n");
