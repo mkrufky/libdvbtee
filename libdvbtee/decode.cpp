@@ -328,9 +328,10 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type,
 			streamtype_name(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type));
 
-		rcvd_pmt[p_pmt->i_program_number] = true;
 		p_es = p_es->p_next;
 	}
+	rcvd_pmt[p_pmt->i_program_number] = true;
+
 	return true;
 }
 
@@ -782,13 +783,12 @@ bool decode::complete_pmt()
 	if (rcvd_pmt.size() == 0)
 		return false;
 	for (map_rcvd::const_iterator iter = rcvd_pmt.begin(); iter != rcvd_pmt.end(); ++iter)
-		if (!iter->second) {
-#if DBG
+		if ((iter->first) && (!iter->second)) {
+#if 1//DBG
 			fprintf(stderr, "%s: missing pmt for program %d\n", __func__, iter->first);
 #endif
 			return false;
 		}
-
 	return true;
 #endif
 }
