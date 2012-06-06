@@ -498,8 +498,8 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 
 		/* service descriptors contain service provider name & service name */
 		descriptors.decode(p_service->p_first_descriptor);
-		strcpy(decoded_sdt.services[p_service->i_service_id].provider_name, descriptors.provider_name);
-		strcpy(decoded_sdt.services[p_service->i_service_id].service_name, descriptors.service_name);
+		strcpy(decoded_sdt.services[p_service->i_service_id].provider_name, (const char *)descriptors.provider_name);
+		strcpy(decoded_sdt.services[p_service->i_service_id].service_name, (const char *)descriptors.service_name);
 
 		p_service = p_service->p_next;
 	}
@@ -539,8 +539,8 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 
 		descriptors.decode(p_event->p_first_descriptor);
 
-		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].name.assign(descriptors._4d.name);
-		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].text.assign(descriptors._4d.text);
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].name.assign((const char *)descriptors._4d.name);
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].text.assign((const char *)descriptors._4d.text);
 #if DBG
 		time_t start = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time + decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
