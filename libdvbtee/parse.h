@@ -125,6 +125,7 @@ private:
 	bool epg_mode;
 	bool scan_mode;
 	bool has_pat;
+	bool has_mgt;
 	bool has_vct;
 	bool has_sdt;
 	bool has_nit;

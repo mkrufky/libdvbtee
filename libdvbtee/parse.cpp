@@ -459,6 +459,7 @@ parse::parse()
   , epg_mode(false)
   , scan_mode(false)
   , has_pat(false)
+  , has_mgt(false)
   , has_vct(false)
   , has_sdt(false)
   , has_nit(false)
@@ -672,7 +673,7 @@ void parse::epg_dump()
 bool parse::is_psip_ready()
 {
 	return ((has_pat) &&
-		(((has_vct) || (!expect_vct)) || ((has_sdt) && (has_nit))) &&
+		(((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit))) &&
 		(decoders[get_ts_id()].complete_pmt()));
 };
 
