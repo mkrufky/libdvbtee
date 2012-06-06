@@ -49,6 +49,9 @@ public:
 	map_lcn lcn;
 
 	dr4d_t _4d;
+
+	unsigned char provider_name[256];
+	unsigned char service_name[256];
 private:
 	bool service(dvbpsi_descriptor_t*);
 	bool short_event(dvbpsi_descriptor_t*);

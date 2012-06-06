@@ -228,6 +228,9 @@ typedef struct
 	uint8_t                         running_status;
 	unsigned int                    f_free_ca:1;
 	// FIXME: descriptors...
+	unsigned char                   provider_name[256];
+	unsigned char                   service_name[256];
+
 } decoded_sdt_service;
 
 typedef std::map<uint16_t, decoded_sdt_service> map_decoded_sdt_services; /* service_id, decoded_sdt_service */

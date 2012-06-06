@@ -57,9 +57,6 @@ desc::~desc()
 
 bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 {
-	unsigned char provider_name[256];
-	unsigned char service_name[256];
-
 	if (p_descriptor->i_tag != DT_Service)
 		return false;
 

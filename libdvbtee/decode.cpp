@@ -498,6 +498,8 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 
 		/* service descriptors contain service provider name & service name */
 		descriptors.decode(p_service->p_first_descriptor);
+		strcpy(decoded_sdt.services[p_service->i_service_id].provider_name, descriptors.provider_name);
+		strcpy(decoded_sdt.services[p_service->i_service_id].service_name, descriptors.service_name);
 
 		p_service = p_service->p_next;
 	}
@@ -600,15 +602,15 @@ void decode::dump_eit_x(uint8_t eit_x, uint16_t source_id)
 		    ((source_id) && (source_id != iter_sdt->second.service_id)))
 			continue;
 
-		unsigned char service_name[8] = { 0 };
 #if 0
+		unsigned char service_name[8] = { 0 };
 		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
 		service_name[7] = 0;
 #endif
 		fprintf(stdout, "%s-%d: id:%d - %d: %s\n", __func__,
 			eit_x, iter_sdt->second.service_id,
-			0,//LCN,
-			service_name);
+			descriptors.lcn[iter_sdt->second.service_id],
+			iter_sdt->second.service_name);
 
 		map_decoded_eit_events::const_iterator iter_eit;
 		for (iter_eit = decoded_eit[eit_x][iter_sdt->second.service_id].events.begin();
