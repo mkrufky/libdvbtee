@@ -305,7 +305,8 @@ private:
 	map_rcvd rcvd_pmt;
 
 	map_decoded_atsc_eit decoded_atsc_eit[128];
-	map_decoded_eit      decoded_eit[34];
+#define NUM_EIT 17
+	map_decoded_eit      decoded_eit[NUM_EIT];
 	//decoded_atsc_eit_t decoded_atsc_eit;
 	uint8_t eit_x;
 #if 0

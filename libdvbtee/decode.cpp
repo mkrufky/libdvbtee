@@ -66,7 +66,7 @@ decode::decode()
 	decoded_nit.ts_list.clear();
 	decoded_sdt.services.clear();
 
-	for (int i = 0; i < 0x80; i++) {
+	for (int i = 0; i < 128; i++) {
 		for (map_decoded_atsc_eit::iterator iter =
 			decoded_atsc_eit[i].begin();
 		     iter != decoded_atsc_eit[i].end(); ++iter)
@@ -75,7 +75,7 @@ decode::decode()
 		decoded_atsc_eit[i].clear();
 	}
 
-	for (int i = 0; i < 34; i++) {
+	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
 		     iter != decoded_eit[i].end(); ++iter)
@@ -102,7 +102,7 @@ decode::~decode()
 	dprintf("(%04x|%05d)",
 		decoded_pat.ts_id, decoded_pat.ts_id);
 
-	for (int i = 0; i < 0x80; i++) {
+	for (int i = 0; i < 128; i++) {
 		for (map_decoded_atsc_eit::iterator iter =
 			decoded_atsc_eit[i].begin();
 		     iter != decoded_atsc_eit[i].end(); ++iter)
@@ -111,7 +111,7 @@ decode::~decode()
 		decoded_atsc_eit[i].clear();
 	}
 
-	for (int i = 0; i < 34; i++) {
+	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
 		     iter != decoded_eit[i].end(); ++iter)
@@ -156,7 +156,7 @@ decode::decode(const decode&)
 
 	//decoded_atsc_eit.events.clear();
 
-	for (int i = 0; i < 0x80; i++) {
+	for (int i = 0; i < 128; i++) {
 		for (map_decoded_atsc_eit::iterator iter =
 			decoded_atsc_eit[i].begin();
 		     iter != decoded_atsc_eit[i].end(); ++iter)
@@ -165,7 +165,7 @@ decode::decode(const decode&)
 		decoded_atsc_eit[i].clear();
 	}
 
-	for (int i = 0; i < 34; i++) {
+	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
 		     iter != decoded_eit[i].end(); ++iter)
@@ -210,7 +210,7 @@ decode& decode::operator= (const decode& cSource)
 
 	//decoded_atsc_eit.events.clear();
 
-	for (int i = 0; i < 0x80; i++) {
+	for (int i = 0; i < 128; i++) {
 		for (map_decoded_atsc_eit::iterator iter =
 			decoded_atsc_eit[i].begin();
 		     iter != decoded_atsc_eit[i].end(); ++iter)
@@ -219,7 +219,7 @@ decode& decode::operator= (const decode& cSource)
 		decoded_atsc_eit[i].clear();
 	}
 
-	for (int i = 0; i < 34; i++) {
+	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
 		     iter != decoded_eit[i].end(); ++iter)
@@ -524,6 +524,21 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 
 bool decode::take_eit(dvbpsi_eit_t* p_eit)
 {
+#if 1
+	eit_x = p_eit->i_table_id;
+	switch (p_eit->i_table_id) {
+	case 0x4e:
+	case 0x4f:
+		eit_x = 0;
+		break;
+	case 0x50 ... 0x5f:
+		eit_x = p_eit->i_table_id - 0x50 + 1;
+		break;
+	case 0x60 ... 0x6f:
+		eit_x = p_eit->i_table_id - 0x60 + 1;
+		break;
+	}
+#endif
 	if ((decoded_eit[eit_x][p_eit->i_service_id].version == p_eit->i_version) &&
 	    (decoded_eit[eit_x][p_eit->i_service_id].service_id == p_eit->i_service_id)) {
 #if DBG
@@ -741,7 +756,7 @@ void decode::dump_epg_dvb(uint16_t service_id)
 {
 	unsigned int eit_num = 0;
 
-	while ((eit_num < 34) && (decoded_eit[eit_num].count(service_id))) {
+	while ((eit_num < NUM_EIT) && (decoded_eit[eit_num].count(service_id))) {
 		dump_eit_x_dvb(eit_num, service_id);
 		eit_num++;
 	}

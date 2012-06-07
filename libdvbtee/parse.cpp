@@ -330,16 +330,8 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 	case 0x60 ... 0x6f: /* eit | other  | sched */
 	case 0x4f:          /* eit | other  | p/f   */
 		break;
-	case 0x50 ... 0x5f: /* eit | actual | sched */
-	{
-		int eit_x = decoders[ts_id].get_current_eit_x();
-		if (decoders[ts_id].eit_x_complete(eit_x))
-			decoders[ts_id].set_current_eit_x(++eit_x);
-		if ((i_table_id - TID_EIT) == eit_x)
-			dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
-		break;
-	}
 #endif
+	case 0x50 ... 0x5f: /* eit | actual | sched */
 	case TID_EIT:     /* eit | actual | p/f */
 		dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
 		break;
