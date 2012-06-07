@@ -852,8 +852,8 @@ bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 
 bool decode::eit_x_complete(uint8_t current_eit_x)
 {
-	return eit_x_complete_atsc(current_eit_x) ||
-	  (current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x);
+	return (eit_x_complete_atsc(current_eit_x) ||
+		(current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x));
 }
 
 bool decode::got_all_eit(int limit)
