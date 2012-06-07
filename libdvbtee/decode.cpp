@@ -827,23 +827,33 @@ bool decode::complete_pmt()
 #endif
 }
 
+bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
+{
+	return ((decoded_vct.channels.size()) &&
+		((decoded_atsc_eit[current_eit_x].size()) &&
+		 (decoded_atsc_eit[current_eit_x].size() == decoded_vct.channels.size())));
+}
+
+bool decode::eit_x_complete_dvb_pf()
+{
+	uint8_t current_eit_x = 0;
+	return ((decoded_sdt.services.size()) &&
+		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_pf)) &&
+		 (decoded_eit[current_eit_x].size() == services_w_eit_pf)));
+}
+
+bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
+{
+	return ((decoded_sdt.services.size()) &&
+		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_sched)) &&
+		 (decoded_eit[current_eit_x].size() == services_w_eit_sched)));
+}
+
+
 bool decode::eit_x_complete(uint8_t current_eit_x)
 {
-#if 0
-	for (map_decoded_vct_channels::const_iterator iter =
-	       decoders[ts_id].get_decoded_vct()->channels.begin();
-	     iter != decoders[ts_id].get_decoded_vct()->channels.end(); ++iter)
-		if (iter->first > 0) {// FIXME: > 0 ???
-			if (0 == decoders[ts_id].get_decoded_atsc_eit()[current_eit_x].count(iter->second.source_id))
-				return false;
-		}
-	return true;
-#else
-	return (((decoded_atsc_eit[current_eit_x].size()) &&
-		 (decoded_atsc_eit[current_eit_x].size() == decoded_vct.channels.size())) ||
-		(((decoded_eit[current_eit_x].size()) && (services_w_eit_pf /*services_w_eit_sched*/)) &&
-		 (decoded_eit[current_eit_x].size() == services_w_eit_pf)));
-#endif
+	return eit_x_complete_atsc(current_eit_x) ||
+	  (current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x);
 }
 
 bool decode::got_all_eit(int limit)
