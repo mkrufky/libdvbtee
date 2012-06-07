@@ -829,9 +829,18 @@ bool decode::complete_pmt()
 
 bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
 {
+#if 1
 	return ((decoded_vct.channels.size()) &&
 		((decoded_atsc_eit[current_eit_x].size()) &&
 		 (decoded_atsc_eit[current_eit_x].size() == decoded_vct.channels.size())));
+#else
+	bool ret = ((decoded_vct.channels.size()) &&
+		((decoded_atsc_eit[current_eit_x].size()) &&
+		 (decoded_atsc_eit[current_eit_x].size() == decoded_vct.channels.size())));
+	fprintf(stderr, "%s(%d):%s- decoded_vct.channels.size() = %d, decoded_atsc_eit[current_eit_x].size() = %d\n",
+		__func__, current_eit_x, (ret) ? "true" : "false", decoded_vct.channels.size(), decoded_atsc_eit[current_eit_x].size());
+	return ret;
+#endif
 }
 
 bool decode::eit_x_complete_dvb_pf()
@@ -852,8 +861,16 @@ bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 
 bool decode::eit_x_complete(uint8_t current_eit_x)
 {
+#if 1
 	return (eit_x_complete_atsc(current_eit_x) ||
-		(current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x));
+		((current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x)));
+#else
+	bool ret = (eit_x_complete_atsc(current_eit_x) ||
+		    ((current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x)));
+	fprintf(stderr, "%s(%d):%s- eit_x_complete_atsc(current_eit_x)= %s\n",
+                __func__, current_eit_x, (ret) ? "true" : "false", (eit_x_complete_atsc(current_eit_x)) ? "true" : "false");
+	return ret;
+#endif
 }
 
 bool decode::got_all_eit(int limit)
