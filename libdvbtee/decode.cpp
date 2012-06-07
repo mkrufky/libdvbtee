@@ -876,7 +876,9 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 bool decode::got_all_eit(int limit)
 {
 	if (decoded_mgt.tables.size() == 0) {
-		if ((decoded_sdt.services.size()) && (decoded_nit.ts_list.size())) return true; else // FIXME
+		if ((decoded_sdt.services.size()) && (decoded_nit.ts_list.size())) {
+			return ((eit_x_complete_dvb_pf()) && (eit_x_complete_dvb_sched(1)));
+		} else // FIXME
 			return false;
 	}
 	for (map_decoded_mgt_tables::const_iterator iter = decoded_mgt.tables.begin(); iter != decoded_mgt.tables.end(); ++iter) {
