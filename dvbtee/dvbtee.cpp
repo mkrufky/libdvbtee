@@ -314,7 +314,7 @@ int main(int argc, char **argv)
 		scan_max = scan_min;
 	else
 	if ((scan_max) && (!scan_min))
-		scan_min = scan_max;
+		channel = scan_min = scan_max;
 
 	if (b_scan) {
 		if (num_tuners >= 0)
