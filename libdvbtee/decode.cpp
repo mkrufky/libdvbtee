@@ -381,7 +381,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 		decoded_vct.channels[p_channel->i_program_number].source_id         = p_channel->i_source_id;
 #if VCT_DBG
 		unsigned char service_name[8] = { 0 };
-		for ( int i = 0; i < 7; ++i ) service_name[i] = p_channel->i_short_name[i*2+1];
+		for ( int i = 0; i < 7; ++i ) service_name[i] = decoded_vct.channels[p_channel->i_program_number].short_name[i*2+1];
 		service_name[7] = 0;
 
 		fprintf(stderr, "  %5d.%d | %10d | %9d | %s\n",

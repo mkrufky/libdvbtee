@@ -279,6 +279,7 @@ public:
 	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; };
 	const decoded_vct_t*   get_decoded_vct() { return &decoded_vct; };
 	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; };
+	const decoded_sdt_t*   get_decoded_sdt() { return &decoded_sdt; };
 
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
 	const map_decoded_eit*      get_decoded_eit()      { return decoded_eit;      };

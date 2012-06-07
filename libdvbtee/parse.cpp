@@ -588,10 +588,14 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 					if (!apid) apid = iter_pmt_es->second.pid;
 					break;
 				}
+
 		char channelno[7]; /* XXX.XXX */
+		unsigned char service_name[256] = { 0 };
+		service_name[7] = 0;
 		map_decoded_vct_channels::const_iterator iter_vct = decoders[ts_id].get_decoded_vct()->channels.find(program_number);
 		if (iter_vct != decoders[ts_id].get_decoded_vct()->channels.end()) {
 			sprintf(channelno, "%d.%d", iter_vct->second.chan_major, iter_vct->second.chan_minor);
+			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
 		} else { // FIXME: use SDT info
 #if 0
 			if (*(decoders[ts_id].descriptors.get_lcn).count(program_number))
@@ -601,10 +605,13 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 				sprintf(channelno, "%d", decoders[ts_id].descriptors.lcn[program_number]);
 #endif
 			else sprintf(channelno, "%d", channel);//FIXME
+
+			strcpy(service_name, decoders[ts_id].get_decoded_sdt()->services[program_number].service_name);
 		}
 
-		fprintf(stdout, "%s:%d:%s:%d:%d:%d\n",
+		fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
 			channelno,
+			service_name,
 			freq,//iter_vct->second.carrier_freq,
 			modulation,
 			vpid, apid, program_number);
