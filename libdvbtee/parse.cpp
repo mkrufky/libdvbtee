@@ -543,7 +543,6 @@ inline uint16_t tp_pkt_pid(uint8_t* pkt)
 	return (pkt[0] == 0x47) ? ((uint16_t) (pkt[1] & 0x1f) << 8) + pkt[2] : (uint16_t) - 1;
 }
 
-#if 1
 unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 {
 	uint32_t freq          = channel_info->frequency;
@@ -613,12 +612,6 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 	}
 	return count;
 }
-#else
-unsigned int parse::xine_dump(uint32_t freq, unsigned int channel, const char* modulation)
-{
-	return decoders[get_ts_id()].xine_dump(freq, channel, modulation);
-}
-#endif
 
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
