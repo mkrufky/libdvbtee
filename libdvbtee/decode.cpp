@@ -525,17 +525,22 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 bool decode::take_eit(dvbpsi_eit_t* p_eit)
 {
 #if 1
+	bool other = false;
+
 	eit_x = p_eit->i_table_id;
 	switch (p_eit->i_table_id) {
-	case 0x4e:
 	case 0x4f:
+		other = true;
+		/* fall thru */
+	case 0x4e:
 		eit_x = 0;
+		break;
+	case 0x60 ... 0x6f:
+		other = true;
+		eit_x = p_eit->i_table_id - 0x60 + 1;
 		break;
 	case 0x50 ... 0x5f:
 		eit_x = p_eit->i_table_id - 0x50 + 1;
-		break;
-	case 0x60 ... 0x6f:
-		eit_x = p_eit->i_table_id - 0x60 + 1;
 		break;
 	}
 #endif
@@ -547,10 +552,11 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 #endif
 		return false;
 	}
-#if DBG
-	fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d\n", __func__, eit_x,
-		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id);
+#if 1//DBG
+	fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d | table id: 0x%02x, last_table id: 0x%02x\n", __func__, eit_x,
+		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id, p_eit->i_table_id, p_eit->i_last_table_id);
 #endif
+	if (other) return false;
 	decoded_eit[eit_x][p_eit->i_service_id].service_id    = p_eit->i_service_id;
 	decoded_eit[eit_x][p_eit->i_service_id].version       = p_eit->i_version;
 	decoded_eit[eit_x][p_eit->i_service_id].ts_id         = p_eit->i_ts_id;

@@ -326,11 +326,8 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 		break;
 	}
 	switch (i_table_id) {
-#if 0
 	case 0x60 ... 0x6f: /* eit | other  | sched */
 	case 0x4f:          /* eit | other  | p/f   */
-		break;
-#endif
 	case 0x50 ... 0x5f: /* eit | actual | sched */
 	case TID_EIT:     /* eit | actual | p/f */
 		dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
