@@ -28,7 +28,6 @@
 #include <map>
 
 typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
-typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 
 typedef struct
 {
