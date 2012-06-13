@@ -138,6 +138,9 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 		case DT_LogicalChannelNumber:
 			_lcn(p_descriptor);
 			break;
+		default:
+			dprintf("unknown descriptor tag: %02x", p_descriptor->i_tag);
+			break;
 		}
 		p_descriptor = p_descriptor->p_next;
 	}
