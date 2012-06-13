@@ -461,11 +461,20 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 	decoded_nit.network_id = p_nit->i_network_id;
 
 	dvbpsi_nit_ts_t* p_ts = p_nit->p_first_ts;
+#if NIT_DBG
+	if (p_ts)
+		fprintf(stderr, "   ts_id | orig_network_id\n");
+#endif
 	while (p_ts) {
 
 		decoded_nit.ts_list[p_ts->i_ts_id].ts_id           = p_ts->i_ts_id;
 		decoded_nit.ts_list[p_ts->i_ts_id].orig_network_id = p_ts->i_orig_network_id;
 
+#if NIT_DBG
+		fprintf(stderr, "   %05d | %d\n",
+			decoded_nit.ts_list[p_ts->i_ts_id].ts_id,
+			decoded_nit.ts_list[p_ts->i_ts_id].orig_network_id);
+#endif
 		/* descriptors contain frequency lists & LCNs */
 		descriptors.decode(p_ts->p_first_descriptor);
 
