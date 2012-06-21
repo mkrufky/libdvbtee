@@ -368,19 +368,15 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 	case TID_NIT_ACTUAL:
 		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit_actual, this);
 		break;
-#if 0
 	case TID_NIT_OTHER:
 		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit_other, this);
 		break;
-#endif
 	case TID_SDT_ACTUAL:
 		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt_actual, this);
 		break;
-#if 0
 	case TID_SDT_OTHER:
 		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt_other, this);
 		break;
-#endif
 	case TID_TDT:
 	case TID_TOT:
 		dvbpsi_AttachTOT(h_dvbpsi, i_table_id, i_extension, take_tot, this);
