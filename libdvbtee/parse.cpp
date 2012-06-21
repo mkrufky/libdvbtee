@@ -56,13 +56,13 @@ static map_decoder   decoders;
 #define TID_CAT  0x01
 #define TID_PMT  0x02
 #define TID_TSDT 0x03
-#define TID_NIT  0x40
-#define TID_NITx 0x41
-#define TID_SDT  0x42
-#define TID_SDTx 0x46
+#define TID_NIT_ACTUAL  0x40
+#define TID_NIT_OTHER   0x41
+#define TID_SDT_ACTUAL  0x42
+#define TID_SDT_OTHER   0x46
 #define TID_BAT  0x4A
-#define TID_EIT  0x4E
-#define TID_EITx 0x4F
+#define TID_EIT_ACTUAL  0x4E
+#define TID_EIT_OTHER   0x4F
   //  0x50 - 0x5F
   //  0x60 - 0x6F
 #define TID_TDT  0x70
@@ -318,8 +318,10 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 	if ((scan_mode) && (!epg_mode)) switch (i_table_id) {
 	default:
 		return;
-	case TID_NIT:
-	case TID_SDT:
+	case TID_NIT_ACTUAL:
+	case TID_NIT_OTHER:
+	case TID_SDT_ACTUAL:
+	case TID_SDT_OTHER:
 	case TID_ATSC_TVCT:
 	case TID_ATSC_CVCT:
 	case TID_ATSC_MGT:
@@ -327,15 +329,15 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 	}
 	switch (i_table_id) {
 	case 0x60 ... 0x6f: /* eit | other  | sched */
-	case 0x4f:          /* eit | other  | p/f   */
+	case TID_EIT_OTHER:          /* eit | other  | p/f   */
 	case 0x50 ... 0x5f: /* eit | actual | sched */
-	case TID_EIT:     /* eit | actual | p/f */
+	case TID_EIT_ACTUAL:     /* eit | actual | p/f */
 		dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
 		break;
-	case TID_NIT:
+	case TID_NIT_ACTUAL:
 		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit, this);
 		break;
-	case TID_SDT:
+	case TID_SDT_ACTUAL:
 		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt, this);
 		break;
 	case TID_TDT:
