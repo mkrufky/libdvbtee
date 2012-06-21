@@ -45,6 +45,96 @@ do {								\
 	}							\
 } while (0)
 
+static map_network_decoder   networks;
+
+decode_network::decode_network()
+//  : eit_x(0)
+//  , services_w_eit_pf(0)
+  : services_w_eit_pf(0)
+  , services_w_eit_sched(0)
+{
+	dprintf("()");
+
+	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
+	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
+
+	decoded_nit.ts_list.clear();
+	decoded_sdt.services.clear();
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+}
+
+decode_network::~decode_network()
+{
+	dprintf("(%04x|%05d)/(%04x|%05d)",
+		decoded_nit.network_id, decoded_nit.network_id,
+		decoded_sdt.network_id, decoded_sdt.network_id);
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+
+	decoded_nit.ts_list.clear();
+	decoded_sdt.services.clear();
+}
+
+decode_network::decode_network(const decode_network&)
+{
+	dprintf("(copy)");
+
+	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
+	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
+
+	decoded_nit.ts_list.clear();
+	decoded_sdt.services.clear();
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+}
+
+decode_network& decode_network::operator= (const decode_network& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
+	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
+
+	decoded_nit.ts_list.clear();
+	decoded_sdt.services.clear();
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+
+	return *this;
+}
+
 decode::decode()
   : eit_x(0)
   , services_w_eit_pf(0)
@@ -443,11 +533,11 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 	return true;
 }
 
-bool decode::take_nit(dvbpsi_nit_t* p_nit)
+static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, desc* descriptors)
 #define NIT_DBG 1
 {
-	if ((decoded_nit.version    == p_nit->i_version) &&
-	    (decoded_nit.network_id == p_nit->i_network_id)) {
+	if ((decoded_nit->version    == p_nit->i_version) &&
+	    (decoded_nit->network_id == p_nit->i_network_id)) {
 
 		dprintf("v%d, network_id %d: ALREADY DECODED",
 			p_nit->i_version, p_nit->i_network_id);
@@ -457,8 +547,8 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 	fprintf(stderr, "%s: v%d, network_id %d\n", __func__,
 		p_nit->i_version, p_nit->i_network_id);
 #endif
-	decoded_nit.version    = p_nit->i_version;
-	decoded_nit.network_id = p_nit->i_network_id;
+	decoded_nit->version    = p_nit->i_version;
+	decoded_nit->network_id = p_nit->i_network_id;
 
 	dvbpsi_nit_ts_t* p_ts = p_nit->p_first_ts;
 #if NIT_DBG
@@ -467,27 +557,38 @@ bool decode::take_nit(dvbpsi_nit_t* p_nit)
 #endif
 	while (p_ts) {
 
-		decoded_nit.ts_list[p_ts->i_ts_id].ts_id           = p_ts->i_ts_id;
-		decoded_nit.ts_list[p_ts->i_ts_id].orig_network_id = p_ts->i_orig_network_id;
+		decoded_nit->ts_list[p_ts->i_ts_id].ts_id           = p_ts->i_ts_id;
+		decoded_nit->ts_list[p_ts->i_ts_id].orig_network_id = p_ts->i_orig_network_id;
 
 #if NIT_DBG
 		fprintf(stderr, "   %05d | %d\n",
-			decoded_nit.ts_list[p_ts->i_ts_id].ts_id,
-			decoded_nit.ts_list[p_ts->i_ts_id].orig_network_id);
+			decoded_nit->ts_list[p_ts->i_ts_id].ts_id,
+			decoded_nit->ts_list[p_ts->i_ts_id].orig_network_id);
 #endif
 		/* descriptors contain frequency lists & LCNs */
-		descriptors.decode(p_ts->p_first_descriptor);
+		descriptors->decode(p_ts->p_first_descriptor);
 
 		p_ts = p_ts->p_next;
 	}
 	return true;
 }
 
-bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
+bool decode::take_nit(dvbpsi_nit_t* p_nit)
+{
+	return __take_nit(p_nit, &decoded_nit, &descriptors);
+}
+
+bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
+{
+	return __take_nit(p_nit, &decoded_nit, &descriptors);
+}
+
+static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* descriptors,
+		       unsigned int* services_w_eit_pf, unsigned int* services_w_eit_sched)
 #define SDT_DBG 1
 {
-	if ((decoded_sdt.version    == p_sdt->i_version) &&
-	    (decoded_sdt.network_id == p_sdt->i_network_id)) {
+	if ((decoded_sdt->version    == p_sdt->i_version) &&
+	    (decoded_sdt->network_id == p_sdt->i_network_id)) {
 
 		dprintf("v%d | ts_id %d | network_id %d: ALREADY DECODED",
 			p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
@@ -497,38 +598,47 @@ bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d\n", __func__,
 		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
 #endif
-	decoded_sdt.ts_id      = p_sdt->i_ts_id;
-	decoded_sdt.version    = p_sdt->i_version;
-	decoded_sdt.network_id = p_sdt->i_network_id;
+	decoded_sdt->ts_id      = p_sdt->i_ts_id;
+	decoded_sdt->version    = p_sdt->i_version;
+	decoded_sdt->network_id = p_sdt->i_network_id;
 
-	int _services_w_eit_pf    = 0;
-	int _services_w_eit_sched = 0;
+	unsigned int _services_w_eit_pf    = 0;
+	unsigned int _services_w_eit_sched = 0;
 	//fprintf(stderr, "  service_id | service_name");
 	dvbpsi_sdt_service_t* p_service = p_sdt->p_first_service;
 	while (p_service) {
 
-		decoded_sdt.services[p_service->i_service_id].service_id     = p_service->i_service_id; /* matches program_id / service_id from PAT */
-		decoded_sdt.services[p_service->i_service_id].f_eit_sched    = p_service->b_eit_schedule;
-		decoded_sdt.services[p_service->i_service_id].f_eit_present  = p_service->b_eit_present;
-		decoded_sdt.services[p_service->i_service_id].running_status = p_service->i_running_status;
-		decoded_sdt.services[p_service->i_service_id].f_free_ca      = p_service->b_free_ca;
+		decoded_sdt->services[p_service->i_service_id].service_id     = p_service->i_service_id; /* matches program_id / service_id from PAT */
+		decoded_sdt->services[p_service->i_service_id].f_eit_sched    = p_service->b_eit_schedule;
+		decoded_sdt->services[p_service->i_service_id].f_eit_present  = p_service->b_eit_present;
+		decoded_sdt->services[p_service->i_service_id].running_status = p_service->i_running_status;
+		decoded_sdt->services[p_service->i_service_id].f_free_ca      = p_service->b_free_ca;
 
-		if (decoded_sdt.services[p_service->i_service_id].f_eit_present)
+		if (decoded_sdt->services[p_service->i_service_id].f_eit_present)
 			_services_w_eit_pf++;
 
-		if (decoded_sdt.services[p_service->i_service_id].f_eit_sched)
+		if (decoded_sdt->services[p_service->i_service_id].f_eit_sched)
 			_services_w_eit_sched++;
 
 		/* service descriptors contain service provider name & service name */
-		descriptors.decode(p_service->p_first_descriptor);
-		strcpy(decoded_sdt.services[p_service->i_service_id].provider_name, (const char *)descriptors.provider_name);
-		strcpy(decoded_sdt.services[p_service->i_service_id].service_name, (const char *)descriptors.service_name);
+		descriptors->decode(p_service->p_first_descriptor);
+		strcpy(decoded_sdt->services[p_service->i_service_id].provider_name, (const char *)descriptors->provider_name);
+		strcpy(decoded_sdt->services[p_service->i_service_id].service_name, (const char *)descriptors->service_name);
 
 		p_service = p_service->p_next;
 	}
-	services_w_eit_pf    = _services_w_eit_pf;
-	services_w_eit_sched = _services_w_eit_sched;
+	*services_w_eit_pf    = _services_w_eit_pf;
+	*services_w_eit_sched = _services_w_eit_sched;
 	return true;
+}
+
+bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
+{
+	return __take_sdt(p_sdt, &decoded_sdt, &descriptors, &services_w_eit_pf, &services_w_eit_sched);
+}
+bool decode_network::take_sdt(dvbpsi_sdt_t* p_sdt)
+{
+	return __take_sdt(p_sdt, &decoded_sdt, &descriptors, &services_w_eit_pf, &services_w_eit_sched);
 }
 
 bool decode::take_eit(dvbpsi_eit_t* p_eit)

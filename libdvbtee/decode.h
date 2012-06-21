@@ -332,4 +332,30 @@ private:
 	bool eit_x_complete_dvb_pf();
 };
 
+class decode_network
+{
+public:
+	decode_network();
+	~decode_network();
+
+	decode_network(const decode_network&);
+	decode_network& operator= (const decode_network&);
+
+	bool take_eit(dvbpsi_eit_t*);
+	bool take_nit(dvbpsi_nit_t*);
+	bool take_sdt(dvbpsi_sdt_t*);
+
+	desc descriptors;
+private:
+	decoded_sdt_t   decoded_sdt;
+	decoded_nit_t   decoded_nit;
+
+	map_decoded_eit decoded_eit[NUM_EIT];
+
+	unsigned int services_w_eit_pf;
+	unsigned int services_w_eit_sched;
+};
+
+typedef std::map<uint16_t, decode_network> map_network_decoder;
+
 #endif /* __DECODE_H__ */
