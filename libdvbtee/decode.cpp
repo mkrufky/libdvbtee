@@ -136,7 +136,8 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 }
 
 decode::decode()
-  : eit_x(0)
+  : network_id(0)
+  , eit_x(0)
   , services_w_eit_pf(0)
   , services_w_eit_sched(0)
 {
@@ -145,17 +146,19 @@ decode::decode()
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
 	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	memset(&decoded_mgt, 0, sizeof(decoded_mgt_t));
+#if DECODE_LOCAL_NET
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
-
+#endif
 	//memset(&decoded_atsc_eit, 0, sizeof(decoded_atsc_eit_t));
 
 	decoded_pat.programs.clear();
 	decoded_vct.channels.clear();
 	decoded_mgt.tables.clear();
+#if DECODE_LOCAL_NET
 	decoded_nit.ts_list.clear();
 	decoded_sdt.services.clear();
-
+#endif
 	for (int i = 0; i < 128; i++) {
 		for (map_decoded_atsc_eit::iterator iter =
 			decoded_atsc_eit[i].begin();
@@ -222,8 +225,10 @@ decode::~decode()
 	//decoded_atsc_eit.events.clear();
 	//decoded_eit.events.clear();
 	decoded_ett.clear();
+#if DECODE_LOCAL_NET
 	decoded_nit.ts_list.clear();
 	decoded_sdt.services.clear();
+#endif
 }
 
 decode::decode(const decode&)
@@ -233,17 +238,19 @@ decode::decode(const decode&)
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
 	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	memset(&decoded_mgt, 0, sizeof(decoded_mgt_t));
+#if DECODE_LOCAL_NET
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
-
+#endif
 	//memset(&decoded_atsc_eit, 0, sizeof(decoded_atsc_eit_t));
 
 	decoded_pat.programs.clear();
 	decoded_vct.channels.clear();
 	decoded_mgt.tables.clear();
+#if DECODE_LOCAL_NET
 	decoded_nit.ts_list.clear();
 	decoded_sdt.services.clear();
-
+#endif
 	//decoded_atsc_eit.events.clear();
 
 	for (int i = 0; i < 128; i++) {
@@ -287,17 +294,19 @@ decode& decode::operator= (const decode& cSource)
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
 	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	memset(&decoded_mgt, 0, sizeof(decoded_mgt_t));
+#if DECODE_LOCAL_NET
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
-
+#endif
 	//memset(&decoded_atsc_eit, 0, sizeof(decoded_atsc_eit_t));
 
 	decoded_pat.programs.clear();
 	decoded_vct.channels.clear();
 	decoded_mgt.tables.clear();
+#if DECODE_LOCAL_NET
 	decoded_nit.ts_list.clear();
 	decoded_sdt.services.clear();
-
+#endif
 	//decoded_atsc_eit.events.clear();
 
 	for (int i = 0; i < 128; i++) {
@@ -575,7 +584,12 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, desc* de
 
 bool decode::take_nit(dvbpsi_nit_t* p_nit)
 {
-	return __take_nit(p_nit, &decoded_nit, &descriptors);
+#if DECODE_LOCAL_NET
+	//return
+	__take_nit(p_nit, &decoded_nit, &descriptors);
+#endif
+	network_id = p_nit->i_network_id; /* FIXME */
+	return networks[p_nit->i_network_id].take_nit(p_nit);
 }
 
 bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
@@ -634,7 +648,12 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 
 bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
-	return __take_sdt(p_sdt, &decoded_sdt, &descriptors, &services_w_eit_pf, &services_w_eit_sched);
+#if DECODE_LOCAL_NET
+	//return
+	__take_sdt(p_sdt, &decoded_sdt, &descriptors, &services_w_eit_pf, &services_w_eit_sched);
+#endif
+	network_id = p_sdt->i_network_id; /* FIXME */
+	return networks[p_sdt->i_network_id].take_sdt(p_sdt);
 }
 bool decode_network::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
@@ -820,7 +839,8 @@ void decode::dump_eit_x_dvb(uint8_t eit_x, uint16_t service_id)
 	fprintf(stderr, "%s-%d\n", __func__, eit_x);
 #endif
 	map_decoded_sdt_services::const_iterator iter_sdt;
-	for (iter_sdt = decoded_sdt.services.begin(); iter_sdt != decoded_sdt.services.end(); ++iter_sdt) {
+	const decoded_sdt_t *decoded_sdt = get_decoded_sdt();
+	for (iter_sdt = decoded_sdt->services.begin(); iter_sdt != decoded_sdt->services.end(); ++iter_sdt) {
 		if ((!iter_sdt->second.f_eit_present) ||
 		    ((service_id) && (service_id != iter_sdt->second.service_id)))
 			continue;
@@ -895,7 +915,8 @@ void decode::dump_epg()
 		dump_epg_atsc(iter_vct->second.source_id);
 	} else {
 	map_decoded_sdt_services::const_iterator iter_sdt;
-	for (iter_sdt = decoded_sdt.services.begin(); iter_sdt != decoded_sdt.services.end(); ++iter_sdt) {
+	const decoded_sdt_t *decoded_sdt = get_decoded_sdt();
+	for (iter_sdt = decoded_sdt->services.begin(); iter_sdt != decoded_sdt->services.end(); ++iter_sdt) {
 		if (iter_sdt->second.f_eit_present)
 			dump_epg_dvb(iter_sdt->second.service_id);
 	}}
@@ -965,14 +986,14 @@ bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
 bool decode::eit_x_complete_dvb_pf()
 {
 	uint8_t current_eit_x = 0;
-	return ((decoded_sdt.services.size()) &&
+	return ((get_decoded_sdt()->services.size()) &&
 		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_pf)) &&
 		 (decoded_eit[current_eit_x].size() == services_w_eit_pf)));
 }
 
 bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 {
-	return ((decoded_sdt.services.size()) &&
+	return ((get_decoded_sdt()->services.size()) &&
 		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_sched)) &&
 		 (decoded_eit[current_eit_x].size() == services_w_eit_sched)));
 }
@@ -995,7 +1016,7 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 bool decode::got_all_eit(int limit)
 {
 	if (decoded_mgt.tables.size() == 0) {
-		if ((decoded_sdt.services.size()) && (decoded_nit.ts_list.size())) {
+		if ((get_decoded_sdt()->services.size()) && (get_decoded_nit()->ts_list.size())) {
 			return ((eit_x_complete_dvb_pf()) && (eit_x_complete_dvb_sched(1)));
 		} else // FIXME
 			return false;
@@ -1014,6 +1035,16 @@ bool decode::got_all_eit(int limit)
 	}
 	return true;
 }
+
+const decoded_sdt_t* decode::get_decoded_sdt()
+{
+	return networks[network_id].get_decoded_sdt();
+};
+
+const decoded_nit_t* decode::get_decoded_nit()
+{
+	return networks[network_id].get_decoded_nit();
+};
 
 #if 0
 bool decode::complete_psip()

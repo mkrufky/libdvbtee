@@ -47,6 +47,8 @@
 
 #include <map>
 
+#define DECODE_LOCAL_NET 1
+
 /* -- PAT -- */
 typedef std::map<uint16_t, uint16_t> map_decoded_pat_programs; /* program number, pid */
 
@@ -279,7 +281,8 @@ public:
 	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; };
 	const decoded_vct_t*   get_decoded_vct() { return &decoded_vct; };
 	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; };
-	const decoded_sdt_t*   get_decoded_sdt() { return &decoded_sdt; };
+	const decoded_sdt_t*   get_decoded_sdt();
+	const decoded_nit_t*   get_decoded_nit();
 
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
 	const map_decoded_eit*      get_decoded_eit()      { return decoded_eit;      };
@@ -296,6 +299,8 @@ public:
 	//FIXME-move to private
 	desc descriptors;
 private:
+	uint16_t network_id;
+
 	time_t stream_time;
 
 	decoded_pat_t   decoded_pat;
@@ -317,10 +322,10 @@ private:
 	unsigned int services_w_eit_sched;
 	//map_rcvd rcvd_eit;
 	map_decoded_atsc_ett decoded_ett;
-
+#if DECODE_LOCAL_NET
 	decoded_sdt_t   decoded_sdt;
 	decoded_nit_t   decoded_nit;
-
+#endif
 	void dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
 	void dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
 
@@ -344,6 +349,9 @@ public:
 	bool take_eit(dvbpsi_eit_t*);
 	bool take_nit(dvbpsi_nit_t*);
 	bool take_sdt(dvbpsi_sdt_t*);
+
+	const decoded_sdt_t*   get_decoded_sdt() { return &decoded_sdt; };
+	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };
 
 	desc descriptors;
 private:
