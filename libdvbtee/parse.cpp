@@ -646,8 +646,9 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 			if (*(decoders[ts_id].descriptors.get_lcn).count(program_number))
 				sprintf(channelno, "%d", *(decoders[ts_id].descriptors.get_lcn)[program_number]);
 #else
-			if (decoders[ts_id].descriptors.lcn.count(program_number))
-				sprintf(channelno, "%d", decoders[ts_id].descriptors.lcn[program_number]);
+			desc *descriptors = decoders[ts_id].get_descriptors();
+			if (descriptors->lcn.count(program_number))
+				sprintf(channelno, "%d", descriptors->lcn[program_number]);
 #endif
 			else sprintf(channelno, "%d", channel);//FIXME
 

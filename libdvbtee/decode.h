@@ -286,6 +286,8 @@ public:
 	const decoded_sdt_t*   get_decoded_sdt();
 	const decoded_nit_t*   get_decoded_nit();
 
+	const desc*            get_descriptors() { return &descriptors; };
+
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
 	const map_decoded_eit*      get_decoded_eit()      { return decoded_eit;      };
 
@@ -298,8 +300,6 @@ public:
 
 	void dump_epg();
 
-	//FIXME-move to private
-	desc descriptors;
 private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -329,6 +329,8 @@ private:
 	decoded_sdt_t   decoded_sdt;
 	decoded_nit_t   decoded_nit;
 #endif
+	desc descriptors;
+
 	void dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
 	void dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
 
@@ -356,7 +358,6 @@ public:
 	const decoded_sdt_t*   get_decoded_sdt() { return &decoded_sdt; };
 	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };
 
-	desc descriptors;
 private:
 	decoded_sdt_t   decoded_sdt;
 	decoded_nit_t   decoded_nit;
@@ -365,6 +366,8 @@ private:
 
 	unsigned int services_w_eit_pf;
 	unsigned int services_w_eit_sched;
+
+	desc descriptors;
 };
 
 typedef std::map<uint16_t, decode_network> map_network_decoder;
