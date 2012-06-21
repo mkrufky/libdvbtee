@@ -246,6 +246,7 @@ typedef struct
 	map_decoded_sdt_services        services;
 } decoded_sdt_t;
 
+typedef std::map<uint16_t, decoded_sdt_t> map_decoded_sdt;
 
 typedef std::map<uint16_t, bool> map_rcvd;
 
@@ -355,11 +356,11 @@ public:
 	bool take_nit(dvbpsi_nit_t*);
 	bool take_sdt(dvbpsi_sdt_t*);
 
-	const decoded_sdt_t*   get_decoded_sdt() { return &decoded_sdt; };
+	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return &decoded_sdt[ts_id]; };
 	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };
 
 private:
-	decoded_sdt_t   decoded_sdt;
+	map_decoded_sdt decoded_sdt;
 	decoded_nit_t   decoded_nit;
 
 	map_decoded_eit decoded_eit[NUM_EIT];
