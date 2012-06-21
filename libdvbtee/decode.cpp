@@ -649,6 +649,14 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 		strcpy(decoded_sdt->services[p_service->i_service_id].provider_name, (const char *)descriptors->provider_name);
 		strcpy(decoded_sdt->services[p_service->i_service_id].service_name, (const char *)descriptors->service_name);
 
+#if SDT_DBG
+		fprintf(stderr, "%s: %d | %s | %s | %s %s\n", __func__,
+			decoded_sdt->services[p_service->i_service_id].service_id,
+			decoded_sdt->services[p_service->i_service_id].provider_name,
+			decoded_sdt->services[p_service->i_service_id].service_name,
+			(decoded_sdt->services[p_service->i_service_id].f_eit_present) ? "p/f" : "   ",
+			(decoded_sdt->services[p_service->i_service_id].f_eit_sched) ? "sched" : "     ");
+#endif
 		p_service = p_service->p_next;
 	}
 	*services_w_eit_pf    = _services_w_eit_pf;
@@ -1054,7 +1062,7 @@ bool decode::got_all_eit(int limit)
 
 const decoded_sdt_t* decode::get_decoded_sdt()
 {
-	return networks[network_id].get_decoded_sdt();
+	return networks[orig_network_id].get_decoded_sdt();
 };
 
 const decoded_nit_t* decode::get_decoded_nit()

@@ -646,13 +646,18 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 			if (*(decoders[ts_id].descriptors.get_lcn).count(program_number))
 				sprintf(channelno, "%d", *(decoders[ts_id].descriptors.get_lcn)[program_number]);
 #else
-			desc *descriptors = decoders[ts_id].get_descriptors();
+			const desc *descriptors = decoders[ts_id].get_descriptors();
+
 			if (descriptors->lcn.count(program_number))
 				sprintf(channelno, "%d", descriptors->lcn[program_number]);
 #endif
 			else sprintf(channelno, "%d", channel);//FIXME
 
-			strcpy(service_name, decoders[ts_id].get_decoded_sdt()->services[program_number].service_name);
+			const decoded_sdt_t *decoded_sdt = decoders[ts_id].get_decoded_sdt();
+			if (decoded_sdt->services.count(program_number))
+				strcpy(service_name, decoded_sdt->services[program_number].service_name);
+			else
+				sprintf(service_name, "%04d_UNKNOWN", program_number);
 		}
 
 		fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
