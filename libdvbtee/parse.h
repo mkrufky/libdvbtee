@@ -80,8 +80,10 @@ private:
 	static void take_pat(void*, dvbpsi_pat_t*);
 	static void take_pmt(void*, dvbpsi_pmt_t*);
 	static void take_eit(void*, dvbpsi_eit_t*);
-	static void take_nit(void*, dvbpsi_nit_t*);
-	static void take_sdt(void*, dvbpsi_sdt_t*);
+	static void take_nit_actual(void*, dvbpsi_nit_t*);
+	static void take_nit_other(void*,  dvbpsi_nit_t*);
+	static void take_sdt_actual(void*, dvbpsi_sdt_t*);
+	static void take_sdt_other(void*,  dvbpsi_sdt_t*);
 	static void take_tot(void*, dvbpsi_tot_t*);
 	static void take_vct(void*, dvbpsi_atsc_vct_t*);
 	static void take_eit(void*, dvbpsi_atsc_eit_t*);
@@ -94,8 +96,10 @@ private:
 	bool take_pat(dvbpsi_pat_t*, bool);
 	bool take_pmt(dvbpsi_pmt_t*, bool);
 	bool take_eit(dvbpsi_eit_t*, bool);
-	bool take_nit(dvbpsi_nit_t*, bool);
-	bool take_sdt(dvbpsi_sdt_t*, bool);
+	bool take_nit_actual(dvbpsi_nit_t*, bool);
+	bool take_nit_other(dvbpsi_nit_t*,  bool);
+	bool take_sdt_actual(dvbpsi_sdt_t*, bool);
+	bool take_sdt_other(dvbpsi_sdt_t*,  bool);
 	bool take_tot(dvbpsi_tot_t*, bool);
 	bool take_vct(dvbpsi_atsc_vct_t*, bool);
 	bool take_eit(dvbpsi_atsc_eit_t*, bool);

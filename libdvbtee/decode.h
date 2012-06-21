@@ -261,8 +261,10 @@ public:
 	bool take_pat(dvbpsi_pat_t*);
 	bool take_pmt(dvbpsi_pmt_t*);
 	bool take_eit(dvbpsi_eit_t*);
-	bool take_nit(dvbpsi_nit_t*);
-	bool take_sdt(dvbpsi_sdt_t*);
+	bool take_nit_actual(dvbpsi_nit_t*);
+	bool take_nit_other(dvbpsi_nit_t*);
+	bool take_sdt_actual(dvbpsi_sdt_t*);
+	bool take_sdt_other(dvbpsi_sdt_t*);
 	bool take_tot(dvbpsi_tot_t*);
 	bool take_vct(dvbpsi_atsc_vct_t*);
 	bool take_eit(dvbpsi_atsc_eit_t*);

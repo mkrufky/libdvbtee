@@ -582,13 +582,18 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, desc* de
 	return true;
 }
 
-bool decode::take_nit(dvbpsi_nit_t* p_nit)
+bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 {
+	network_id = p_nit->i_network_id;
 #if DECODE_LOCAL_NET
 	//return
 	__take_nit(p_nit, &decoded_nit, &descriptors);
 #endif
-	network_id = p_nit->i_network_id; /* FIXME */
+	return networks[p_nit->i_network_id].take_nit(p_nit);
+}
+
+bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
+{
 	return networks[p_nit->i_network_id].take_nit(p_nit);
 }
 
@@ -646,15 +651,21 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 	return true;
 }
 
-bool decode::take_sdt(dvbpsi_sdt_t* p_sdt)
+bool decode::take_sdt_actual(dvbpsi_sdt_t* p_sdt)
 {
+	network_id = p_sdt->i_network_id;
 #if DECODE_LOCAL_NET
 	//return
 	__take_sdt(p_sdt, &decoded_sdt, &descriptors, &services_w_eit_pf, &services_w_eit_sched);
 #endif
-	network_id = p_sdt->i_network_id; /* FIXME */
 	return networks[p_sdt->i_network_id].take_sdt(p_sdt);
 }
+
+bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
+{
+	return networks[p_sdt->i_network_id].take_sdt(p_sdt);
+}
+
 bool decode_network::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
 	return __take_sdt(p_sdt, &decoded_sdt, &descriptors, &services_w_eit_pf, &services_w_eit_sched);

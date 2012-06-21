@@ -253,7 +253,7 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 	return true;
 }
 
-bool parse::take_nit(dvbpsi_nit_t* p_nit, bool decoded)
+bool parse::take_nit_actual(dvbpsi_nit_t* p_nit, bool decoded)
 {
 	dprintf("(%s): v%d, network_id %d",
 		(decoded) ? "post" : "pre",
@@ -266,7 +266,20 @@ bool parse::take_nit(dvbpsi_nit_t* p_nit, bool decoded)
 	return true;
 }
 
-bool parse::take_sdt(dvbpsi_sdt_t* p_sdt, bool decoded)
+bool parse::take_nit_other(dvbpsi_nit_t* p_nit, bool decoded)
+{
+	dprintf("(%s): v%d, network_id %d",
+		(decoded) ? "post" : "pre",
+		p_nit->i_version, p_nit->i_network_id);
+
+	if (decoded) return true;
+#if 0
+	has_nit = true;
+#endif
+	return true;
+}
+
+bool parse::take_sdt_actual(dvbpsi_sdt_t* p_sdt, bool decoded)
 {
 	dprintf("(%s): v%d | ts_id %d | network_id %d",
 		(decoded) ? "post" : "pre",
@@ -279,6 +292,24 @@ bool parse::take_sdt(dvbpsi_sdt_t* p_sdt, bool decoded)
 
 	has_sdt = true;
 
+	return true;
+}
+
+bool parse::take_sdt_other(dvbpsi_sdt_t* p_sdt, bool decoded)
+{
+	dprintf("(%s): v%d | ts_id %d | network_id %d",
+		(decoded) ? "post" : "pre",
+		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
+
+	if (!decoded) {
+#if 0
+		set_ts_id(p_sdt->i_ts_id);
+#endif
+		return true;
+	}
+#if 0
+	has_sdt = true;
+#endif
 	return true;
 }
 
@@ -335,10 +366,16 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 		dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
 		break;
 	case TID_NIT_ACTUAL:
-		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit, this);
+		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit_actual, this);
+		break;
+	case TID_NIT_OTHER:
+		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit_other, this);
 		break;
 	case TID_SDT_ACTUAL:
-		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt, this);
+		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt_actual, this);
+		break;
+	case TID_SDT_OTHER:
+		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt_other, this);
 		break;
 	case TID_TDT:
 	case TID_TOT:
@@ -395,8 +432,10 @@ void parse::a(void* p_this, b* p_table)					\
 define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_DeletePAT);
 define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT);
 define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_DeleteEIT);
-define_table_wrapper(take_nit, dvbpsi_nit_t, dvbpsi_DeleteNIT);
-define_table_wrapper(take_sdt, dvbpsi_sdt_t, dvbpsi_DeleteSDT);
+define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_DeleteNIT);
+define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_DeleteNIT);
+define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_DeleteSDT);
+define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_DeleteSDT);
 define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_DeleteTOT);
 define_table_wrapper(take_vct, dvbpsi_atsc_vct_t, dvbpsi_atsc_DeleteVCT);
 define_table_wrapper(take_eit, dvbpsi_atsc_eit_t, dvbpsi_atsc_DeleteEIT);
