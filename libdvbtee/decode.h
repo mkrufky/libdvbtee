@@ -301,7 +301,8 @@ public:
 	//FIXME-move to private
 	desc descriptors;
 private:
-	uint16_t network_id;
+	uint16_t orig_network_id;
+	uint16_t      network_id;
 
 	time_t stream_time;
 

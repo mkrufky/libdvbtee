@@ -136,7 +136,8 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 }
 
 decode::decode()
-  : network_id(0)
+  : orig_network_id(0)
+  , network_id(0)
   , eit_x(0)
   , services_w_eit_pf(0)
   , services_w_eit_sched(0)
@@ -588,6 +589,10 @@ bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 #if DECODE_LOCAL_NET
 	//return
 	__take_nit(p_nit, &decoded_nit, &descriptors);
+	if (decoded_nit.ts_list.count(decoded_pat.ts_id)) {
+		orig_network_id = decoded_nit.ts_list[decoded_pat.ts_id].orig_network_id;
+		return networks[orig_network_id].take_nit(p_nit);
+	}
 #endif
 	return networks[p_nit->i_network_id].take_nit(p_nit);
 }
@@ -653,7 +658,7 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 
 bool decode::take_sdt_actual(dvbpsi_sdt_t* p_sdt)
 {
-	network_id = p_sdt->i_network_id;
+	orig_network_id = p_sdt->i_network_id;
 #if DECODE_LOCAL_NET
 	//return
 	__take_sdt(p_sdt, &decoded_sdt, &descriptors, &services_w_eit_pf, &services_w_eit_sched);
