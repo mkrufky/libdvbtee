@@ -50,8 +50,8 @@ static map_network_decoder   networks;
 decode_network::decode_network()
 //  : eit_x(0)
 //  , services_w_eit_pf(0)
-  : services_w_eit_pf(0)
-  , services_w_eit_sched(0)
+//  : services_w_eit_pf(0)
+//  , services_w_eit_sched(0)
 {
 	dprintf("()");
 
@@ -59,9 +59,9 @@ decode_network::decode_network()
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_sdt::iterator iter = decoded_sdt.begin(); iter != decoded_sdt.end(); ++iter)
-		iter->second.services.clear();
-	decoded_sdt.clear();
+	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+		iter->second.decoded_sdt.services.clear();
+	decoded_network_services.clear();
 
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
@@ -94,9 +94,9 @@ decode_network::~decode_network()
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_sdt::iterator iter = decoded_sdt.begin(); iter != decoded_sdt.end(); ++iter)
-		iter->second.services.clear();
-	decoded_sdt.clear();
+	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+		iter->second.decoded_sdt.services.clear();
+	decoded_network_services.clear();
 }
 
 decode_network::decode_network(const decode_network&)
@@ -107,9 +107,9 @@ decode_network::decode_network(const decode_network&)
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_sdt::iterator iter = decoded_sdt.begin(); iter != decoded_sdt.end(); ++iter)
-		iter->second.services.clear();
-	decoded_sdt.clear();
+	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+		iter->second.decoded_sdt.services.clear();
+	decoded_network_services.clear();
 
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
@@ -132,9 +132,9 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_sdt::iterator iter = decoded_sdt.begin(); iter != decoded_sdt.end(); ++iter)
-		iter->second.services.clear();
-	decoded_sdt.clear();
+	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+		iter->second.decoded_sdt.services.clear();
+	decoded_network_services.clear();
 
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
@@ -694,7 +694,10 @@ bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 
 bool decode_network::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
-	return __take_sdt(p_sdt, &decoded_sdt[p_sdt->i_ts_id], &descriptors, &services_w_eit_pf, &services_w_eit_sched);
+	return __take_sdt(p_sdt, &decoded_network_services[p_sdt->i_ts_id].decoded_sdt,
+			  &descriptors,
+			  &decoded_network_services[p_sdt->i_ts_id].services_w_eit_pf,
+			  &decoded_network_services[p_sdt->i_ts_id].services_w_eit_sched);
 }
 
 bool decode::take_eit(dvbpsi_eit_t* p_eit)
