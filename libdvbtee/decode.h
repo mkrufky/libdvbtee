@@ -246,17 +246,6 @@ typedef struct
 	map_decoded_sdt_services        services;
 } decoded_sdt_t;
 
-typedef struct
-{
-//	uint16_t                        ts_id;
-	decoded_sdt_t                   decoded_sdt;
-	unsigned int                    services_w_eit_pf;
-	unsigned int                    services_w_eit_sched;
-
-} decoded_network_service_t;
-
-typedef std::map<uint16_t, decoded_network_service_t> map_decoded_network_services;
-
 typedef std::map<uint16_t, bool> map_rcvd;
 
 class decode
@@ -352,6 +341,26 @@ private:
 	bool eit_x_complete_dvb_pf();
 };
 
+class decode_network_service
+{
+public:
+	decode_network_service();
+	~decode_network_service();
+
+	decode_network_service(const decode_network_service&);
+	decode_network_service& operator= (const decode_network_service&);
+
+	decoded_sdt_t                   decoded_sdt;
+	unsigned int                    services_w_eit_pf;
+	unsigned int                    services_w_eit_sched;
+
+	map_decoded_eit decoded_eit[NUM_EIT];
+
+//	uint16_t                        ts_id;
+};
+
+typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
+
 class decode_network
 {
 public:
@@ -371,8 +380,6 @@ public:
 private:
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
-
-	map_decoded_eit decoded_eit[NUM_EIT];
 
 	desc descriptors;
 };

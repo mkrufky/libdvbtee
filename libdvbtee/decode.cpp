@@ -47,6 +47,70 @@ do {								\
 
 static map_network_decoder   networks;
 
+decode_network_service::decode_network_service()
+  : services_w_eit_pf(0)
+  , services_w_eit_sched(0)
+{
+	dprintf("()");
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+}
+
+decode_network_service::~decode_network_service()
+{
+	dprintf("(%04x|%05d)",
+		decoded_sdt.network_id, decoded_sdt.network_id);
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+}
+
+decode_network_service::decode_network_service(const decode_network_service&)
+{
+	dprintf("(copy)");
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+}
+
+decode_network_service& decode_network_service::operator= (const decode_network_service& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	for (int i = 0; i < NUM_EIT; i++) {
+		for (map_decoded_eit::iterator iter =
+			decoded_eit[i].begin();
+		     iter != decoded_eit[i].end(); ++iter)
+			iter->second.events.clear();
+
+		decoded_eit[i].clear();
+	}
+
+	return *this;
+}
+
 decode_network::decode_network()
 //  : eit_x(0)
 //  , services_w_eit_pf(0)
@@ -62,15 +126,6 @@ decode_network::decode_network()
 	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
 		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
-
-	for (int i = 0; i < NUM_EIT; i++) {
-		for (map_decoded_eit::iterator iter =
-			decoded_eit[i].begin();
-		     iter != decoded_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_eit[i].clear();
-	}
 }
 
 decode_network::~decode_network()
@@ -83,14 +138,6 @@ decode_network::~decode_network()
 	dprintf("(%04x|%05d)",
 		decoded_nit.network_id, decoded_nit.network_id);
 #endif
-	for (int i = 0; i < NUM_EIT; i++) {
-		for (map_decoded_eit::iterator iter =
-			decoded_eit[i].begin();
-		     iter != decoded_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_eit[i].clear();
-	}
 
 	decoded_nit.ts_list.clear();
 
@@ -110,15 +157,6 @@ decode_network::decode_network(const decode_network&)
 	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
 		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
-
-	for (int i = 0; i < NUM_EIT; i++) {
-		for (map_decoded_eit::iterator iter =
-			decoded_eit[i].begin();
-		     iter != decoded_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_eit[i].clear();
-	}
 }
 
 decode_network& decode_network::operator= (const decode_network& cSource)
@@ -135,15 +173,6 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
 		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
-
-	for (int i = 0; i < NUM_EIT; i++) {
-		for (map_decoded_eit::iterator iter =
-			decoded_eit[i].begin();
-		     iter != decoded_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_eit[i].clear();
-	}
 
 	return *this;
 }
@@ -699,6 +728,13 @@ bool decode_network::take_sdt(dvbpsi_sdt_t* p_sdt)
 			  &decoded_network_services[p_sdt->i_ts_id].services_w_eit_pf,
 			  &decoded_network_services[p_sdt->i_ts_id].services_w_eit_sched);
 }
+
+#if 0
+bool decode_network::take_eit(dvbpsi_eit_t* p_eit)
+{
+	return __take_eit(p_eit, &decoded_network_services[p_eit->i_ts_id].decoded_eit);
+}
+#endif
 
 bool decode::take_eit(dvbpsi_eit_t* p_eit)
 {
