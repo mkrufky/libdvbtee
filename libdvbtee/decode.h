@@ -350,16 +350,17 @@ public:
 	decode_network_service(const decode_network_service&);
 	decode_network_service& operator= (const decode_network_service&);
 
-	bool take_eit(dvbpsi_eit_t*);
+	bool take_eit(dvbpsi_eit_t*, uint8_t);
 	bool take_sdt(dvbpsi_sdt_t*);
 
 	decoded_sdt_t                   decoded_sdt;
-	unsigned int                    services_w_eit_pf;
-	unsigned int                    services_w_eit_sched;
 
 	map_decoded_eit decoded_eit[NUM_EIT];
 private:
 //	uint16_t                        ts_id;
+
+	unsigned int                    services_w_eit_pf;
+	unsigned int                    services_w_eit_sched;
 
 	desc descriptors;
 };
@@ -375,7 +376,7 @@ public:
 	decode_network(const decode_network&);
 	decode_network& operator= (const decode_network&);
 
-	bool take_eit(dvbpsi_eit_t* p_eit) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit); };
+	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); };
 	bool take_nit(dvbpsi_nit_t*);
 	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); };
 

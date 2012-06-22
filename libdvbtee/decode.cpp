@@ -112,10 +112,6 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 }
 
 decode_network::decode_network()
-//  : eit_x(0)
-//  , services_w_eit_pf(0)
-//  : services_w_eit_pf(0)
-//  , services_w_eit_sched(0)
 {
 	dprintf("()");
 
@@ -727,35 +723,8 @@ bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 			  &services_w_eit_pf, &services_w_eit_sched);
 }
 
-#if 0
-bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit)
+bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descriptors, uint8_t eit_x)
 {
-	return __take_eit(p_eit, &decoded_eit);
-}
-#endif
-
-bool decode::take_eit(dvbpsi_eit_t* p_eit)
-{
-#if 1
-	bool other = false;
-
-	eit_x = p_eit->i_table_id;
-	switch (p_eit->i_table_id) {
-	case 0x4f:
-		other = true;
-		/* fall thru */
-	case 0x4e:
-		eit_x = 0;
-		break;
-	case 0x60 ... 0x6f:
-		other = true;
-		eit_x = p_eit->i_table_id - 0x60 + 1;
-		break;
-	case 0x50 ... 0x5f:
-		eit_x = p_eit->i_table_id - 0x50 + 1;
-		break;
-	}
-#endif
 	if ((decoded_eit[eit_x][p_eit->i_service_id].version == p_eit->i_version) &&
 	    (decoded_eit[eit_x][p_eit->i_service_id].service_id == p_eit->i_service_id)) {
 #if DBG
@@ -768,7 +737,6 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d | table id: 0x%02x, last_table id: 0x%02x\n", __func__, eit_x,
 		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id, p_eit->i_table_id, p_eit->i_last_table_id);
 #endif
-	if (other) return false;
 	decoded_eit[eit_x][p_eit->i_service_id].service_id    = p_eit->i_service_id;
 	decoded_eit[eit_x][p_eit->i_service_id].version       = p_eit->i_version;
 	decoded_eit[eit_x][p_eit->i_service_id].ts_id         = p_eit->i_ts_id;
@@ -784,10 +752,10 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].running_status = p_event->i_running_status;
 		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].f_free_ca      = p_event->b_free_ca;
 
-		descriptors.decode(p_event->p_first_descriptor);
+		descriptors->decode(p_event->p_first_descriptor);
 
-		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].name.assign((const char *)descriptors._4d.name);
-		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].text.assign((const char *)descriptors._4d.text);
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].name.assign((const char *)descriptors->_4d.name);
+		decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].text.assign((const char *)descriptors->_4d.text);
 #if DBG
 		time_t start = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].start_time + decoded_eit[eit_x][p_eit->i_service_id].events[p_event->i_event_id].length_sec /*+ (60 * tz_offset)*/);
@@ -795,11 +763,65 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 		struct tm tms = *localtime(&start);
 		struct tm tme = *localtime(&end);
 
-		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, descriptors._4d.name);
+		fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, descriptors->_4d.name);
 #endif
 		p_event = p_event->p_next;
 	}
 	return true;
+}
+
+static inline bool table_id_to_eit_x(uint8_t table_id, uint8_t *eit_x, bool *actual)
+{
+#if 1
+	*actual = true;
+	switch (table_id) {
+	case 0x4f:
+		*actual = false;
+		/* fall thru */
+	case 0x4e:
+		*eit_x = 0;
+		break;
+	case 0x60 ... 0x6f:
+		*actual = false;
+		*eit_x = table_id - 0x60 + 1;
+		break;
+	case 0x50 ... 0x5f:
+		*eit_x = table_id - 0x50 + 1;
+		break;
+	}
+	return true;
+#else
+	*actual = false;
+	switch (table_id) {
+	case 0x4e:
+	case 0x50 ... 0x5f:
+		*actual = true;
+		/* fall-thru */
+	case 0x4f:
+	case 0x60 ... 0x6f:
+		*eit_x = (table_id & 0xfe == 0x4e) ? 0 : table_id - (table_id & 0xf0) + 1;
+		return true;
+	default:
+		return false;
+	}
+#endif
+}
+
+bool decode::take_eit(dvbpsi_eit_t* p_eit)
+{
+	bool actual;
+	table_id_to_eit_x(p_eit->i_table_id, &eit_x, &actual);
+
+	if (actual)
+#if DECODE_LOCAL_NET
+		__take_eit(p_eit, decoded_eit, &descriptors, eit_x);
+#endif
+	return networks[p_eit->i_network_id].take_eit(p_eit, eit_x);
+}
+
+bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
+{
+	return __take_eit(p_eit, decoded_eit, &descriptors, eit_x);
 }
 
 bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
