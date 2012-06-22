@@ -288,7 +288,7 @@ public:
 	const desc*            get_descriptors() { return &descriptors; };
 
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
-	const map_decoded_eit*      get_decoded_eit()      { return decoded_eit;      };
+	const map_decoded_eit*      get_decoded_eit();
 
 	const uint8_t get_current_eit_x() { return eit_x; };
 	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; };
@@ -314,7 +314,9 @@ private:
 
 	map_decoded_atsc_eit decoded_atsc_eit[128];
 #define NUM_EIT 17
+#if DECODE_LOCAL_NET
 	map_decoded_eit      decoded_eit[NUM_EIT];
+#endif
 	//decoded_atsc_eit_t decoded_atsc_eit;
 	uint8_t eit_x;
 #if 0
@@ -382,6 +384,7 @@ public:
 
 	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return &decoded_network_services[ts_id].decoded_sdt; };
 	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };
+	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) { return decoded_network_services[ts_id].decoded_eit; };
 
 private:
 	map_decoded_network_services decoded_network_services;

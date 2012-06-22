@@ -206,7 +206,7 @@ decode::decode()
 
 		decoded_atsc_eit[i].clear();
 	}
-
+#if DECODE_LOCAL_NET
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
@@ -215,7 +215,7 @@ decode::decode()
 
 		decoded_eit[i].clear();
 	}
-
+#endif
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -242,7 +242,7 @@ decode::~decode()
 
 		decoded_atsc_eit[i].clear();
 	}
-
+#if DECODE_LOCAL_NET
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
@@ -251,7 +251,7 @@ decode::~decode()
 
 		decoded_eit[i].clear();
 	}
-
+#endif
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -300,7 +300,7 @@ decode::decode(const decode&)
 
 		decoded_atsc_eit[i].clear();
 	}
-
+#if DECODE_LOCAL_NET
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
@@ -309,7 +309,7 @@ decode::decode(const decode&)
 
 		decoded_eit[i].clear();
 	}
-
+#endif
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -356,7 +356,7 @@ decode& decode::operator= (const decode& cSource)
 
 		decoded_atsc_eit[i].clear();
 	}
-
+#if DECODE_LOCAL_NET
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
@@ -365,7 +365,7 @@ decode& decode::operator= (const decode& cSource)
 
 		decoded_eit[i].clear();
 	}
-
+#endif
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
@@ -952,8 +952,8 @@ void decode::dump_eit_x_dvb(uint8_t eit_x, uint16_t service_id)
 			iter_sdt->second.service_name);
 
 		map_decoded_eit_events::const_iterator iter_eit;
-		for (iter_eit = decoded_eit[eit_x][iter_sdt->second.service_id].events.begin();
-		     iter_eit != decoded_eit[eit_x][iter_sdt->second.service_id].events.end();
+		for (iter_eit = get_decoded_eit()[eit_x][iter_sdt->second.service_id].events.begin();
+		     iter_eit != get_decoded_eit()[eit_x][iter_sdt->second.service_id].events.end();
 		     ++iter_eit) {
 
 			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
@@ -997,7 +997,7 @@ void decode::dump_epg_dvb(uint16_t service_id)
 {
 	unsigned int eit_num = 0;
 
-	while ((eit_num < NUM_EIT) && (decoded_eit[eit_num].count(service_id))) {
+	while ((eit_num < NUM_EIT) && (get_decoded_eit()[eit_num].count(service_id))) {
 		dump_eit_x_dvb(eit_num, service_id);
 		eit_num++;
 	}
@@ -1083,15 +1083,15 @@ bool decode::eit_x_complete_dvb_pf()
 {
 	uint8_t current_eit_x = 0;
 	return ((get_decoded_sdt()->services.size()) &&
-		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_pf)) &&
-		 (decoded_eit[current_eit_x].size() == services_w_eit_pf)));
+		(((get_decoded_eit()[current_eit_x].size()) || (!services_w_eit_pf)) &&
+		 (get_decoded_eit()[current_eit_x].size() == services_w_eit_pf)));
 }
 
 bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 {
 	return ((get_decoded_sdt()->services.size()) &&
-		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_sched)) &&
-		 (decoded_eit[current_eit_x].size() == services_w_eit_sched)));
+		(((get_decoded_eit()[current_eit_x].size()) || (!services_w_eit_sched)) &&
+		 (get_decoded_eit()[current_eit_x].size() == services_w_eit_sched)));
 }
 
 
@@ -1131,6 +1131,11 @@ bool decode::got_all_eit(int limit)
 	}
 	return true;
 }
+
+const map_decoded_eit* decode::get_decoded_eit()
+{
+	return networks[orig_network_id].get_decoded_eit(decoded_pat.ts_id);
+};
 
 const decoded_sdt_t* decode::get_decoded_sdt()
 {
