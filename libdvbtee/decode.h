@@ -375,9 +375,9 @@ public:
 	decode_network(const decode_network&);
 	decode_network& operator= (const decode_network&);
 
-	bool take_eit(dvbpsi_eit_t*);
+	bool take_eit(dvbpsi_eit_t* p_eit) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit); };
 	bool take_nit(dvbpsi_nit_t*);
-	bool take_sdt(dvbpsi_sdt_t*);
+	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); };
 
 	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return &decoded_network_services[ts_id].decoded_sdt; };
 	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };

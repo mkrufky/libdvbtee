@@ -721,11 +721,6 @@ bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 	return networks[p_sdt->i_network_id].take_sdt(p_sdt);
 }
 
-bool decode_network::take_sdt(dvbpsi_sdt_t* p_sdt)
-{
-	return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt);
-}
-
 bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
 	return __take_sdt(p_sdt, &decoded_sdt, &descriptors,
@@ -733,9 +728,9 @@ bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 }
 
 #if 0
-bool decode_network::take_eit(dvbpsi_eit_t* p_eit)
+bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit)
 {
-	return __take_eit(p_eit, &decoded_network_services[p_eit->i_ts_id].decoded_eit);
+	return __take_eit(p_eit, &decoded_eit);
 }
 #endif
 
