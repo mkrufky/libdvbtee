@@ -312,22 +312,15 @@ private:
 
 	map_rcvd rcvd_pmt;
 
-	map_decoded_atsc_eit decoded_atsc_eit[128];
-#define NUM_EIT 17
-#if DECODE_LOCAL_NET
-	map_decoded_eit      decoded_eit[NUM_EIT];
-#endif
-	//decoded_atsc_eit_t decoded_atsc_eit;
 	uint8_t eit_x;
+
+	map_decoded_atsc_eit decoded_atsc_eit[128];
 #if 0
 	decoded_atsc_eit_callback atsc_eit_callback;
 #endif
-	unsigned int services_w_eit_pf;
-	unsigned int services_w_eit_sched;
 	//map_rcvd rcvd_eit;
 	map_decoded_atsc_ett decoded_ett;
 #if DECODE_LOCAL_NET
-	decoded_sdt_t   decoded_sdt;
 	decoded_nit_t   decoded_nit;
 #endif
 	desc descriptors;
@@ -355,8 +348,12 @@ public:
 	bool take_eit(dvbpsi_eit_t*, uint8_t);
 	bool take_sdt(dvbpsi_sdt_t*);
 
+	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
+	bool eit_x_complete_dvb_pf();
+
 	decoded_sdt_t                   decoded_sdt;
 
+#define NUM_EIT 17
 	map_decoded_eit decoded_eit[NUM_EIT];
 private:
 //	uint16_t                        ts_id;
@@ -386,6 +383,8 @@ public:
 	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };
 	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) { return decoded_network_services[ts_id].decoded_eit; };
 
+	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x); };
+	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services[ts_id].eit_x_complete_dvb_pf(); };
 private:
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
