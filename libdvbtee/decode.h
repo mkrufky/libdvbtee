@@ -350,13 +350,18 @@ public:
 	decode_network_service(const decode_network_service&);
 	decode_network_service& operator= (const decode_network_service&);
 
+	bool take_eit(dvbpsi_eit_t*);
+	bool take_sdt(dvbpsi_sdt_t*);
+
 	decoded_sdt_t                   decoded_sdt;
 	unsigned int                    services_w_eit_pf;
 	unsigned int                    services_w_eit_sched;
 
 	map_decoded_eit decoded_eit[NUM_EIT];
-
+private:
 //	uint16_t                        ts_id;
+
+	desc descriptors;
 };
 
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;

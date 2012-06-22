@@ -723,10 +723,13 @@ bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 
 bool decode_network::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
-	return __take_sdt(p_sdt, &decoded_network_services[p_sdt->i_ts_id].decoded_sdt,
-			  &descriptors,
-			  &decoded_network_services[p_sdt->i_ts_id].services_w_eit_pf,
-			  &decoded_network_services[p_sdt->i_ts_id].services_w_eit_sched);
+	return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt);
+}
+
+bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
+{
+	return __take_sdt(p_sdt, &decoded_sdt, &descriptors,
+			  &services_w_eit_pf, &services_w_eit_sched);
 }
 
 #if 0
