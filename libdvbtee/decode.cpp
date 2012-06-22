@@ -812,8 +812,8 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	bool actual;
 	table_id_to_eit_x(p_eit->i_table_id, &eit_x, &actual);
 
-	if (actual)
 #if DECODE_LOCAL_NET
+	if (actual)
 		__take_eit(p_eit, decoded_eit, &descriptors, eit_x);
 #endif
 	return networks[p_eit->i_network_id].take_eit(p_eit, eit_x);
