@@ -551,6 +551,7 @@ void parse::cleanup()
 	dprintf("()");
 
 	detach_demux();
+	clear_decoded_networks();
 	decoders.clear();
 	channel_info.clear();
 }

@@ -47,6 +47,11 @@ do {								\
 
 static map_network_decoder   networks;
 
+void clear_decoded_networks()
+{
+	networks.clear();
+}
+
 decode_network_service::decode_network_service()
   : services_w_eit_pf(0)
   , services_w_eit_sched(0)
