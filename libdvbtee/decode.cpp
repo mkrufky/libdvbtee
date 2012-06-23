@@ -389,6 +389,7 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 	decoded_pmt[p_pmt->i_program_number].pcr_pid = p_pmt->i_pcr_pid;
 	decoded_pmt[p_pmt->i_program_number].es_streams.clear();
 	//FIXME: descriptors
+	descriptors.decode(p_pmt->p_first_descriptor);
 
 	fprintf(stderr, "  es_pid | type\n");
 
@@ -465,11 +466,13 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 			service_name);
 #endif
 		//FIXME: descriptors
+		descriptors.decode(p_channel->p_first_descriptor);
 
 		p_channel = p_channel->p_next;
 	}
-
 	//FIXME: descriptors
+	descriptors.decode(p_vct->p_first_descriptor);
+
 	return true;
 }
 
@@ -508,11 +511,15 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 		default:
 			break;
 		}
-		//FIXME: descriptors
 #endif
+		//FIXME: descriptors
+		descriptors.decode(p_table->p_first_descriptor);
+
 		p_table = p_table->p_next;
 	}
 	//FIXME: descriptors
+	descriptors.decode(p_mgt->p_first_descriptor);
+
 	return true;
 }
 
@@ -801,12 +808,13 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 			decode_multiple_string(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title, decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes, name);
 			//p_epg->text[0] = 0;
 
-			//FIXME: descriptors
-
 			struct tm tms = *localtime( &start );
 			struct tm tme = *localtime( &end  );
 			fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
+			//FIXME: descriptors
+			descriptors.decode(p_event->p_first_descriptor);
+
 		p_event = p_event->p_next;
 	}
 	return true;
