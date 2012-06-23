@@ -224,7 +224,7 @@ int main(int argc, char **argv)
 	char outfilename[256];
 	memset(&outfilename, 0, sizeof(outfilename));
 
-#define VERSION "0.0.2"
+#define VERSION "0.0.3"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
         while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E::o::d::")) != -1) {
