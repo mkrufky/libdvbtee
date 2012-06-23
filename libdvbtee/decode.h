@@ -354,8 +354,6 @@ public:
 #define NUM_EIT 17
 	map_decoded_eit decoded_eit[NUM_EIT];
 private:
-//	uint16_t                        ts_id;
-
 	unsigned int                    services_w_eit_pf;
 	unsigned int                    services_w_eit_sched;
 
