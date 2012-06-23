@@ -1024,11 +1024,6 @@ bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
 #endif
 }
 
-const uint16_t decode::get_lcn(uint16_t service_id)
-{
-	return networks[network_id].descriptors.lcn[service_id];
-}
-
 bool decode::eit_x_complete_dvb_pf()
 {
 	return networks[orig_network_id].eit_x_complete_dvb_pf(decoded_pat.ts_id);
@@ -1090,6 +1085,16 @@ bool decode::got_all_eit(int limit)
 		}
 	}
 	return true;
+}
+
+const decode_network* decode::get_decoded_network()
+{
+	return &networks[orig_network_id];
+}
+
+const uint16_t decode::get_lcn(uint16_t service_id)
+{
+	return networks[network_id].descriptors.lcn[service_id];
 }
 
 const map_decoded_eit* decode::get_decoded_eit()

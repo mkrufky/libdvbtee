@@ -246,93 +246,6 @@ typedef struct
 
 typedef std::map<uint16_t, bool> map_rcvd;
 
-class decode
-{
-public:
-	decode();
-	~decode();
-
-	decode(const decode&);
-	decode& operator= (const decode&);
-
-	bool take_pat(dvbpsi_pat_t*);
-	bool take_pmt(dvbpsi_pmt_t*);
-	bool take_eit(dvbpsi_eit_t*);
-	bool take_nit_actual(dvbpsi_nit_t*);
-	bool take_nit_other(dvbpsi_nit_t*);
-	bool take_sdt_actual(dvbpsi_sdt_t*);
-	bool take_sdt_other(dvbpsi_sdt_t*);
-	bool take_tot(dvbpsi_tot_t*);
-	bool take_vct(dvbpsi_atsc_vct_t*);
-	bool take_eit(dvbpsi_atsc_eit_t*);
-	bool take_ett(dvbpsi_atsc_ett_t*);
-	bool take_stt(dvbpsi_atsc_stt_t*);
-	bool take_mgt(dvbpsi_atsc_mgt_t*);
-#ifdef RRT
-	bool take_rrt(dvbpsi_atsc_mgt_t*);
-#endif
-	bool complete_pmt();
-#if 0
-	bool complete_psip();
-#endif
-
-	const decoded_pat_t*   get_decoded_pat() { return &decoded_pat; };
-	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; };
-	const decoded_vct_t*   get_decoded_vct() { return &decoded_vct; };
-	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; };
-	const decoded_sdt_t*   get_decoded_sdt();
-	const decoded_nit_t*   get_decoded_nit();
-
-	const desc*            get_descriptors() { return &descriptors; };
-
-	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
-	const map_decoded_eit*      get_decoded_eit();
-
-	const uint8_t get_current_eit_x() { return eit_x; };
-	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; };
-
-	const uint16_t get_lcn(uint16_t);
-
-	void dump_eit_x(uint8_t eit_x, uint16_t source_id = 0);
-	bool eit_x_complete(uint8_t current_eit_x);
-	bool got_all_eit(int limit = -1);
-
-	void dump_epg();
-
-private:
-	uint16_t orig_network_id;
-	uint16_t      network_id;
-
-	time_t stream_time;
-
-	decoded_pat_t   decoded_pat;
-	map_decoded_pmt decoded_pmt;
-	decoded_vct_t   decoded_vct;
-	decoded_mgt_t   decoded_mgt;
-
-	map_rcvd rcvd_pmt;
-
-	uint8_t eit_x;
-
-	map_decoded_atsc_eit decoded_atsc_eit[128];
-#if 0
-	decoded_atsc_eit_callback atsc_eit_callback;
-#endif
-	//map_rcvd rcvd_eit;
-	map_decoded_atsc_ett decoded_ett;
-
-	desc descriptors;
-
-	void dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
-	void dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
-
-	void dump_epg_atsc(uint16_t source_id);
-	void dump_epg_dvb(uint16_t source_id);
-
-	bool eit_x_complete_atsc(uint8_t current_eit_x);
-	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
-	bool eit_x_complete_dvb_pf();
-};
 
 class decode_network_service
 {
@@ -389,5 +302,95 @@ private:
 };
 
 typedef std::map<uint16_t, decode_network> map_network_decoder;
+
+class decode
+{
+public:
+	decode();
+	~decode();
+
+	decode(const decode&);
+	decode& operator= (const decode&);
+
+	bool take_pat(dvbpsi_pat_t*);
+	bool take_pmt(dvbpsi_pmt_t*);
+	bool take_eit(dvbpsi_eit_t*);
+	bool take_nit_actual(dvbpsi_nit_t*);
+	bool take_nit_other(dvbpsi_nit_t*);
+	bool take_sdt_actual(dvbpsi_sdt_t*);
+	bool take_sdt_other(dvbpsi_sdt_t*);
+	bool take_tot(dvbpsi_tot_t*);
+	bool take_vct(dvbpsi_atsc_vct_t*);
+	bool take_eit(dvbpsi_atsc_eit_t*);
+	bool take_ett(dvbpsi_atsc_ett_t*);
+	bool take_stt(dvbpsi_atsc_stt_t*);
+	bool take_mgt(dvbpsi_atsc_mgt_t*);
+#ifdef RRT
+	bool take_rrt(dvbpsi_atsc_mgt_t*);
+#endif
+	bool complete_pmt();
+#if 0
+	bool complete_psip();
+#endif
+
+	const decoded_pat_t*   get_decoded_pat() { return &decoded_pat; };
+	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; };
+	const decoded_vct_t*   get_decoded_vct() { return &decoded_vct; };
+	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; };
+	const decoded_sdt_t*   get_decoded_sdt();
+	const decoded_nit_t*   get_decoded_nit();
+
+	const desc*            get_descriptors() { return &descriptors; };
+
+	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
+	const map_decoded_eit*      get_decoded_eit();
+
+	const uint8_t get_current_eit_x() { return eit_x; };
+	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; };
+
+	const uint16_t get_lcn(uint16_t);
+
+	const decode_network*  get_decoded_network();
+
+	void dump_eit_x(uint8_t eit_x, uint16_t source_id = 0);
+	bool eit_x_complete(uint8_t current_eit_x);
+	bool got_all_eit(int limit = -1);
+
+	void dump_epg();
+
+private:
+	uint16_t orig_network_id;
+	uint16_t      network_id;
+
+	time_t stream_time;
+
+	decoded_pat_t   decoded_pat;
+	map_decoded_pmt decoded_pmt;
+	decoded_vct_t   decoded_vct;
+	decoded_mgt_t   decoded_mgt;
+
+	map_rcvd rcvd_pmt;
+
+	uint8_t eit_x;
+
+	map_decoded_atsc_eit decoded_atsc_eit[128];
+#if 0
+	decoded_atsc_eit_callback atsc_eit_callback;
+#endif
+	//map_rcvd rcvd_eit;
+	map_decoded_atsc_ett decoded_ett;
+
+	desc descriptors;
+
+	void dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
+	void dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
+
+	void dump_epg_atsc(uint16_t source_id);
+	void dump_epg_dvb(uint16_t source_id);
+
+	bool eit_x_complete_atsc(uint8_t current_eit_x);
+	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
+	bool eit_x_complete_dvb_pf();
+};
 
 #endif /* __DECODE_H__ */
