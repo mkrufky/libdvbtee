@@ -288,12 +288,12 @@ public:
 	bool take_nit(dvbpsi_nit_t*);
 	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); };
 
-	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return &decoded_network_services[ts_id].decoded_sdt; };
+	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL; };
 	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };
-	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) { return decoded_network_services[ts_id].decoded_eit; };
+	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit: NULL; };
 
-	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x); };
-	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services[ts_id].eit_x_complete_dvb_pf(); };
+	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x) : false; };
+	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; };
 
 	desc descriptors;
 private:

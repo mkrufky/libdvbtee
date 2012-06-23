@@ -645,7 +645,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 			else sprintf(channelno, "%d", channel);//FIXME
 
 			const decoded_sdt_t *decoded_sdt = decoders[ts_id].get_decoded_sdt();
-			if (decoded_sdt->services.count(program_number))
+			if ((decoded_sdt) && (decoded_sdt->services.count(program_number)))
 				strcpy(service_name, decoded_sdt->services[program_number].service_name);
 			else
 				sprintf(service_name, "%04d_UNKNOWN", program_number);
