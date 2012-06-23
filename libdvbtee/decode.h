@@ -47,8 +47,6 @@
 
 #include <map>
 
-#define DECODE_LOCAL_NET 1
-
 /* -- PAT -- */
 typedef std::map<uint16_t, uint16_t> map_decoded_pat_programs; /* program number, pid */
 
@@ -293,6 +291,8 @@ public:
 	const uint8_t get_current_eit_x() { return eit_x; };
 	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; };
 
+	const uint16_t get_lcn(uint16_t);
+
 	void dump_eit_x(uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
 	bool got_all_eit(int limit = -1);
@@ -320,9 +320,7 @@ private:
 #endif
 	//map_rcvd rcvd_eit;
 	map_decoded_atsc_ett decoded_ett;
-#if DECODE_LOCAL_NET
-	decoded_nit_t   decoded_nit;
-#endif
+
 	desc descriptors;
 
 	void dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
@@ -385,11 +383,11 @@ public:
 
 	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x); };
 	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services[ts_id].eit_x_complete_dvb_pf(); };
+
+	desc descriptors;
 private:
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
-
-	desc descriptors;
 };
 
 typedef std::map<uint16_t, decode_network> map_network_decoder;

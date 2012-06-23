@@ -638,15 +638,9 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 			sprintf(channelno, "%d.%d", iter_vct->second.chan_major, iter_vct->second.chan_minor);
 			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
 		} else { // FIXME: use SDT info
-#if 0
-			if (*(decoders[ts_id].descriptors.get_lcn).count(program_number))
-				sprintf(channelno, "%d", *(decoders[ts_id].descriptors.get_lcn)[program_number]);
-#else
-			const desc *descriptors = decoders[ts_id].get_descriptors();
+			if (uint16_t lcn = decoders[ts_id].get_lcn(program_number))
+				sprintf(channelno, "%d", lcn);
 
-			if (descriptors->lcn.count(program_number))
-				sprintf(channelno, "%d", descriptors->lcn[program_number]);
-#endif
 			else sprintf(channelno, "%d", channel);//FIXME
 
 			const decoded_sdt_t *decoded_sdt = decoders[ts_id].get_decoded_sdt();
