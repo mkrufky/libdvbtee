@@ -65,8 +65,8 @@ decode_network_service::decode_network_service()
 
 decode_network_service::~decode_network_service()
 {
-	dprintf("(%04x|%05d)",
-		decoded_sdt.network_id, decoded_sdt.network_id);
+	dprintf("(%04x|%05d/%05d)",
+		decoded_sdt.network_id, decoded_sdt.network_id, decoded_sdt.ts_id);
 
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
