@@ -128,6 +128,7 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 }
 
 decode_network::decode_network()
+  : orig_network_id(0)
 {
 	dprintf("()");
 
@@ -147,8 +148,9 @@ decode_network::~decode_network()
 		decoded_nit.network_id, decoded_nit.network_id,
 		decoded_sdt.network_id, decoded_sdt.network_id);
 #else
-	dprintf("(%04x|%05d) %d",
+	dprintf("(%04x|%05d)/(%04x|%05d) %d",
 		decoded_nit.network_id, decoded_nit.network_id,
+		orig_network_id, orig_network_id,
 		decoded_network_services.size());
 #endif
 
@@ -583,14 +585,18 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, desc* de
 bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 {
 	network_id = p_nit->i_network_id;
-#if 1
+#if 0
 	return networks[network_id].take_nit(p_nit);
 #else
 	bool ret = networks[network_id].take_nit(p_nit);
 	const decoded_nit_t *decoded_nit = get_decoded_nit();
 	if ((decoded_nit) && (decoded_nit->ts_list.count(decoded_pat.ts_id))) {
-		orig_network_id = decoded_nit->ts_list[decoded_pat.ts_id].orig_network_id;
+		orig_network_id = ((decoded_nit_t*)decoded_nit)->ts_list[decoded_pat.ts_id].orig_network_id;
+
+		networks[network_id].orig_network_id = orig_network_id;
+#if 0
 		return networks[orig_network_id].take_nit(p_nit);
+#endif
 	}
 	return ret;
 #endif
@@ -598,7 +604,21 @@ bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 
 bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
 {
+#if 0
 	return networks[p_nit->i_network_id].take_nit(p_nit);
+#else
+	bool ret = networks[p_nit->i_network_id].take_nit(p_nit);
+	const decoded_nit_t *decoded_nit = get_decoded_nit();
+	if ((decoded_nit) && (decoded_nit->ts_list.count(decoded_pat.ts_id))) {
+		uint16_t other_orig_network_id = ((decoded_nit_t*)decoded_nit)->ts_list[decoded_pat.ts_id].orig_network_id;
+
+		networks[p_nit->i_network_id].orig_network_id = other_orig_network_id;
+#if 0
+		return networks[other_orig_network_id].take_nit(p_nit);
+#endif
+	}
+	return ret;
+#endif
 }
 
 bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
@@ -667,11 +687,15 @@ bool decode::take_sdt_actual(dvbpsi_sdt_t* p_sdt)
 {
 	orig_network_id = p_sdt->i_network_id;
 
-	return networks[p_sdt->i_network_id].take_sdt(p_sdt);
+	networks[orig_network_id].orig_network_id = orig_network_id;
+
+	return networks[orig_network_id].take_sdt(p_sdt);
 }
 
 bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 {
+	networks[p_sdt->i_network_id].orig_network_id = p_sdt->i_network_id;
+
 	return networks[p_sdt->i_network_id].take_sdt(p_sdt);
 }
 

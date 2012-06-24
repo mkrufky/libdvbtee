@@ -296,6 +296,8 @@ public:
 	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; };
 
 	desc descriptors;
+
+	uint16_t orig_network_id;
 private:
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
