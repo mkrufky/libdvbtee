@@ -595,6 +595,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 
 	fprintf(stdout, "\n# channel %d, %d, %s %s\n", channel, freq, "", "");
 
+	if (decoders.count(ts_id))
 	for (map_decoded_pat_programs::const_iterator iter_pat = decoders[ts_id].get_decoded_pat()->programs.begin();
 	     iter_pat != decoders[ts_id].get_decoded_pat()->programs.end(); ++iter_pat) {
 		int program_number = iter_pat->first;
@@ -698,22 +699,21 @@ void parse::epg_dump()
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		decoders[iter->second].dump_epg();
+		if (decoders.count(iter->second)) decoders[iter->second].dump_epg();
 
 	channels.clear();
-
 }
 
 bool parse::is_psip_ready()
 {
 	return ((has_pat) &&
 		(((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit))) &&
-		(decoders[get_ts_id()].complete_pmt()));
+		((decoders.count(get_ts_id())) && (decoders[get_ts_id()].complete_pmt())));
 };
 
 bool parse::is_epg_ready()
 {
-	return ((is_psip_ready()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)));
+	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
 };
 
 
@@ -783,7 +783,7 @@ int parse::feed(int count, uint8_t* p_data)
 		fed_pkt_count++;
 	}
 #if 1//DBG
-	while(decoders[ts_id].eit_x_complete(dumped_eit)) {
+	while (((decoders.count(ts_id)) && (decoders[ts_id].eit_x_complete(dumped_eit)))) {
 		decoders[ts_id].dump_eit_x(dumped_eit);
 		dumped_eit++;
 	}
