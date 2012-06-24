@@ -73,8 +73,8 @@ decode_network_service::decode_network_service()
 
 decode_network_service::~decode_network_service()
 {
-	dprintf("(%04x|%05d/%05d)",
-		decoded_sdt.network_id, decoded_sdt.network_id, decoded_sdt.ts_id);
+	dprintf("(%05d|%05d)",
+		decoded_sdt.network_id, decoded_sdt.ts_id);
 
 	decoded_sdt.services.clear();
 
@@ -144,13 +144,11 @@ decode_network::decode_network()
 decode_network::~decode_network()
 {
 #if 0
-	dprintf("(%04x|%05d)/(%04x|%05d)",
-		decoded_nit.network_id, decoded_nit.network_id,
-		decoded_sdt.network_id, decoded_sdt.network_id);
+	dprintf("(%05d|%05d)",
+		decoded_nit.network_id, decoded_sdt.network_id);
 #else
-	dprintf("(%04x|%05d)/(%04x|%05d) %d",
-		decoded_nit.network_id, decoded_nit.network_id,
-		orig_network_id, orig_network_id,
+	dprintf("(%05d|%05d) %d",
+		decoded_nit.network_id, orig_network_id,
 		decoded_network_services.size());
 #endif
 
@@ -637,10 +635,10 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 			p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
 		return false;
 	}
-#if SDT_DBG
-	fprintf(stderr, "%s: v%d | ts_id %d | network_id %d\n", __func__,
+	dprintf("v%02d | ts_id %05d | network_id %05d\n"
+		/*"------------------------------------"*/,
 		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
-#endif
+
 	decoded_sdt->ts_id      = p_sdt->i_ts_id;
 	decoded_sdt->version    = p_sdt->i_version;
 	decoded_sdt->network_id = p_sdt->i_network_id;
@@ -668,14 +666,13 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 		strcpy((char*)decoded_sdt->services[p_service->i_service_id].provider_name, (const char*)descriptors->provider_name);
 		strcpy((char*)decoded_sdt->services[p_service->i_service_id].service_name, (const char*)descriptors->service_name);
 
-#if SDT_DBG
-		fprintf(stderr, "%s: %d | %s | %s | %s %s\n", __func__,
+		dprintf("%05d | %s %s | %s - %s",
 			decoded_sdt->services[p_service->i_service_id].service_id,
-			decoded_sdt->services[p_service->i_service_id].provider_name,
-			decoded_sdt->services[p_service->i_service_id].service_name,
 			(decoded_sdt->services[p_service->i_service_id].f_eit_present) ? "p/f" : "   ",
-			(decoded_sdt->services[p_service->i_service_id].f_eit_sched) ? "sched" : "     ");
-#endif
+			(decoded_sdt->services[p_service->i_service_id].f_eit_sched) ? "sched" : "     ",
+			decoded_sdt->services[p_service->i_service_id].provider_name,
+			decoded_sdt->services[p_service->i_service_id].service_name);
+
 		p_service = p_service->p_next;
 	}
 	*services_w_eit_pf    = _services_w_eit_pf;
@@ -715,7 +712,7 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descrip
 #endif
 		return false;
 	}
-#if 1//DBG
+#if DBG
 	fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d | table id: 0x%02x, last_table id: 0x%02x\n", __func__, eit_x,
 		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id, p_eit->i_table_id, p_eit->i_last_table_id);
 #endif
