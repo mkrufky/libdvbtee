@@ -28,6 +28,7 @@
 
 #include "feed.h"
 #include "tune.h"
+#include "serve.h"
 
 #include "atsctext.h"
 
@@ -108,6 +109,12 @@ void signal_callback_handler(int signum)
 	context->tuner.feeder.parser.cleanup();
 
 	exit(signum);
+}
+
+
+void start_server(struct dvbtee_context* context, int num_tuners)
+{
+	serve server;
 }
 
 
@@ -309,6 +316,10 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
+	if (b_serve) {
+		start_server(&context, num_tuners);
+		goto exit;
+	}
 	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
 		context.tuner.feeder.parser.limit_eit(eit_limit);
