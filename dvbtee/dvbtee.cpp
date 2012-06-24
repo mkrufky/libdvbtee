@@ -200,6 +200,7 @@ int main(int argc, char **argv)
 	bool scan_epg   = false;
 	bool b_output_file   = false;
 	bool b_output_stdout = false;
+	bool b_serve    = false;
 
 	/* LinuxDVB context: */
 	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
@@ -227,7 +228,7 @@ int main(int argc, char **argv)
 #define VERSION "0.0.4"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::E::o::d::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::SE::o::d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -264,6 +265,9 @@ int main(int argc, char **argv)
 			scan_method = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			if (scan_method)
 				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
+			break;
+		case 'S': /* server mode */
+			b_serve = true;
 			break;
 		case 'E': /* enable EPG scan */
 #if 0
