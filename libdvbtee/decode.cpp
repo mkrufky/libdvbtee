@@ -645,8 +645,8 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 
 		/* service descriptors contain service provider name & service name */
 		descriptors->decode(p_service->p_first_descriptor);
-		strcpy(decoded_sdt->services[p_service->i_service_id].provider_name, (const char *)descriptors->provider_name);
-		strcpy(decoded_sdt->services[p_service->i_service_id].service_name, (const char *)descriptors->service_name);
+		strcpy((char*)decoded_sdt->services[p_service->i_service_id].provider_name, (const char*)descriptors->provider_name);
+		strcpy((char*)decoded_sdt->services[p_service->i_service_id].service_name, (const char*)descriptors->service_name);
 
 #if SDT_DBG
 		fprintf(stderr, "%s: %d | %s | %s | %s %s\n", __func__,
@@ -903,8 +903,8 @@ void decode::dump_eit_x_dvb(uint8_t eit_x, uint16_t service_id)
 
 		map_decoded_eit_events::const_iterator iter_eit;
 		if (get_decoded_eit())
-		for (iter_eit = get_decoded_eit()[eit_x][iter_sdt->second.service_id].events.begin();
-		     iter_eit != get_decoded_eit()[eit_x][iter_sdt->second.service_id].events.end();
+		for (iter_eit = ((map_decoded_eit*)get_decoded_eit())[eit_x][iter_sdt->second.service_id].events.begin();
+		     iter_eit != ((map_decoded_eit*)get_decoded_eit())[eit_x][iter_sdt->second.service_id].events.end();
 		     ++iter_eit) {
 
 			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
@@ -1073,8 +1073,8 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 bool decode::got_all_eit(int limit)
 {
 	if (decoded_mgt.tables.size() == 0) {
-		decoded_nit_t* decoded_nit = get_decoded_nit();
-		decoded_sdt_t* decoded_sdt = get_decoded_sdt();
+		const decoded_nit_t* decoded_nit = get_decoded_nit();
+		const decoded_sdt_t* decoded_sdt = get_decoded_sdt();
 		if (((decoded_nit) && (decoded_sdt)) && ((decoded_sdt->services.size()) && (decoded_nit->ts_list.size()))) {
 			return ((eit_x_complete_dvb_pf()) && (eit_x_complete_dvb_sched(1)));
 		} else // FIXME
