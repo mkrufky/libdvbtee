@@ -732,16 +732,17 @@ int parse::feed(int count, uint8_t* p_data)
         uint8_t* p = p_data;
         for (int i = count / 188; i > 0; --i) {
 		uint16_t pid = tp_pkt_pid(p);
+		bool send_pkt = false;
 
 		if (p[1] & 0x80) {
 			fprintf(stderr, "\tTEI\t");//"%s: TEI detected, dropping packet\n", __func__);
 			if (!process_err_pkts) continue;
 		}
 
-		if (PID_PAT == pid)
+		if (PID_PAT == pid) {
 			dvbpsi_PushPacket(h_pat, p);
-		else {
-			bool send_pkt = false;
+			send_pkt = true;
+		} else {
 			map_dvbpsi::const_iterator iter;
 
 			iter = h_pmt.find(pid);
@@ -771,10 +772,9 @@ int parse::feed(int count, uint8_t* p_data)
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
 			}
-
-			if ((false) && (send_pkt)) {
-				out.push(p);
-			}
+		}
+		if ((false) && (send_pkt)) {
+			out.push(p);
 		}
 #if DBG
 		addpid(pid);
