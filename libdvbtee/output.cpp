@@ -74,7 +74,7 @@ void* output_stream::output_stream_thread()
 		uint8_t p_data[buf_size];// = { 0 };
 		if (buf_size) {
 			ringbuffer.read(p_data, buf_size);
-			// DO SOMETHING!!!
+			stream(p_data, buf_size);
 		}
 	}
 	pthread_exit(NULL);
@@ -107,8 +107,14 @@ void output_stream::stop()
 
 int output_stream::push(uint8_t* p_data, int size)
 {
-	/* push data into output_stream buffer  */
+	/* push data into output_stream buffer */
 	ringbuffer.write(p_data, size);
+	return 0;
+}
+
+int output_stream::stream(uint8_t* p_data, int size)
+{
+	/* stream data to target */
 	return 0;
 }
 /* ----------------------------------------------------------------- */
@@ -210,7 +216,7 @@ void output::stop()
 
 int output::push(uint8_t* p_data)
 {
-	/* push data into output buffer  */
+	/* push data into output buffer */
 	ringbuffer.write(p_data, 188);
 	return 0;
 }

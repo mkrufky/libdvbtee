@@ -53,6 +53,8 @@ private:
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
+
+	int stream(uint8_t* p_data, int size);
 };
 
 typedef std::map<int, output_stream> output_stream_map;
