@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "serve.h"
 
@@ -86,7 +87,35 @@ void* serve::serve_thread()
 	pthread_exit(NULL);
 }
 
+int serve::start()
+{
+	dprintf("()");
+
+	f_kill_thread = false;
+
+	int ret = pthread_create(&h_thread, NULL, serve_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
+void serve::stop()
+{
+	dprintf("()");
+
+	stop_without_wait();
+
+	while (-1 != sock_fd) {
+		usleep(20*1000);
+	}
+	return;
+}
+
+#if 0
 int serve::push(uint8_t* p_data)
 {
 	return 0;
 }
+#endif

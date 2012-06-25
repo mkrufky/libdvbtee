@@ -11,7 +11,7 @@ LDADD = -L../libdvbtee -L../usr/lib -ldvbtee -ldvbpsi
 LIBS = -L../libdvbtee -L../usr/lib -ldvbtee -ldvbpsi
 
 shared: libdvbtee
-	$(GPP) $(INCLUDES) $(CPPFLAGS) dvbtee.cpp serve.o -o dvbtee $(LIBS)
+	$(GPP) $(INCLUDES) $(CPPFLAGS) dvbtee.cpp serve.cpp -o dvbtee $(LIBS)
 
 static: libdvbtee
 	$(GPP) $(INCLUDES) $(CPPFLAGS) dvbtee.cpp ../libdvbtee/libdvbtee.a -o dvbtee

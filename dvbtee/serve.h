@@ -32,14 +32,18 @@ public:
 	serve();
 	~serve();
 
+	int start();
+	void stop();
+#if 0
 	int push(uint8_t* p_data);
-
+#endif
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
 
 	void *serve_thread();
 	static void *serve_thread(void*);
+	void stop_without_wait() { f_kill_thread = true; };
 
 	int sock_fd;
 	uint16_t port;
