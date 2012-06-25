@@ -25,6 +25,8 @@
 #include <pthread.h>
 #include <stdint.h>
 
+#include <map>
+
 class output_stream
 {
 public:
@@ -49,11 +51,16 @@ private:
 	void stop_without_wait() { f_kill_thread = true; };
 };
 
+typedef std::map<int, output_stream> output_stream_map;
+
 class output
 {
 public:
 	output();
 	~output();
+
+	output(const output&);
+	output& operator= (const output&);
 
 	int start();
 	void stop();
@@ -61,6 +68,8 @@ public:
 	int push(uint8_t* p_data);
 
 private:
+	output_stream_map output_streams;
+
 	pthread_t h_thread;
 	bool f_kill_thread;
 

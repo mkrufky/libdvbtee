@@ -104,17 +104,22 @@ output::output()
   : f_kill_thread(false)
 {
 	dprintf("()");
+
+	output_streams.clear();
 }
 
 output::~output()
 {
 	dprintf("()");
+
+	output_streams.clear();
 }
 
-#if 0
 output::output(const output&)
 {
 	dprintf("(copy)");
+
+	output_streams.clear();
 }
 
 output& output::operator= (const output& cSource)
@@ -124,9 +129,10 @@ output& output::operator= (const output& cSource)
 	if (this == &cSource)
 		return *this;
 
+	output_streams.clear();
+
 	return *this;
 }
-#endif
 
 //static
 void* output::output_thread(void *p_this)
