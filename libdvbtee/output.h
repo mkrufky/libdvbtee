@@ -25,6 +25,25 @@
 #include <pthread.h>
 #include <stdint.h>
 
+class output_stream
+{
+public:
+	output_stream();
+	~output_stream();
+
+	output_stream(const output_stream&);
+	output_stream& operator= (const output_stream&);
+
+	int push(uint8_t* p_data);
+
+private:
+	pthread_t h_thread;
+	bool f_kill_thread;
+
+	void *output_stream_thread();
+	static void *output_stream_thread(void*);
+};
+
 class output
 {
 public:

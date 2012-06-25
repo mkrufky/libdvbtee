@@ -30,6 +30,49 @@
 
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
+output_stream::output_stream()
+  : f_kill_thread(false)
+{
+	dprintf("()");
+}
+
+output_stream::~output_stream()
+{
+	dprintf("()");
+}
+
+output_stream::output_stream(const output_stream&)
+{
+	dprintf("(copy)");
+}
+
+output_stream& output_stream::operator= (const output_stream& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	return *this;
+}
+
+//static
+void* output_stream::output_stream_thread(void *p_this)
+{
+	return static_cast<output_stream*>(p_this)->output_stream_thread();
+}
+
+void* output_stream::output_stream_thread()
+{
+	pthread_exit(NULL);
+}
+
+int output_stream::push(uint8_t* p_data)
+{
+	return 0;
+}
+/* ----------------------------------------------------------------- */
+
 output::output()
   : f_kill_thread(false)
 {
