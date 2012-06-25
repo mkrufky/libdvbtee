@@ -162,7 +162,13 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 
 	if (!decoded) return true;
 
-	/* FIXME: if we're going to stream a program, we should make sure its pid is coming thru after analyzing the decoded pmt's */
+	/* if we're going to stream a program, we should make sure its pid is coming thru after analyzing the decoded pmt's */
+	map_decoded_pmt::const_iterator iter_pmt = decoders[ts_id].get_decoded_pmt()->find(p_pmt->i_program_number);
+	if (iter_pmt != decoders[ts_id].get_decoded_pmt()->end()) {
+		for (map_ts_elementary_streams::const_iterator iter_pmt_es = iter_pmt->second.es_streams.begin();
+		     iter_pmt_es != iter_pmt->second.es_streams.end(); ++iter_pmt_es)
+				payload_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+	}
 
 	return true;
 }
@@ -777,6 +783,11 @@ int parse::feed(int count, uint8_t* p_data)
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
 			}
+
+			map_pidtype::const_iterator iter_payload;
+			iter_payload = payload_pids.find(pid);
+			if (iter_payload != payload_pids.end())
+				send_pkt = true;
 		}
 		if (/*(false) &&*/ (send_pkt)) {
 			out.push(p);

@@ -33,6 +33,7 @@
 #include <map>
 typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
 typedef std::map<uint16_t, decode> map_decoder;
+typedef std::map<uint16_t, uint16_t> map_pidtype;
 
 typedef struct {
 	unsigned int channel;
@@ -146,6 +147,7 @@ private:
 	output out;
 
 	bool process_err_pkts;
+	map_pidtype payload_pids;
 };
 
 #endif//__PARSE_H__
