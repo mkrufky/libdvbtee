@@ -40,6 +40,8 @@ output_stream::output_stream()
 output_stream::~output_stream()
 {
 	dprintf("()");
+
+	stop();
 }
 
 #if 0
@@ -131,6 +133,8 @@ output::output()
 output::~output()
 {
 	dprintf("()");
+
+	stop();
 
 	output_streams.clear();
 }
