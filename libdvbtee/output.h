@@ -22,8 +22,10 @@
 #ifndef __OUTPUT_H__
 #define __OUTPUT_H__
 
+#include <arpa/inet.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #include <map>
 
@@ -34,7 +36,7 @@ class output_stream
 public:
 	output_stream();
 	~output_stream();
-#if 0
+#if 1
 	output_stream(const output_stream&);
 	output_stream& operator= (const output_stream&);
 #endif
@@ -44,15 +46,19 @@ public:
 	void stop();
 
 	int push(uint8_t* p_data, int size);
+	int add(); //FIXME
 
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
+	int sock;
 
-	RingBuffer<DummyMutex> ringbuffer;
+	RingBuffer ringbuffer;
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
+
+	struct sockaddr_in  udp_addr;
 
 	int stream(uint8_t* p_data, int size);
 };
@@ -72,6 +78,7 @@ public:
 	void stop();
 
 	int push(uint8_t* p_data);
+	int add(); //FIXME
 
 private:
 	output_stream_map output_streams;
@@ -79,12 +86,14 @@ private:
 	pthread_t h_thread;
 	bool f_kill_thread;
 
-	RingBuffer<DummyMutex> ringbuffer;
+	RingBuffer ringbuffer;
 
 	void *output_thread();
 	static void *output_thread(void*);
 
 	void stop_without_wait() { f_kill_thread = true; };
+
+	unsigned int num_targets;
 };
 
 #endif /*__OUTPUT_H__ */

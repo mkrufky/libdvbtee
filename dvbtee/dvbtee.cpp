@@ -323,6 +323,12 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
+	if (b_output_file) {
+		if (b_read_dvr)
+			context.tuner.feeder.parser.add_output();
+		else
+			context._file_feeder.parser.add_output();
+	}
 	if (b_serve) {
 		start_server(&context, num_tuners);
 		goto exit;

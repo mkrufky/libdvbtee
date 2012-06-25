@@ -716,6 +716,11 @@ bool parse::is_epg_ready()
 	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
 };
 
+int parse::add_output()
+{
+	out.add();
+	return out.start();
+}
 
 int parse::feed(int count, uint8_t* p_data)
 {
@@ -773,7 +778,7 @@ int parse::feed(int count, uint8_t* p_data)
 				send_pkt = true;
 			}
 		}
-		if ((false) && (send_pkt)) {
+		if (/*(false) &&*/ (send_pkt)) {
 			out.push(p);
 		}
 #if DBG

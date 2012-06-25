@@ -32,9 +32,12 @@
 
 output_stream::output_stream()
   : f_kill_thread(false)
-  , ringbuffer(188*7*199)
+  , sock(-1)
+  , ringbuffer()
 {
 	dprintf("()");
+	memset(&ringbuffer, 0, sizeof(ringbuffer));
+	ringbuffer.setCapacity(188*7*199+1);
 }
 
 output_stream::~output_stream()
@@ -44,10 +47,12 @@ output_stream::~output_stream()
 	stop();
 }
 
-#if 0
+#if 1
 output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
+	memset(&ringbuffer, 0, sizeof(ringbuffer));
+	ringbuffer.setCapacity(188*7*199+1);
 }
 
 output_stream& output_stream::operator= (const output_stream& cSource)
@@ -56,6 +61,9 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 
 	if (this == &cSource)
 		return *this;
+
+	memset(&ringbuffer, 0, sizeof(ringbuffer));
+	ringbuffer.setCapacity(188*7*199+1);
 
 	return *this;
 }
@@ -69,6 +77,8 @@ void* output_stream::output_stream_thread(void *p_this)
 
 void* output_stream::output_stream_thread()
 {
+	dprintf("()");
+
 	/* push data from output_stream buffer to target */
 	while (!f_kill_thread) {
 
@@ -117,15 +127,53 @@ int output_stream::push(uint8_t* p_data, int size)
 int output_stream::stream(uint8_t* p_data, int size)
 {
 	/* stream data to target */
+	return sendto(sock, p_data, size, 0, (struct sockaddr*) &udp_addr, sizeof(udp_addr));
+}
+
+int output_stream::add()
+{
+	dprintf("(2)");
+
+	if (sock >= 0)
+		close(sock);
+
+	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	if (sock >= 0) {
+		int fl = fcntl(sock, F_GETFL, 0);
+		if (fcntl(sock, F_SETFL, fl | O_NONBLOCK) < 0)
+			perror("set non-blocking failed");
+		memset(&udp_addr, 0, sizeof(udp_addr));
+		udp_addr.sin_family = AF_INET;
+		udp_addr.sin_port   = htons(/*FIXME*/1234);
+		if (inet_aton(/*"192.168.1.103"*//*FIXME*/"224.1.1.1", &udp_addr.sin_addr) == 0) {
+
+			perror("udp ip address translation failed");
+			return -1;
+		} else
+			ringbuffer.reset();
+	} else {
+		perror("socket failed");
+		return -1;
+	}
+
+	dprintf("~(2)");
+
 	return 0;
 }
+
 /* ----------------------------------------------------------------- */
 
 output::output()
   : f_kill_thread(false)
-  , ringbuffer(188*7*199*2)
+  , ringbuffer()
+  , num_targets(0)
 {
 	dprintf("()");
+
+	ringbuffer.setCapacity(188*7*199*2+1);
+
+	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
 }
@@ -222,5 +270,16 @@ int output::push(uint8_t* p_data)
 {
 	/* push data into output buffer */
 	ringbuffer.write(p_data, 188);
+	return 0;
+}
+
+int output::add()
+{
+	dprintf("(1)");
+	/* push data into output buffer */
+	if (output_streams[num_targets].add() == 0)
+		num_targets++;
+	dprintf("~(1)");
+
 	return 0;
 }
