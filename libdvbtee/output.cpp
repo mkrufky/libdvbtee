@@ -32,6 +32,7 @@
 
 output_stream::output_stream()
   : f_kill_thread(false)
+  , ringbuffer(188*7*199)
 {
 	dprintf("()");
 }
@@ -41,6 +42,7 @@ output_stream::~output_stream()
 	dprintf("()");
 }
 
+#if 0
 output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
@@ -55,6 +57,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 
 	return *this;
 }
+#endif
 
 //static
 void* output_stream::output_stream_thread(void *p_this)
@@ -66,6 +69,13 @@ void* output_stream::output_stream_thread()
 {
 	/* push data from output_stream buffer to target */
 	while (!f_kill_thread) {
+
+		int buf_size = ringbuffer.getSize();
+		uint8_t p_data[buf_size];// = { 0 };
+		if (buf_size) {
+			ringbuffer.read(p_data, buf_size);
+			// DO SOMETHING!!!
+		}
 	}
 	pthread_exit(NULL);
 }
@@ -95,15 +105,17 @@ void output_stream::stop()
 	return;
 }
 
-int output_stream::push(uint8_t* p_data)
+int output_stream::push(uint8_t* p_data, int size)
 {
 	/* push data into output_stream buffer  */
+	ringbuffer.write(p_data, size);
 	return 0;
 }
 /* ----------------------------------------------------------------- */
 
 output::output()
   : f_kill_thread(false)
+  , ringbuffer(188*7*199*2)
 {
 	dprintf("()");
 
@@ -117,6 +129,7 @@ output::~output()
 	output_streams.clear();
 }
 
+#if 0
 output::output(const output&)
 {
 	dprintf("(copy)");
@@ -135,6 +148,7 @@ output& output::operator= (const output& cSource)
 
 	return *this;
 }
+#endif
 
 //static
 void* output::output_thread(void *p_this)
@@ -146,10 +160,15 @@ void* output::output_thread()
 {
 	/* push data from main output buffer into output_stream buffers */
 	while (!f_kill_thread) {
-		/* FIXME: read from buffer */
-		uint8_t* p_data = 0;
-		for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
-			iter->second.push(p_data);
+
+		int buf_size = ringbuffer.getSize();
+		uint8_t p_data[buf_size];// = { 0 };
+		if (buf_size) {
+			ringbuffer.read(p_data, buf_size);
+
+			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+				iter->second.push(p_data, buf_size);
+		}
 	}
 	pthread_exit(NULL);
 }
@@ -192,5 +211,6 @@ void output::stop()
 int output::push(uint8_t* p_data)
 {
 	/* push data into output buffer  */
+	ringbuffer.write(p_data, 188);
 	return 0;
 }

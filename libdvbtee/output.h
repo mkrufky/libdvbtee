@@ -27,25 +27,29 @@
 
 #include <map>
 
+#include "ringbuffer.h"
+
 class output_stream
 {
 public:
 	output_stream();
 	~output_stream();
-
+#if 0
 	output_stream(const output_stream&);
 	output_stream& operator= (const output_stream&);
-
+#endif
 	void stop_without_wait() { f_kill_thread = true; };
 
 	int start();
 	void stop();
 
-	int push(uint8_t* p_data);
+	int push(uint8_t* p_data, int size);
 
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
+
+	RingBuffer<DummyMutex> ringbuffer;
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
@@ -58,10 +62,10 @@ class output
 public:
 	output();
 	~output();
-
+#if 0
 	output(const output&);
 	output& operator= (const output&);
-
+#endif
 	int start();
 	void stop();
 
@@ -72,6 +76,8 @@ private:
 
 	pthread_t h_thread;
 	bool f_kill_thread;
+
+	RingBuffer<DummyMutex> ringbuffer;
 
 	void *output_thread();
 	static void *output_thread(void*);
