@@ -64,6 +64,7 @@ void* output_stream::output_stream_thread(void *p_this)
 
 void* output_stream::output_stream_thread()
 {
+	/* push data from output_stream buffer to target */
 	while (!f_kill_thread) {
 	}
 	pthread_exit(NULL);
@@ -96,6 +97,7 @@ void output_stream::stop()
 
 int output_stream::push(uint8_t* p_data)
 {
+	/* push data into output_stream buffer  */
 	return 0;
 }
 /* ----------------------------------------------------------------- */
@@ -142,7 +144,12 @@ void* output::output_thread(void *p_this)
 
 void* output::output_thread()
 {
+	/* push data from main output buffer into output_stream buffers */
 	while (!f_kill_thread) {
+		/* FIXME: read from buffer */
+		uint8_t* p_data = 0;
+		for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+			iter->second.push(p_data);
 	}
 	pthread_exit(NULL);
 }
@@ -156,12 +163,22 @@ int output::start()
 	if (0 != ret)
 		perror("pthread_create() failed");
 
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		iter->second.start();
+
 	return ret;
 }
 
 void output::stop()
 {
 	dprintf("()");
+
+	/* call stop_without_wait() on everybody first before we call stop() on everybody, which is a blocking function */
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		iter->second.stop_without_wait();
+
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		iter->second.stop();
 
 	stop_without_wait();
 #if 0
@@ -174,5 +191,6 @@ void output::stop()
 
 int output::push(uint8_t* p_data)
 {
+	/* push data into output buffer  */
 	return 0;
 }

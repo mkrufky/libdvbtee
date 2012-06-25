@@ -36,6 +36,8 @@ public:
 	output_stream(const output_stream&);
 	output_stream& operator= (const output_stream&);
 
+	void stop_without_wait() { f_kill_thread = true; };
+
 	int start();
 	void stop();
 
@@ -47,8 +49,6 @@ private:
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
-
-	void stop_without_wait() { f_kill_thread = true; };
 };
 
 typedef std::map<int, output_stream> output_stream_map;
