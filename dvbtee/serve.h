@@ -24,7 +24,7 @@
 #include <pthread.h>
 #include <stdint.h>
 
-#define SERVE_DEFAULT_PORT 80
+#define SERVE_DEFAULT_PORT 64080
 
 class serve
 {
@@ -32,7 +32,7 @@ public:
 	serve();
 	~serve();
 
-	int start();
+	int start(uint16_t port_requested = SERVE_DEFAULT_PORT);
 	void stop();
 #if 0
 	int push(uint8_t* p_data);

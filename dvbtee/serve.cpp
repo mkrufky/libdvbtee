@@ -18,12 +18,16 @@
  *
  *****************************************************************************/
 
+#include <errno.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <sys/socket.h>
+#include <string.h>
 
 #include "serve.h"
 
@@ -66,6 +70,7 @@ void serve::close_socket()
 		close(sock_fd);
 		sock_fd = -1;
 	}
+	port = 0;
 }
 
 #if 0
@@ -91,17 +96,89 @@ void* serve::serve_thread(void *p_this)
 	return static_cast<serve*>(p_this)->serve_thread();
 }
 
+#define MAX_SOCKETS 4
+
 void* serve::serve_thread()
 {
+	struct sockaddr_in tcpsa;
+	socklen_t salen = sizeof(tcpsa);
+	int i, rxlen = 0;
+	int sock[MAX_SOCKETS];
+
+	dprintf("(sock_fd=%d)", sock_fd);
+
+	for (i = 0; i < MAX_SOCKETS; i++)
+		sock[i] = -1;
+
+	while (!f_kill_thread) {
+		int d = accept(sock_fd, (struct sockaddr*)&tcpsa, &salen);
+		if (d != -1) {
+			for (i = 0; i < MAX_SOCKETS; i++)
+				if (sock[i] == -1) {
+					sock[i] = d;
+					break;
+				}
+			if (sock[i] != d)
+				perror("couldn't attach to socket");
+		}
+		for (i = 0; i < MAX_SOCKETS; i++)
+			if (sock[i] != -1) {
+				char buf[256] = { 0 };
+				rxlen = recv(sock[i], buf, sizeof(buf), MSG_DONTWAIT);
+				if (rxlen > 0) {
+					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
+					fprintf(stderr, "%s: %s\n", __func__, buf);
+					//process
+				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+					close(sock[i]);
+					sock[i] = -1;
+				}
+			}
+	}
+
 	close_socket();
 	pthread_exit(NULL);
 }
 
-int serve::start()
+int serve::start(uint16_t port_requested)
 {
+	struct sockaddr_in tcp_sock;
+
 	dprintf("()");
 
+	memset(&tcp_sock, 0, sizeof(tcp_sock));
+
 	f_kill_thread = false;
+
+	sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock_fd < 0) {
+		perror("open socket failed");
+		return sock_fd;
+	}
+
+	int reuse = 1;
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+		perror("setting reuse failed");
+		return -1;
+	}
+
+	tcp_sock.sin_family = AF_INET;
+	tcp_sock.sin_port = htons(port_requested);
+	tcp_sock.sin_addr.s_addr = INADDR_ANY;
+
+
+	if (bind(sock_fd, (struct sockaddr*)&tcp_sock, sizeof(tcp_sock)) < 0) {
+		perror("bind to local interface failed");
+		return -1;
+	}
+	port = port_requested;
+
+	int fl = fcntl(sock_fd, F_GETFL, 0);
+	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
+		perror("set non-blocking failed");
+		return -1;
+	}
+	listen(sock_fd, 4);
 
 	int ret = pthread_create(&h_thread, NULL, serve_thread, this);
 

@@ -115,9 +115,11 @@ void signal_callback_handler(int signum)
 void start_server(struct dvbtee_context* context, int num_tuners)
 {
 	serve server;
-#if 1
+
 	server.start();
 
+	while (1) sleep(1);
+#if 0
 	server.stop();
 #endif
 }
