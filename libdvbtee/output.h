@@ -34,6 +34,9 @@ public:
 	output_stream(const output_stream&);
 	output_stream& operator= (const output_stream&);
 
+	int start();
+	void stop();
+
 	int push(uint8_t* p_data);
 
 private:
@@ -42,6 +45,8 @@ private:
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
+
+	void stop_without_wait() { f_kill_thread = true; };
 };
 
 class output
@@ -49,6 +54,9 @@ class output
 public:
 	output();
 	~output();
+
+	int start();
+	void stop();
 
 	int push(uint8_t* p_data);
 
@@ -58,6 +66,8 @@ private:
 
 	void *output_thread();
 	static void *output_thread(void*);
+
+	void stop_without_wait() { f_kill_thread = true; };
 };
 
 #endif /*__OUTPUT_H__ */

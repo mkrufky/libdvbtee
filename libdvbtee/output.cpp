@@ -64,7 +64,34 @@ void* output_stream::output_stream_thread(void *p_this)
 
 void* output_stream::output_stream_thread()
 {
+	while (!f_kill_thread) {
+	}
 	pthread_exit(NULL);
+}
+
+int output_stream::start()
+{
+	dprintf("()");
+
+	int ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
+void output_stream::stop()
+{
+	dprintf("()");
+
+	stop_without_wait();
+#if 0
+	while (-1 != sock_fd) {
+		usleep(20*1000);
+	}
+#endif
+	return;
 }
 
 int output_stream::push(uint8_t* p_data)
@@ -109,7 +136,34 @@ void* output::output_thread(void *p_this)
 
 void* output::output_thread()
 {
+	while (!f_kill_thread) {
+	}
 	pthread_exit(NULL);
+}
+
+int output::start()
+{
+	dprintf("()");
+
+	int ret = pthread_create(&h_thread, NULL, output_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
+void output::stop()
+{
+	dprintf("()");
+
+	stop_without_wait();
+#if 0
+	while (-1 != sock_fd) {
+		usleep(20*1000);
+	}
+#endif
+	return;
 }
 
 int output::push(uint8_t* p_data)
