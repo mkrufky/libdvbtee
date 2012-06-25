@@ -53,6 +53,15 @@ serve::~serve()
 {
 	dprintf("()");
 
+	close_socket();
+}
+
+void serve::close_socket()
+{
+	dprintf("()");
+
+	stop();
+
 	if (sock_fd >= 0) {
 		close(sock_fd);
 		sock_fd = -1;
@@ -84,6 +93,7 @@ void* serve::serve_thread(void *p_this)
 
 void* serve::serve_thread()
 {
+	close_socket();
 	pthread_exit(NULL);
 }
 
