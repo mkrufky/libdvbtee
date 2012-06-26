@@ -46,6 +46,8 @@ private:
 	void stop_without_wait() { f_kill_thread = true; };
 	void close_socket();
 
+	bool command(char*);
+
 	int sock_fd;
 	uint16_t port;
 };
