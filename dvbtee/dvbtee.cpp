@@ -250,6 +250,7 @@ int main(int argc, char **argv)
 			break;
 		case 'A': /* ATSC / QAM */
 			scan_flags = strtoul(optarg, NULL, 0);
+			b_read_dvr = true;
 			break;
 		case 'c': /* channel / scan min */
 			channel = strtoul(optarg, NULL, 0);
@@ -329,13 +330,13 @@ int main(int argc, char **argv)
 		else
 			context._file_feeder.parser.add_output(outfilename);
 	}
-	if (b_serve) {
-		start_server(&context, num_tuners);
-		goto exit;
-	}
 	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
 		context.tuner.feeder.parser.limit_eit(eit_limit);
+	}
+	if (b_serve) {
+		start_server(&context, num_tuners);
+		goto exit;
 	}
 
 	if ((scan_min) && (!scan_max))
@@ -344,7 +345,7 @@ int main(int argc, char **argv)
 	if ((scan_max) && (!scan_min))
 		channel = scan_min = scan_max;
 
-	if (b_scan) {
+	if ((b_scan) && ((b_read_dvr) || (num_tuners >= 0))) {
 		if (num_tuners >= 0)
 			multiscan(&context, num_tuners, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit);
 		else
