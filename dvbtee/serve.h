@@ -24,6 +24,8 @@
 #include <pthread.h>
 #include <stdint.h>
 
+#include "tune.h"
+
 #define SERVE_DEFAULT_PORT 64080
 
 class serve
@@ -37,6 +39,7 @@ public:
 #if 0
 	int push(uint8_t* p_data);
 #endif
+	void set_tuner(tune *new_tuner) { tuner = new_tuner; };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -50,6 +53,8 @@ private:
 
 	int sock_fd;
 	uint16_t port;
+
+	tune *tuner;
 };
 
 #endif /*__SERVE_H__ */

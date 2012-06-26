@@ -49,6 +49,7 @@ serve::serve()
   : f_kill_thread(false)
   , sock_fd(-1)
   , port(0)
+  , tuner(NULL)
 {
 	dprintf("()");
 }
@@ -128,7 +129,7 @@ void* serve::serve_thread()
 				if (rxlen > 0) {
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 					fprintf(stderr, "%s: %s\n", __func__, buf);
-					//process
+					command(buf); /* process */
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 					close(sock[i]);
 					sock[i] = -1;
@@ -210,37 +211,39 @@ int serve::push(uint8_t* p_data)
 bool serve::command(char* cmdline)
 {
 	char* cmd = strtok(cmdline, ":");
+	char* arg;
 	if (!cmd)
-		return false;
+		cmd = cmdline;
+	arg = strtok(NULL, ";");
 
-	char* arg = strtok(cmdline, ":");
-#if 0
+	unsigned int scan_flags = 0; // FIXME
+
 	if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
-		fprintf(stderr, "TUNE to channel %d...\n", channel);
-		if (tuner.open_fe() < 0)
+		fprintf(stderr, "TUNE to channel %d...(%s)\n", channel, arg);
+		if (tuner->open_fe() < 0)
 			return false;
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
-		if (tuner.tune_channel((scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
+		if (tuner->tune_channel((scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
 
-			if (!tuner.wait_for_lock_or_timeout(2000)) {
-				tuner.close_fe();
+			if (!tuner->wait_for_lock_or_timeout(2000)) {
+				tuner->close_fe();
 				return false; /* NO LOCK! */
 			}
-			tuner.feeder.parser.set_channel_info(channel,
+			tuner->feeder.parser.set_channel_info(channel,
 							     (scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 							     (scan_flags == SCAN_VSB) ? "8VSB" : "QAM256");
-			tuner.start_feed();
+			tuner->start_feed();
 		}
 
 	} else if (strstr(cmd, "stream")) {
-		tuner.feeder.parser.add_output(arg);
-	} else if (strstr(cmd, "stopfeed")) {
-		tuner.stop_feed();
-		tuner.close_fe();
+		tuner->feeder.parser.add_output(arg);
+	} else if (strstr(cmd, "stop")) {
+		tuner->stop_feed();
+		tuner->close_fe();
 	}
-#endif
+
 	return true;
 }

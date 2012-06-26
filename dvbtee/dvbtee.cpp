@@ -116,6 +116,7 @@ void start_server(struct dvbtee_context* context, int num_tuners)
 {
 	serve server;
 
+	server.set_tuner(&context->tuner);
 	server.start();
 
 	while (1) sleep(1);
