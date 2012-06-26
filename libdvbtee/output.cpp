@@ -124,8 +124,7 @@ void output_stream::stop()
 int output_stream::push(uint8_t* p_data, int size)
 {
 	/* push data into output_stream buffer */
-	ringbuffer.write(p_data, size);
-	return 0;
+	return ringbuffer.write(p_data, size);
 }
 
 int output_stream::stream(uint8_t* p_data, int size)
@@ -134,7 +133,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 	return sendto(sock, p_data, size, 0, (struct sockaddr*) &udp_addr, sizeof(udp_addr));
 }
 
-int output_stream::add()
+int output_stream::add(char* target)
 {
 	dprintf("(2)");
 
@@ -150,7 +149,7 @@ int output_stream::add()
 		memset(&udp_addr, 0, sizeof(udp_addr));
 		udp_addr.sin_family = AF_INET;
 		udp_addr.sin_port   = htons(/*FIXME*/1234);
-		if (inet_aton(/*"192.168.1.103"*//*FIXME*/"224.1.1.1", &udp_addr.sin_addr) == 0) {
+		if (inet_aton(target, &udp_addr.sin_addr) == 0) {
 
 			perror("udp ip address translation failed");
 			return -1;
@@ -273,17 +272,17 @@ void output::stop()
 int output::push(uint8_t* p_data)
 {
 	/* push data into output buffer */
-	ringbuffer.write(p_data, 188);
-	return 0;
+	return ringbuffer.write(p_data, 188);
 }
 
-int output::add()
+int output::add(char* target)
 {
 	dprintf("(1)");
 	/* push data into output buffer */
-	if (output_streams[num_targets].add() == 0)
+	int ret = output_streams[num_targets].add(target);
+	if (ret == 0)
 		num_targets++;
 	dprintf("~(1)");
 
-	return 0;
+	return ret;
 }

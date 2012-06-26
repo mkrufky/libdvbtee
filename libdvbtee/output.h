@@ -45,8 +45,8 @@ public:
 	int start();
 	void stop();
 
-	int push(uint8_t* p_data, int size);
-	int add(); //FIXME
+	int push(uint8_t*, int);
+	int add(char*);
 
 private:
 	pthread_t h_thread;
@@ -60,7 +60,7 @@ private:
 
 	struct sockaddr_in  udp_addr;
 
-	int stream(uint8_t* p_data, int size);
+	int stream(uint8_t*, int);
 };
 
 typedef std::map<int, output_stream> output_stream_map;
@@ -77,8 +77,8 @@ public:
 	int start();
 	void stop();
 
-	int push(uint8_t* p_data);
-	int add(); //FIXME
+	int push(uint8_t*);
+	int add(char*);
 
 private:
 	output_stream_map output_streams;

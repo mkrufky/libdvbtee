@@ -325,9 +325,9 @@ int main(int argc, char **argv)
 #endif
 	if (b_output_file) {
 		if (b_read_dvr)
-			context.tuner.feeder.parser.add_output();
+			context.tuner.feeder.parser.add_output(outfilename);
 		else
-			context._file_feeder.parser.add_output();
+			context._file_feeder.parser.add_output(outfilename);
 	}
 	if (b_serve) {
 		start_server(&context, num_tuners);

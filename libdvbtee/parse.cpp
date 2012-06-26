@@ -722,10 +722,13 @@ bool parse::is_epg_ready()
 	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
 };
 
-int parse::add_output()
+int parse::add_output(char* target)
 {
-	out.add();
-	return out.start();
+	int ret = out.add(target);
+	if (ret < 0)
+		return ret;
+	else
+		return out.start();
 }
 
 int parse::feed(int count, uint8_t* p_data)

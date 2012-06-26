@@ -56,7 +56,7 @@ public:
 	int feed(int, uint8_t*);
 	void reset();
 
-	int add_output();
+	int add_output(char*);
 
 	unsigned int xine_dump(uint16_t ts_id) { return xine_dump(ts_id, &channel_info[ts_id]); };
 	unsigned int xine_dump(); /* full channel dump  */
