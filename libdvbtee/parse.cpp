@@ -552,6 +552,13 @@ void parse::detach_demux()
 	dvbpsi_DetachPAT(h_pat);
 }
 
+void parse::stop()
+{
+	dprintf("()");
+
+	out.stop();
+}
+
 void parse::cleanup()
 {
 	dprintf("()");

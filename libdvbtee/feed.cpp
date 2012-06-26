@@ -113,6 +113,8 @@ void feed::stop()
 
 	stop_without_wait();
 
+	parser.stop();
+
 	while (-1 != fd) {
 		usleep(20*1000);
 	}

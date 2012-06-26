@@ -55,6 +55,7 @@ public:
 
 	int feed(int, uint8_t*);
 	void reset();
+	void stop();
 
 	int add_output(char*);
 
