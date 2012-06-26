@@ -75,19 +75,23 @@ void* output_stream::output_stream_thread(void *p_this)
 	return static_cast<output_stream*>(p_this)->output_stream_thread();
 }
 
+#define OUTPUT_STREAM_PACKET_SIZE 188*7
 void* output_stream::output_stream_thread()
 {
+	uint8_t data[OUTPUT_STREAM_PACKET_SIZE];
+
 	dprintf("()");
 
 	/* push data from output_stream buffer to target */
 	while (!f_kill_thread) {
 
 		int buf_size = ringbuffer.getSize();
-		uint8_t p_data[buf_size];// = { 0 };
-		if (buf_size) {
-			ringbuffer.read(p_data, buf_size);
-			stream(p_data, buf_size);
+		if (buf_size < OUTPUT_STREAM_PACKET_SIZE) {
+			usleep(50*1000);
+			continue;
 		}
+		ringbuffer.read(data, OUTPUT_STREAM_PACKET_SIZE);
+		stream(data, OUTPUT_STREAM_PACKET_SIZE);
 	}
 	pthread_exit(NULL);
 }
