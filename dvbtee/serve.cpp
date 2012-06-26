@@ -49,14 +49,15 @@ serve::serve()
   : f_kill_thread(false)
   , sock_fd(-1)
   , port(0)
-  , tuner(NULL)
 {
 	dprintf("()");
+	tuners.clear();
 }
 
 serve::~serve()
 {
 	dprintf("()");
+	tuners.clear();
 
 	close_socket();
 }
@@ -217,6 +218,8 @@ bool serve::command(char* cmdline)
 	arg = strtok(NULL, ";");
 
 	unsigned int scan_flags = 0; // FIXME
+
+	tune* tuner = tuners[0];
 
 	if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);

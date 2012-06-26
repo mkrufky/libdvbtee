@@ -28,6 +28,8 @@
 
 #define SERVE_DEFAULT_PORT 64080
 
+typedef std::map<uint8_t, tune*> tuner_map;
+
 class serve
 {
 public:
@@ -39,7 +41,7 @@ public:
 #if 0
 	int push(uint8_t* p_data);
 #endif
-	void set_tuner(tune *new_tuner) { tuner = new_tuner; };
+	bool add_tuner(tune *new_tuner) { tuners[tuners.size()] = new_tuner; };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -54,7 +56,7 @@ private:
 	int sock_fd;
 	uint16_t port;
 
-	tune *tuner;
+	tuner_map tuners;
 };
 
 #endif /*__SERVE_H__ */

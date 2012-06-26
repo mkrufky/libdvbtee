@@ -116,7 +116,20 @@ void start_server(struct dvbtee_context* context, int num_tuners)
 {
 	serve server;
 
-	server.set_tuner(&context->tuner);
+	if (num_tuners < 0)
+		server.add_tuner(&context->tuner);
+	else {
+		tune tuners[num_tuners];
+		for (int i = 0; i < num_tuners; i++) {
+			int dvb_adap = i; /* ID X, /dev/dvb/adapterX/ */
+			int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
+			int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
+			int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
+
+			tuners[i].set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
+			server.add_tuner(&tuners[i]);
+		}
+	}
 	server.start();
 
 	while (1) sleep(1);
