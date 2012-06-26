@@ -135,7 +135,18 @@ int output_stream::stream(uint8_t* p_data, int size)
 
 int output_stream::add(char* target)
 {
+	char *ip;
+	uint16_t port;
+
 	dprintf("(2)");
+
+	if (strstr(target, ":")) {
+		ip = strtok(target, ":");
+		port = atoi(strtok(NULL, ":"));
+	} else {
+		ip = target;
+		port = 1234;
+	}
 
 	if (sock >= 0)
 		close(sock);
@@ -148,8 +159,8 @@ int output_stream::add(char* target)
 			perror("set non-blocking failed");
 		memset(&udp_addr, 0, sizeof(udp_addr));
 		udp_addr.sin_family = AF_INET;
-		udp_addr.sin_port   = htons(/*FIXME*/1234);
-		if (inet_aton(target, &udp_addr.sin_addr) == 0) {
+		udp_addr.sin_port   = htons(port);
+		if (inet_aton(ip, &udp_addr.sin_addr) == 0) {
 
 			perror("udp ip address translation failed");
 			return -1;
