@@ -211,15 +211,24 @@ int serve::push(uint8_t* p_data)
 
 bool serve::command(char* cmdline)
 {
-	char* cmd = strtok(cmdline, ":");
+	char* cmd = strtok(cmdline, "/");
 	char* arg;
 	if (!cmd)
 		cmd = cmdline;
-	arg = strtok(NULL, ";");
+	arg = strtok(NULL, "/");
 
-	unsigned int scan_flags = 0; // FIXME
+	unsigned int tuner_id, scan_flags = 0; // FIXME
 
-	tune* tuner = tuners[0];
+	if (strstr(cmd, "tuner")) {
+		tuner_id = atoi(arg);
+		cmd = strtok(NULL, "/");
+		arg = strtok(NULL, "/");
+	} else
+		tuner_id = 0;
+
+	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+	if (!tuner)
+		return false;
 
 	if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
@@ -245,7 +254,7 @@ bool serve::command(char* cmdline)
 		tuner->feeder.parser.add_output(arg);
 	} else if (strstr(cmd, "stop")) {
 		tuner->stop_feed();
-		tuner->close_fe();
+//		tuner->close_fe();
 	}
 
 	return true;

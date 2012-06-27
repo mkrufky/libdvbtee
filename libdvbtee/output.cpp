@@ -138,7 +138,7 @@ int output_stream::add(char* target)
 	char *ip;
 	uint16_t port;
 
-	dprintf("(2)");
+	dprintf("(-->%s)", target);
 
 	if (strstr(target, ":")) {
 		ip = strtok(target, ":");
@@ -171,7 +171,7 @@ int output_stream::add(char* target)
 		return -1;
 	}
 
-	dprintf("~(2)");
+	dprintf("~(-->%s)", target);
 
 	return 0;
 }
@@ -288,12 +288,15 @@ int output::push(uint8_t* p_data)
 
 int output::add(char* target)
 {
-	dprintf("(1)");
+	dprintf("(%d->%s)", num_targets, target);
 	/* push data into output buffer */
 	int ret = output_streams[num_targets].add(target);
 	if (ret == 0)
 		num_targets++;
-	dprintf("~(1)");
+	else
+		dprintf("failed to add target #%d: %s", num_targets, target);
+
+	dprintf("~(%d->%s)", (ret == 0) ? num_targets - 1 : num_targets, target);
 
 	return ret;
 }
