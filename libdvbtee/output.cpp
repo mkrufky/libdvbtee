@@ -140,13 +140,25 @@ int output_stream::add(char* target)
 {
 	char *ip;
 	uint16_t port;
+	bool b_tcp = false;
+	bool b_udp = false;
 
 	dprintf("(-->%s)", target);
 
 	if (strstr(target, ":")) {
 		ip = strtok(target, ":");
+		if (strstr(ip, "tcp"))
+			b_tcp = true;
+		else
+		if (strstr(ip, "udp"))
+			b_udp = true;
+
+		if ((b_tcp) || (b_udp))
+			ip = strtok(NULL, ":");
+		// else ip = proto;
 		port = atoi(strtok(NULL, ":"));
 	} else {
+		b_tcp = false;
 		ip = target;
 		port = 1234;
 	}
