@@ -37,7 +37,7 @@ output_stream::output_stream()
 {
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.setCapacity(188*7*199);
+	ringbuffer.set_capacity(188*7*199);
 }
 
 output_stream::~output_stream()
@@ -52,7 +52,7 @@ output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.setCapacity(188*7*199);
+	ringbuffer.set_capacity(188*7*199);
 }
 
 output_stream& output_stream::operator= (const output_stream& cSource)
@@ -63,7 +63,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 		return *this;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.setCapacity(188*7*199);
+	ringbuffer.set_capacity(188*7*199);
 
 	return *this;
 }
@@ -78,20 +78,23 @@ void* output_stream::output_stream_thread(void *p_this)
 #define OUTPUT_STREAM_PACKET_SIZE 188*7
 void* output_stream::output_stream_thread()
 {
-	uint8_t data[OUTPUT_STREAM_PACKET_SIZE];
+	uint8_t *data = NULL;
+	int buf_size;
 
 	dprintf("()");
 
 	/* push data from output_stream buffer to target */
 	while (!f_kill_thread) {
 
-		int buf_size = ringbuffer.getSize();
+		buf_size = ringbuffer.get_size();
 		if (buf_size < OUTPUT_STREAM_PACKET_SIZE) {
 			usleep(50*1000);
 			continue;
 		}
-		buf_size = ringbuffer.read(data, OUTPUT_STREAM_PACKET_SIZE);
+
+		buf_size = ringbuffer.read_ptr((void**)&data, OUTPUT_STREAM_PACKET_SIZE);
 		stream(data, buf_size);
+		ringbuffer.advance_read_ptr();
 	}
 	pthread_exit(NULL);
 }
@@ -185,7 +188,7 @@ output::output()
 {
 	dprintf("()");
 
-	ringbuffer.setCapacity(188*7*199*2);
+	ringbuffer.set_capacity(188*7*199*2);
 
 	memset(&output_streams, 0, sizeof(output_streams));
 
@@ -230,16 +233,20 @@ void* output::output_thread(void *p_this)
 
 void* output::output_thread()
 {
+	int buf_size;
+	uint8_t *data = NULL;
+
 	/* push data from main output buffer into output_stream buffers */
 	while (!f_kill_thread) {
 
-		int buf_size = ringbuffer.getSize();
-		uint8_t p_data[buf_size];// = { 0 };
+		buf_size = ringbuffer.get_size();
+		//data = NULL;
 		if (buf_size) {
-			buf_size = ringbuffer.read(p_data, buf_size);
+			buf_size = ringbuffer.read_ptr((void**)&data, buf_size);
 
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
-				iter->second.push(p_data, buf_size);
+				iter->second.push(data, buf_size);
+			ringbuffer.advance_read_ptr();
 		}
 	}
 	pthread_exit(NULL);

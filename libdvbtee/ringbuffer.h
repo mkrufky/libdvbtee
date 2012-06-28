@@ -1,15 +1,13 @@
 class RingBuffer {
 public:
-#if 0
-    RingBuffer(int) {}
-#else
     RingBuffer() {}
-    void setCapacity(int) {}
-#endif
     virtual ~RingBuffer() {}
-    int getSize() const { return 0; }
-    int getCapacity() const { return 0; }
+    void set_capacity(int) {}
+    int get_size() const { return 0; }
+    int get_capacity() const { return 0; }
     void reset() {}
     bool write(const void*, int) { return false; }
     int read(void*, int) { return 0; }
+    int read_ptr(void*, int) { return 0; }
+    void advance_read_ptr() {}
 };
