@@ -37,7 +37,7 @@ output_stream::output_stream()
 {
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.setCapacity(188*7*199+1);
+	ringbuffer.setCapacity(188*7*199);
 }
 
 output_stream::~output_stream()
@@ -52,7 +52,7 @@ output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.setCapacity(188*7*199+1);
+	ringbuffer.setCapacity(188*7*199);
 }
 
 output_stream& output_stream::operator= (const output_stream& cSource)
@@ -63,7 +63,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 		return *this;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.setCapacity(188*7*199+1);
+	ringbuffer.setCapacity(188*7*199);
 
 	return *this;
 }
@@ -185,7 +185,7 @@ output::output()
 {
 	dprintf("()");
 
-	ringbuffer.setCapacity(188*7*199*2+1);
+	ringbuffer.setCapacity(188*7*199*2);
 
 	memset(&output_streams, 0, sizeof(output_streams));
 
