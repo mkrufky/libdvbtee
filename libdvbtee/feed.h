@@ -41,6 +41,7 @@ public:
 	void stop();
 	int start();
 	int start_stdin();
+	int start_tcp_listener(uint16_t);
 
 	void close_file();
 
@@ -65,8 +66,10 @@ private:
 
 	void *feed_thread();
 	void *stdin_feed_thread();
+	void *tcp_listen_feed_thread();
 	static void *feed_thread(void*);
 	static void *stdin_feed_thread(void*);
+	static void *tcp_listen_feed_thread(void*);
 
 	void set_filename(char*);
 	int  open_file();

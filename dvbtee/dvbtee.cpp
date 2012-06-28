@@ -138,6 +138,17 @@ void start_server(struct dvbtee_context* context, int num_tuners)
 #endif
 }
 
+#if 0
+void listen_for_data(struct dvbtee_context* context, char* tcpipfeedurl)
+{
+	// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
+	if (0 <= context->_file_feeder.start_tcp_listener(atoi(tcpipfeedurl))) {
+		context->_file_feeder.wait_for_streaming_or_timeout(timeout);
+		context->_file_feeder.stop();
+		context->_file_feeder.close_file();
+	}
+}
+#endif
 
 void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan_method,
 	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg, int eit_limit)
@@ -253,10 +264,13 @@ int main(int argc, char **argv)
 	char outfilename[256];
 	memset(&outfilename, 0, sizeof(outfilename));
 
+	char tcpipfeedurl[32];
+	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
+
 #define VERSION "0.0.4"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::SE::o::d::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::Si:E::o::d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -297,6 +311,9 @@ int main(int argc, char **argv)
 			break;
 		case 'S': /* server mode */
 			b_serve = true;
+			break;
+		case 'i': /* pull local/remote tcp/udp port for data */
+			strcpy(tcpipfeedurl, optarg);
 			break;
 		case 'E': /* enable EPG scan */
 #if 0
@@ -375,6 +392,20 @@ int main(int argc, char **argv)
 			}
 			context._file_feeder.close_file();
 		}
+		goto exit;
+	}
+
+	if (strlen(tcpipfeedurl)) {
+#if 0
+		listen_for_data(&context, tcpipfeedurl);
+#else
+		// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
+		if (0 <= context._file_feeder.start_tcp_listener(atoi(tcpipfeedurl))) {
+			context._file_feeder.wait_for_streaming_or_timeout(timeout);
+			context._file_feeder.stop();
+			context._file_feeder.close_file();
+		}
+#endif
 		goto exit;
 	}
 

@@ -95,6 +95,12 @@ void* feed::stdin_feed_thread(void *p_this)
 	return static_cast<feed*>(p_this)->stdin_feed_thread();
 }
 
+//static
+void* feed::tcp_listen_feed_thread(void *p_this)
+{
+	return static_cast<feed*>(p_this)->tcp_listen_feed_thread();
+}
+
 int feed::start()
 {
 	f_kill_thread = false;
@@ -123,12 +129,12 @@ void feed::stop()
 #define BUFSIZE (188 * 312)
 void *feed::feed_thread()
 {
+	unsigned char buf[BUFSIZE];
+	ssize_t r;
+
 	dprintf("(fd=%d)", fd);
 
 	while (!f_kill_thread) {
-		unsigned char buf[BUFSIZE];
-		unsigned char *p_buf = buf;
-		ssize_t r;
 
 		if ((r = read(fd, buf, BUFSIZE)) <= 0) {
 
@@ -176,7 +182,7 @@ void *feed::feed_thread()
 			usleep(50*1000);
 			continue;
 		}
-		parser.feed(r, p_buf);
+		parser.feed(r, buf);
 	}
 	close_file();
 	pthread_exit(NULL);
@@ -184,12 +190,12 @@ void *feed::feed_thread()
 
 void *feed::stdin_feed_thread()
 {
+	unsigned char buf[BUFSIZE];
+	ssize_t r;
+
 	dprintf("()");
 
 	while (!f_kill_thread) {
-		unsigned char buf[BUFSIZE];
-		unsigned char *p_buf = buf;
-		ssize_t r;
 
 		if ((r = fread(buf, 188, BUFSIZE / 188, stdin)) < (BUFSIZE / 188)) {
 			if (ferror(stdin)) {
@@ -203,8 +209,50 @@ void *feed::stdin_feed_thread()
 			}
 			continue;
 		}
-		parser.feed(r * 188, p_buf);
+		parser.feed(r * 188, buf);
 	}
+	pthread_exit(NULL);
+}
+
+void *feed::tcp_listen_feed_thread()
+{
+	struct sockaddr_in tcpsa;
+	socklen_t salen = sizeof(tcpsa);
+	int i, rxlen = 0;
+#define MAX_SOCKETS 1
+	int sock[MAX_SOCKETS];
+	unsigned char buf[BUFSIZE];
+
+	dprintf("(sock_fd=%d)", fd);
+
+	for (i = 0; i < MAX_SOCKETS; i++)
+		sock[i] = -1;
+
+	while (!f_kill_thread) {
+		int d = accept(fd, (struct sockaddr*)&tcpsa, &salen);
+		if (d != -1) {
+			for (i = 0; i < MAX_SOCKETS; i++)
+				if (sock[i] == -1) {
+					sock[i] = d;
+					break;
+				}
+			if (sock[i] != d)
+				perror("couldn't attach to socket");
+		}
+		for (i = 0; i < MAX_SOCKETS; i++)
+			if (sock[i] != -1) {
+
+				rxlen = recv(sock[i], buf, sizeof(buf), MSG_DONTWAIT);
+				if (rxlen > 0) {
+					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
+					parser.feed(rxlen, buf);
+				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+					close(sock[i]);
+					sock[i] = -1;
+				}
+			}
+	}
+	close_file();
 	pthread_exit(NULL);
 }
 
@@ -221,6 +269,55 @@ int feed::start_stdin()
 	f_kill_thread = false;
 
 	int ret = pthread_create(&h_thread, NULL, stdin_feed_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
+int feed::start_tcp_listener(uint16_t port_requested)
+{
+	struct sockaddr_in tcp_sock;
+
+	dprintf("()");
+
+	memset(&tcp_sock, 0, sizeof(tcp_sock));
+
+	f_kill_thread = false;
+
+	fd = -1;
+
+	fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (fd < 0) {
+		perror("open socket failed");
+		return fd;
+	}
+
+	int reuse = 1;
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+		perror("setting reuse failed");
+		return -1;
+	}
+
+	tcp_sock.sin_family = AF_INET;
+	tcp_sock.sin_port = htons(port_requested);
+	tcp_sock.sin_addr.s_addr = INADDR_ANY;
+
+	if (bind(fd, (struct sockaddr*)&tcp_sock, sizeof(tcp_sock)) < 0) {
+		perror("bind to local interface failed");
+		return -1;
+	}
+	//	port = port_requested;
+
+	int fl = fcntl(fd, F_GETFL, 0);
+	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
+		perror("set non-blocking failed");
+		return -1;
+	}
+	listen(fd, 1);
+
+	int ret = pthread_create(&h_thread, NULL, tcp_listen_feed_thread, this);
 
 	if (0 != ret)
 		perror("pthread_create() failed");
