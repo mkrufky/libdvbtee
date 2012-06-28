@@ -90,8 +90,8 @@ void* output_stream::output_stream_thread()
 			usleep(50*1000);
 			continue;
 		}
-		ringbuffer.read(data, OUTPUT_STREAM_PACKET_SIZE);
-		stream(data, OUTPUT_STREAM_PACKET_SIZE);
+		buf_size = ringbuffer.read(data, OUTPUT_STREAM_PACKET_SIZE);
+		stream(data, buf_size);
 	}
 	pthread_exit(NULL);
 }
@@ -236,7 +236,7 @@ void* output::output_thread()
 		int buf_size = ringbuffer.getSize();
 		uint8_t p_data[buf_size];// = { 0 };
 		if (buf_size) {
-			ringbuffer.read(p_data, buf_size);
+			buf_size = ringbuffer.read(p_data, buf_size);
 
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 				iter->second.push(p_data, buf_size);
