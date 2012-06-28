@@ -59,9 +59,12 @@ private:
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
 
-	struct sockaddr_in  udp_addr;
+	struct sockaddr_in  ip_addr;
 
 	int stream(uint8_t*, int);
+#define OUTPUT_STREAM_UDP 0
+#define OUTPUT_STREAM_TCP 1
+	unsigned int stream_method;
 };
 
 typedef std::map<int, output_stream> output_stream_map;

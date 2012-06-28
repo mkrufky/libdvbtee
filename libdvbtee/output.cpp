@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "output.h"
 #include "log.h"
@@ -34,6 +35,7 @@ output_stream::output_stream()
   : f_kill_thread(false)
   , sock(-1)
   , ringbuffer()
+  , stream_method(OUTPUT_STREAM_UDP)
 {
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
@@ -133,7 +135,20 @@ int output_stream::push(uint8_t* p_data, int size)
 int output_stream::stream(uint8_t* p_data, int size)
 {
 	/* stream data to target */
-	return sendto(sock, p_data, size, 0, (struct sockaddr*) &udp_addr, sizeof(udp_addr));
+	switch (stream_method) {
+	case OUTPUT_STREAM_UDP:
+		return sendto(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
+	case OUTPUT_STREAM_TCP:
+		fd_set fds;
+		FD_ZERO(&fds);
+		FD_SET(sock, &fds);
+
+		struct timeval sel_timeout = {0, 10000};
+
+		while (!select(sock + 1, NULL, &fds, NULL, &sel_timeout)) usleep(20*1000);
+
+		return send(sock, p_data, size, 0);
+	}
 }
 
 int output_stream::add(char* target)
@@ -166,26 +181,36 @@ int output_stream::add(char* target)
 	if (sock >= 0)
 		close(sock);
 
-	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
+	sock = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
 	if (sock >= 0) {
+
 		int fl = fcntl(sock, F_GETFL, 0);
 		if (fcntl(sock, F_SETFL, fl | O_NONBLOCK) < 0)
 			perror("set non-blocking failed");
-		memset(&udp_addr, 0, sizeof(udp_addr));
-		udp_addr.sin_family = AF_INET;
-		udp_addr.sin_port   = htons(port);
-		if (inet_aton(ip, &udp_addr.sin_addr) == 0) {
 
-			perror("udp ip address translation failed");
+		memset(&ip_addr, 0, sizeof(ip_addr));
+		ip_addr.sin_family = AF_INET;
+		ip_addr.sin_port   = htons(port);
+		if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
+
+			perror("ip address translation failed");
 			return -1;
 		} else
 			ringbuffer.reset();
+
+		if (b_tcp) {
+			if ((connect(sock, (struct sockaddr *) &ip_addr, sizeof(ip_addr)) < 0) && (errno != EINPROGRESS)) {
+				perror("failed to connect to server");
+				return -1;
+			}
+			stream_method = OUTPUT_STREAM_TCP;
+		} else {
+			stream_method = OUTPUT_STREAM_UDP;
+		}
 	} else {
 		perror("socket failed");
 		return -1;
 	}
-
 	dprintf("~(-->%s)", target);
 
 	return 0;
