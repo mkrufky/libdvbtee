@@ -77,7 +77,7 @@ void* output_stream::output_stream_thread(void *p_this)
 	return static_cast<output_stream*>(p_this)->output_stream_thread();
 }
 
-#define OUTPUT_STREAM_PACKET_SIZE 188*7
+#define OUTPUT_STREAM_PACKET_SIZE ((stream_method == OUTPUT_STREAM_UDP) ? 188*7 : 188*147)
 void* output_stream::output_stream_thread()
 {
 	uint8_t *data = NULL;
@@ -142,14 +142,18 @@ int output_stream::stream(uint8_t* p_data, int size)
 		ret = sendto(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
 		break;
 	case OUTPUT_STREAM_TCP:
-		fd_set fds;
-		FD_ZERO(&fds);
-		FD_SET(sock, &fds);
+		while (0 >= ret) {
+		  fd_set fds;
+		  FD_ZERO(&fds);
+		  FD_SET(sock, &fds);
 
-		struct timeval sel_timeout = {0, 10000};
+		  struct timeval sel_timeout = {0, 10000};
 
-		while (!select(sock + 1, NULL, &fds, NULL, &sel_timeout)) usleep(20*1000);
-
+		  ret = select(sock + 1, NULL, &fds, NULL, &sel_timeout);
+		  if (ret < 0)
+		    perror("error!");
+		  usleep(20*1000);
+		}
 		ret = send(sock, p_data, size, 0);
 		break;
 	}
