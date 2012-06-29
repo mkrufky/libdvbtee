@@ -177,8 +177,11 @@ int output_stream::add(char* target)
 		if (strstr(ip, "udp"))
 			b_udp = true;
 
-		if ((b_tcp) || (b_udp))
+		if ((b_tcp) || (b_udp)) {
 			ip = strtok(NULL, ":");
+			if (strstr(ip, "//") == ip)
+				ip += 2;
+		}
 		// else ip = proto;
 		port = atoi(strtok(NULL, ":"));
 	} else {
