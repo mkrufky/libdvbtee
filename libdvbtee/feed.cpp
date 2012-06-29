@@ -246,9 +246,12 @@ void *feed::tcp_listen_feed_thread()
 				if (rxlen > 0) {
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 					parser.feed(rxlen, buf);
+					//fprintf(stderr, "%s: %d bytes\n", __func__, rxlen);
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 					close(sock[i]);
 					sock[i] = -1;
+				} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
+					usleep(50*1000);
 				}
 			}
 	}
