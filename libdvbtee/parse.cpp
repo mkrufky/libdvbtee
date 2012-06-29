@@ -754,11 +754,26 @@ int parse::feed(int count, uint8_t* p_data)
         for (int i = count / 188; i > 0; --i) {
 		uint16_t pid = tp_pkt_pid(p);
 		bool send_pkt = false;
+		unsigned int sync_offset = 0;
+
+		while ((pid == (uint16_t) - 1) || ((i > 1) && (tp_pkt_pid(p+188) == (uint16_t) - 1))) {
+			p++;
+			sync_offset++;
+			if (sync_offset == 188) {
+				sync_offset = 0;
+				i--;
+			}
+			pid = tp_pkt_pid(p);
+			fprintf(stderr, ".\t");
+		}
 
 		if (p[1] & 0x80) {
 			fprintf(stderr, "\tTEI\t");//"%s: TEI detected, dropping packet\n", __func__);
 			if (!process_err_pkts) continue;
 		}
+
+		if (PID_ATSC == pid)
+			send_pkt = true;
 
 		if (PID_PAT == pid) {
 			dvbpsi_PushPacket(h_pat, p);
