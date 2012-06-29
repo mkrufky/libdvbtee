@@ -134,10 +134,13 @@ int output_stream::push(uint8_t* p_data, int size)
 
 int output_stream::stream(uint8_t* p_data, int size)
 {
+	int ret = -1;
+
 	/* stream data to target */
 	switch (stream_method) {
 	case OUTPUT_STREAM_UDP:
-		return sendto(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		ret = sendto(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		break;
 	case OUTPUT_STREAM_TCP:
 		fd_set fds;
 		FD_ZERO(&fds);
@@ -147,8 +150,10 @@ int output_stream::stream(uint8_t* p_data, int size)
 
 		while (!select(sock + 1, NULL, &fds, NULL, &sel_timeout)) usleep(20*1000);
 
-		return send(sock, p_data, size, 0);
+		ret = send(sock, p_data, size, 0);
+		break;
 	}
+	return ret;
 }
 
 int output_stream::add(char* target)
