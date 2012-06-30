@@ -221,7 +221,7 @@ void *feed::tcp_listen_feed_thread()
 	int i, rxlen = 0;
 #define MAX_SOCKETS 1
 	int sock[MAX_SOCKETS];
-	unsigned char buf[BUFSIZE];
+	unsigned char buf[/*BUFSIZE*/188*175];
 
 	dprintf("(sock_fd=%d)", fd);
 
@@ -242,11 +242,11 @@ void *feed::tcp_listen_feed_thread()
 		for (i = 0; i < MAX_SOCKETS; i++)
 			if (sock[i] != -1) {
 
-				rxlen = recv(sock[i], buf, sizeof(buf), MSG_DONTWAIT);
+				rxlen = recv(sock[i], buf, sizeof(buf), MSG_WAITALL);
 				if (rxlen > 0) {
+					if (rxlen != sizeof(buf)) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, sizeof(buf));
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 					parser.feed(rxlen, buf);
-					//fprintf(stderr, "%s: %d bytes\n", __func__, rxlen);
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 					close(sock[i]);
 					sock[i] = -1;
@@ -312,12 +312,13 @@ int feed::start_tcp_listener(uint16_t port_requested)
 		return -1;
 	}
 	//	port = port_requested;
-
+#if 0
 	int fl = fcntl(fd, F_GETFL, 0);
 	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 		perror("set non-blocking failed");
 		return -1;
 	}
+#endif
 	listen(fd, 1);
 
 	int ret = pthread_create(&h_thread, NULL, tcp_listen_feed_thread, this);
