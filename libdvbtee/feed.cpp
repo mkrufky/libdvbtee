@@ -283,7 +283,7 @@ int feed::start_tcp_listener(uint16_t port_requested)
 {
 	struct sockaddr_in tcp_sock;
 
-	dprintf("()");
+	dprintf("(%d)", port_requested);
 
 	memset(&tcp_sock, 0, sizeof(tcp_sock));
 
