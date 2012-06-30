@@ -765,7 +765,7 @@ int parse::feed(int count, uint8_t* p_data)
 		bool send_pkt = false;
 		unsigned int sync_offset = 0;
 
-		while ((pid == (uint16_t) - 1) || ((i > 1) && (tp_pkt_pid(p+188) == (uint16_t) - 1))) {
+		while (((i > 0) && (pid == (uint16_t) - 1)) || ((i > 1) && (tp_pkt_pid(p+188) == (uint16_t) - 1))) {
 			p++;
 			sync_offset++;
 			if (sync_offset == 188) {
