@@ -249,9 +249,15 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 			b_attach_demux  = true;
 			break;
 		}
-		if ((b_attach_demux) && (NULL == h_demux[iter->second.pid]))
+		if ((b_attach_demux) && (iter->second.pid != PID_ATSC)) {
+			if (h_demux.count(iter->second.pid))
+#if 0
+				dvbpsi_DetachDemux(h_demux[iter->second.pid]);
+#else
+			{} else
+#endif
 			h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
-			/* else already attached */
+		}
 	}
 	expect_vct = b_expecting_vct;
 	has_mgt = true;
