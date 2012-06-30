@@ -195,9 +195,9 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 		p_mgt->i_version);
 
 	if (!decoded) return true;
-
+#if 0
 	has_mgt = false;
-
+#endif
 	bool b_expecting_vct = false;
 
 	eit_pids.clear();
@@ -580,7 +580,10 @@ void parse::reset()
 	ts_id = 0;
 	dumped_eit = 0;
 	has_pat = false;
+	has_mgt = false;
 	has_vct = false;
+	has_sdt = false;
+	has_nit = false;
 	expect_vct = true;
 
 	h_pat = dvbpsi_AttachPAT(take_pat, this);
