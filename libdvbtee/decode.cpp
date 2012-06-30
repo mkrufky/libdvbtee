@@ -147,7 +147,7 @@ decode_network::~decode_network()
 	dprintf("(%05d|%05d)",
 		decoded_nit.network_id, decoded_sdt.network_id);
 #else
-	dprintf("(%05d|%05d) %d",
+	dprintf("(%05d|%05d) %zu",
 		decoded_nit.network_id, orig_network_id,
 		decoded_network_services.size());
 #endif
