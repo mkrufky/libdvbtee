@@ -149,7 +149,7 @@ void *feed::feed_thread()
 				break;
 			case EOVERFLOW:
 				fprintf(stderr, "%s: r = %d, errno = EOVERFLOW\n", __func__, (int)r);
-				break;
+				continue;
 			case EBADF:
 				fprintf(stderr, "%s: r = %d, errno = EBADF\n", __func__, (int)r);
 				f_kill_thread = true;
