@@ -240,6 +240,7 @@ int main(int argc, char **argv)
 	bool b_output_file   = false;
 	bool b_output_stdout = false;
 	bool b_serve    = false;
+	bool b_kernel_pid_filters = false;
 
 	/* LinuxDVB context: */
 	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
@@ -365,6 +366,8 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
+	b_kernel_pid_filters = (service_id) ? true : false;
+
 	if (out_opt > 0)
 		context.tuner.feeder.parser.out.set_options(out_opt);
 
@@ -375,7 +378,7 @@ int main(int argc, char **argv)
 			context._file_feeder.parser.add_output(outfilename);
 	}
 	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
-		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
+		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
 		context.tuner.feeder.parser.limit_eit(eit_limit);
 	}
 	if (b_serve) {
