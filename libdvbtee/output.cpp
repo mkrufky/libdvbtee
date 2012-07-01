@@ -234,6 +234,7 @@ output::output()
   : f_kill_thread(false)
   , ringbuffer()
   , num_targets(0)
+  , options(OUTPUT_NONE)
 {
 	dprintf("()");
 
@@ -336,10 +337,10 @@ void output::stop()
 	return;
 }
 
-int output::push(uint8_t* p_data)
+int output::push(uint8_t* p_data, enum output_options opt)
 {
 	/* push data into output buffer */
-	return ringbuffer.write(p_data, 188);
+	return (((!options) || (!opt)) || (opt & options)) ? ringbuffer.write(p_data, 188) : 0;
 }
 
 int output::add(char* target)

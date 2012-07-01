@@ -260,6 +260,8 @@ int main(int argc, char **argv)
 
 	uint16_t service_id      = 0;
 
+	enum output_options out_opt = (enum output_options)-1;
+
 	char filename[256];
 	memset(&filename, 0, sizeof(filename));
 
@@ -272,7 +274,7 @@ int main(int argc, char **argv)
 #define VERSION "0.0.4"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::SE::o::d::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::SE::o::O:d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -337,6 +339,9 @@ int main(int argc, char **argv)
 			} else
 				b_output_stdout = true;
 			break;
+		case 'O': /* output options */
+			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
+			break;
 		case 'd':
 			if (optarg)
 				libdvbtee_set_debug_level(strtoul(optarg, NULL, 0));
@@ -360,6 +365,9 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
+	if (out_opt > 0)
+		context.tuner.feeder.parser.out.set_options(out_opt);
+
 	if (b_output_file) {
 		if (b_read_dvr)
 			context.tuner.feeder.parser.add_output(outfilename);
@@ -423,8 +431,11 @@ int main(int argc, char **argv)
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
-		if (service_id)
+		if (service_id) {
 			context.tuner.feeder.parser.set_service_id(service_id);
+			if (out_opt < 0)
+				context.tuner.feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
+		}
 
 		if (context.tuner.tune_channel(
 				(scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {

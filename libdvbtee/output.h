@@ -32,6 +32,15 @@
 
 #include "ringbuffer.h"
 
+enum output_options {
+	OUTPUT_NONE    = 0,
+	OUTPUT_PATPMT  = 1,
+	OUTPUT_PES     = 2,
+	OUTPUT_PSIP    = 4,
+};
+
+#define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES)
+
 class output_stream
 {
 public:
@@ -81,9 +90,10 @@ public:
 	int start();
 	void stop();
 
-	int push(uint8_t*);
+	int push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
 	int add(char*);
 
+	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
 private:
 	output_stream_map output_streams;
 
@@ -98,6 +108,8 @@ private:
 	void stop_without_wait() { f_kill_thread = true; };
 
 	unsigned int num_targets;
+
+	enum output_options options;
 };
 
 #endif /*__OUTPUT_H__ */

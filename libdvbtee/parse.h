@@ -82,6 +82,9 @@ public:
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 
 	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; reset_filters(); }
+
+	output out;
+
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
@@ -150,8 +153,6 @@ private:
 
 	int dumped_eit;
 	int eit_collection_limit;
-
-	output out;
 
 	bool process_err_pkts;
 	map_pidtype payload_pids;

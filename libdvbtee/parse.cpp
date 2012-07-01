@@ -791,6 +791,7 @@ int parse::feed(int count, uint8_t* p_data)
 		uint16_t pid = tp_pkt_pid(p);
 		bool send_pkt = false;
 		unsigned int sync_offset = 0;
+		output_options out_type = OUTPUT_NONE;
 
 		while (((i > 0) && (pid == (uint16_t) - 1)) || ((i > 1) && (tp_pkt_pid(p+188) == (uint16_t) - 1))) {
 			p++;
@@ -808,12 +809,15 @@ int parse::feed(int count, uint8_t* p_data)
 			if (!process_err_pkts) continue;
 		}
 
-		if (PID_ATSC == pid)
+		if (PID_ATSC == pid) {
 			send_pkt = true;
+			out_type = OUTPUT_PSIP;
+		}
 
 		if (PID_PAT == pid) {
 			dvbpsi_PushPacket(h_pat, p);
 			send_pkt = true;
+			out_type = OUTPUT_PATPMT;
 		} else {
 			map_dvbpsi::const_iterator iter;
 
@@ -821,6 +825,7 @@ int parse::feed(int count, uint8_t* p_data)
 			if (iter != h_pmt.end()) {
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
+				out_type = OUTPUT_PATPMT;
 			}
 
 			map_eit_pids::const_iterator iter_eit;
@@ -837,21 +842,25 @@ int parse::feed(int count, uint8_t* p_data)
 					continue;
 				}
 				decoders[ts_id].set_current_eit_x(iter_eit->second);
+				out_type = OUTPUT_PSIP;
 			}
 
 			iter = h_demux.find(pid);
 			if (iter != h_demux.end()) {
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
+				//if (!out_type) out_type = OUTPUT_PSIP;
 			}
 
 			map_pidtype::const_iterator iter_payload;
 			iter_payload = payload_pids.find(pid);
-			if (iter_payload != payload_pids.end())
+			if (iter_payload != payload_pids.end()) {
 				send_pkt = true;
+				out_type = OUTPUT_PES;
+			}
 		}
 		if (/*(false) &&*/ (send_pkt)) {
-			out.push(p);
+			out.push(p, out_type);
 		}
 #if DBG
 		addpid(pid);
