@@ -54,6 +54,7 @@ public:
 
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; };
 	uint16_t get_ts_id() const { return ts_id; };
+	void set_service_id(uint16_t id) { service_ids[id] = 0; }
 
 	int feed(int, uint8_t*);
 	void reset();
@@ -133,6 +134,7 @@ private:
 
 	time_t stream_time;
 	uint16_t ts_id;
+	map_eit_pids service_ids; // ignore the type name used here
 
 	bool epg_mode;
 	bool scan_mode;

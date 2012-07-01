@@ -147,8 +147,10 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 	       decoders[p_pat->i_ts_id].get_decoded_pat()->programs.begin();
 	     iter != decoders[p_pat->i_ts_id].get_decoded_pat()->programs.end(); ++iter)
 		if (iter->first > 0) {// FIXME: > 0 ???
-			h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
-			add_filter(iter->second);
+			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
+				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
+				add_filter(iter->second);
+			}
 		}
 
 	has_pat = true;
@@ -532,6 +534,9 @@ parse::parse()
 	h_demux[PID_NIT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_SDT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_TOT]  = dvbpsi_AttachDemux(attach_table, this);//if !scan_mode
+
+	memset(&service_ids, 0, sizeof(service_ids));
+	service_ids.clear();
 }
 
 parse::~parse()
@@ -548,6 +553,7 @@ parse::~parse()
 	if (fed_pkt_count)
 		fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
+	service_ids.clear();
 }
 
 void parse::detach_demux()
@@ -565,6 +571,7 @@ void parse::detach_demux()
 	dvbpsi_DetachPAT(h_pat);
 
 	clear_filters();
+	service_ids.clear();
 }
 
 void parse::stop()

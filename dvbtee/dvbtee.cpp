@@ -258,6 +258,8 @@ int main(int argc, char **argv)
 	unsigned int wait_event  = 0;
 	int eit_limit            = -1;
 
+	uint16_t service_id      = 0;
+
 	char filename[256];
 	memset(&filename, 0, sizeof(filename));
 
@@ -270,7 +272,7 @@ int main(int argc, char **argv)
 #define VERSION "0.0.4"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:s::Si:E::o::d::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::SE::o::d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -314,6 +316,9 @@ int main(int argc, char **argv)
 			break;
 		case 'i': /* pull local/remote tcp/udp port for data */
 			strcpy(tcpipfeedurl, optarg);
+			break;
+		case 'I': /* request a service by its service id */
+			service_id = strtoul(optarg, NULL, 0);
 			break;
 		case 'E': /* enable EPG scan */
 #if 0
@@ -417,6 +422,9 @@ int main(int argc, char **argv)
 
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
+
+		if (service_id)
+			context.tuner.feeder.parser.set_service_id(service_id);
 
 		if (context.tuner.tune_channel(
 				(scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
