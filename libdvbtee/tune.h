@@ -47,7 +47,7 @@ public:
 	tune(const tune&);
 	tune& operator= (const tune&);
 
-	bool set_device_ids(int, int, int, int);
+	bool set_device_ids(int adap, int fe, int demux, int dvr, bool kernel_pid_filter = true);
 
 	int open_fe();
 	int close_fe();

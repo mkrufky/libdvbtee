@@ -83,7 +83,7 @@ tune& tune::operator= (const tune& cSource)
 	return *this;
 }
 
-bool tune::set_device_ids(int adap, int fe, int demux, int dvr)
+bool tune::set_device_ids(int adap, int fe, int demux, int dvr, bool kernel_pid_filter)
 {
 	dprintf("(%d, %d, %d, %d)", adap, fe, demux, dvr);
 
@@ -92,7 +92,8 @@ bool tune::set_device_ids(int adap, int fe, int demux, int dvr)
 	demux_id = demux;
 	dvr_id   = dvr;
 
-	feeder.parser.set_addfilter_callback(add_filter, this);
+	if (kernel_pid_filter)
+		feeder.parser.set_addfilter_callback(add_filter, this);
 
 	return ((adap >= 0) && (fe >= 0) && (demux >= 0) && (dvr >= 0)); /* TO DO: -1 should signify auto/search */
 }
@@ -340,13 +341,10 @@ void tune::clear_filters()
 //static
 void tune::add_filter(void *p_this, uint16_t pid)
 {
-#define USE_KERNEL_PID_FILTER 1
-#if USE_KERNEL_PID_FILTER
 	if (pid == 0xffff)
 		return static_cast<tune*>(p_this)->clear_filters();
 	else
-	return static_cast<tune*>(p_this)->add_filter(pid);
-#endif
+		return static_cast<tune*>(p_this)->add_filter(pid);
 }
 
 void tune::add_filter(uint16_t pid)
