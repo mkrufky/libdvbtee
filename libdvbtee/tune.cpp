@@ -45,6 +45,8 @@ tune::tune()
 {
 	dprintf("()");
 //	channels.clear();
+	memset(&filtered_pids, 0, sizeof(filtered_pids));
+	filtered_pids.clear();
 }
 
 tune::~tune()
@@ -53,6 +55,7 @@ tune::~tune()
 	stop_feed();
 	close_fe();
 //	channels.clear();
+	filtered_pids.clear();
 }
 
 tune::tune(const tune&)
@@ -61,6 +64,8 @@ tune::tune(const tune&)
 
 //	channels.clear();
 	feeder.parser.cleanup();
+	memset(&filtered_pids, 0, sizeof(filtered_pids));
+	filtered_pids.clear();
 }
 
 tune& tune::operator= (const tune& cSource)
@@ -72,6 +77,8 @@ tune& tune::operator= (const tune& cSource)
 
 //	channels.clear();
 	feeder.parser.cleanup();
+	memset(&filtered_pids, 0, sizeof(filtered_pids));
+	filtered_pids.clear();
 
 	return *this;
 }
@@ -84,6 +91,8 @@ bool tune::set_device_ids(int adap, int fe, int demux, int dvr)
 	fe_id    = fe;
 	demux_id = demux;
 	dvr_id   = dvr;
+
+	feeder.parser.set_addfilter_callback(add_filter, this);
 
 	return ((adap >= 0) && (fe >= 0) && (demux >= 0) && (dvr >= 0)); /* TO DO: -1 should signify auto/search */
 }
@@ -307,6 +316,73 @@ bool tune::tune_dvbt(unsigned int channel)
 	else fprintf(stderr, "tuned to %d\n", fe_params.frequency);
 
 	return true;
+}
+
+//static
+void tune::clear_filters(void *p_this)
+{
+	return static_cast<tune*>(p_this)->clear_filters();
+}
+
+void tune::clear_filters()
+{
+	dprintf("()");
+
+	for (filtered_pid_map::const_iterator iter = filtered_pids.begin(); iter != filtered_pids.end(); ++iter) {
+		if (ioctl(iter->second, DMX_STOP, NULL) < 0) {
+			perror("DMX_STOP failed");
+		}
+		close(iter->second);
+	}
+	filtered_pids.clear();
+}
+
+//static
+void tune::add_filter(void *p_this, uint16_t pid)
+{
+#define USE_KERNEL_PID_FILTER 1
+#if USE_KERNEL_PID_FILTER
+	if (pid == 0xffff)
+		return static_cast<tune*>(p_this)->clear_filters();
+	else
+	return static_cast<tune*>(p_this)->add_filter(pid);
+#endif
+}
+
+void tune::add_filter(uint16_t pid)
+{
+	dprintf("pid = %04x", pid);
+
+	if (filtered_pids.count(pid))
+		return;
+
+	char filename[80]; // max path length??
+
+	filtered_pids[pid] = -1;
+
+	sprintf(filename, "/dev/dvb/adapter%i/demux%i", adap_id, demux_id);
+	if ((filtered_pids[pid] = open(filename, O_RDWR)) < 0) {
+		// try flat dvb dev structure if this fails
+		sprintf(filename, "/dev/dvb%i.demux%i", adap_id, demux_id);
+		if ((filtered_pids[pid] = open(filename, O_RDWR)) < 0) {
+			fprintf(stderr,"%s: failed to open %s\n", __func__, filename);
+			goto fail_demux;
+		}
+	}
+	fprintf(stderr, "%s: using %s\n", __func__, filename);
+	struct dmx_pes_filter_params pesfilter;
+
+	pesfilter.pid = pid;
+	pesfilter.input = DMX_IN_FRONTEND;
+	pesfilter.output = DMX_OUT_TS_TAP;
+	pesfilter.pes_type = DMX_PES_OTHER;
+	pesfilter.flags = DMX_IMMEDIATE_START;
+
+	if (ioctl(filtered_pids[pid], DMX_SET_PES_FILTER, &pesfilter) < 0) {
+		perror("DMX_SET_PES_FILTER failed");
+	}
+fail_demux:
+	return;
 }
 
 //static

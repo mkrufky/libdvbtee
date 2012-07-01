@@ -44,6 +44,8 @@ typedef std::map<uint16_t, channel_info_t> map_channel_info;
 
 typedef std::map<uint16_t, uint16_t> map_eit_pids; /* pid, eit-x */
 
+typedef void (*addfilter_callback)(void *, uint16_t);
+
 class parse
 {
 public:
@@ -77,6 +79,8 @@ public:
 	void limit_eit(int limit) { eit_collection_limit = limit; }
 
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
+
+	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; reset_filters(); }
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
@@ -149,6 +153,12 @@ private:
 
 	bool process_err_pkts;
 	map_pidtype payload_pids;
+
+	addfilter_callback addfilter_cb;
+	void* addfilter_context;
+	void add_filter(uint16_t pid) { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, pid); }
+	void clear_filters() { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, 0xffff); }
+	void reset_filters();
 };
 
 #endif//__PARSE_H__

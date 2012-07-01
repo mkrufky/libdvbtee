@@ -36,6 +36,8 @@ typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 static map_chan_to_ts_id channels;
 #endif
 
+typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
+
 class tune
 {
 public:
@@ -73,6 +75,11 @@ private:
 	void *scan_thread();
 	static void *scan_thread(void*);
 
+	void add_filter(uint16_t);
+	static void add_filter(void *, uint16_t);
+	void clear_filters();
+	static void clear_filters(void *);
+
 	int  adap_id;
 
 	int    fe_fd;
@@ -96,6 +103,8 @@ private:
 
 	bool tune_atsc(fe_modulation_t, unsigned int);
 	bool tune_dvbt(unsigned int);
+
+	filtered_pid_map filtered_pids;
 };
 
 #endif /*__TUNE_H__ */

@@ -146,8 +146,10 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 	for (map_decoded_pat_programs::const_iterator iter =
 	       decoders[p_pat->i_ts_id].get_decoded_pat()->programs.begin();
 	     iter != decoders[p_pat->i_ts_id].get_decoded_pat()->programs.end(); ++iter)
-		if (iter->first > 0) // FIXME: > 0 ???
+		if (iter->first > 0) {// FIXME: > 0 ???
 			h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
+			add_filter(iter->second);
+		}
 
 	has_pat = true;
 
@@ -166,8 +168,10 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 	map_decoded_pmt::const_iterator iter_pmt = decoders[ts_id].get_decoded_pmt()->find(p_pmt->i_program_number);
 	if (iter_pmt != decoders[ts_id].get_decoded_pmt()->end()) {
 		for (map_ts_elementary_streams::const_iterator iter_pmt_es = iter_pmt->second.es_streams.begin();
-		     iter_pmt_es != iter_pmt->second.es_streams.end(); ++iter_pmt_es)
+		     iter_pmt_es != iter_pmt->second.es_streams.end(); ++iter_pmt_es) {
 				payload_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+				add_filter(iter_pmt_es->second.pid);
+		}
 	}
 
 	return true;
@@ -256,6 +260,7 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 #else
 			{} else
 #endif
+			add_filter(iter->second.pid);
 			h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
 		}
 	}
@@ -512,6 +517,8 @@ parse::parse()
   , dumped_eit(0)
   , eit_collection_limit(-1)
   , process_err_pkts(false)
+  , addfilter_cb(NULL)
+  , addfilter_context(NULL)
 {
 	dprintf("()");
 
@@ -556,6 +563,8 @@ void parse::detach_demux()
 	h_pmt.clear();
 
 	dvbpsi_DetachPAT(h_pat);
+
+	clear_filters();
 }
 
 void parse::stop()
@@ -573,6 +582,16 @@ void parse::cleanup()
 	clear_decoded_networks();
 	decoders.clear();
 	channel_info.clear();
+}
+
+void parse::reset_filters()
+{
+	add_filter(PID_ATSC);
+	add_filter(PID_PAT);
+	add_filter(PID_NIT);
+	add_filter(PID_SDT);
+	add_filter(PID_TOT);
+	add_filter(PID_EIT);
 }
 
 void parse::reset()
@@ -600,6 +619,7 @@ void parse::reset()
 	h_demux[PID_NIT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_SDT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_TOT]  = dvbpsi_AttachDemux(attach_table, this);//if !scan_mode
+	reset_filters();
 }
 
 inline uint16_t tp_pkt_pid(uint8_t* pkt)
