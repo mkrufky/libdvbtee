@@ -809,16 +809,21 @@ int parse::feed(int count, uint8_t* p_data)
 			if (!process_err_pkts) continue;
 		}
 
-		if (PID_ATSC == pid) {
-			send_pkt = true;
-			out_type = OUTPUT_PSIP;
-		}
-
-		if (PID_PAT == pid) {
+		switch (pid) {
+		case PID_PAT:
 			dvbpsi_PushPacket(h_pat, p);
 			send_pkt = true;
 			out_type = OUTPUT_PATPMT;
-		} else {
+			break;
+		case PID_ATSC:
+		case PID_NIT:
+		case PID_SDT:
+		case PID_TOT:
+		case PID_EIT:
+			send_pkt = true;
+			out_type = OUTPUT_PSIP;
+			/* fall-thru */
+		default:
 			map_dvbpsi::const_iterator iter;
 
 			iter = h_pmt.find(pid);
@@ -858,8 +863,9 @@ int parse::feed(int count, uint8_t* p_data)
 				send_pkt = true;
 				out_type = OUTPUT_PES;
 			}
+			break;
 		}
-		if (/*(false) &&*/ (send_pkt)) {
+		if (send_pkt) {
 			out.push(p, out_type);
 		}
 #if DBG
