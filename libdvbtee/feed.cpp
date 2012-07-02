@@ -244,7 +244,7 @@ void *feed::tcp_listen_feed_thread()
 
 				rxlen = recv(sock[i], buf, sizeof(buf), MSG_WAITALL);
 				if (rxlen > 0) {
-					if (rxlen != sizeof(buf)) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, sizeof(buf));
+					if (rxlen != sizeof(buf)) fprintf(stderr, "%s: %d bytes != %zu\n", __func__, rxlen, sizeof(buf));
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 					parser.feed(rxlen, buf);
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
