@@ -297,7 +297,10 @@ void* output::output_thread()
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 				iter->second.push(data, buf_size);
 			ringbuffer.advance_read_ptr();
+		} else {
+			usleep(50*1000);
 		}
+
 	}
 	pthread_exit(NULL);
 }
