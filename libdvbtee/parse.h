@@ -71,6 +71,7 @@ public:
 
 	void set_scan_mode(bool onoff) { scan_mode = onoff; };
 	void set_epg_mode(bool onoff)  { epg_mode = onoff; };
+	void enable(bool onoff)  { enabled = onoff; };
 //got_all_eit()
 	bool is_psip_ready();
 	bool is_epg_ready();
@@ -162,6 +163,8 @@ private:
 	void add_filter(uint16_t pid) { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, pid); }
 	void clear_filters() { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, 0xffff); }
 	void reset_filters();
+
+	bool enabled;
 };
 
 #endif//__PARSE_H__

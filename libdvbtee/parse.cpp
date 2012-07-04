@@ -521,6 +521,7 @@ parse::parse()
   , process_err_pkts(false)
   , addfilter_cb(NULL)
   , addfilter_context(NULL)
+  , enabled(true)
 {
 	dprintf("()");
 
@@ -785,8 +786,11 @@ int parse::feed(int count, uint8_t* p_data)
 		return -1;
 	}
 
-	/* one TS packet at a time */
         uint8_t* p = p_data;
+	if (!enabled)
+		out.push(p, count);
+	else
+	/* one TS packet at a time */
         for (int i = count / 188; i > 0; --i) {
 		uint16_t pid = tp_pkt_pid(p);
 		bool send_pkt = false;
