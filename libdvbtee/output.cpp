@@ -340,10 +340,15 @@ void output::stop()
 	return;
 }
 
-int output::push(uint8_t* p_data, enum output_options opt)
+int output::push(uint8_t* p_data, int size)
 {
 	/* push data into output buffer */
-	return (((!options) || (!opt)) || (opt & options)) ? ringbuffer.write(p_data, 188) : 0;
+	return ringbuffer.write(p_data, size);
+}
+
+int output::push(uint8_t* p_data, enum output_options opt)
+{
+	return (((!options) || (!opt)) || (opt & options)) ? push(p_data, 188) : 0;
 }
 
 int output::add(char* target)

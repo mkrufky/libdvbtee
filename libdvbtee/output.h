@@ -90,6 +90,7 @@ public:
 	int start();
 	void stop();
 
+	int push(uint8_t* p_data, int size);
 	int push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
 	int add(char*);
 
