@@ -126,7 +126,7 @@ void output_stream::stop()
 	return;
 }
 
-int output_stream::push(uint8_t* p_data, int size)
+bool output_stream::push(uint8_t* p_data, int size)
 {
 	/* push data into output_stream buffer */
 	return ringbuffer.write(p_data, size);
@@ -338,15 +338,15 @@ void output::stop()
 	return;
 }
 
-int output::push(uint8_t* p_data, int size)
+bool output::push(uint8_t* p_data, int size)
 {
 	/* push data into output buffer */
 	return ringbuffer.write(p_data, size);
 }
 
-int output::push(uint8_t* p_data, enum output_options opt)
+bool output::push(uint8_t* p_data, enum output_options opt)
 {
-	return (((!options) || (!opt)) || (opt & options)) ? push(p_data, 188) : 0;
+	return (((!options) || (!opt)) || (opt & options)) ? push(p_data, 188) : false;
 }
 
 int output::add(char* target)

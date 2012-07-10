@@ -57,7 +57,7 @@ public:
 	int start();
 	void stop();
 
-	int push(uint8_t*, int);
+	bool push(uint8_t*, int);
 	int add(char*);
 
 private:
@@ -92,8 +92,8 @@ public:
 	int start();
 	void stop();
 
-	int push(uint8_t* p_data, int size);
-	int push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
+	bool push(uint8_t* p_data, int size);
+	bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
 	int add(char*);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
