@@ -41,6 +41,8 @@ enum output_options {
 
 #define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES)
 
+#define OUTPUT_STREAM_BUF_SIZE 188*7*199
+
 class output_stream
 {
 public:
