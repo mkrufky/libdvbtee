@@ -238,8 +238,6 @@ output::output()
 {
 	dprintf("()");
 
-	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
-
 	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
@@ -354,6 +352,11 @@ int output::push(uint8_t* p_data, enum output_options opt)
 int output::add(char* target)
 {
 	dprintf("(%d->%s)", num_targets, target);
+
+	/* allocates out buffer if and only if we have at least one target */
+	if (ringbuffer.get_capacity() <= 0)
+		ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
+
 	/* push data into output buffer */
 	int ret = output_streams[num_targets].add(target);
 	if (ret == 0)
