@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "parse.h"
+#include "rbuf.h"
 
 void libdvbtee_set_debug_level(unsigned int debug);
 
@@ -59,20 +60,26 @@ public:
 
 private:
 	pthread_t h_thread;
+	pthread_t h_feed_thread;
 	bool f_kill_thread;
 
 	char filename[256];
 	int fd;
 
-	void *feed_thread();
-	void *stdin_feed_thread();
+	rbuf ringbuffer;
+
+	void            *feed_thread();
+	void       *file_feed_thread();
+	void      *stdin_feed_thread();
 	void *tcp_listen_feed_thread();
-	static void *feed_thread(void*);
-	static void *stdin_feed_thread(void*);
+	static void            *feed_thread(void*);
+	static void       *file_feed_thread(void*);
+	static void      *stdin_feed_thread(void*);
 	static void *tcp_listen_feed_thread(void*);
 
 	void set_filename(char*);
 	int  open_file();
+	int start_feed();
 };
 
 #endif /*__FEED_H__ */

@@ -29,6 +29,8 @@
 #include "feed.h"
 #include "log.h"
 
+#define FEED_BUFFER 0
+
 #define dprintf(fmt, arg...) __dprintf(DBG_FEED, fmt, ##arg)
 
 unsigned int dbg = 0;
@@ -38,13 +40,19 @@ void libdvbtee_set_debug_level(unsigned int debug)
 	dbg = debug;
 }
 
+#define BUFSIZE (188 * 312)
+
 feed::feed()
   : f_kill_thread(false)
   , fd(-1)
+  , ringbuffer()
 {
 	dprintf("()");
 
 	memset(filename, 0, sizeof(filename));
+#if FEED_BUFFER
+	ringbuffer.set_capacity(BUFSIZE*4);
+#endif
 }
 
 feed::~feed()
@@ -67,7 +75,7 @@ int feed::open_file()
 
 	fd = -1;
 
-	if ((fd = open(filename, O_RDONLY | O_NONBLOCK )) < 0)
+	if ((fd = open(filename, O_RDONLY )) < 0)
 		fprintf(stderr, "failed to open %s\n", filename);
 	else
 		fprintf(stderr, "%s: using %s\n", __func__, filename);
@@ -90,6 +98,12 @@ void* feed::feed_thread(void *p_this)
 }
 
 //static
+void* feed::file_feed_thread(void *p_this)
+{
+	return static_cast<feed*>(p_this)->file_feed_thread();
+}
+
+//static
 void* feed::stdin_feed_thread(void *p_this)
 {
 	return static_cast<feed*>(p_this)->stdin_feed_thread();
@@ -101,15 +115,31 @@ void* feed::tcp_listen_feed_thread(void *p_this)
 	return static_cast<feed*>(p_this)->tcp_listen_feed_thread();
 }
 
-int feed::start()
+int feed::start_feed()
 {
+#if 0
 	f_kill_thread = false;
-
-	int ret = pthread_create(&h_thread, NULL, feed_thread, this);
+#endif
+	int ret = pthread_create(&h_feed_thread, NULL, feed_thread, this);
 
 	if (0 != ret)
 		perror("pthread_create() failed");
 
+	return ret;
+}
+
+int feed::start()
+{
+	f_kill_thread = false;
+
+	int ret = pthread_create(&h_thread, NULL, file_feed_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+#if FEED_BUFFER
+	else
+		start_feed();
+#endif
 	return ret;
 }
 
@@ -126,38 +156,67 @@ void feed::stop()
 	}
 }
 
-#define BUFSIZE (188 * 312)
 void *feed::feed_thread()
 {
-	unsigned char buf[BUFSIZE];
+	unsigned char *data = NULL;
+	int size, read_size;
+
+	dprintf("()");
+	while (!f_kill_thread) {
+		size = ringbuffer.get_size();
+		if (size >= 188) {
+			if (size != (size/188)*188) fprintf(stderr,"%s: ringbuf has unaligned data %d -> %d\t", __func__, size, (size/188)*188);
+			size = (size/188)*188;
+			read_size = ringbuffer.get_read_ptr((void**)&data, size);
+			//if ((read_size != size) && (size != (size/read_size)*read_size)) fprintf(stderr,"%s: read size doesnt match ringbuffer size, shouldnt be %d != %d\n", __func__, read_size, size);
+			parser.feed(read_size, data);
+			ringbuffer.put_read_ptr();
+		} else
+			usleep(20*1000);
+	}
+	pthread_exit(NULL);
+}
+
+void *feed::file_feed_thread()
+{
 	ssize_t r;
+#if FEED_BUFFER
+	void *q = NULL;
+#else
+	unsigned char q[BUFSIZE];
+#endif
+	int available;
 
 	dprintf("(fd=%d)", fd);
 
 	while (!f_kill_thread) {
 
-		if ((r = read(fd, buf, BUFSIZE)) <= 0) {
+#if FEED_BUFFER
+		available = ringbuffer.get_write_ptr(&q);
+#else
+		available = sizeof(q);
+#endif
+		available = (available < BUFSIZE) ? available : BUFSIZE;
+		if ((r = read(fd, q, available)) <= 0) {
 
 			if (!r) {
 				f_kill_thread = true;
 				continue;
 			}
-			// FIXME: handle (r < 0) errror cases
-			//if (ret <= 0) switch (errno) {
 			switch (errno) {
 			case EAGAIN:
 				break;
 			case EOVERFLOW:
 				fprintf(stderr, "%s: r = %d, errno = EOVERFLOW\n", __func__, (int)r);
-				continue;
+				break;
 			case EBADF:
 				fprintf(stderr, "%s: r = %d, errno = EBADF\n", __func__, (int)r);
 				f_kill_thread = true;
-				continue;
+				break;
 			case EFAULT:
 				fprintf(stderr, "%s: r = %d, errno = EFAULT\n", __func__, (int)r);
 				f_kill_thread = true;
-				continue;
+				break;
 			case EINTR: /* maybe ok? */
 				fprintf(stderr, "%s: r = %d, errno = EINTR\n", __func__, (int)r);
 				//f_kill_thread = true;
@@ -165,24 +224,26 @@ void *feed::feed_thread()
 			case EINVAL:
 				fprintf(stderr, "%s: r = %d, errno = EINVAL\n", __func__, (int)r);
 				f_kill_thread = true;
-				continue;
+				break;
 			case EIO: /* maybe ok? */
 				fprintf(stderr, "%s: r = %d, errno = EIO\n", __func__, (int)r);
 				f_kill_thread = true;
-				continue;
+				break;
 			case EISDIR:
 				fprintf(stderr, "%s: r = %d, errno = EISDIR\n", __func__, (int)r);
 				f_kill_thread = true;
-				continue;
+				break;
 			default:
 				fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, errno);
 				break;
 			}
-
-			usleep(50*1000);
 			continue;
 		}
-		parser.feed(r, buf);
+#if FEED_BUFFER
+		ringbuffer.put_write_ptr(r);
+#else
+		parser.feed(r, q);
+#endif
 	}
 	close_file();
 	pthread_exit(NULL);
@@ -190,14 +251,25 @@ void *feed::feed_thread()
 
 void *feed::stdin_feed_thread()
 {
-	unsigned char buf[BUFSIZE];
 	ssize_t r;
+#if FEED_BUFFER
+	void *q = NULL;
+#else
+	unsigned char q[BUFSIZE];
+#endif
+	int available;
 
 	dprintf("()");
 
 	while (!f_kill_thread) {
 
-		if ((r = fread(buf, 188, BUFSIZE / 188, stdin)) < (BUFSIZE / 188)) {
+#if FEED_BUFFER
+		available = ringbuffer.get_write_ptr(&q);
+#else
+		available = sizeof(q);
+#endif
+		available = (available < BUFSIZE) ? available : BUFSIZE;
+		if ((r = fread(q, 188, available / 188, stdin)) < (available / 188)) {
 			if (ferror(stdin)) {
 				fprintf(stderr, "%s: error reading stdin!\n", __func__);
 				usleep(50*1000);
@@ -209,7 +281,11 @@ void *feed::stdin_feed_thread()
 			}
 			continue;
 		}
-		parser.feed(r * 188, buf);
+#if FEED_BUFFER
+		ringbuffer.put_write_ptr(r * 188);
+#else
+		parser.feed(r * 188, q);
+#endif
 	}
 	pthread_exit(NULL);
 }
@@ -221,7 +297,12 @@ void *feed::tcp_listen_feed_thread()
 	int i, rxlen = 0;
 #define MAX_SOCKETS 1
 	int sock[MAX_SOCKETS];
-	unsigned char buf[/*BUFSIZE*/188*175];
+#if FEED_BUFFER
+	void *q = NULL;
+#else
+	unsigned char q[BUFSIZE/2];
+#endif
+	int available;
 
 	dprintf("(sock_fd=%d)", fd);
 
@@ -242,17 +323,28 @@ void *feed::tcp_listen_feed_thread()
 		for (i = 0; i < MAX_SOCKETS; i++)
 			if (sock[i] != -1) {
 
-				rxlen = recv(sock[i], buf, sizeof(buf), MSG_WAITALL);
+#if FEED_BUFFER
+				available = ringbuffer.get_write_ptr(&q);
+#else
+				available = sizeof(q);
+#endif
+				available = (available < (BUFSIZE/2)) ? available : (BUFSIZE/2);
+				rxlen = recv(sock[i], q, available, MSG_WAITALL);
 				if (rxlen > 0) {
-					if (rxlen != sizeof(buf)) fprintf(stderr, "%s: %d bytes != %zu\n", __func__, rxlen, sizeof(buf));
+					if (rxlen != available) fprintf(stderr, "%s: %d bytes != %zu\n", __func__, rxlen, available);
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
-					parser.feed(rxlen, buf);
+#if !FEED_BUFFER
+					parser.feed(rxlen, q);
+#endif
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 					close(sock[i]);
 					sock[i] = -1;
 				} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
 					usleep(50*1000);
 				}
+#if FEED_BUFFER
+				ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
+#endif
 			}
 	}
 	close_file();
@@ -275,7 +367,10 @@ int feed::start_stdin()
 
 	if (0 != ret)
 		perror("pthread_create() failed");
-
+#if FEED_BUFFER
+	else
+		start_feed();
+#endif
 	return ret;
 }
 
@@ -325,7 +420,10 @@ int feed::start_tcp_listener(uint16_t port_requested)
 
 	if (0 != ret)
 		perror("pthread_create() failed");
-
+#if FEED_BUFFER
+	else
+		start_feed();
+#endif
 	return ret;
 }
 

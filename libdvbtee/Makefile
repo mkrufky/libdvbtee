@@ -13,7 +13,7 @@ LDADD= -L../usr/lib -ldvbpsi
 LIBS= -L../usr/lib -ldvbpsi
 
 objects = parse.o functions.o decode.o channels.o feed.o tune.o atsctext.o \
-	  output.o desc.o
+	  output.o desc.o rbuf.o
 
 lib_name = libdvbtee
 

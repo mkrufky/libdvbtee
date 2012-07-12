@@ -30,7 +30,7 @@
 
 #include <map>
 
-#include "ringbuffer.h"
+#include "rbuf.h"
 
 enum output_options {
 	OUTPUT_NONE    = 0,
@@ -65,7 +65,7 @@ private:
 	bool f_kill_thread;
 	int sock;
 
-	RingBuffer ringbuffer;
+	rbuf ringbuffer;
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
@@ -103,7 +103,7 @@ private:
 	pthread_t h_thread;
 	bool f_kill_thread;
 
-	RingBuffer ringbuffer;
+	rbuf ringbuffer;
 
 	void *output_thread();
 	static void *output_thread(void*);
