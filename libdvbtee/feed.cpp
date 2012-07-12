@@ -28,6 +28,7 @@
 
 #include "feed.h"
 #include "log.h"
+#define CLASS_MODULE "feed"
 
 #define FEED_BUFFER 0
 

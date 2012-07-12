@@ -29,6 +29,7 @@
 #include "parse.h"
 #include "functions.h"
 #include "log.h"
+#define CLASS_MODULE "parse"
 
 #if USE_STATIC_DECODE_MAP
 static map_decoder   decoders;

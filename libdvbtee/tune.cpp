@@ -27,6 +27,7 @@
 
 #include "tune.h"
 #include "log.h"
+#define CLASS_MODULE "tune"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_TUNE, fmt, ##arg)
 

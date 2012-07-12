@@ -28,6 +28,7 @@
 
 #include "output.h"
 #include "log.h"
+#define CLASS_MODULE "out"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 

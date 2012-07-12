@@ -27,6 +27,7 @@
 
 #include "functions.h"
 #include "log.h"
+#define CLASS_MODULE "desc"
 
 #include "dvbpsi/dr_48.h" /* service descriptor */
 #include "dvbpsi/dr_4d.h" /* short event descriptor */

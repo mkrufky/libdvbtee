@@ -47,6 +47,7 @@ The tables are copyrighted by (from A/65C Annex C Page 91 footnote 19):
 #include "objects.h"
 #else
 #include "log.h"
+#define CLASS_MODULE "atsc"
 #define LogModule(a, b, fmt, arg...) __dprintf(DBG_ATSCTEXT, fmt, ##arg)
 #endif
 #include "atsctext.h"

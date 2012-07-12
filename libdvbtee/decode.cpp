@@ -28,6 +28,7 @@
 #include "functions.h"
 #include "decode.h"
 #include "log.h"
+#define CLASS_MODULE "decode"
 
 bool fshowtime;
 
