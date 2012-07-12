@@ -86,7 +86,7 @@ class output
 public:
 	output();
 	~output();
-#if 0
+#if 1
 	output(const output&);
 	output& operator= (const output&);
 #endif
