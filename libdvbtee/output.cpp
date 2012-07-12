@@ -33,6 +33,7 @@
 
 output_stream::output_stream()
   : f_kill_thread(false)
+  , f_streaming(false)
   , sock(-1)
   , ringbuffer()
   , stream_method(OUTPUT_STREAM_UDP)
@@ -85,6 +86,8 @@ void* output_stream::output_stream_thread()
 
 	dprintf("()");
 
+	f_streaming = true;
+
 	/* push data from output_stream buffer to target */
 	while (!f_kill_thread) {
 
@@ -98,6 +101,7 @@ void* output_stream::output_stream_thread()
 		stream(data, buf_size);
 		ringbuffer.put_read_ptr();
 	}
+	f_streaming = false;
 	pthread_exit(NULL);
 }
 
@@ -118,11 +122,10 @@ void output_stream::stop()
 	dprintf("()");
 
 	stop_without_wait();
-#if 0
-	while (-1 != sock_fd) {
+
+	while (f_streaming)
 		usleep(20*1000);
-	}
-#endif
+
 	return;
 }
 
@@ -232,6 +235,7 @@ int output_stream::add(char* target)
 
 output::output()
   : f_kill_thread(false)
+  , f_streaming(false)
   , ringbuffer()
   , num_targets(0)
   , options(OUTPUT_NONE)
@@ -284,6 +288,8 @@ void* output::output_thread()
 	int buf_size;
 	uint8_t *data = NULL;
 
+	f_streaming = true;
+
 	/* push data from main output buffer into output_stream buffers */
 	while (!f_kill_thread) {
 
@@ -300,6 +306,7 @@ void* output::output_thread()
 		}
 
 	}
+	f_streaming = false;
 	pthread_exit(NULL);
 }
 
@@ -330,11 +337,10 @@ void output::stop()
 		iter->second.stop();
 
 	stop_without_wait();
-#if 0
-	while (-1 != sock_fd) {
+
+	while (f_streaming)
 		usleep(20*1000);
-	}
-#endif
+
 	return;
 }
 

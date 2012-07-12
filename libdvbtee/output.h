@@ -63,6 +63,7 @@ public:
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
+	bool f_streaming;
 	int sock;
 
 	rbuf ringbuffer;
@@ -102,6 +103,7 @@ private:
 
 	pthread_t h_thread;
 	bool f_kill_thread;
+	bool f_streaming;
 
 	rbuf ringbuffer;
 
