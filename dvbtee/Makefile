@@ -5,6 +5,7 @@ STRIP     = $(CROSS_COMPILE)strip
 
 INSTALL_DIR = ../usr/bin
 
+DEBUG = -g -ggdb
 INCLUDES = -I../usr/lib -I../libdvbtee -I../usr/include
 CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -fPIC $(DEBUG)
 LDADD = -L../libdvbtee -L../usr/lib -ldvbtee -ldvbpsi

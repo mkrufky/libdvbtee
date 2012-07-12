@@ -6,9 +6,10 @@ STRIP     = $(CROSS_COMPILE)strip
 
 INSTALL_DIR = $(DVBTEE_ROOT)/usr/lib
 
+DEBUG = -g -ggdb
 INCLUDES= -I../usr/include
 GPPFLAGS= $(INCLUDES) -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread
-CPPFLAGS= $(INCLUDES) -g -Os -Wall -Wno-deprecated -fpermissive -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread
+CPPFLAGS= $(INCLUDES) -g -Os -Wall -Wno-deprecated -fpermissive -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread $(DEBUG)
 LDADD= -L../usr/lib -ldvbpsi
 LIBS= -L../usr/lib -ldvbpsi
 

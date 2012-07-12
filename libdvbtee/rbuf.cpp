@@ -28,6 +28,7 @@
 
 rbuf::rbuf()
   : capacity(0)
+  , p_data(NULL)
   , idx_read(0)
   , idx_write(0)
 {
@@ -42,8 +43,12 @@ rbuf::~rbuf()
 #if DBG
 	fprintf(stderr, "%s()", __func__);
 #endif
-	delete p_data;
+	pthread_mutex_lock(&mutex);
 
+	if (p_data)
+		delete p_data;
+
+	pthread_mutex_unlock(&mutex);
 	pthread_mutex_destroy(&mutex);
 }
 
@@ -52,8 +57,15 @@ void rbuf::set_capacity(int cap)
 #if DBG
 	fprintf(stderr, "%s(%d)", __func__, cap);
 #endif
+	pthread_mutex_lock(&mutex);
+
+	if (p_data)
+		delete p_data;
+
 	p_data = new char[(capacity = cap)];
 	__reset();
+
+	pthread_mutex_unlock(&mutex);
 }
 
 int rbuf::get_capacity()
