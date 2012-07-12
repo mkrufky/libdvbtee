@@ -77,7 +77,7 @@ void* output_stream::output_stream_thread(void *p_this)
 	return static_cast<output_stream*>(p_this)->output_stream_thread();
 }
 
-#define OUTPUT_STREAM_PACKET_SIZE ((stream_method == OUTPUT_STREAM_UDP) ? 188*7 : 188*175)
+#define OUTPUT_STREAM_PACKET_SIZE ((stream_method == OUTPUT_STREAM_UDP) ? 188*7 : 188*156)
 void* output_stream::output_stream_thread()
 {
 	uint8_t *data = NULL;
