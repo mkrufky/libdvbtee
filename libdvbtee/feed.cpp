@@ -43,7 +43,7 @@ void libdvbtee_set_debug_level(unsigned int debug)
 	dbg = debug;
 }
 
-#define BUFSIZE (188 * 312)
+#define BUFSIZE ((4096/188)*188)
 
 feed::feed()
   : f_kill_thread(false)
@@ -309,7 +309,7 @@ void *feed::tcp_listen_feed_thread()
 #if FEED_BUFFER
 	void *q = NULL;
 #else
-	unsigned char q[BUFSIZE/2];
+	unsigned char q[BUFSIZE];
 #endif
 	int available;
 
@@ -337,7 +337,7 @@ void *feed::tcp_listen_feed_thread()
 #else
 				available = sizeof(q);
 #endif
-				available = (available < (BUFSIZE/2)) ? available : (BUFSIZE/2);
+				available = (available < (BUFSIZE)) ? available : (BUFSIZE);
 				rxlen = recv(sock[i], q, available, MSG_WAITALL);
 				if (rxlen > 0) {
 					if (rxlen != available) fprintf(stderr, "%s: %d bytes != %zu\n", __func__, rxlen, available);
