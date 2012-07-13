@@ -22,7 +22,6 @@
 #ifndef __FEED_H__
 #define __FEED_H__
 
-#include <arpa/inet.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "parse.h"
