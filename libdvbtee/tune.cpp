@@ -214,8 +214,8 @@ int tune::start_feed()
 	}
 	fprintf(stderr, "%s: using %s\n", __func__, filename);
 #if 0
-	int buffersize = 188*((384*1024)/188);
-	if (ioctl(stream->demux_fd, DMX_SET_BUFFER_SIZE, buffersize) < 0)
+#define BUFSIZE_0x2000 (188*((384*1024)/188))
+	if (ioctl(demux_fd, DMX_SET_BUFFER_SIZE, BUFSIZE_0x2000) < 0)
 		perror("DMX_SET_BUFFER_SIZE failed");
 #endif
 	struct dmx_pes_filter_params pesfilter;
@@ -369,6 +369,11 @@ void tune::add_filter(uint16_t pid)
 		}
 	}
 	fprintf(stderr, "%s: using %s\n", __func__, filename);
+#if 0
+#define BUFSIZE_PID (188*((384*1024)/188))
+	if (ioctl(filtered_pids[pid], DMX_SET_BUFFER_SIZE, BUFSIZE_PID) < 0)
+		perror("DMX_SET_BUFFER_SIZE failed");
+#endif
 	struct dmx_pes_filter_params pesfilter;
 
 	pesfilter.pid = pid;
