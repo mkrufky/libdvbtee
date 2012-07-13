@@ -42,7 +42,9 @@ public:
 	void stop();
 	int start();
 	int start_stdin();
+#if 0
 	int start_socket(char* source);
+#endif
 	int start_tcp_listener(uint16_t);
 	int start_udp_listener(uint16_t);
 

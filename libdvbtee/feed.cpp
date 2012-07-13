@@ -427,6 +427,7 @@ int feed::start_stdin()
 	return ret;
 }
 
+#if 0
 int feed::start_socket(char* source)
 {
 	dprintf("()");
@@ -488,6 +489,7 @@ int feed::start_socket(char* source)
 	dprintf("~(-->%s)", source);
 	return ret;
 }
+#endif
 
 int feed::start_tcp_listener(uint16_t port_requested)
 {
