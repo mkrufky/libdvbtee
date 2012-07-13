@@ -448,7 +448,7 @@ int main(int argc, char **argv)
 			}
 			context.tuner.feeder.parser.set_channel_info(channel,
 				(scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
-				(scan_flags == SCAN_VSB) ? "8VSB" : "QAM256");
+				(scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 		}
 	}
 

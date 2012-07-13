@@ -421,7 +421,7 @@ void* tune::scan_thread()
 			case FE_ATSC:
 				feeder.parser.set_channel_info(channel,
 							       (scan_mode == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
-							       (scan_mode == SCAN_VSB) ? "8VSB" : "QAM256");
+							       (scan_mode == SCAN_VSB) ? "8VSB" : "QAM_256");
 				break;
 			case FE_OFDM:
 				feeder.parser.set_channel_info(channel, dvbt_chan_to_freq(channel),
