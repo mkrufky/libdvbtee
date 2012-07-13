@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "feed.h"
@@ -114,6 +115,12 @@ void* feed::stdin_feed_thread(void *p_this)
 void* feed::tcp_listen_feed_thread(void *p_this)
 {
 	return static_cast<feed*>(p_this)->tcp_listen_feed_thread();
+}
+
+//static
+void* feed::udp_listen_feed_thread(void *p_this)
+{
+	return static_cast<feed*>(p_this)->udp_listen_feed_thread();
 }
 
 int feed::start_feed()
@@ -352,6 +359,50 @@ void *feed::tcp_listen_feed_thread()
 	pthread_exit(NULL);
 }
 
+void *feed::udp_listen_feed_thread()
+{
+//	struct sockaddr_in udpsa;
+//	socklen_t salen = sizeof(udpsa);
+	int rxlen = 0;
+#if FEED_BUFFER
+	void *q = NULL;
+#else
+	unsigned char q[188*7];
+#endif
+	int available;
+
+	dprintf("(sock_fd=%d)", fd);
+
+	while (!f_kill_thread) {
+
+#if FEED_BUFFER
+		available = ringbuffer.get_write_ptr(&q);
+#else
+		available = sizeof(q);
+#endif
+		available = (available < (188*7)) ? available : (188*7);
+		//ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+		rxlen = recvfrom(fd, q, available, MSG_WAITALL, NULL, NULL);//(struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		if (rxlen > 0) {
+			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %zu\n", __func__, rxlen, available);
+//			getpeername(fd, (struct sockaddr*)&udpsa, &salen);
+#if !FEED_BUFFER
+			parser.feed(rxlen, q);
+#endif
+		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+//			close(sock[i]);
+//			sock[i] = -1;
+		} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
+			usleep(50*1000);
+		}
+#if FEED_BUFFER
+		ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
+#endif
+	}
+	close_file();
+	pthread_exit(NULL);
+}
+
 int feed::start_stdin()
 {
 	dprintf("()");
@@ -372,6 +423,68 @@ int feed::start_stdin()
 	else
 		start_feed();
 #endif
+	return ret;
+}
+
+int feed::start_socket(char* source)
+{
+	dprintf("()");
+#if 0
+	struct sockaddr_in ip_addr;
+#endif
+	char *ip;
+        uint16_t port;
+        bool b_tcp = false;
+        bool b_udp = false;
+	int ret;
+
+        dprintf("(<--%s)", source);
+
+	if (strstr(source, ":")) {
+		ip = strtok(source, ":");
+		if (strstr(ip, "tcp"))
+			b_tcp = true;
+		else
+			if (strstr(ip, "udp"))
+				b_udp = true;
+
+		if ((b_tcp) || (b_udp)) {
+			ip = strtok(NULL, ":");
+			if (strstr(ip, "//") == ip)
+				ip += 2;
+		}
+		// else ip = proto;
+		port = atoi(strtok(NULL, ":"));
+        } else {
+		b_tcp = false;
+		ip = source;
+		port = 1234;
+        }
+#if 0
+	if (fd >= 0)
+		close(fd);
+
+	fd = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
+	if (fd >= 0) {
+#endif
+#if 0
+		memset(&ip_addr, 0, sizeof(ip_addr));
+                ip_addr.sin_family = AF_INET;
+                ip_addr.sin_port   = htons(port);
+                if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
+			perror("ip address translation failed");
+			return -1;
+                } else
+			ringbuffer.reset();
+#endif
+		ret = (b_tcp) ? start_tcp_listener(port) : start_udp_listener(port);
+#if 0
+	} else {
+		perror("socket failed");
+		return -1;
+	}
+#endif
+	dprintf("~(-->%s)", source);
 	return ret;
 }
 
@@ -418,6 +531,57 @@ int feed::start_tcp_listener(uint16_t port_requested)
 	listen(fd, 1);
 
 	int ret = pthread_create(&h_thread, NULL, tcp_listen_feed_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+#if FEED_BUFFER
+	else
+		start_feed();
+#endif
+	return ret;
+}
+
+int feed::start_udp_listener(uint16_t port_requested)
+{
+	struct sockaddr_in udp_sock;
+
+	dprintf("(%d)", port_requested);
+
+	memset(&udp_sock, 0, sizeof(udp_sock));
+
+	f_kill_thread = false;
+
+	fd = -1;
+
+	fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (fd < 0) {
+		perror("open socket failed");
+		return fd;
+	}
+
+	int reuse = 1;
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+		perror("setting reuse failed");
+		return -1;
+	}
+
+	udp_sock.sin_family = AF_INET;
+	udp_sock.sin_port = htons(port_requested);
+	udp_sock.sin_addr.s_addr = INADDR_ANY;
+
+	if (bind(fd, (struct sockaddr*)&udp_sock, sizeof(udp_sock)) < 0) {
+		perror("bind to local interface failed");
+		return -1;
+	}
+	//	port = port_requested;
+#if 0
+	int fl = fcntl(fd, F_GETFL, 0);
+	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
+		perror("set non-blocking failed");
+		return -1;
+	}
+#endif
+	int ret = pthread_create(&h_thread, NULL, udp_listen_feed_thread, this);
 
 	if (0 != ret)
 		perror("pthread_create() failed");

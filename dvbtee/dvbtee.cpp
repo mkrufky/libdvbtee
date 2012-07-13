@@ -142,7 +142,7 @@ void start_server(struct dvbtee_context* context, int num_tuners)
 void listen_for_data(struct dvbtee_context* context, char* tcpipfeedurl)
 {
 	// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
-	if (0 <= context->_file_feeder.start_tcp_listener(atoi(tcpipfeedurl))) {
+	if (0 <= context->_file_feeder.start_udp_listener(atoi(tcpipfeedurl))) {
 		context->_file_feeder.wait_for_streaming_or_timeout(timeout);
 		context->_file_feeder.stop();
 		context->_file_feeder.close_file();
@@ -416,7 +416,7 @@ int main(int argc, char **argv)
 		listen_for_data(&context, tcpipfeedurl);
 #else
 		// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
-		if (0 <= context._file_feeder.start_tcp_listener(atoi(tcpipfeedurl))) {
+		if (0 <= context._file_feeder.start_udp_listener(atoi(tcpipfeedurl))) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);
 			context._file_feeder.stop();
 			context._file_feeder.close_file();

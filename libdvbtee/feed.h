@@ -22,6 +22,7 @@
 #ifndef __FEED_H__
 #define __FEED_H__
 
+#include <arpa/inet.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "parse.h"
@@ -42,7 +43,9 @@ public:
 	void stop();
 	int start();
 	int start_stdin();
+	int start_socket(char* source);
 	int start_tcp_listener(uint16_t);
+	int start_udp_listener(uint16_t);
 
 	void close_file();
 
@@ -72,10 +75,12 @@ private:
 	void       *file_feed_thread();
 	void      *stdin_feed_thread();
 	void *tcp_listen_feed_thread();
+	void *udp_listen_feed_thread();
 	static void            *feed_thread(void*);
 	static void       *file_feed_thread(void*);
 	static void      *stdin_feed_thread(void*);
 	static void *tcp_listen_feed_thread(void*);
+	static void *udp_listen_feed_thread(void*);
 
 	void set_filename(char*);
 	int  open_file();
