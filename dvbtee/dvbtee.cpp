@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 	char tcpipfeedurl[32];
 	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
 
-#define VERSION "0.0.4"
+#define VERSION "0.0.5"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
         while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::SE::o::O:d::")) != -1) {
