@@ -40,7 +40,7 @@ public:
     bool write(const void*, int);
 
     int  get_read_ptr(void**, int);
-    void put_read_ptr();
+    void put_read_ptr(int);
     int  read(void*, int);
 
 private:
@@ -50,14 +50,13 @@ private:
     char* p_data;
 
     int idx_read;
-    int idx_read_nxt;
     int idx_write;
 
     int  __get_size();
     void __reset();
 
     int  __get_read_ptr(void**, int);
-    void __put_read_ptr();
+    void __put_read_ptr(int);
 };
 
 #endif /* __RBUF_H__ */

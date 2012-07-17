@@ -105,8 +105,10 @@ void* output_stream::output_stream_thread()
 		}
 
 		buf_size = ringbuffer.get_read_ptr((void**)&data, OUTPUT_STREAM_PACKET_SIZE);
+		buf_size /= 188;
+		buf_size *= 188;
 		stream(data, buf_size);
-		ringbuffer.put_read_ptr();
+		ringbuffer.put_read_ptr(buf_size);
 	}
 	f_streaming = false;
 	pthread_exit(NULL);
@@ -308,10 +310,12 @@ void* output::output_thread()
 		//data = NULL;
 		if (buf_size) {
 			buf_size = ringbuffer.get_read_ptr((void**)&data, buf_size);
+			buf_size /= 188;
+			buf_size *= 188;
 
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 				iter->second.push(data, buf_size);
-			ringbuffer.put_read_ptr();
+			ringbuffer.put_read_ptr(buf_size);
 		} else {
 			usleep(50*1000);
 		}

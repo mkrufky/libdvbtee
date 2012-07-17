@@ -179,7 +179,7 @@ void *feed::feed_thread()
 			read_size = ringbuffer.get_read_ptr((void**)&data, size);
 			//if ((read_size != size) && (size != (size/read_size)*read_size)) fprintf(stderr,"%s: read size doesnt match ringbuffer size, shouldnt be %d != %d\n", __func__, read_size, size);
 			parser.feed(read_size, data);
-			ringbuffer.put_read_ptr();
+			ringbuffer.put_read_ptr(read_size);
 		} else
 			usleep(20*1000);
 	}

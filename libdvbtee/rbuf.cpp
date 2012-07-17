@@ -193,9 +193,9 @@ int rbuf::get_read_ptr(void**p, int size)
 	return __get_read_ptr(p, size);
 }
 
-void rbuf::put_read_ptr()
+void rbuf::put_read_ptr(int size)
 {
-	__put_read_ptr();
+	__put_read_ptr(size);
 
 	pthread_mutex_unlock(&mutex);
 }
@@ -208,7 +208,7 @@ int rbuf::read(void* p, int size)
 	if (newsize)
 		memcpy(p, q, newsize);
 
-	put_read_ptr();
+	put_read_ptr(newsize);
 	return newsize;
 }
 
@@ -241,15 +241,17 @@ int rbuf::__get_read_ptr(void**p, int size)
 	if (idx_read + size >= capacity) {
 		size = capacity - idx_read;
 		*p = p_data + idx_read;
-		idx_read_nxt = 0;
 	} else {
 		*p = p_data + idx_read;
-		idx_read_nxt = idx_read + size;
 	}
 	return size;
 }
 
-void rbuf::__put_read_ptr()
+void rbuf::__put_read_ptr(int size)
 {
-	idx_read = idx_read_nxt;
+	if (idx_read + size >= capacity) {
+		idx_read = 0;
+	} else {
+		idx_read += size;
+	}
 }
