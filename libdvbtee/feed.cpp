@@ -427,20 +427,19 @@ int feed::start_stdin()
 	return ret;
 }
 
-#if 0
 int feed::start_socket(char* source)
 {
 	dprintf("()");
 #if 0
 	struct sockaddr_in ip_addr;
 #endif
-	char *ip;
-        uint16_t port;
-        bool b_tcp = false;
-        bool b_udp = false;
+	char *ip, *portnum;
+	uint16_t port = 0;
+	bool b_tcp = false;
+	bool b_udp = false;
 	int ret;
 
-        dprintf("(<--%s)", source);
+	dprintf("(<--%s)", source);
 
 	if (strstr(source, ":")) {
 		ip = strtok(source, ":");
@@ -456,12 +455,19 @@ int feed::start_socket(char* source)
 				ip += 2;
 		}
 		// else ip = proto;
-		port = atoi(strtok(NULL, ":"));
-        } else {
-		b_tcp = false;
-		ip = source;
-		port = 1234;
-        }
+		portnum = strtok(NULL, ":");
+		if (portnum)
+			port = atoi(portnum);
+
+		if (!port) {
+			port = atoi(ip);
+			ip = NULL;
+		}
+	} else {
+		// assuming UDP
+		ip = NULL;
+		port = atoi(source);
+	}
 #if 0
 	if (fd >= 0)
 		close(fd);
@@ -471,12 +477,12 @@ int feed::start_socket(char* source)
 #endif
 #if 0
 		memset(&ip_addr, 0, sizeof(ip_addr));
-                ip_addr.sin_family = AF_INET;
-                ip_addr.sin_port   = htons(port);
-                if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
+		ip_addr.sin_family = AF_INET;
+		ip_addr.sin_port   = htons(port);
+		if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
 			perror("ip address translation failed");
 			return -1;
-                } else
+		} else
 			ringbuffer.reset();
 #endif
 		ret = (b_tcp) ? start_tcp_listener(port) : start_udp_listener(port);
@@ -489,7 +495,6 @@ int feed::start_socket(char* source)
 	dprintf("~(-->%s)", source);
 	return ret;
 }
-#endif
 
 int feed::start_tcp_listener(uint16_t port_requested)
 {

@@ -42,11 +42,7 @@ public:
 	void stop();
 	int start();
 	int start_stdin();
-#if 0
 	int start_socket(char* source);
-#endif
-	int start_tcp_listener(uint16_t);
-	int start_udp_listener(uint16_t);
 
 	void close_file();
 
@@ -82,6 +78,9 @@ private:
 	static void      *stdin_feed_thread(void*);
 	static void *tcp_listen_feed_thread(void*);
 	static void *udp_listen_feed_thread(void*);
+
+	int start_tcp_listener(uint16_t);
+	int start_udp_listener(uint16_t);
 
 	void set_filename(char*);
 	int  open_file();
