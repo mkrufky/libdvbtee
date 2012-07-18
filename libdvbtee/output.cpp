@@ -141,7 +141,16 @@ void output_stream::stop()
 bool output_stream::push(uint8_t* p_data, int size)
 {
 	/* push data into output_stream buffer */
-	return ringbuffer.write(p_data, size);
+	if (!ringbuffer.write(p_data, size))
+		while (size >= 188)
+			if (ringbuffer.write(p_data, 188)) {
+				p_data += 188;
+				size -= 188;
+			} else {
+				fprintf(stderr, "%s> FAILED: %d bytes dropped\n", __func__, size);
+				return false;
+			}
+	return true;
 }
 
 int output_stream::stream(uint8_t* p_data, int size)
@@ -362,7 +371,10 @@ void output::stop()
 bool output::push(uint8_t* p_data, int size)
 {
 	/* push data into output buffer */
-	return ringbuffer.write(p_data, size);
+	bool ret = ringbuffer.write(p_data, size);
+	if (!ret)
+		fprintf(stderr, "%s: FAILED: %d bytes dropped\n", __func__, size);
+	return ret;
 }
 
 bool output::push(uint8_t* p_data, enum output_options opt)
