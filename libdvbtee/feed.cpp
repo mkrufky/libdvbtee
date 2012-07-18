@@ -288,7 +288,6 @@ void *feed::stdin_feed_thread()
 				fprintf(stderr, "%s: EOF\n", __func__);
 				f_kill_thread = true;
 			}
-			continue;
 		}
 #if FEED_BUFFER
 		ringbuffer.put_write_ptr(r * 188);
