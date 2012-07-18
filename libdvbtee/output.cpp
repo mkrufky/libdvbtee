@@ -389,6 +389,8 @@ void output::stop()
 
 bool output::push(uint8_t* p_data, int size)
 {
+	if (!ringbuffer.get_capacity())
+		return false;
 	/* push data into output buffer */
 	bool ret = ringbuffer.write(p_data, size);
 	if (!ret)
