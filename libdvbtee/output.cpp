@@ -349,7 +349,7 @@ void* output::output_thread()
 
 		buf_size = ringbuffer.get_size();
 		//data = NULL;
-		if (buf_size) {
+		if (buf_size >= 188) {
 			buf_size = ringbuffer.get_read_ptr((void**)&data, buf_size);
 			buf_size /= 188;
 			buf_size *= 188;
