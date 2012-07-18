@@ -236,6 +236,7 @@ int output_stream::add(char* target)
 			perror("file failed");
 			return -1;
 		} else {
+			ringbuffer.reset();
 			stream_method = OUTPUT_STREAM_FILE;
 			return 0;
 		}
