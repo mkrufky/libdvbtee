@@ -340,7 +340,7 @@ void *feed::tcp_listen_feed_thread()
 				available = (available < (BUFSIZE)) ? available : (BUFSIZE);
 				rxlen = recv(sock[i], q, available, MSG_WAITALL);
 				if (rxlen > 0) {
-					if (rxlen != available) fprintf(stderr, "%s: %d bytes != %zu\n", __func__, rxlen, available);
+					if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 #if !FEED_BUFFER
 					parser.feed(rxlen, q);
@@ -385,7 +385,7 @@ void *feed::udp_listen_feed_thread()
 		//ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
 		rxlen = recvfrom(fd, q, available, MSG_WAITALL, NULL, NULL);//(struct sockaddr*) &ip_addr, sizeof(ip_addr));
 		if (rxlen > 0) {
-			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %zu\n", __func__, rxlen, available);
+			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
 //			getpeername(fd, (struct sockaddr*)&udpsa, &salen);
 #if !FEED_BUFFER
 			parser.feed(rxlen, q);
