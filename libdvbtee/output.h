@@ -78,6 +78,8 @@ private:
 #define OUTPUT_STREAM_TCP  1
 #define OUTPUT_STREAM_FILE 2
 	unsigned int stream_method;
+
+	unsigned int count_in, count_out;
 };
 
 typedef std::map<int, output_stream> output_stream_map;
@@ -116,6 +118,8 @@ private:
 	unsigned int num_targets;
 
 	enum output_options options;
+
+	unsigned int count_in, count_out;
 };
 
 #endif /*__OUTPUT_H__ */
