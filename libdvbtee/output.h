@@ -74,8 +74,9 @@ private:
 	struct sockaddr_in  ip_addr;
 
 	int stream(uint8_t*, int);
-#define OUTPUT_STREAM_UDP 0
-#define OUTPUT_STREAM_TCP 1
+#define OUTPUT_STREAM_UDP  0
+#define OUTPUT_STREAM_TCP  1
+#define OUTPUT_STREAM_FILE 2
 	unsigned int stream_method;
 };
 

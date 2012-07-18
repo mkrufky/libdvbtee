@@ -177,6 +177,9 @@ int output_stream::stream(uint8_t* p_data, int size)
 		}
 		ret = send(sock, p_data, size, 0);
 		break;
+	case OUTPUT_STREAM_FILE:
+		ret = write(sock, p_data, size);
+		break;
 	}
 	return ret;
 }
@@ -184,9 +187,10 @@ int output_stream::stream(uint8_t* p_data, int size)
 int output_stream::add(char* target)
 {
 	char *ip;
-	uint16_t port;
+	uint16_t port = 0;
 	bool b_tcp = false;
 	bool b_udp = false;
+	bool b_file = false;
 
 	dprintf("(-->%s)", target);
 
@@ -197,14 +201,18 @@ int output_stream::add(char* target)
 		else
 		if (strstr(ip, "udp"))
 			b_udp = true;
+		else
+		if (strstr(ip, "file"))
+			b_file = true;
 
-		if ((b_tcp) || (b_udp)) {
+		if ((b_tcp) || (b_udp) || (b_file)) {
 			ip = strtok(NULL, ":");
 			if (strstr(ip, "//") == ip)
 				ip += 2;
 		}
 		// else ip = proto;
-		port = atoi(strtok(NULL, ":"));
+		if (!b_file)
+			port = atoi(strtok(NULL, ":"));
 	} else {
 		b_tcp = false;
 		ip = target;
@@ -213,6 +221,17 @@ int output_stream::add(char* target)
 
 	if (sock >= 0)
 		close(sock);
+
+	if (b_file) {
+		dprintf("opening %s...", ip);
+		if ((sock = open(ip, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0) {
+			perror("file failed");
+			return -1;
+		} else {
+			stream_method = OUTPUT_STREAM_FILE;
+			return 0;
+		}
+	}
 
 	sock = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
 	if (sock >= 0) {
