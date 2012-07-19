@@ -106,7 +106,7 @@ void* output_stream::output_stream_thread()
 
 		buf_size = ringbuffer.get_size();
 		if (buf_size < OUTPUT_STREAM_PACKET_SIZE) {
-//			usleep(50*1000);
+			usleep(1000);
 			continue;
 		}
 
@@ -364,7 +364,7 @@ void* output::output_thread()
 			ringbuffer.put_read_ptr(buf_size);
 			count_out += buf_size;
 		} else {
-//			usleep(50*1000);
+			usleep(1000);
 		}
 
 	}
