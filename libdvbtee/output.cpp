@@ -106,7 +106,7 @@ void* output_stream::output_stream_thread()
 
 		buf_size = ringbuffer.get_size();
 		if (buf_size < OUTPUT_STREAM_PACKET_SIZE) {
-			usleep(50*1000);
+//			usleep(50*1000);
 			continue;
 		}
 
@@ -116,6 +116,7 @@ void* output_stream::output_stream_thread()
 		stream(data, buf_size);
 		ringbuffer.put_read_ptr(buf_size);
 		count_out += buf_size;
+		dprintf("(thread-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 	}
 	f_streaming = false;
 	pthread_exit(NULL);
@@ -156,9 +157,11 @@ bool output_stream::push(uint8_t* p_data, int size)
 				count_in += 188;
 			} else {
 				fprintf(stderr, "%s> FAILED: %d bytes dropped\n", __func__, size);
+				dprintf("(push-false-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 				return false;
 			}
 	else count_in += size;
+	dprintf("(push-true-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 
 	return true;
 }
@@ -361,7 +364,7 @@ void* output::output_thread()
 			ringbuffer.put_read_ptr(buf_size);
 			count_out += buf_size;
 		} else {
-			usleep(50*1000);
+//			usleep(50*1000);
 		}
 
 	}
