@@ -32,6 +32,8 @@
 
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
+#define DOUBLE_BUFFER 0
+
 output_stream::output_stream()
   : f_kill_thread(false)
   , f_streaming(false)
@@ -370,12 +372,14 @@ void* output::output_thread()
 int output::start()
 {
 	dprintf("()");
-
+#if DOUBLE_BUFFER
 	int ret = pthread_create(&h_thread, NULL, output_thread, this);
 
 	if (0 != ret)
 		perror("pthread_create() failed");
-
+#else
+	int ret = 0;
+#endif
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.start();
 
@@ -392,24 +396,30 @@ void output::stop()
 
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.stop();
-
+#if DOUBLE_BUFFER
 	stop_without_wait();
 
 	while (f_streaming)
 		usleep(20*1000);
-
+#endif
 	return;
 }
 
 bool output::push(uint8_t* p_data, int size)
 {
+#if DOUBLE_BUFFER
 	if (!ringbuffer.get_capacity())
 		return false;
 	/* push data into output buffer */
 	bool ret = ringbuffer.write(p_data, size);
 	if (!ret)
 		fprintf(stderr, "%s: FAILED: %d bytes dropped\n", __func__, size);
+#else
+	bool ret = true;
 
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		iter->second.push(p_data, size);
+#endif
 	count_in += size;
 
 	return ret;
@@ -423,11 +433,11 @@ bool output::push(uint8_t* p_data, enum output_options opt)
 int output::add(char* target)
 {
 	dprintf("(%d->%s)", num_targets, target);
-
+#if DOUBLE_BUFFER
 	/* allocates out buffer if and only if we have at least one target */
 	if (ringbuffer.get_capacity() <= 0)
 		ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
-
+#endif
 	/* push data into output buffer */
 	int ret = output_streams[num_targets].add(target);
 	if (ret == 0)
