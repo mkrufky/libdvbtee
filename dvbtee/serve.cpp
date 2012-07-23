@@ -227,14 +227,17 @@ bool serve::command(char* cmdline)
 		tuner_id = 0;
 
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
-	if (!tuner)
+	if (!tuner) {
+		fprintf(stderr, "NO TUNER!\n");
 		return false;
-
+	}
 	if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
 		fprintf(stderr, "TUNE to channel %d...(%s)\n", channel, arg);
-		if (tuner->open_fe() < 0)
+		if (tuner->open_fe() < 0) {
+			fprintf(stderr, "open_fe() failed!\n");
 			return false;
+		}
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
@@ -242,6 +245,7 @@ bool serve::command(char* cmdline)
 
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
 				tuner->close_fe();
+				fprintf(stderr, "no lock!\n");
 				return false; /* NO LOCK! */
 			}
 			tuner->feeder.parser.set_channel_info(channel,
@@ -251,8 +255,10 @@ bool serve::command(char* cmdline)
 		}
 
 	} else if (strstr(cmd, "stream")) {
+		fprintf(stderr, "adding stream target...\n");
 		tuner->feeder.parser.add_output(arg);
 	} else if (strstr(cmd, "stop")) {
+		fprintf(stderr, "stopping...\n");
 		tuner->stop_feed();
 //		tuner->close_fe();
 	}
