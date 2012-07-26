@@ -778,12 +778,13 @@ int parse::add_output(char* target)
 
 void parse::set_service_ids(char *ids)
 {
-	char *id = strtok(ids, ",");
+	char *save, *id = strtok_r(ids, ",", &save);
+
 	if (id) while (id) {
 		if (!id)
 			id = ids;
 		set_service_id(strtoul(id, NULL, 0));
-		id = strtok(NULL, ",");
+		id = strtok_r(NULL, ",", &save);
 	} else
 		set_service_id(strtoul(ids, NULL, 0));
 }
