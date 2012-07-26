@@ -54,7 +54,7 @@ public:
 
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; };
 	uint16_t get_ts_id() const { return ts_id; };
-	void set_service_id(uint16_t id) { service_ids[id] = 0; }
+	void set_service_ids(char *ids);
 
 	int feed(int, uint8_t*);
 	void reset();
@@ -125,6 +125,7 @@ private:
 	unsigned int xine_dump(uint16_t, channel_info_t*);
 
 	void set_ts_id(uint16_t new_ts_id) { fprintf(stderr, "%s(%04x|%d)\n", __func__, new_ts_id, new_ts_id); ts_id = new_ts_id; memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t)); };
+	void set_service_id(uint16_t id) { service_ids[id] = 0; }
 	void detach_demux();
 
 	channel_info_t new_channel_info;

@@ -776,6 +776,18 @@ int parse::add_output(char* target)
 		return out.start();
 }
 
+void parse::set_service_ids(char *ids)
+{
+	char *id = strtok(ids, ",");
+	if (id) while (id) {
+		if (!id)
+			id = ids;
+		set_service_id(strtoul(id, NULL, 0));
+		id = strtok(NULL, ",");
+	} else
+		set_service_id(strtoul(ids, NULL, 0));
+}
+
 int parse::feed(int count, uint8_t* p_data)
 {
 	if (count <= 0) {

@@ -256,7 +256,7 @@ bool serve::command(char* cmdline)
 
 	} else if (strstr(cmd, "service")) {
 		fprintf(stderr, "selecting service id...\n");
-		tuner->feeder.parser.set_service_id(strtoul(arg, NULL, 0));
+		tuner->feeder.parser.set_service_ids(arg);
 	} else if (strstr(cmd, "stream")) {
 		fprintf(stderr, "adding stream target...\n");
 		tuner->feeder.parser.add_output(arg);

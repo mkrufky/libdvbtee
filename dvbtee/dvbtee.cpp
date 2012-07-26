@@ -259,8 +259,6 @@ int main(int argc, char **argv)
 	unsigned int wait_event  = 0;
 	int eit_limit            = -1;
 
-	uint16_t service_id      = 0;
-
 	enum output_options out_opt = (enum output_options)-1;
 
 	char filename[256];
@@ -271,6 +269,9 @@ int main(int argc, char **argv)
 
 	char tcpipfeedurl[32];
 	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
+
+	char service_ids[64];
+	memset(&service_ids, 0, sizeof(service_ids));
 
 #define VERSION "0.0.6"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
@@ -321,7 +322,7 @@ int main(int argc, char **argv)
 			strcpy(tcpipfeedurl, optarg);
 			break;
 		case 'I': /* request a service by its service id */
-			service_id = strtoul(optarg, NULL, 0);
+			strcpy(service_ids, optarg);
 			break;
 		case 'E': /* enable EPG scan */
 #if 0
@@ -366,7 +367,7 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
-	b_kernel_pid_filters = (service_id) ? true : false;
+	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
 
 	if (out_opt > 0)
 		context.tuner.feeder.parser.out.set_options(out_opt);
@@ -434,8 +435,8 @@ int main(int argc, char **argv)
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
-		if (service_id) {
-			context.tuner.feeder.parser.set_service_id(service_id);
+		if (strlen(service_ids) > 0) {
+			context.tuner.feeder.parser.set_service_ids(service_ids);
 			if (out_opt < 0)
 				context.tuner.feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
 		}
