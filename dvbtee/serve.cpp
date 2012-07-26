@@ -211,18 +211,19 @@ int serve::push(uint8_t* p_data)
 
 bool serve::command(char* cmdline)
 {
-	char* cmd = strtok(cmdline, "/");
-	char* arg;
+	char *arg, *save;
+	char *cmd = strtok_r(cmdline, "/", &save);
+
 	if (!cmd)
 		cmd = cmdline;
-	arg = strtok(NULL, "/");
+	arg = strtok_r(NULL, "/", &save);
 
 	unsigned int tuner_id, scan_flags = 0; // FIXME
 
 	if (strstr(cmd, "tuner")) {
 		tuner_id = atoi(arg);
-		cmd = strtok(NULL, "/");
-		arg = strtok(NULL, "/");
+		cmd = strtok_r(NULL, "/", &save);
+		arg = strtok_r(NULL, "/", &save);
 	} else
 		tuner_id = 0;
 
