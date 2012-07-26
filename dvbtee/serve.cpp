@@ -211,6 +211,27 @@ int serve::push(uint8_t* p_data)
 
 bool serve::command(char* cmdline)
 {
+	char *save;
+	bool ret = false;
+	char *item = strtok_r(cmdline, ";", &save);
+
+	if (item) while (item) {
+		if (!item)
+			item = cmdline;
+
+		ret = __command(item);
+		if (!ret)
+			return ret;
+
+		item = strtok_r(NULL, ";", &save);
+	} else
+		ret = __command(cmdline);
+
+	return ret;
+}
+
+bool serve::__command(char* cmdline)
+{
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, "/", &save);
 

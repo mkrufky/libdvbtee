@@ -51,7 +51,8 @@ private:
 	void stop_without_wait() { f_kill_thread = true; };
 	void close_socket();
 
-	bool command(char*);
+	bool   command(char*);
+	bool __command(char*);
 
 	int sock_fd;
 	uint16_t port;
