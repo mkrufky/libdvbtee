@@ -204,6 +204,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 
 int output_stream::add(char* target)
 {
+	char *save;
 	char *ip;
 	uint16_t port = 0;
 	bool b_tcp = false;
@@ -213,7 +214,7 @@ int output_stream::add(char* target)
 	dprintf("(-->%s)", target);
 
 	if (strstr(target, ":")) {
-		ip = strtok(target, ":");
+		ip = strtok_r(target, ":", &save);
 		if (strstr(ip, "tcp"))
 			b_tcp = true;
 		else
@@ -224,13 +225,13 @@ int output_stream::add(char* target)
 			b_file = true;
 
 		if ((b_tcp) || (b_udp) || (b_file)) {
-			ip = strtok(NULL, ":");
+			ip = strtok_r(NULL, ":", &save);
 			if (strstr(ip, "//") == ip)
 				ip += 2;
 		}
 		// else ip = proto;
 		if (!b_file)
-			port = atoi(strtok(NULL, ":"));
+			port = atoi(strtok_r(NULL, ":", &save));
 	} else {
 		b_tcp = false;
 		ip = target;
@@ -439,6 +440,26 @@ bool output::push(uint8_t* p_data, enum output_options opt)
 }
 
 int output::add(char* target)
+{
+	char *save;
+	int ret = -1;
+	char *item = strtok_r(target, ",", &save);
+	if (item) while (item) {
+		if (!item)
+			item = target;
+
+		ret = __add(item);
+		if (ret < 0)
+			return ret;
+
+		item = strtok_r(NULL, ",", &save);
+	} else
+		ret = __add(target);
+
+	return ret;
+}
+
+int output::__add(char* target)
 {
 	dprintf("(%d->%s)", num_targets, target);
 #if DOUBLE_BUFFER

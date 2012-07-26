@@ -115,6 +115,8 @@ private:
 
 	void stop_without_wait() { f_kill_thread = true; };
 
+	int __add(char*);
+
 	unsigned int num_targets;
 
 	enum output_options options;
