@@ -335,7 +335,9 @@ bool parse::take_sdt_other(dvbpsi_sdt_t* p_sdt, bool decoded)
 
 bool parse::take_eit(dvbpsi_eit_t* p_eit, bool decoded)
 {
-	dprintf("(%s): TODO", (decoded) ? "post" : "pre");
+	dprintf("(%s): v%d, service_id %d",
+		(decoded) ? "post" : "pre",
+		p_eit->i_version, p_eit->i_service_id);
 
 	if (decoded) return true;
 
