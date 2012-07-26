@@ -264,7 +264,7 @@ bool serve::command(char* cmdline)
 	} else if (strstr(cmd, "stop")) {
 		fprintf(stderr, "stopping...\n");
 		tuner->stop_feed();
-//		tuner->close_fe();
+		tuner->close_fe();
 	}
 
 	return true;
