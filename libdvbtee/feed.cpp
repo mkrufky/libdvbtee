@@ -432,7 +432,7 @@ int feed::start_socket(char* source)
 #if 0
 	struct sockaddr_in ip_addr;
 #endif
-	char *ip, *portnum;
+	char *ip, *portnum, *save;
 	uint16_t port = 0;
 	bool b_tcp = false;
 	bool b_udp = false;
@@ -441,7 +441,7 @@ int feed::start_socket(char* source)
 	dprintf("(<--%s)", source);
 
 	if (strstr(source, ":")) {
-		ip = strtok(source, ":");
+		ip = strtok_r(source, ":", &save);
 		if (strstr(ip, "tcp"))
 			b_tcp = true;
 		else
@@ -449,12 +449,12 @@ int feed::start_socket(char* source)
 				b_udp = true;
 
 		if ((b_tcp) || (b_udp)) {
-			ip = strtok(NULL, ":");
+			ip = strtok_r(NULL, ":", &save);
 			if (strstr(ip, "//") == ip)
 				ip += 2;
 		}
 		// else ip = proto;
-		portnum = strtok(NULL, ":");
+		portnum = strtok_r(NULL, ":", &save);
 		if (portnum)
 			port = atoi(portnum);
 
