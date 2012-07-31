@@ -273,7 +273,17 @@ bool serve::__command(char* cmdline)
 		fprintf(stderr, "NO TUNER!\n");
 		return false;
 	}
-	if (strstr(cmd, "channel")) {
+//	if (strstr(cmd, "channels")) {
+//		fprintf(stderr, "dumping channel list...\n");
+	if (strstr(cmd, "scan")) {
+		fprintf(stderr, "scanning for services...\n");
+
+		if (!scan_flags)
+			scan_flags = SCAN_VSB;
+
+		tuner->scan_for_services(scan_flags, 0, 0, false);;
+		
+	} else if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
 		fprintf(stderr, "TUNE to channel %d...(%s)\n", channel, arg);
 		if (tuner->open_fe() < 0) {
