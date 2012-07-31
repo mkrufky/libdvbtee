@@ -100,6 +100,23 @@ void* serve::serve_thread(void *p_this)
 
 #define MAX_SOCKETS 4
 
+#define CRLF "\r\n"
+
+static char http_response[] =
+	 "HTTP/1.1 200 OK"
+	 CRLF
+	 "Content-type: text/plain"
+	 CRLF
+	 "Content-length: 0"
+	 CRLF
+	 "Cache-Control: no-cache,no-store,private"
+	 CRLF
+	 "Expires: -1"
+	 CRLF
+	 "Connection: close"
+	 CRLF
+	 CRLF;
+
 void* serve::serve_thread()
 {
 	struct sockaddr_in tcpsa;
@@ -128,9 +145,12 @@ void* serve::serve_thread()
 				char buf[256] = { 0 };
 				rxlen = recv(sock[i], buf, sizeof(buf), MSG_DONTWAIT);
 				if (rxlen > 0) {
+					bool send_http;
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 					fprintf(stderr, "%s: %s\n", __func__, buf);
+					send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
 					command(buf); /* process */
+					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 					close(sock[i]);
 					sock[i] = -1;
