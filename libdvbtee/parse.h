@@ -46,6 +46,8 @@ typedef std::map<uint16_t, uint16_t> map_eit_pids; /* pid, eit-x */
 
 typedef void (*addfilter_callback)(void *, uint16_t);
 
+typedef void (*chandump_callback)(void *context, uint16_t lcn, uint16_t major, uint16_t minor, uint16_t physical_channel, uint32_t freq, char *modulation, char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
+
 class parse
 {
 public:
@@ -83,6 +85,8 @@ public:
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 
 	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; reset_filters(); }
+
+	void set_chandump_callback(chandump_callback cb, void* context = NULL) { chandump_context = context; chandump_cb = cb; }
 
 	output out;
 
@@ -159,6 +163,9 @@ private:
 	bool process_err_pkts;
 	map_pidtype payload_pids;
 
+	chandump_callback chandump_cb;
+	void* chandump_context;
+
 	addfilter_callback addfilter_cb;
 	void* addfilter_context;
 	void add_filter(uint16_t pid) { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, pid); }
@@ -168,4 +175,4 @@ private:
 	bool enabled;
 };
 
-#endif//__PARSE_H__
+#endif //__PARSE_H__

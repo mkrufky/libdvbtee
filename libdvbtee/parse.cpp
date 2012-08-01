@@ -638,6 +638,27 @@ inline uint16_t tp_pkt_pid(uint8_t* pkt)
 	return (pkt[0] == 0x47) ? ((uint16_t) (pkt[1] & 0x1f) << 8) + pkt[2] : (uint16_t) - 1;
 }
 
+static void xine_chandump(void *context,
+			  uint16_t lcn, uint16_t major, uint16_t minor,
+			  uint16_t physical_channel, uint32_t freq, char *modulation,
+			  char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+{
+	char channelno[7]; /* XXX.XXX */
+	if (major + minor > 1)
+		sprintf(channelno, "%d.%d", major, minor);
+	else if (lcn)
+		sprintf(channelno, "%d", lcn);
+	else
+		sprintf(channelno, "%d", physical_channel);
+
+	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+		channelno,
+		service_name,
+		freq,//iter_vct->second.carrier_freq,
+		modulation,
+		vpid, apid, program_number);
+}
+
 unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 {
 	uint32_t freq          = channel_info->frequency;
@@ -688,15 +709,16 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 		char channelno[7]; /* XXX.XXX */
 		unsigned char service_name[256] = { 0 };
 		service_name[7] = 0;
+		uint16_t lcn = 0;
+		uint16_t major = 0;
+		uint16_t minor = 0;
 		map_decoded_vct_channels::const_iterator iter_vct = decoders[ts_id].get_decoded_vct()->channels.find(program_number);
 		if (iter_vct != decoders[ts_id].get_decoded_vct()->channels.end()) {
-			sprintf(channelno, "%d.%d", iter_vct->second.chan_major, iter_vct->second.chan_minor);
+			major = iter_vct->second.chan_major;
+			minor = iter_vct->second.chan_minor;
 			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
 		} else { // FIXME: use SDT info
-			if (uint16_t lcn = decoders[ts_id].get_lcn(program_number))
-				sprintf(channelno, "%d", lcn);
-
-			else sprintf(channelno, "%d", channel);//FIXME
+			lcn = decoders[ts_id].get_lcn(program_number);
 
 			decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
 			if ((decoded_sdt) && (decoded_sdt->services.count(program_number)))
@@ -704,18 +726,14 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 			else
 				sprintf((char*)service_name, "%04d_UNKNOWN", program_number);
 		}
+		if (!chandump_cb)
+			set_chandump_callback(xine_chandump);
 
-		fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
-			channelno,
-			service_name,
-			freq,//iter_vct->second.carrier_freq,
-			modulation,
-			vpid, apid, program_number);
+		chandump_cb(chandump_context, lcn, major, minor, channel, freq, modulation, service_name, vpid, apid, program_number);
 		count++;
 	}
 	return count;
 }
-
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
