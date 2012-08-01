@@ -640,8 +640,8 @@ inline uint16_t tp_pkt_pid(uint8_t* pkt)
 
 static void xine_chandump(void *context,
 			  uint16_t lcn, uint16_t major, uint16_t minor,
-			  uint16_t physical_channel, uint32_t freq, char *modulation,
-			  char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+			  uint16_t physical_channel, uint32_t freq, const char *modulation,
+			  unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
 {
 	char channelno[7]; /* XXX.XXX */
 	if (major + minor > 1)
@@ -662,7 +662,7 @@ static void xine_chandump(void *context,
 unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 {
 	uint32_t freq          = channel_info->frequency;
-	unsigned int channel   = channel_info->channel;
+	uint16_t channel       = channel_info->channel;
 	const char* modulation = channel_info->modulation;;
 
 	int count = 0;
@@ -706,7 +706,6 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 					break;
 				}
 
-		char channelno[7]; /* XXX.XXX */
 		unsigned char service_name[256] = { 0 };
 		service_name[7] = 0;
 		uint16_t lcn = 0;

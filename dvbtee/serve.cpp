@@ -250,6 +250,34 @@ bool serve::command(char* cmdline)
 	return ret;
 }
 
+static void chandump(void *context,
+		     uint16_t lcn, uint16_t major, uint16_t minor,
+		     uint16_t physical_channel, uint32_t freq, const char *modulation,
+		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+{
+	char channelno[7]; /* XXX.XXX */
+	if (major + minor > 1)
+		sprintf(channelno, "%d.%d", major, minor);
+	else if (lcn)
+		sprintf(channelno, "%d", lcn);
+	else
+		sprintf(channelno, "%d", physical_channel);
+#if 0
+	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+		channelno,
+		service_name,
+		freq,//iter_vct->second.carrier_freq,
+		modulation,
+		vpid, apid, program_number);
+#else
+	fprintf(stdout, "%s-%s: service/%d;channel/%d\n",
+		channelno,
+		service_name,
+		program_number,
+		physical_channel);
+#endif
+}
+
 bool serve::__command(char* cmdline)
 {
 	char *arg, *save;
@@ -281,7 +309,8 @@ bool serve::__command(char* cmdline)
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
-		tuner->scan_for_services(scan_flags, 0, 0, false);;
+		tuner->feeder.parser.set_chandump_callback(chandump);
+		tuner->scan_for_services(scan_flags, 0, 0, false);
 
 	} else if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
