@@ -282,7 +282,7 @@ bool serve::__command(char* cmdline)
 			scan_flags = SCAN_VSB;
 
 		tuner->scan_for_services(scan_flags, 0, 0, false);;
-		
+
 	} else if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
 		fprintf(stderr, "TUNE to channel %d...(%s)\n", channel, arg);
