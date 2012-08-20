@@ -173,6 +173,10 @@ private:
 	void reset_filters();
 
 	bool enabled;
+
+	uint8_t pat_pkt[188];
+
+	uint8_t rewritten_pat_ver_offset;
 };
 
 #endif //__PARSE_H__

@@ -37,6 +37,8 @@ static map_decoder   decoders;
 
 #define dprintf(fmt, arg...) __dprintf(DBG_PARSE, fmt, ##arg)
 
+#include <dvbpsi/psi.h>
+
 #define PID_PAT  0x00
 #define PID_CAT  0x01
 #define PID_TSDT 0x02
@@ -79,6 +81,8 @@ static map_decoder   decoders;
 #define TID_ATSC_EIT  0xCB
 #define TID_ATSC_ETT  0xCC
 #define TID_ATSC_STT  0xCD
+
+static void writePSI(uint8_t* p_packet, dvbpsi_psi_section_t* p_section);
 
 #if DBG
 uint8_t pids[0x2000] = { 0 };
@@ -144,6 +148,14 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		return true;
 	}
 
+	dvbpsi_pat_t pat;
+	bool do_pat_rewrite = (service_ids.size()) ? true : false;
+
+	if (do_pat_rewrite)
+		dvbpsi_InitPAT(&pat, ts_id,
+			       0x1f & (++rewritten_pat_ver_offset +
+				       decoders[ts_id].get_decoded_pat()->version), 1);
+
 	for (map_decoded_pat_programs::const_iterator iter =
 	       decoders[p_pat->i_ts_id].get_decoded_pat()->programs.begin();
 	     iter != decoders[p_pat->i_ts_id].get_decoded_pat()->programs.end(); ++iter)
@@ -151,8 +163,21 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 				add_filter(iter->second);
+				if (do_pat_rewrite)
+					dvbpsi_PATAddProgram(&pat,
+							     iter->first,
+							     iter->second);
 			}
 		}
+
+	if (do_pat_rewrite) {
+		dvbpsi_psi_section_t* p_section = dvbpsi_GenPATSections(&pat, service_ids.size());
+		pat_pkt[0] = 0x47;
+		pat_pkt[1] = pat_pkt[2] = pat_pkt[3] = 0x00;
+		writePSI(pat_pkt, p_section);
+		dvbpsi_DeletePSISections(p_section);
+		dvbpsi_EmptyPAT(&pat);
+	}
 
 	has_pat = true;
 
@@ -525,6 +550,7 @@ parse::parse()
   , addfilter_cb(NULL)
   , addfilter_context(NULL)
   , enabled(true)
+  , rewritten_pat_ver_offset(0)
 {
 	dprintf("()");
 
@@ -808,6 +834,57 @@ void parse::set_service_ids(char *ids)
 		set_service_id(strtoul(ids, NULL, 0));
 }
 
+/*****************************************************************************
+ * writePSI - taken from libdvbpsi/misc/gen_pat.c
+ *****************************************************************************/
+static void writePSI(uint8_t* p_packet, dvbpsi_psi_section_t* p_section)
+{
+  p_packet[0] = 0x47;
+
+  while(p_section)
+    {
+      uint8_t* p_pos_in_ts;
+      uint8_t* p_byte = p_section->p_data;
+      uint8_t* p_end =   p_section->p_payload_end
+	+ (p_section->b_syntax_indicator ? 4 : 0);
+
+      p_packet[1] |= 0x40;
+      p_packet[3] = (p_packet[3] & 0x0f) | 0x10;
+
+      p_packet[4] = 0x00; /* pointer_field */
+      p_pos_in_ts = p_packet + 5;
+
+      while((p_pos_in_ts < p_packet + 188) && (p_byte < p_end))
+	*(p_pos_in_ts++) = *(p_byte++);
+      while(p_pos_in_ts < p_packet + 188)
+	*(p_pos_in_ts++) = 0xff;
+#if 0
+      fwrite(p_packet, 1, 188, stdout);
+#endif
+      p_packet[3] = (p_packet[3] + 1) & 0x0f;
+
+      while(p_byte < p_end)
+	{
+	  p_packet[1] &= 0xbf;
+	  p_packet[3] = (p_packet[3] & 0x0f) | 0x10;
+
+	  p_pos_in_ts = p_packet + 4;
+
+	  while((p_pos_in_ts < p_packet + 188) && (p_byte < p_end))
+	    *(p_pos_in_ts++) = *(p_byte++);
+	  while(p_pos_in_ts < p_packet + 188)
+	    *(p_pos_in_ts++) = 0xff;
+#if 0
+	  fwrite(p_packet, 1, 188, stdout);
+#endif
+	  p_packet[3] = (p_packet[3] + 1) & 0x0f;
+	}
+
+      p_section = p_section->p_next;
+    }
+}
+
+
 int parse::feed(int count, uint8_t* p_data)
 {
 	if (count <= 0) {
@@ -849,8 +926,10 @@ int parse::feed(int count, uint8_t* p_data)
 		switch (pid) {
 		case PID_PAT:
 			dvbpsi_PushPacket(h_pat, p);
-			send_pkt = true;
+			send_pkt = (service_ids.size()) ? false : true;
 			out_type = OUTPUT_PATPMT;
+			if (!send_pkt)
+				out.push(pat_pkt, out_type);
 			break;
 		case PID_ATSC:
 		case PID_NIT:
