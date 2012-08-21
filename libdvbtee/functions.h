@@ -31,6 +31,10 @@
 #include "decode.h"
 #endif
 
+#include <dvbpsi/psi.h>
+
+void writePSI(uint8_t* p_packet, dvbpsi_psi_section_t* p_section);
+
 #define ST_VideoMpeg1           0x01
 #define ST_VideoMpeg2           0x02
 #define ST_AudioMpeg1           0x03
