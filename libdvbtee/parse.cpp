@@ -547,6 +547,7 @@ parse::parse()
   , addfilter_context(NULL)
   , enabled(true)
   , rewritten_pat_ver_offset(0)
+  , rewritten_pat_cont_ctr(0)
 {
 	dprintf("()");
 
@@ -873,8 +874,10 @@ int parse::feed(int count, uint8_t* p_data)
 			dvbpsi_PushPacket(h_pat, p);
 			send_pkt = (service_ids.size()) ? false : true;
 			out_type = OUTPUT_PATPMT;
-			if (!send_pkt)
+			if (!send_pkt) {
+				pat_pkt[3] = ++rewritten_pat_cont_ctr & 0x0f;
 				out.push(pat_pkt, out_type);
+			}
 			break;
 		case PID_ATSC:
 		case PID_NIT:
