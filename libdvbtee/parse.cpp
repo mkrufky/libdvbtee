@@ -167,7 +167,7 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		}
 
 	if (do_pat_rewrite) {
-		dvbpsi_psi_section_t* p_section = dvbpsi_GenPATSections(&pat, service_ids.size());
+		dvbpsi_psi_section_t* p_section = dvbpsi_GenPATSections(&pat, 0);
 		pat_pkt[0] = 0x47;
 		pat_pkt[1] = pat_pkt[2] = pat_pkt[3] = 0x00;
 		writePSI(pat_pkt, p_section);
