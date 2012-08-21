@@ -875,7 +875,7 @@ int parse::feed(int count, uint8_t* p_data)
 			send_pkt = (service_ids.size()) ? false : true;
 			out_type = OUTPUT_PATPMT;
 			if (!send_pkt) {
-				pat_pkt[3] = ++rewritten_pat_cont_ctr & 0x0f;
+				pat_pkt[3] = (0x0f & ++rewritten_pat_cont_ctr) | 0x10;
 				out.push(pat_pkt, out_type);
 			}
 			break;
