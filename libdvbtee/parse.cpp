@@ -132,6 +132,31 @@ bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 	return true;
 }
 
+void parse::rewrite_pat()
+{
+	if (0 == service_ids.size())
+		return;
+
+	dvbpsi_pat_t pat;
+	dvbpsi_psi_section_t* p_section;
+	const decoded_pat_t *decoded_pat = decoders[ts_id].get_decoded_pat();
+
+	if (rewritten_pat_ver_offset == 0x1e)
+		rewritten_pat_ver_offset = 0;
+
+	dvbpsi_InitPAT(&pat, ts_id, 0x1f & (++rewritten_pat_ver_offset + decoded_pat->version), 1);
+
+	for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
+		dvbpsi_PATAddProgram(&pat, iter->first, decoded_pat->programs[iter->first]);
+
+	p_section = dvbpsi_GenPATSections(&pat, 0);
+	pat_pkt[0] = 0x47;
+	pat_pkt[1] = pat_pkt[2] = pat_pkt[3] = 0x00;
+	writePSI(pat_pkt, p_section);
+	dvbpsi_DeletePSISections(p_section);
+	dvbpsi_EmptyPAT(&pat);
+}
+
 bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 {
 	dprintf("(%s): v%d, ts_id: %d",
@@ -144,13 +169,18 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		return true;
 	}
 
+#ifdef INLINE_PAT_REWRITE
 	dvbpsi_pat_t pat;
 	bool do_pat_rewrite = (service_ids.size()) ? true : false;
 
-	if (do_pat_rewrite)
+	if (do_pat_rewrite) {
+		if (rewritten_pat_ver_offset == 0x1e)
+			rewritten_pat_ver_offset = 0;
 		dvbpsi_InitPAT(&pat, ts_id,
 			       0x1f & (++rewritten_pat_ver_offset +
 				       decoders[ts_id].get_decoded_pat()->version), 1);
+	}
+#endif
 
 	for (map_decoded_pat_programs::const_iterator iter =
 	       decoders[p_pat->i_ts_id].get_decoded_pat()->programs.begin();
@@ -159,13 +189,16 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 				add_filter(iter->second);
+#ifdef INLINE_PAT_REWRITE
 				if (do_pat_rewrite)
 					dvbpsi_PATAddProgram(&pat,
 							     iter->first,
 							     iter->second);
+#endif
 			}
 		}
 
+#ifdef INLINE_PAT_REWRITE
 	if (do_pat_rewrite) {
 		dvbpsi_psi_section_t* p_section = dvbpsi_GenPATSections(&pat, 0);
 		pat_pkt[0] = 0x47;
@@ -174,6 +207,9 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		dvbpsi_DeletePSISections(p_section);
 		dvbpsi_EmptyPAT(&pat);
 	}
+#else
+	rewrite_pat();
+#endif
 
 	has_pat = true;
 
@@ -822,6 +858,9 @@ void parse::set_service_ids(char *ids)
 {
 	char *save, *id = strtok_r(ids, ",", &save);
 
+#if 1
+	service_ids.clear();
+#endif
 	if (id) while (id) {
 		if (!id)
 			id = ids;
@@ -829,6 +868,9 @@ void parse::set_service_ids(char *ids)
 		id = strtok_r(NULL, ",", &save);
 	} else
 		set_service_id(strtoul(ids, NULL, 0));
+#if 1
+	if (has_pat) rewrite_pat();
+#endif
 }
 
 int parse::feed(int count, uint8_t* p_data)

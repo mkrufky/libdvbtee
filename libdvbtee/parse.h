@@ -177,6 +177,7 @@ private:
 	uint8_t pat_pkt[188];
 
 	uint8_t rewritten_pat_ver_offset, rewritten_pat_cont_ctr;
+	void rewrite_pat();
 };
 
 #endif //__PARSE_H__
