@@ -147,7 +147,7 @@ void parse::rewrite_pat()
 	dvbpsi_InitPAT(&pat, ts_id, 0x1f & (++rewritten_pat_ver_offset + decoded_pat->version), 1);
 
 	for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
-		dvbpsi_PATAddProgram(&pat, iter->first, decoded_pat->programs[iter->first]);
+		dvbpsi_PATAddProgram(&pat, iter->first, ((decoded_pat_t *) decoded_pat)->programs[iter->first]);
 
 	p_section = dvbpsi_GenPATSections(&pat, 0);
 	pat_pkt[0] = 0x47;
