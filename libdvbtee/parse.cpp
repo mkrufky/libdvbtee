@@ -169,19 +169,6 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		return true;
 	}
 
-#ifdef INLINE_PAT_REWRITE
-	dvbpsi_pat_t pat;
-	bool do_pat_rewrite = (service_ids.size()) ? true : false;
-
-	if (do_pat_rewrite) {
-		if (rewritten_pat_ver_offset == 0x1e)
-			rewritten_pat_ver_offset = 0;
-		dvbpsi_InitPAT(&pat, ts_id,
-			       0x1f & (++rewritten_pat_ver_offset +
-				       decoders[ts_id].get_decoded_pat()->version), 1);
-	}
-#endif
-
 	for (map_decoded_pat_programs::const_iterator iter =
 	       decoders[p_pat->i_ts_id].get_decoded_pat()->programs.begin();
 	     iter != decoders[p_pat->i_ts_id].get_decoded_pat()->programs.end(); ++iter)
@@ -189,27 +176,10 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 				add_filter(iter->second);
-#ifdef INLINE_PAT_REWRITE
-				if (do_pat_rewrite)
-					dvbpsi_PATAddProgram(&pat,
-							     iter->first,
-							     iter->second);
-#endif
 			}
 		}
 
-#ifdef INLINE_PAT_REWRITE
-	if (do_pat_rewrite) {
-		dvbpsi_psi_section_t* p_section = dvbpsi_GenPATSections(&pat, 0);
-		pat_pkt[0] = 0x47;
-		pat_pkt[1] = pat_pkt[2] = pat_pkt[3] = 0x00;
-		writePSI(pat_pkt, p_section);
-		dvbpsi_DeletePSISections(p_section);
-		dvbpsi_EmptyPAT(&pat);
-	}
-#else
 	rewrite_pat();
-#endif
 
 	has_pat = true;
 
