@@ -157,6 +157,18 @@ void parse::rewrite_pat()
 	dvbpsi_EmptyPAT(&pat);
 }
 
+void parse::process_pat(const decoded_pat_t *decoded_pat)
+{
+	for (map_decoded_pat_programs::const_iterator iter = decoded_pat->programs.begin();
+	     iter != decoded_pat->programs.end(); ++iter)
+		if (iter->first > 0) {// FIXME: > 0 ???
+			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
+				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
+				add_filter(iter->second);
+			}
+		}
+}
+
 bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 {
 	dprintf("(%s): v%d, ts_id: %d",
@@ -169,16 +181,7 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		return true;
 	}
 
-	const decoded_pat_t* decoded_pat = decoders[p_pat->i_ts_id].get_decoded_pat();
-
-	for (map_decoded_pat_programs::const_iterator iter = decoded_pat->programs.begin();
-	     iter != decoded_pat->programs.end(); ++iter)
-		if (iter->first > 0) {// FIXME: > 0 ???
-			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
-				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
-				add_filter(iter->second);
-			}
-		}
+	process_pat(decoders[p_pat->i_ts_id].get_decoded_pat());
 
 	rewrite_pat();
 
