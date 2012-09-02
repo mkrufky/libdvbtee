@@ -216,7 +216,7 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 	return true;
 }
 
-bool parse::process_pmt(const decoded_pmt_t *pmt)
+void parse::process_pmt(const decoded_pmt_t *pmt)
 {
 	dprintf(": v%d, service_id %d, pcr_pid %d",
 		pmt->version, pmt->program, pmt->pcr_pid);
@@ -226,8 +226,6 @@ bool parse::process_pmt(const decoded_pmt_t *pmt)
 			payload_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
 			add_filter(iter_pmt_es->second.pid);
 	}
-
-	return true;
 }
 
 bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
