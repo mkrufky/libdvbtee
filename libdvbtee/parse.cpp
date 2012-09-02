@@ -169,9 +169,10 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		return true;
 	}
 
-	for (map_decoded_pat_programs::const_iterator iter =
-	       decoders[p_pat->i_ts_id].get_decoded_pat()->programs.begin();
-	     iter != decoders[p_pat->i_ts_id].get_decoded_pat()->programs.end(); ++iter)
+	const decoded_pat_t* decoded_pat = decoders[p_pat->i_ts_id].get_decoded_pat();
+
+	for (map_decoded_pat_programs::const_iterator iter = decoded_pat->programs.begin();
+	     iter != decoded_pat->programs.end(); ++iter)
 		if (iter->first > 0) {// FIXME: > 0 ???
 			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
