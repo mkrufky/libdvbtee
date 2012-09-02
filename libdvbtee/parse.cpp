@@ -237,8 +237,10 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 
 	if (!decoded) return true;
 
-	map_decoded_pmt::const_iterator iter_pmt = decoders[ts_id].get_decoded_pmt()->find(p_pmt->i_program_number);
-	if (iter_pmt != decoders[ts_id].get_decoded_pmt()->end())
+	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+
+	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(p_pmt->i_program_number);
+	if (iter_pmt != decoded_pmt->end())
 		process_pmt(&iter_pmt->second);
 
 	return true;
