@@ -870,7 +870,19 @@ void parse::set_service_ids(char *ids)
 	} else
 		set_service_id(strtoul(ids, NULL, 0));
 #if 1
-	if (has_pat) rewrite_pat();
+	if (has_pat) {
+		rewrite_pat();
+
+		for (map_decoded_pat_programs::const_iterator iter =
+		       decoders[ts_id].get_decoded_pat()->programs.begin();
+		     iter != decoders[ts_id].get_decoded_pat()->programs.end(); ++iter)
+			if (iter->first > 0) {// FIXME: > 0 ???
+				if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
+					h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
+					add_filter(iter->second);
+				}
+			}
+	}
 #endif
 }
 
