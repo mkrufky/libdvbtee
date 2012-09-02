@@ -223,6 +223,7 @@ void parse::process_pmt(const decoded_pmt_t *pmt)
 
 	for (map_ts_elementary_streams::const_iterator iter_pmt_es = pmt->es_streams.begin();
 	     iter_pmt_es != pmt->es_streams.end(); ++iter_pmt_es) {
+			/* if we're going to stream a program, make sure its pid is coming thru */
 			payload_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
 			add_filter(iter_pmt_es->second.pid);
 	}
@@ -236,15 +237,9 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 
 	if (!decoded) return true;
 
-	/* if we're going to stream a program, we should make sure its pid is coming thru after analyzing the decoded pmt's */
 	map_decoded_pmt::const_iterator iter_pmt = decoders[ts_id].get_decoded_pmt()->find(p_pmt->i_program_number);
-	if (iter_pmt != decoders[ts_id].get_decoded_pmt()->end()) {
-		for (map_ts_elementary_streams::const_iterator iter_pmt_es = iter_pmt->second.es_streams.begin();
-		     iter_pmt_es != iter_pmt->second.es_streams.end(); ++iter_pmt_es) {
-				payload_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
-				add_filter(iter_pmt_es->second.pid);
-		}
-	}
+	if (iter_pmt != decoders[ts_id].get_decoded_pmt()->end())
+		process_pmt(&iter_pmt->second);
 
 	return true;
 }
