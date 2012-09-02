@@ -635,6 +635,7 @@ void parse::detach_demux()
 
 	clear_filters();
 	service_ids.clear();
+	payload_pids.clear();
 }
 
 void parse::stop()
