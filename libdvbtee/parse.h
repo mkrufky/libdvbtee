@@ -178,6 +178,7 @@ private:
 
 	uint8_t rewritten_pat_ver_offset, rewritten_pat_cont_ctr;
 	void rewrite_pat();
+	bool process_pmt(const decoded_pmt_t *);
 };
 
 #endif //__PARSE_H__

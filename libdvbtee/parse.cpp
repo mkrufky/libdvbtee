@@ -216,6 +216,20 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 	return true;
 }
 
+bool parse::process_pmt(const decoded_pmt_t *pmt)
+{
+	dprintf(": v%d, service_id %d, pcr_pid %d",
+		pmt->version, pmt->program, pmt->pcr_pid);
+
+	for (map_ts_elementary_streams::const_iterator iter_pmt_es = pmt->es_streams.begin();
+	     iter_pmt_es != pmt->es_streams.end(); ++iter_pmt_es) {
+			payload_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+			add_filter(iter_pmt_es->second.pid);
+	}
+
+	return true;
+}
+
 bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 {
 	dprintf("(%s): v%d, service_id %d, pcr_pid %d",
@@ -872,6 +886,7 @@ void parse::set_service_ids(char *ids)
 #if 1
 	if (has_pat) {
 		rewrite_pat();
+		payload_pids.clear();
 
 		for (map_decoded_pat_programs::const_iterator iter =
 		       decoders[ts_id].get_decoded_pat()->programs.begin();
@@ -880,6 +895,11 @@ void parse::set_service_ids(char *ids)
 				if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 					h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 					add_filter(iter->second);
+					//
+					map_decoded_pmt::const_iterator iter_pmt =
+						decoders[ts_id].get_decoded_pmt()->find(iter->first);
+					if (iter_pmt != decoders[ts_id].get_decoded_pmt()->end())
+						process_pmt(&iter_pmt->second);
 				}
 			}
 	}
