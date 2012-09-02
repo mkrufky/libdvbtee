@@ -847,9 +847,9 @@ void parse::set_service_ids(char *ids)
 {
 	char *save, *id = strtok_r(ids, ",", &save);
 
-#if 1
 	service_ids.clear();
-#endif
+	payload_pids.clear();
+
 	if (id) while (id) {
 		if (!id)
 			id = ids;
@@ -857,29 +857,21 @@ void parse::set_service_ids(char *ids)
 		id = strtok_r(NULL, ",", &save);
 	} else
 		set_service_id(strtoul(ids, NULL, 0));
-#if 1
+
 	if (has_pat) {
 		rewrite_pat();
-		payload_pids.clear();
 
 		const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
 		const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
 
-		for (map_decoded_pat_programs::const_iterator iter =
-		       decoded_pat->programs.begin();
-		     iter != decoded_pat->programs.end(); ++iter)
-			if (iter->first > 0) {// FIXME: > 0 ???
-				if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
-					h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
-					add_filter(iter->second);
+		process_pat(decoded_pat);
 
-					map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(iter->first);
-					if (iter_pmt != decoded_pmt->end())
-						process_pmt(&iter_pmt->second);
-				}
-			}
+		for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter) {
+			map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(iter->first);
+			if (iter_pmt != decoded_pmt->end())
+				process_pmt(&iter_pmt->second);
+		}
 	}
-#endif
 }
 
 int parse::feed(int count, uint8_t* p_data)
