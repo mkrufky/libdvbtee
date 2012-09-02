@@ -937,6 +937,7 @@ int parse::feed(int count, uint8_t* p_data)
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
 				out_type = OUTPUT_PATPMT;
+				break;
 			}
 
 			map_eit_pids::const_iterator iter_eit;
@@ -961,6 +962,7 @@ int parse::feed(int count, uint8_t* p_data)
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
 				//if (!out_type) out_type = OUTPUT_PSIP;
+				break;
 			}
 
 			map_pidtype::const_iterator iter_payload;
@@ -968,8 +970,11 @@ int parse::feed(int count, uint8_t* p_data)
 			if (iter_payload != payload_pids.end()) {
 				send_pkt = true;
 				out_type = OUTPUT_PES;
+				break;
 			}
+#if 0
 			break;
+#endif
 		}
 		if (send_pkt) {
 			out.push(p, out_type);
