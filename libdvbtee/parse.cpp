@@ -714,6 +714,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 
 	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
 	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+	const decoded_vct_t* decoded_vct = decoders[ts_id].get_decoded_vct();
 
 	fprintf(stdout, "\n# channel %d, %d, %s %s\n", channel, freq, "", "");
 
@@ -759,8 +760,8 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 		uint16_t lcn = 0;
 		uint16_t major = 0;
 		uint16_t minor = 0;
-		map_decoded_vct_channels::const_iterator iter_vct = decoders[ts_id].get_decoded_vct()->channels.find(program_number);
-		if (iter_vct != decoders[ts_id].get_decoded_vct()->channels.end()) {
+		map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(program_number);
+		if (iter_vct != decoded_vct->channels.end()) {
 			major = iter_vct->second.chan_major;
 			minor = iter_vct->second.chan_minor;
 			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
