@@ -965,9 +965,13 @@ int parse::feed(int count, uint8_t* p_data)
 				break;
 			}
 
+#if 0
 			map_pidtype::const_iterator iter_payload;
 			iter_payload = payload_pids.find(pid);
 			if (iter_payload != payload_pids.end()) {
+#else
+			if (payload_pids.count(pid)) {
+#endif
 				send_pkt = true;
 				out_type = OUTPUT_PES;
 				break;
