@@ -242,12 +242,14 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 #if 0
 	has_mgt = false;
 #endif
+	const decoded_mgt_t* decoded_mgt = decoders[ts_id].get_decoded_mgt();
+
 	bool b_expecting_vct = false;
 
 	eit_pids.clear();
 	for (map_decoded_mgt_tables::const_iterator iter =
-	       decoders[ts_id].get_decoded_mgt()->tables.begin();
-	     iter != decoders[ts_id].get_decoded_mgt()->tables.end(); ++iter) {
+	       decoded_mgt->tables.begin();
+	     iter != decoded_mgt->tables.end(); ++iter) {
 
 		bool b_attach_demux = false;
 
