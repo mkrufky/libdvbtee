@@ -856,17 +856,20 @@ void parse::set_service_ids(char *ids)
 		rewrite_pat();
 		payload_pids.clear();
 
+		const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
+
 		for (map_decoded_pat_programs::const_iterator iter =
-		       decoders[ts_id].get_decoded_pat()->programs.begin();
-		     iter != decoders[ts_id].get_decoded_pat()->programs.end(); ++iter)
+		       decoded_pat->programs.begin();
+		     iter != decoded_pat->programs.end(); ++iter)
 			if (iter->first > 0) {// FIXME: > 0 ???
 				if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 					h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 					add_filter(iter->second);
-					//
-					map_decoded_pmt::const_iterator iter_pmt =
-						decoders[ts_id].get_decoded_pmt()->find(iter->first);
-					if (iter_pmt != decoders[ts_id].get_decoded_pmt()->end())
+
+					const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+
+					map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(iter->first);
+					if (iter_pmt != decoded_pmt->end())
 						process_pmt(&iter_pmt->second);
 				}
 			}
