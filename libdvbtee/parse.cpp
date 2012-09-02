@@ -710,6 +710,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 	int count = 0;
 
 	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
+	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
 
 	fprintf(stdout, "\n# channel %d, %d, %s %s\n", channel, freq, "", "");
 
@@ -722,8 +723,8 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 		int apid = 0;
 		int vpid = 0;
 
-		map_decoded_pmt::const_iterator iter_pmt = decoders[ts_id].get_decoded_pmt()->find(program_number);
-		if (iter_pmt == decoders[ts_id].get_decoded_pmt()->end())
+		map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(program_number);
+		if (iter_pmt == decoded_pmt->end())
 			continue;
 		//map_ts_elementary_streams::iterator iter_pmt_es = iter_pmt->second.es_streams.find(program_number);
 		for (map_ts_elementary_streams::const_iterator iter_pmt_es = iter_pmt->second.es_streams.begin();
@@ -859,6 +860,7 @@ void parse::set_service_ids(char *ids)
 		payload_pids.clear();
 
 		const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
+		const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
 
 		for (map_decoded_pat_programs::const_iterator iter =
 		       decoded_pat->programs.begin();
@@ -867,8 +869,6 @@ void parse::set_service_ids(char *ids)
 				if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 					h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 					add_filter(iter->second);
-
-					const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
 
 					map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(iter->first);
 					if (iter_pmt != decoded_pmt->end())
