@@ -229,11 +229,19 @@ int serve::push(uint8_t* p_data)
 }
 #endif
 
+#ifdef PRETTY_URLS
+#define CHAR_CMD_SEP "&"
+#define CHAR_CMD_SET "="
+#else
+#define CHAR_CMD_SEP ";"
+#define CHAR_CMD_SET "/"
+#endif
+
 bool serve::command(char* cmdline)
 {
 	char *save;
 	bool ret = false;
-	char *item = strtok_r(cmdline, ";", &save);
+	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
 
 	if (item) while (item) {
 		if (!item)
@@ -243,7 +251,7 @@ bool serve::command(char* cmdline)
 		if (!ret)
 			return ret;
 
-		item = strtok_r(NULL, ";", &save);
+		item = strtok_r(NULL, CHAR_CMD_SEP, &save);
 	} else
 		ret = __command(cmdline);
 
@@ -281,18 +289,18 @@ static void chandump(void *context,
 bool serve::__command(char* cmdline)
 {
 	char *arg, *save;
-	char *cmd = strtok_r(cmdline, "/", &save);
+	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);
 
 	if (!cmd)
 		cmd = cmdline;
-	arg = strtok_r(NULL, "/", &save);
+	arg = strtok_r(NULL, CHAR_CMD_SET, &save);
 
 	unsigned int tuner_id, scan_flags = 0; // FIXME
 
 	if (strstr(cmd, "tuner")) {
 		tuner_id = atoi(arg);
-		cmd = strtok_r(NULL, "/", &save);
-		arg = strtok_r(NULL, "/", &save);
+		cmd = strtok_r(NULL, CHAR_CMD_SET, &save);
+		arg = strtok_r(NULL, CHAR_CMD_SET, &save);
 	} else
 		tuner_id = 0;
 
