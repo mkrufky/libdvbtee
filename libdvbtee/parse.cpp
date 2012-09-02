@@ -709,11 +709,13 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 
 	int count = 0;
 
+	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
+
 	fprintf(stdout, "\n# channel %d, %d, %s %s\n", channel, freq, "", "");
 
 	if (decoders.count(ts_id))
-	for (map_decoded_pat_programs::const_iterator iter_pat = decoders[ts_id].get_decoded_pat()->programs.begin();
-	     iter_pat != decoders[ts_id].get_decoded_pat()->programs.end(); ++iter_pat) {
+	for (map_decoded_pat_programs::const_iterator iter_pat = decoded_pat->programs.begin();
+	     iter_pat != decoded_pat->programs.end(); ++iter_pat) {
 		int program_number = iter_pat->first;
 		//int pmt_pid        = iter_pat->second;
 
