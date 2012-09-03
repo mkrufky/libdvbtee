@@ -231,9 +231,9 @@ typedef struct
 	unsigned char                   provider_name[256];
 	unsigned char                   service_name[256];
 
-} decoded_sdt_service;
+} decoded_sdt_service_t;
 
-typedef std::map<uint16_t, decoded_sdt_service> map_decoded_sdt_services; /* service_id, decoded_sdt_service */
+typedef std::map<uint16_t, decoded_sdt_service_t> map_decoded_sdt_services; /* service_id, decoded_sdt_service */
 
 typedef struct
 {
@@ -243,6 +243,21 @@ typedef struct
 	// FIXME: descriptors...
 	map_decoded_sdt_services        services;
 } decoded_sdt_t;
+
+typedef const char *(*dump_epg_header_footer_callback)(void */* context */,
+						       bool/* true = header / false = footer*/,
+						       bool/* true = channel / false = body*/);
+
+typedef const char *(*dump_epg_event_callback)(void * context,
+					       const char * channel_name,
+					       uint16_t chan_major,
+					       uint16_t chan_minor,
+					       //
+					       uint16_t event_id,
+					       time_t start_time,
+					       uint32_t length_sec,
+					       const char * name,
+					       const char * text);
 
 typedef std::map<uint16_t, bool> map_rcvd;
 
@@ -360,8 +375,12 @@ public:
 	bool eit_x_complete(uint8_t current_eit_x);
 	bool got_all_eit(int limit = -1);
 
-	void dump_epg();
+	const char * dump_epg();
 
+	const char * dump_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*);
+	const char * dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*);
+
+	void set_dump_epg_cb(void* context, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb);
 private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -386,11 +405,11 @@ private:
 
 	desc descriptors;
 
-	void dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
-	void dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
+	const char * dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
+	const char * dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
 
-	void dump_epg_atsc(uint16_t source_id);
-	void dump_epg_dvb(uint16_t source_id);
+	const char * dump_epg_atsc(uint16_t source_id);
+	const char * dump_epg_dvb(uint16_t source_id);
 
 	bool eit_x_complete_atsc(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
