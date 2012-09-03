@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "serve.h"
+#include "html.h"
 
 //FIXME:
 #define DBG_SERVE 1
@@ -92,6 +93,19 @@ serve& serve::operator= (const serve& cSource)
 }
 #endif
 
+
+//static
+void serve::streamback(void *p_this, const char *str)
+{
+	return static_cast<serve*>(p_this)->streamback(str);
+}
+
+void serve::streamback(const char *str)
+{
+//	fprintf(stdout, "%s --> %d\n", str, streamback_socket);
+	fprintf(stdout, "%s\n", str);
+}
+
 //static
 void* serve::serve_thread(void *p_this)
 {
@@ -116,6 +130,59 @@ static char http_response[] =
 	 "Connection: close"
 	 CRLF
 	 CRLF;
+
+const char * serve::epg_header_footer_callback(void *context, bool header, bool channel)
+{
+	return static_cast<serve*>(context)->do_epg_header_footer_callback(context, header, channel);
+}
+
+
+const char * serve::do_epg_header_footer_callback(void * context, bool header, bool channel)
+{
+	if ((header) && (!channel)) streamback_started = true;
+	if (!streamback_started) return NULL;
+	if ((header) && (channel)) streamback_newchannel = true;
+	const char * ret = html_dump_epg_header_footer_callback(context, header, channel);
+	if ((!header) && (!channel)) fflush(stdout);
+	return ret;
+}
+
+const char * serve::epg_event_callback(void * context,
+				const char * channel_name,
+				uint16_t chan_major,
+				uint16_t chan_minor,
+				//
+				uint16_t event_id,
+				time_t start_time,
+				uint32_t length_sec,
+				const char * name,
+				const char * text)
+{
+	return static_cast<serve*>(context)->do_epg_event_callback(context, channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
+}
+
+const char * serve::do_epg_event_callback(void * context,
+				const char * channel_name,
+				uint16_t chan_major,
+				uint16_t chan_minor,
+				//
+				uint16_t event_id,
+				time_t start_time,
+				uint32_t length_sec,
+				const char * name,
+				const char * text)
+{
+	if (!streamback_started) return NULL;
+#if 1
+	if (streamback_newchannel) {
+		streamback(html_dump_epg_event_callback(context, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL));
+		streamback_newchannel = false;
+		fflush(stdout);
+	}
+#endif
+	return html_dump_epg_event_callback(context, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+}
+
 
 void* serve::serve_thread()
 {
@@ -149,6 +216,16 @@ void* serve::serve_thread()
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 					fprintf(stderr, "%s: %s\n", __func__, buf);
 					send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
+#if 1
+					//if (send_http)
+						streamback_socket = sock[i];
+						streamback_newchannel = false;
+						streamback_started = false;
+						set_dump_epg_cb(this,
+								epg_header_footer_callback,
+								epg_event_callback,
+								streamback);
+#endif
 					command(buf); /* process */
 					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
@@ -349,6 +426,9 @@ bool serve::__command(char* cmdline)
 	} else if (strstr(cmd, "stream")) {
 		fprintf(stderr, "adding stream target...\n");
 		tuner->feeder.parser.add_output(arg);
+	} else if (strstr(cmd, "epg")) {
+		fprintf(stderr, "dumping epg...\n");
+		fprintf(stderr, "%s\n", tuner->feeder.parser.epg_dump());
 	} else if (strstr(cmd, "stop")) {
 		fprintf(stderr, "stopping...\n");
 		tuner->stop_feed();

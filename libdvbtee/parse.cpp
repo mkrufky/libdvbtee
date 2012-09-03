@@ -809,8 +809,10 @@ unsigned int parse::xine_dump()
 	return count;
 }
 
-void parse::epg_dump()
+const char * parse::epg_dump()
 {
+	std::string str;
+	str.clear();
 	map_chan_to_ts_id channels;
 	//fprintf(stderr, "%s(%d, %d)\n", __func__, channel_info.size(), channels.size());
 
@@ -818,9 +820,13 @@ void parse::epg_dump()
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		if (decoders.count(iter->second)) decoders[iter->second].dump_epg();
+		if (decoders.count(iter->second)) str.append(decoders[iter->second].dump_epg());
 
 	channels.clear();
+
+	//fprintf(stderr, "%s", str.c_str());
+
+	return str.c_str();
 }
 
 bool parse::is_psip_ready()

@@ -66,7 +66,7 @@ public:
 
 	unsigned int xine_dump(uint16_t ts_id) { return xine_dump(ts_id, &channel_info[ts_id]); };
 	unsigned int xine_dump(); /* full channel dump  */
-	void epg_dump(); /* full channel dump  */
+	const char * epg_dump(); /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
 	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; };

@@ -259,6 +259,8 @@ typedef const char *(*dump_epg_event_callback)(void * context,
 					       const char * name,
 					       const char * text);
 
+typedef void (*dump_epg_streamback_callback)(void *, const char *);
+
 typedef std::map<uint16_t, bool> map_rcvd;
 
 
@@ -379,8 +381,6 @@ public:
 
 	const char * dump_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*);
 	const char * dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*);
-
-	void set_dump_epg_cb(void* context, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb);
 private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -415,5 +415,10 @@ private:
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_pf();
 };
+
+void set_dump_epg_cb(void* context,
+		     dump_epg_header_footer_callback hf_cb,
+		     dump_epg_event_callback ev_cb,
+		     dump_epg_streamback_callback streamback_cb);
 
 #endif /* __DECODE_H__ */

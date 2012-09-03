@@ -34,12 +34,17 @@ bool fshowtime;
 
 static dump_epg_header_footer_callback dump_epg_header_footer_cb = NULL;
 static dump_epg_event_callback dump_epg_event_cb = NULL;
+static dump_epg_streamback_callback dump_epg_streamback_cb = NULL;
 static void *dump_epg_priv = NULL;
 
-void decode::set_dump_epg_cb(void* context, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb)
+void set_dump_epg_cb(void* context,
+		     dump_epg_header_footer_callback hf_cb,
+		     dump_epg_event_callback ev_cb,
+		     dump_epg_streamback_callback streamback_cb)
 {
 	dump_epg_header_footer_cb = hf_cb;
 	dump_epg_event_cb = ev_cb;
+	dump_epg_streamback_cb = streamback_cb;
 	dump_epg_priv = context;
 };
 
@@ -877,7 +882,7 @@ const char * decode::dump_epg_event(const decoded_vct_channel_t *channel, const 
 	for ( int i = 0; i < 7; ++i ) service_name[i] = channel->short_name[i*2+1];
 	service_name[7] = 0;
 
-	fprintf(stdout, "%s: id:%d - %d.%d: %s\t", __func__,
+	fprintf(stderr, "%s: id:%d - %d.%d: %s\t", __func__,
 		channel->source_id,
 		channel->chan_major,
 		channel->chan_minor, service_name);
@@ -893,7 +898,7 @@ const char * decode::dump_epg_event(const decoded_vct_channel_t *channel, const 
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 
 	return (dump_epg_event_cb) ?
 		dump_epg_event_cb(dump_epg_priv,
@@ -908,7 +913,7 @@ const char * decode::dump_epg_event(const decoded_vct_channel_t *channel, const 
 
 const char * decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_eit_event_t *event)
 {
-	fprintf(stdout, "%s: id:%d - %d: %s\t", __func__,
+	fprintf(stderr, "%s: id:%d - %d: %s\t", __func__,
 		service->service_id,
 		get_lcn(service->service_id),
 		service->service_name);
@@ -920,7 +925,7 @@ const char * decode::dump_epg_event(const decoded_sdt_service_t *service, const 
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, event->name.c_str()/*, iter_eit->second.text.c_str()*/ );
+	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, event->name.c_str()/*, iter_eit->second.text.c_str()*/ );
 
 	return (dump_epg_event_cb) ?
 		dump_epg_event_cb(dump_epg_priv,
@@ -975,7 +980,7 @@ const char * decode::dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id)
 			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
 			const char *ev_str = dump_epg_event(&iter_vct->second, &iter_eit->second);
-			if (ev_str) str.append(ev_str);
+			if (ev_str) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, ev_str); else str.append(ev_str);
 		}
 	}
 	return str.c_str();
@@ -1018,7 +1023,7 @@ const char * decode::dump_eit_x_dvb(uint8_t eit_x, uint16_t service_id)
 			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, iter_eit->second.name.c_str()/*, iter_eit->second.text.c_str()*/ );
 #endif
 			const char *ev_str = dump_epg_event(&iter_sdt->second, &iter_eit->second);
-			if (ev_str) str.append(ev_str);
+			if (ev_str) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, ev_str); else str.append(ev_str);
 		}
 	}
 	return str.c_str();
@@ -1069,26 +1074,29 @@ const char * decode::dump_epg()
 {
 	std::string str;
 	str.clear();
+	const char * epg_str;
 
-	if (dump_epg_header_footer_cb) str.append(dump_epg_header_footer_cb(dump_epg_priv, true, false));
+	if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, false)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, false));
 
 	if (decoded_vct.channels.size()) {
 	map_decoded_vct_channels::const_iterator iter_vct;
 	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct) {
-		if (dump_epg_header_footer_cb) str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true));
-		str.append(dump_epg_atsc(iter_vct->second.source_id));
-		if (dump_epg_header_footer_cb) str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true));
+		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true));
+		epg_str = dump_epg_atsc(iter_vct->second.source_id);
+		if (!dump_epg_streamback_cb) if (epg_str) str.append(epg_str);
+		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true));
 	}} else {
 	map_decoded_sdt_services::const_iterator iter_sdt;
 	const decoded_sdt_t *decoded_sdt = get_decoded_sdt();
 	if (decoded_sdt) for (iter_sdt = decoded_sdt->services.begin(); iter_sdt != decoded_sdt->services.end(); ++iter_sdt)
 	if (iter_sdt->second.f_eit_present) {
-		if (dump_epg_header_footer_cb) str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true));
-		str.append(dump_epg_dvb(iter_sdt->second.service_id));
-		if (dump_epg_header_footer_cb) str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true));
+		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true));
+		epg_str = dump_epg_dvb(iter_sdt->second.service_id);
+		if (!dump_epg_streamback_cb) if (epg_str) str.append(epg_str);
+		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true));
 	}}
 
-	if (dump_epg_header_footer_cb) str.append(dump_epg_header_footer_cb(dump_epg_priv, false, false));
+	if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, false)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, false));
 
 	return str.c_str();
 }

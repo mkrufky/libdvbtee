@@ -51,6 +51,12 @@ private:
 	void stop_without_wait() { f_kill_thread = true; };
 	void close_socket();
 
+	void streamback(const char*);
+	static void streamback(void*, const char*);
+	int streamback_socket;
+	bool streamback_started;
+	bool streamback_newchannel;
+
 	bool   command(char*);
 	bool __command(char*);
 
@@ -58,6 +64,30 @@ private:
 	uint16_t port;
 
 	tuner_map tuners;
+
+	const char * do_epg_header_footer_callback(void * context, bool header, bool channel);
+	const char * do_epg_event_callback(void * context,
+					const char * channel_name,
+					uint16_t chan_major,
+					uint16_t chan_minor,
+					//
+					uint16_t event_id,
+					time_t start_time,
+					uint32_t length_sec,
+					const char * name,
+					const char * text);
+	static const char * epg_header_footer_callback(void * context, bool header, bool channel);
+	static const char * epg_event_callback(void * context,
+					const char * channel_name,
+					uint16_t chan_major,
+					uint16_t chan_minor,
+					//
+					uint16_t event_id,
+					time_t start_time,
+					uint32_t length_sec,
+					const char * name,
+					const char * text);
+
 };
 
 #endif /*__SERVE_H__ */
