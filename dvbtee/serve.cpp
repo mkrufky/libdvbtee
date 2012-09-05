@@ -100,10 +100,20 @@ void serve::streamback(void *p_this, const char *str)
 	return static_cast<serve*>(p_this)->streamback(str);
 }
 
+#define CRLF "\r\n"
+
 void serve::streamback(const char *str)
 {
+	dprintf("()");
+	if (!strlen(str)) return;
 //	fprintf(stdout, "%s --> %d\n", str, streamback_socket);
-	fprintf(stdout, "%s\n", str);
+//	fprintf(stdout, "%s\n", str);
+	char sz[5] = { 0 };
+	sprintf(sz, "%x", (unsigned int)strlen(str));
+	send(streamback_socket, sz, strlen(sz), 0 );
+	send(streamback_socket, CRLF, 2, 0 );
+	send(streamback_socket, str, strlen(str), 0 );
+	send(streamback_socket, CRLF, 2, 0 );
 }
 
 //static
@@ -114,35 +124,45 @@ void* serve::serve_thread(void *p_this)
 
 #define MAX_SOCKETS 4
 
-#define CRLF "\r\n"
-
 static char http_response[] =
 	 "HTTP/1.1 200 OK"
 	 CRLF
-	 "Content-type: text/plain"
+	 "Content-type: text/html"
 	 CRLF
+#if 0
 	 "Content-length: 0"
+#else
+	 "Transfer-Encoding: chunked"
+#endif
+#if 0
 	 CRLF
 	 "Cache-Control: no-cache,no-store,private"
 	 CRLF
 	 "Expires: -1"
 	 CRLF
 	 "Connection: close"
+#endif
+	 CRLF
+	 CRLF;
+
+static char http_conn_close[] =
+	 "Connection: close"
 	 CRLF
 	 CRLF;
 
 const char * serve::epg_header_footer_callback(void *context, bool header, bool channel)
 {
-	return static_cast<serve*>(context)->do_epg_header_footer_callback(context, header, channel);
+	return static_cast<serve*>(context)->epg_header_footer_callback(header, channel);
 }
 
 
-const char * serve::do_epg_header_footer_callback(void * context, bool header, bool channel)
+const char * serve::epg_header_footer_callback(bool header, bool channel)
 {
-	if ((header) && (!channel)) streamback_started = true;
+	dprintf("()");
+	if ((header) && (!channel)) { send(streamback_socket, http_response, strlen(http_response), 0 ); streamback_started = true; }
 	if (!streamback_started) return NULL;
 	if ((header) && (channel)) streamback_newchannel = true;
-	const char * ret = html_dump_epg_header_footer_callback(context, header, channel);
+	const char * ret = html_dump_epg_header_footer_callback(this, header, channel);
 	if ((!header) && (!channel)) fflush(stdout);
 	return ret;
 }
@@ -158,10 +178,10 @@ const char * serve::epg_event_callback(void * context,
 				const char * name,
 				const char * text)
 {
-	return static_cast<serve*>(context)->do_epg_event_callback(context, channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
+	return static_cast<serve*>(context)->epg_event_callback(channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
 }
 
-const char * serve::do_epg_event_callback(void * context,
+const char * serve::epg_event_callback(
 				const char * channel_name,
 				uint16_t chan_major,
 				uint16_t chan_minor,
@@ -172,15 +192,16 @@ const char * serve::do_epg_event_callback(void * context,
 				const char * name,
 				const char * text)
 {
+	dprintf("()");
 	if (!streamback_started) return NULL;
 #if 1
 	if (streamback_newchannel) {
-		streamback(html_dump_epg_event_callback(context, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL));
+		streamback(html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL));
 		streamback_newchannel = false;
 		fflush(stdout);
 	}
 #endif
-	return html_dump_epg_event_callback(context, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+	return html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
 }
 
 
@@ -209,7 +230,7 @@ void* serve::serve_thread()
 		}
 		for (i = 0; i < MAX_SOCKETS; i++)
 			if (sock[i] != -1) {
-				char buf[256] = { 0 };
+				char buf[1024] = { 0 };
 				rxlen = recv(sock[i], buf, sizeof(buf), MSG_DONTWAIT);
 				if (rxlen > 0) {
 					bool send_http;
@@ -217,7 +238,7 @@ void* serve::serve_thread()
 					fprintf(stderr, "%s: %s\n", __func__, buf);
 					send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
 #if 1
-					//if (send_http)
+					if (send_http) {
 						streamback_socket = sock[i];
 						streamback_newchannel = false;
 						streamback_started = false;
@@ -225,9 +246,16 @@ void* serve::serve_thread()
 								epg_header_footer_callback,
 								epg_event_callback,
 								streamback);
+					}
 #endif
+//					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
 					command(buf); /* process */
-					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
+					if (send_http) {
+						send(streamback_socket, "0\r\n", 3, 0 );
+						send(sock[i], http_conn_close, strlen(http_conn_close), 0 );
+						close(sock[i]);
+						streamback_socket = sock[i] = -1;
+					}
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 					close(sock[i]);
 					sock[i] = -1;
@@ -306,7 +334,7 @@ int serve::push(uint8_t* p_data)
 }
 #endif
 
-#ifdef PRETTY_URLS
+#if 1//def PRETTY_URLS
 #define CHAR_CMD_SEP "&"
 #define CHAR_CMD_SET "="
 #else

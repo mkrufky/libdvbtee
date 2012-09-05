@@ -65,9 +65,8 @@ private:
 
 	tuner_map tuners;
 
-	const char * do_epg_header_footer_callback(void * context, bool header, bool channel);
-	const char * do_epg_event_callback(void * context,
-					const char * channel_name,
+	const char * epg_header_footer_callback(bool header, bool channel);
+	const char * epg_event_callback(const char * channel_name,
 					uint16_t chan_major,
 					uint16_t chan_minor,
 					//
