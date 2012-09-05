@@ -423,7 +423,7 @@ bool serve::__command(char* cmdline)
 			scan_flags = SCAN_VSB;
 
 		tuner->feeder.parser.set_chandump_callback(chandump);
-		tuner->scan_for_services(scan_flags, 0, 0, false);
+		tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false);
 
 	} else if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
