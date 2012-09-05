@@ -277,7 +277,7 @@ int serve::start(uint16_t port_requested)
 		perror("set non-blocking failed");
 		return -1;
 	}
-	listen(sock_fd, 4);
+	listen(sock_fd, MAX_SOCKETS);
 
 	int ret = pthread_create(&h_thread, NULL, serve_thread, this);
 
