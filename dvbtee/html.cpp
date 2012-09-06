@@ -86,3 +86,47 @@ const char * html_dump_epg_event_callback(void * context,
 //	fprintf(stderr, "%s", str.c_str());
 	return str.c_str();
 }
+
+const char * html_dump_channels(void *context,
+			       uint16_t lcn, uint16_t major, uint16_t minor,
+			       uint16_t physical_channel, uint32_t freq, const char *modulation,
+			       unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+{
+	std::string str;
+        str.clear();
+	char channelno[7]; /* XXX.XXX */
+	if (major + minor > 1)
+		sprintf(channelno, "%d.%d", major, minor);
+	else if (lcn)
+		sprintf(channelno, "%d", lcn);
+	else
+		sprintf(channelno, "%d", physical_channel);
+
+	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+		channelno,
+		service_name,
+		freq,//iter_vct->second.carrier_freq,
+		modulation,
+		vpid, apid, program_number);
+
+	str.append("<table>");
+	str.append("<tr>");
+	str.append("<td>");
+	str.append("<a href='/tune/stop");
+	str.append("&service=");
+	str.append(0);
+	str.append("&channel=");
+	str.append(0);
+	str.append("'>");
+	str.append("</a>");
+	str.append("</td>");
+	str.append("</tr>");
+	str.append("<tr>");
+	str.append("<td>");
+	str.append("<hr>");
+	str.append("</td>");
+	str.append("</tr>");
+	str.append("</table>");
+
+	return str.c_str();
+}
