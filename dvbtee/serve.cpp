@@ -116,12 +116,6 @@ void serve::streamback(const char *str)
 	send(streamback_socket, CRLF, 2, 0 );
 }
 
-//static
-void* serve::serve_thread(void *p_this)
-{
-	return static_cast<serve*>(p_this)->serve_thread();
-}
-
 #define MAX_SOCKETS 4
 #define HTTP_200_OK  "HTTP/1.1 200 OK"
 #define CONTENT_TYPE "Content-type: "
@@ -210,6 +204,12 @@ const char * serve::epg_event_callback(
 	return html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
 }
 
+
+//static
+void* serve::serve_thread(void *p_this)
+{
+	return static_cast<serve*>(p_this)->serve_thread();
+}
 
 void* serve::serve_thread()
 {
