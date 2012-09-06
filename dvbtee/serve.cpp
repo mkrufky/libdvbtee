@@ -123,16 +123,22 @@ void* serve::serve_thread(void *p_this)
 }
 
 #define MAX_SOCKETS 4
+#define HTTP_200_OK  "HTTP/1.1 200 OK"
+#define CONTENT_TYPE "Content-type: "
+#define TEXT_HTML    "text/html"
+#define TEXT_PLAIN   "text/plain"
+#define ENC_CHUNKED  "Transfer-Encoding: chunked"
+#define CONN_CLOSE   "Connection: close"
 
 static char http_response[] =
-	 "HTTP/1.1 200 OK"
+	 HTTP_200_OK
 	 CRLF
-	 "Content-type: text/html"
+	 CONTENT_TYPE TEXT_HTML
 	 CRLF
 #if 0
 	 "Content-length: 0"
 #else
-	 "Transfer-Encoding: chunked"
+	 ENC_CHUNKED
 #endif
 #if 0
 	 CRLF
@@ -140,13 +146,13 @@ static char http_response[] =
 	 CRLF
 	 "Expires: -1"
 	 CRLF
-	 "Connection: close"
+	 CONN_CLOSE
 #endif
 	 CRLF
 	 CRLF;
 
 static char http_conn_close[] =
-	 "Connection: close"
+	 CONN_CLOSE
 	 CRLF
 	 CRLF;
 
@@ -251,7 +257,7 @@ void* serve::serve_thread()
 //					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
 					command(buf); /* process */
 					if (send_http) {
-						send(streamback_socket, "0\r\n", 3, 0 );
+						send(streamback_socket, "0" CRLF, 3, 0 );
 						send(sock[i], http_conn_close, strlen(http_conn_close), 0 );
 						close(sock[i]);
 						streamback_socket = sock[i] = -1;
