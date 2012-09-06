@@ -109,10 +109,12 @@ static int stream_http_chunk(int socket, const char *str, const bool send_zero_l
 		char sz[5] = { 0 };
 		sprintf(sz, "%x", (unsigned int)strlength);
 
-		send(socket, sz, strlen(sz), 0 );
+		send(socket, sz, strlen(sz), 0);
 		stream_crlf(socket);
-		send(socket, str, strlength, 0 );
-		stream_crlf(socket);
+		if (strlength) {
+			send(socket, str, strlength, 0);
+			stream_crlf(socket);
+		}
 	}
 	return 0; // FIXME!
 }
@@ -171,7 +173,7 @@ const char * serve::epg_header_footer_callback(void *context, bool header, bool 
 const char * serve::epg_header_footer_callback(bool header, bool channel)
 {
 	dprintf("()");
-	if ((header) && (!channel)) { send(streamback_socket, http_response, strlen(http_response), 0 ); streamback_started = true; }
+	if ((header) && (!channel)) streamback_started = true;
 	if (!streamback_started) return NULL;
 	if ((header) && (channel)) streamback_newchannel = true;
 	const char * ret = html_dump_epg_header_footer_callback(this, header, channel);
@@ -264,6 +266,7 @@ void* serve::serve_thread()
 								epg_header_footer_callback,
 								epg_event_callback,
 								streamback);
+						send(streamback_socket, http_response, strlen(http_response), 0 );
 					}
 #endif
 //					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
