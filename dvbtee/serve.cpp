@@ -32,6 +32,8 @@
 #include "serve.h"
 #include "html.h"
 
+#define CRLF "\r\n"
+
 //FIXME:
 #define DBG_SERVE 1
 
@@ -94,26 +96,32 @@ serve& serve::operator= (const serve& cSource)
 #endif
 
 
+static int stream_http_chunk(int socket, const char *str)
+{
+	size_t strlength = strlen(str);
+	dprintf("(length:%d)", strlength);
+
+	if (strlength) {
+		char sz[5] = { 0 };
+		sprintf(sz, "%x", (unsigned int)strlength);
+
+		send(socket, sz, strlen(sz), 0 );
+		send(socket, CRLF, 2, 0 );
+		send(socket, str, strlength, 0 );
+		send(socket, CRLF, 2, 0 );
+	}
+	return 0; // FIXME!
+}
+
 //static
 void serve::streamback(void *p_this, const char *str)
 {
 	return static_cast<serve*>(p_this)->streamback(str);
 }
 
-#define CRLF "\r\n"
-
 void serve::streamback(const char *str)
 {
-	dprintf("()");
-	if (!strlen(str)) return;
-//	fprintf(stdout, "%s --> %d\n", str, streamback_socket);
-//	fprintf(stdout, "%s\n", str);
-	char sz[5] = { 0 };
-	sprintf(sz, "%x", (unsigned int)strlen(str));
-	send(streamback_socket, sz, strlen(sz), 0 );
-	send(streamback_socket, CRLF, 2, 0 );
-	send(streamback_socket, str, strlen(str), 0 );
-	send(streamback_socket, CRLF, 2, 0 );
+	stream_http_chunk(streamback_socket, str);
 }
 
 #define MAX_SOCKETS 4
