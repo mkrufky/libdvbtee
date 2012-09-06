@@ -95,20 +95,24 @@ serve& serve::operator= (const serve& cSource)
 }
 #endif
 
+static inline ssize_t stream_crlf(int socket)
+{
+	return send(socket, CRLF, 2, 0 );
+}
 
-static int stream_http_chunk(int socket, const char *str)
+static int stream_http_chunk(int socket, const char *str, const bool send_zero_length = false)
 {
 	size_t strlength = strlen(str);
 	dprintf("(length:%d)", strlength);
 
-	if (strlength) {
+	if ((strlength) || (send_zero_length)) {
 		char sz[5] = { 0 };
 		sprintf(sz, "%x", (unsigned int)strlength);
 
 		send(socket, sz, strlen(sz), 0 );
-		send(socket, CRLF, 2, 0 );
+		stream_crlf(socket);
 		send(socket, str, strlength, 0 );
-		send(socket, CRLF, 2, 0 );
+		stream_crlf(socket);
 	}
 	return 0; // FIXME!
 }
@@ -265,7 +269,11 @@ void* serve::serve_thread()
 //					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
 					command(buf); /* process */
 					if (send_http) {
+#if 0
 						send(streamback_socket, "0" CRLF, 3, 0 );
+#else
+						stream_http_chunk(streamback_socket, "", true);
+#endif
 						send(sock[i], http_conn_close, strlen(http_conn_close), 0 );
 						close(sock[i]);
 						streamback_socket = sock[i] = -1;
