@@ -360,7 +360,7 @@ int serve::push(uint8_t* p_data)
 #endif
 
 #if 1//def PRETTY_URLS
-#define CHAR_CMD_SEP "&"
+#define CHAR_CMD_SEP "&/"
 #define CHAR_CMD_SET "="
 #else
 #define CHAR_CMD_SEP ";"
@@ -449,7 +449,10 @@ bool serve::__command(char* cmdline)
 			scan_flags = SCAN_VSB;
 
 		tuner->feeder.parser.set_chandump_callback(chandump);
-		tuner->scan_for_services(scan_flags, 0, 0, ((strstr(cmd, "epg")) || (strstr(arg, "epg"))) ? true : false);
+		if ((arg) && strlen(arg))
+			tuner->scan_for_services(scan_flags, arg, (strstr(cmd, "epg")) ? true : false);
+		else
+			tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false);
 
 	} else if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
