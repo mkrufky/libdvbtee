@@ -37,6 +37,7 @@ static map_chan_to_ts_id channels;
 #endif
 
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
+typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 
 class tune
 {
@@ -90,8 +91,7 @@ private:
 	int   dvr_id;
 
 	int          scan_mode;
-	unsigned int scan_min;
-	unsigned int scan_max;
+	channel_map  scan_channel_list;
 	bool         scan_epg;
 	bool         scan_complete;
 

@@ -400,7 +400,8 @@ void* tune::scan_thread()
 	feeder.parser.set_scan_mode(true);
 	feeder.parser.set_epg_mode(scan_epg);
 
-	for (unsigned int channel = scan_min; channel <= scan_max; channel++) {
+	for (channel_map::const_iterator iter = scan_channel_list.begin(); iter != scan_channel_list.end(); ++iter) {
+		unsigned int channel = iter->first;
 
 		if (f_kill_thread)
 			break;
@@ -458,14 +459,15 @@ void* tune::scan_thread()
 int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool epg)
 {
 	//channels.clear();
+	scan_channel_list.clear();
+
+	unsigned int scan_min = min;
+	unsigned int scan_max = max;
 
 	if (mode != SCAN_QAM)
 		mode = SCAN_VSB;
 
 	scan_mode = mode;
-
-	scan_min = min;
-	scan_max = max;
 
 	scan_epg = epg;
 
@@ -484,6 +486,9 @@ int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool
 		scan_max = (max) ? max : 133;
 		break;
 	}
+
+	for (unsigned int channel = scan_min; channel <= scan_max; channel++)
+		scan_channel_list[channel] = false; // TODO: set true if channel found
 
 	scan_complete = false;
 	f_kill_thread = false;
