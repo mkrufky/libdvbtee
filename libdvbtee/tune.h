@@ -63,6 +63,7 @@ public:
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
+	int scan_for_services(unsigned int, char *, bool epg = false);
 	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false);
 	int start_scan(unsigned int, char *, bool epg = false);
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false);

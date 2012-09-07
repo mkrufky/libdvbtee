@@ -549,6 +549,22 @@ unsigned int tune::get_scan_results(bool wait)
 #endif
 };
 
+int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg)
+{
+	unsigned int count = 0;
+
+	if (!mode)
+		mode = SCAN_VSB;
+
+	if (0 != start_scan(scan_mode, channel_list, epg))
+		return -1;
+
+	count += get_scan_results(true);
+	fprintf(stderr, "found %d services\n", count);
+
+	return 0;
+}
+
 int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg)
 {
 	unsigned int count = 0;
