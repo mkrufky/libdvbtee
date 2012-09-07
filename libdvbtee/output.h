@@ -43,6 +43,8 @@ enum output_options {
 
 #define OUTPUT_STREAM_BUF_SIZE 188*7*198
 
+typedef void (*stream_callback)(void *, const uint8_t *, size_t);
+
 class output_stream
 {
 public:
@@ -59,6 +61,7 @@ public:
 
 	bool push(uint8_t*, int);
 	int add(char*);
+	int add(void*, stream_callback);
 
 private:
 	pthread_t h_thread;
@@ -77,9 +80,13 @@ private:
 #define OUTPUT_STREAM_UDP  0
 #define OUTPUT_STREAM_TCP  1
 #define OUTPUT_STREAM_FILE 2
+#define OUTPUT_STREAM_FUNC 3
 	unsigned int stream_method;
 
 	unsigned int count_in, count_out;
+
+	stream_callback stream_cb;
+	void *stream_cb_priv;
 };
 
 typedef std::map<int, output_stream> output_stream_map;
@@ -99,6 +106,7 @@ public:
 	bool push(uint8_t* p_data, int size);
 	bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
 	int add(char*);
+	int add(void*, stream_callback);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
 private:

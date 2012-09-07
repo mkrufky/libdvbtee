@@ -843,6 +843,15 @@ bool parse::is_epg_ready()
 	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
 };
 
+int parse::add_output(void* priv, stream_callback callback)
+{
+  int ret = out.add(priv, callback);
+	if (ret < 0)
+		return ret;
+	else
+		return out.start();
+}
+
 int parse::add_output(char* target)
 {
 	int ret = out.add(target);

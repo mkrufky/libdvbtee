@@ -42,6 +42,8 @@ output_stream::output_stream()
   , stream_method(OUTPUT_STREAM_UDP)
   , count_in(0)
   , count_out(0)
+  , stream_cb(NULL)
+  , stream_cb_priv(NULL)
 {
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
@@ -65,6 +67,8 @@ output_stream::output_stream(const output_stream&)
 	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 	f_kill_thread = false;
 	f_streaming = false;
+	stream_cb = NULL;
+	stream_cb_priv = NULL;
 	sock = -1;
 }
 
@@ -79,6 +83,8 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 	f_kill_thread = false;
 	f_streaming = false;
+	stream_cb = NULL;
+	stream_cb_priv = NULL;
 	sock = -1;
 
 	return *this;
@@ -198,8 +204,24 @@ int output_stream::stream(uint8_t* p_data, int size)
 	case OUTPUT_STREAM_FILE:
 		ret = write(sock, p_data, size);
 		break;
+	case OUTPUT_STREAM_FUNC:
+		if (stream_cb) {
+			stream_cb(stream_cb_priv, p_data, size);
+			ret = 0;
+		}
+		break;
 	}
 	return ret;
+}
+
+int output_stream::add(void* priv, stream_callback callback)
+{
+	stream_cb = callback;
+	stream_cb_priv = priv;
+
+	ringbuffer.reset();
+	stream_method = OUTPUT_STREAM_FUNC;
+	return 0;
 }
 
 int output_stream::add(char* target)
@@ -437,6 +459,28 @@ bool output::push(uint8_t* p_data, int size)
 bool output::push(uint8_t* p_data, enum output_options opt)
 {
 	return (((!options) || (!opt)) || (opt & options)) ? push(p_data, 188) : false;
+}
+
+int output::add(void* priv, stream_callback callback)
+{
+	if ((callback) && (priv)) {
+#if DOUBLE_BUFFER
+		/* allocates out buffer if and only if we have at least one target */
+		if (ringbuffer.get_capacity() <= 0)
+			ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
+#endif
+		/* push data into output buffer */
+		int ret = output_streams[num_targets].add(priv, callback);
+		if (ret == 0)
+			num_targets++;
+		else
+			dprintf("failed to add target #%d", num_targets);
+
+		dprintf("~(%d->FUNC)", (ret == 0) ? num_targets - 1 : num_targets);
+
+		return ret;
+	}
+	return -1;
 }
 
 int output::add(char* target)

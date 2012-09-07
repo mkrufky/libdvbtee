@@ -51,7 +51,8 @@ private:
 	void stop_without_wait() { f_kill_thread = true; };
 	void close_socket();
 
-	void streamback(const char*);
+	void streamback(const uint8_t*, size_t);
+	static void streamback(void*, const uint8_t*, size_t);
 	static void streamback(void*, const char*);
 	int streamback_socket;
 	bool streamback_started;

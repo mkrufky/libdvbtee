@@ -100,9 +100,8 @@ static inline ssize_t stream_crlf(int socket)
 	return send(socket, CRLF, 2, 0 );
 }
 
-static int stream_http_chunk(int socket, const char *str, const bool send_zero_length = false)
+static int stream_http_chunk(int socket, const uint8_t *str, size_t strlength, const bool send_zero_length = false)
 {
-	size_t strlength = strlen(str);
 	dprintf("(length:%d)", strlength);
 
 	if ((strlength) || (send_zero_length)) {
@@ -122,12 +121,18 @@ static int stream_http_chunk(int socket, const char *str, const bool send_zero_l
 //static
 void serve::streamback(void *p_this, const char *str)
 {
-	return static_cast<serve*>(p_this)->streamback(str);
+	return static_cast<serve*>(p_this)->streamback((uint8_t *)str, strlen(str));
 }
 
-void serve::streamback(const char *str)
+//static
+void serve::streamback(void *p_this, const uint8_t *str, size_t length)
 {
-	stream_http_chunk(streamback_socket, str);
+	return static_cast<serve*>(p_this)->streamback(str, length);
+}
+
+void serve::streamback(const uint8_t *str, size_t length)
+{
+	stream_http_chunk(streamback_socket, str, length);
 }
 
 #define MAX_SOCKETS 4
@@ -210,7 +215,7 @@ const char * serve::epg_event_callback(
 	if (!streamback_started) return NULL;
 #if 1
 	if (streamback_newchannel) {
-		streamback(html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL));
+		streamback(this, html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL));
 		streamback_newchannel = false;
 		fflush(stdout);
 	}
@@ -275,7 +280,7 @@ void* serve::serve_thread()
 #if 0
 						send(streamback_socket, "0" CRLF, 3, 0 );
 #else
-						stream_http_chunk(streamback_socket, "", true);
+						stream_http_chunk(streamback_socket, (uint8_t *)"", 0, true);
 #endif
 						send(sock[i], http_conn_close, strlen(http_conn_close), 0 );
 						close(sock[i]);
@@ -482,7 +487,10 @@ bool serve::__command(char* cmdline)
 		tuner->feeder.parser.set_service_ids(arg);
 	} else if (strstr(cmd, "stream")) {
 		fprintf(stderr, "adding stream target...\n");
-		tuner->feeder.parser.add_output(arg);
+		if ((arg) && strlen(arg))
+			tuner->feeder.parser.add_output(arg);
+		else
+			tuner->feeder.parser.add_output(this, streamback);
 	} else if (strstr(cmd, "epg")) {
 		fprintf(stderr, "dumping epg...\n");
 		fprintf(stderr, "%s\n", tuner->feeder.parser.epg_dump());
