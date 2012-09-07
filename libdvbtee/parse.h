@@ -46,7 +46,7 @@ typedef std::map<uint16_t, uint16_t> map_eit_pids; /* pid, eit-x */
 
 typedef void (*addfilter_callback)(void *, uint16_t);
 
-typedef void (*chandump_callback)(void *context, uint16_t lcn, uint16_t major, uint16_t minor, uint16_t physical_channel, uint32_t freq, const char *modulation, unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
+typedef const char * (*chandump_callback)(void *context, uint16_t lcn, uint16_t major, uint16_t minor, uint16_t physical_channel, uint32_t freq, const char *modulation, unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
 
 class parse
 {

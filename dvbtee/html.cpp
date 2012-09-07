@@ -109,21 +109,32 @@ const char * html_dump_channels(void *context,
 		modulation,
 		vpid, apid, program_number);
 
+	char phy_chan[4] = { 0 };
+	char svc_id[6] = { 0 };
+
+	sprintf(phy_chan, "%d", physical_channel);
+	sprintf(svc_id, "%d", program_number);
+
 	str.append("<table>");
 	str.append("<tr>");
 	str.append("<td>");
 	str.append("<a href='/tune/stop");
 	str.append("&service=");
-	str.append(0);
+	str.append(svc_id);
 	str.append("&channel=");
-	str.append(0);
+	str.append(phy_chan);
 	str.append("'>");
+	str.append(channelno);
+	str.append(": ");
+	str.append((const char *)service_name);
 	str.append("</a>");
+#if 0
 	str.append("</td>");
 	str.append("</tr>");
 	str.append("<tr>");
 	str.append("<td>");
 	str.append("<hr>");
+#endif
 	str.append("</td>");
 	str.append("</tr>");
 	str.append("</table>");

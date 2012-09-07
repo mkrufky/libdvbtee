@@ -48,6 +48,10 @@ void set_dump_epg_cb(void* context,
 	dump_epg_priv = context;
 };
 
+void streamback_callback(const char *str)
+{
+	if ((str) && (strlen(str))) dump_epg_streamback_cb(dump_epg_priv, str);
+}
 
 #define dprintf(fmt, arg...)					\
 do {								\

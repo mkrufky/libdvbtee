@@ -35,4 +35,9 @@ const char * html_dump_epg_event_callback(void * context,
 					  const char * name,
 					  const char * text);
 
+const char * html_dump_channels(void *context,
+				uint16_t lcn, uint16_t major, uint16_t minor,
+				uint16_t physical_channel, uint32_t freq, const char *modulation,
+				unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
+
 #endif /* __HTML_H__ */

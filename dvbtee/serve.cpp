@@ -388,7 +388,7 @@ bool serve::command(char* cmdline)
 	return ret;
 }
 
-static void chandump(void *context,
+static const char * chandump(void *context,
 		     uint16_t lcn, uint16_t major, uint16_t minor,
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
@@ -414,6 +414,7 @@ static void chandump(void *context,
 		program_number,
 		physical_channel);
 #endif
+	return html_dump_channels(context, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
 }
 
 bool serve::__command(char* cmdline)

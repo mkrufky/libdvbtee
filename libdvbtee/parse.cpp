@@ -683,7 +683,7 @@ inline uint16_t tp_pkt_pid(uint8_t* pkt)
 	return (pkt[0] == 0x47) ? ((uint16_t) (pkt[1] & 0x1f) << 8) + pkt[2] : (uint16_t) - 1;
 }
 
-static void xine_chandump(void *context,
+static const char * xine_chandump(void *context,
 			  uint16_t lcn, uint16_t major, uint16_t minor,
 			  uint16_t physical_channel, uint32_t freq, const char *modulation,
 			  unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
@@ -702,6 +702,8 @@ static void xine_chandump(void *context,
 		freq,//iter_vct->second.carrier_freq,
 		modulation,
 		vpid, apid, program_number);
+
+	return NULL;
 }
 
 unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
@@ -777,7 +779,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 		if (!chandump_cb)
 			set_chandump_callback(xine_chandump);
 
-		chandump_cb(chandump_context, lcn, major, minor, channel, freq, modulation, service_name, vpid, apid, program_number);
+		streamback_callback(chandump_cb(chandump_context, lcn, major, minor, channel, freq, modulation, service_name, vpid, apid, program_number));
 		count++;
 	}
 	return count;
