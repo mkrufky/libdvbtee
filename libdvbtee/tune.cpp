@@ -464,17 +464,6 @@ int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool
 	unsigned int scan_min = min;
 	unsigned int scan_max = max;
 
-	if (mode != SCAN_QAM)
-		mode = SCAN_VSB;
-
-	scan_mode = mode;
-
-	scan_epg = epg;
-
-	fe_fd = open_fe();
-	if (fe_fd < 0)
-		return fe_fd;
-
 	switch (scan_mode) {
 	default:
 	case SCAN_VSB:
@@ -489,6 +478,22 @@ int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool
 
 	for (unsigned int channel = scan_min; channel <= scan_max; channel++)
 		scan_channel_list[channel] = false; // TODO: set true if channel found
+
+	return start_scan(mode, epg);
+}
+
+int tune::start_scan(unsigned int mode, bool epg)
+{
+	if (mode != SCAN_QAM)
+		mode = SCAN_VSB;
+
+	scan_mode = mode;
+
+	scan_epg = epg;
+
+	fe_fd = open_fe();
+	if (fe_fd < 0)
+		return fe_fd;
 
 	scan_complete = false;
 	f_kill_thread = false;

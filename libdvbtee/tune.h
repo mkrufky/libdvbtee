@@ -64,6 +64,7 @@ public:
 #define SCAN_VSB 1
 #define SCAN_QAM 2
 	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false);
+	int start_scan(unsigned int, bool epg = false);
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); };
 	unsigned int get_scan_results(bool wait = true);
