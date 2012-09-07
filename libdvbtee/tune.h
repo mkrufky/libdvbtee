@@ -64,7 +64,7 @@ public:
 #define SCAN_VSB 1
 #define SCAN_QAM 2
 	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false);
-	int start_scan(unsigned int, bool epg = false);
+	int start_scan(unsigned int, char *, bool epg = false);
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); };
 	unsigned int get_scan_results(bool wait = true);
@@ -106,6 +106,8 @@ private:
 	bool tune_dvbt(unsigned int);
 
 	filtered_pid_map filtered_pids;
+
+	int start_scan(unsigned int, bool epg = false);
 };
 
 #endif /*__TUNE_H__ */

@@ -20,6 +20,7 @@
  *****************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -454,6 +455,29 @@ void* tune::scan_thread()
 	close_fe();
 	scan_complete = true;
 	pthread_exit(NULL);
+}
+
+#define CHAR_CMD_COMMA ","
+
+int tune::start_scan(unsigned int mode, char *channel_list, bool epg)
+{
+	char *save;
+	char *item = strtok_r(channel_list, CHAR_CMD_COMMA, &save);
+
+	scan_channel_list.clear();
+
+	if (item) while (item) {
+#if 0
+		if (!item)
+			item = channel_list;
+#endif
+		scan_channel_list[atoi(item)] = false;
+
+		item = strtok_r(NULL, CHAR_CMD_COMMA, &save);
+	} else
+		scan_channel_list[atoi(channel_list)] = false;
+
+	return start_scan(mode, epg);
 }
 
 int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool epg)
