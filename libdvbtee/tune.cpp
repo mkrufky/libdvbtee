@@ -464,6 +464,11 @@ int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool
 	unsigned int scan_min = min;
 	unsigned int scan_max = max;
 
+	if (mode != SCAN_QAM)
+		mode = SCAN_VSB;
+
+	scan_mode = mode;
+
 	switch (scan_mode) {
 	default:
 	case SCAN_VSB:
