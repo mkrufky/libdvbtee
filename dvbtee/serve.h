@@ -58,8 +58,8 @@ private:
 	bool streamback_started;
 	bool streamback_newchannel;
 
-	bool   command(char*);
-	bool __command(char*);
+	bool   command(int, char*);
+	bool __command(int, char*);
 
 	int sock_fd;
 	uint16_t port;

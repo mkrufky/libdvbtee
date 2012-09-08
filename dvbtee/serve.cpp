@@ -275,7 +275,7 @@ void* serve::serve_thread()
 					}
 #endif
 //					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
-					command(buf); /* process */
+					command(sock[i], buf); /* process */
 					if (send_http) {
 #if 0
 						send(streamback_socket, "0" CRLF, 3, 0 );
@@ -372,7 +372,7 @@ int serve::push(uint8_t* p_data)
 #define CHAR_CMD_SET "/"
 #endif
 
-bool serve::command(char* cmdline)
+bool serve::command(int socket, char* cmdline)
 {
 	char *save;
 	bool ret = false;
@@ -382,13 +382,13 @@ bool serve::command(char* cmdline)
 		if (!item)
 			item = cmdline;
 
-		ret = __command(item);
+		ret = __command(socket, item);
 		if (!ret)
 			return ret;
 
 		item = strtok_r(NULL, CHAR_CMD_SEP, &save);
 	} else
-		ret = __command(cmdline);
+		ret = __command(socket, cmdline);
 
 	return ret;
 }
@@ -422,7 +422,7 @@ static const char * chandump(void *context,
 	return html_dump_channels(context, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
 }
 
-bool serve::__command(char* cmdline)
+bool serve::__command(int socket, char* cmdline)
 {
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);
@@ -490,7 +490,7 @@ bool serve::__command(char* cmdline)
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.add_output(arg);
 		else
-			tuner->feeder.parser.add_output(this, streamback);
+			tuner->feeder.parser.add_output(socket, OUTPUT_STREAM_HTTP);
 	} else if (strstr(cmd, "epg")) {
 		fprintf(stderr, "dumping epg...\n");
 		fprintf(stderr, "%s\n", tuner->feeder.parser.epg_dump());
