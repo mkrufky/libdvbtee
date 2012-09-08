@@ -275,7 +275,7 @@ void* serve::serve_thread()
 					}
 #endif
 //					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
-					command(sock[i], buf); /* process */
+					command(send_http, sock[i], buf); /* process */
 					if (send_http) {
 #if 0
 						send(streamback_socket, "0" CRLF, 3, 0 );
@@ -372,7 +372,7 @@ int serve::push(uint8_t* p_data)
 #define CHAR_CMD_SET "/"
 #endif
 
-bool serve::command(int socket, char* cmdline)
+bool serve::command(bool b_http, int socket, char* cmdline)
 {
 	char *save;
 	bool ret = false;
@@ -382,13 +382,13 @@ bool serve::command(int socket, char* cmdline)
 		if (!item)
 			item = cmdline;
 
-		ret = __command(socket, item);
+		ret = __command(b_http, socket, item);
 		if (!ret)
 			return ret;
 
 		item = strtok_r(NULL, CHAR_CMD_SEP, &save);
 	} else
-		ret = __command(socket, cmdline);
+		ret = __command(b_http, socket, cmdline);
 
 	return ret;
 }
@@ -422,7 +422,7 @@ static const char * chandump(void *context,
 	return html_dump_channels(context, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
 }
 
-bool serve::__command(int socket, char* cmdline)
+bool serve::__command(bool b_http, int socket, char* cmdline)
 {
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);
