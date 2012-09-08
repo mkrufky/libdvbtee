@@ -852,6 +852,15 @@ int parse::add_output(void* priv, stream_callback callback)
 		return out.start();
 }
 
+int parse::add_output(int socket, unsigned int method)
+{
+	int ret = out.add(socket, method);
+	if (ret < 0)
+		return ret;
+	else
+		return out.start();
+}
+
 int parse::add_output(char* target)
 {
 	int ret = out.add(target);
