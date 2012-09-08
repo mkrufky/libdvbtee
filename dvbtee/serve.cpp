@@ -102,7 +102,7 @@ static inline ssize_t stream_crlf(int socket)
 
 static int stream_http_chunk(int socket, const uint8_t *str, size_t strlength, const bool send_zero_length = false)
 {
-	dprintf("(length:%d)", strlength);
+	dprintf("(length:%d)", (int)strlength);
 
 	if ((strlength) || (send_zero_length)) {
 		char sz[5] = { 0 };
