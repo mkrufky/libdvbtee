@@ -34,6 +34,54 @@
 
 #define DOUBLE_BUFFER 0
 
+#define HTTP_200_OK  "HTTP/1.1 200 OK"
+#define CONTENT_TYPE "Content-type: "
+#define TEXT_HTML    "text/html"
+#define TEXT_PLAIN   "text/plain"
+#define OCTET_STREAM "application/octet-stream"
+#define ENC_CHUNKED  "Transfer-Encoding: chunked"
+#define CONN_CLOSE   "Connection: close"
+#define CRLF         "\r\n"
+
+static char http_response[] =
+	HTTP_200_OK
+	CRLF
+	CONTENT_TYPE OCTET_STREAM
+	CRLF
+	ENC_CHUNKED
+	CRLF
+	CRLF;
+
+static char http_conn_close[] =
+	CONN_CLOSE
+	CRLF
+	CRLF;
+
+static inline ssize_t stream_crlf(int socket)
+{
+	return send(socket, CRLF, 2, 0 );
+}
+
+static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
+{
+#if DBG
+	dprintf("(length:%d)", length);
+#endif
+	if ((length) || (send_zero_length)) {
+		char sz[5] = { 0 };
+		sprintf(sz, "%x", (unsigned int)length);
+
+		send(socket, sz, strlen(sz), 0);
+		stream_crlf(socket);
+		if (length) {
+			send(socket, buf, length, 0);
+			stream_crlf(socket);
+		}
+	}
+	return 0; // FIXME!
+}
+
+
 output_stream::output_stream()
   : f_kill_thread(false)
   , f_streaming(false)
@@ -132,10 +180,19 @@ void* output_stream::output_stream_thread()
 
 int output_stream::start()
 {
+	int ret = 0;
+
 	dprintf("()");
 
-	int ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
+	switch (stream_method) {
+	case OUTPUT_STREAM_HTTP:
+		ret = send(sock, http_response, strlen(http_response), 0 );
+		break;
+	}
+	if (0 != ret)
+		perror("stream header failed");
 
+	ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
 	if (0 != ret)
 		perror("pthread_create() failed");
 
@@ -150,6 +207,16 @@ void output_stream::stop()
 
 	while (f_streaming)
 		usleep(20*1000);
+
+	switch (stream_method) {
+	case OUTPUT_STREAM_HTTP:
+		stream_http_chunk(sock, (uint8_t *)"", 0, true);
+
+		int ret = send(sock, http_conn_close, strlen(http_conn_close), 0 );
+		if (0 != ret)
+			perror("stream footer failed");
+		break;
+	}
 
 	return;
 }
@@ -203,6 +270,9 @@ int output_stream::stream(uint8_t* p_data, int size)
 		break;
 	case OUTPUT_STREAM_FILE:
 		ret = write(sock, p_data, size);
+		break;
+	case OUTPUT_STREAM_HTTP:
+		ret = stream_http_chunk(sock, p_data, size);
 		break;
 	case OUTPUT_STREAM_FUNC:
 		if (stream_cb) {

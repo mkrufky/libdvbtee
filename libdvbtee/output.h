@@ -82,6 +82,7 @@ private:
 #define OUTPUT_STREAM_TCP  1
 #define OUTPUT_STREAM_FILE 2
 #define OUTPUT_STREAM_FUNC 3
+#define OUTPUT_STREAM_HTTP 4
 	unsigned int stream_method;
 
 	unsigned int count_in, count_out;
