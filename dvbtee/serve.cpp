@@ -276,19 +276,19 @@ void* serve::serve_thread()
 #endif
 //					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
 					command(send_http, sock[i], buf); /* process */
+#if 1
 					if (send_http) {
-#if 0
-						send(streamback_socket, "0" CRLF, 3, 0 );
-#else
 						stream_http_chunk(streamback_socket, (uint8_t *)"", 0, true);
-#endif
 						send(sock[i], http_conn_close, strlen(http_conn_close), 0 );
-						close(sock[i]);
-						streamback_socket = sock[i] = -1;
+//						close(sock[i]);
+//						streamback_socket = sock[i] = -1;
 					}
+#endif
 				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+#if 0 // FIXME
 					close(sock[i]);
 					sock[i] = -1;
+#endif
 				}
 			}
 	}
@@ -377,7 +377,19 @@ bool serve::command(bool b_http, int socket, char* cmdline)
 	char *save;
 	bool ret = false;
 	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
-
+	bool stream_http_headers = ((b_http) && ((strstr(cmdline, "scan")) || strstr(cmdline, "epg")));
+#if 1
+	if (stream_http_headers) {
+		streamback_socket = socket;
+		streamback_newchannel = false;
+		streamback_started = false;
+		set_dump_epg_cb(this,
+				epg_header_footer_callback,
+				epg_event_callback,
+				streamback);
+		send(socket, http_response, strlen(http_response), 0 );
+	}
+#endif
 	if (item) while (item) {
 		if (!item)
 			item = cmdline;
@@ -389,7 +401,14 @@ bool serve::command(bool b_http, int socket, char* cmdline)
 		item = strtok_r(NULL, CHAR_CMD_SEP, &save);
 	} else
 		ret = __command(b_http, socket, cmdline);
-
+#if 1
+	if (stream_http_headers) {
+		stream_http_chunk(socket, (uint8_t *)"", 0, true);
+		send(socket, http_conn_close, strlen(http_conn_close), 0 );
+//		close(socket);
+//		streamback_socket = socket = -1;
+	}
+#endif
 	return ret;
 }
 
