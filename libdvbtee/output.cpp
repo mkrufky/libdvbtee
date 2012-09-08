@@ -68,17 +68,29 @@ static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, cons
 	dprintf("(length:%d)", length);
 #endif
 	if ((length) || (send_zero_length)) {
+		int ret = 0;
 		char sz[5] = { 0 };
 		sprintf(sz, "%x", (unsigned int)length);
 
-		send(socket, sz, strlen(sz), 0);
-		stream_crlf(socket);
+		ret = send(socket, sz, strlen(sz), 0);
+		if (ret < 0)
+			return ret;
+
+		ret = stream_crlf(socket);
+		if (ret < 0)
+			return ret;
+
 		if (length) {
-			send(socket, buf, length, 0);
-			stream_crlf(socket);
+			ret = send(socket, buf, length, 0);
+			if (ret < 0)
+				return ret;
+
+			ret = stream_crlf(socket);
+			if (ret < 0)
+				return ret;
 		}
 	}
-	return 0; // FIXME!
+	return 0;
 }
 
 
@@ -149,7 +161,7 @@ void* output_stream::output_stream_thread(void *p_this)
 void* output_stream::output_stream_thread()
 {
 	uint8_t *data = NULL;
-	int buf_size;
+	int buf_size, ret;
 
 	dprintf("()");
 
@@ -167,7 +179,11 @@ void* output_stream::output_stream_thread()
 		buf_size = ringbuffer.get_read_ptr((void**)&data, OUTPUT_STREAM_PACKET_SIZE);
 		buf_size /= 188;
 		buf_size *= 188;
-		stream(data, buf_size);
+
+		ret = stream(data, buf_size);
+		if (ret < 0)
+			perror("streaming failed");
+
 		ringbuffer.put_read_ptr(buf_size);
 		count_out += buf_size;
 #if 0
@@ -189,7 +205,7 @@ int output_stream::start()
 		ret = send(sock, http_response, strlen(http_response), 0 );
 		break;
 	}
-	if (0 != ret)
+	if (ret < 0)
 		perror("stream header failed");
 
 	ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
@@ -210,10 +226,12 @@ void output_stream::stop()
 
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
-		stream_http_chunk(sock, (uint8_t *)"", 0, true);
+		int ret = stream_http_chunk(sock, (uint8_t *)"", 0, true);
+		if (ret < 0)
+			perror("stream ending failed");;
 
-		int ret = send(sock, http_conn_close, strlen(http_conn_close), 0 );
-		if (0 != ret)
+		ret = send(sock, http_conn_close, strlen(http_conn_close), 0 );
+		if (ret < 0)
 			perror("stream footer failed");
 		break;
 	}
