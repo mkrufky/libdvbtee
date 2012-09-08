@@ -984,7 +984,7 @@ const char * decode::dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id)
 			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
 			const char *ev_str = dump_epg_event(&iter_vct->second, &iter_eit->second);
-			if (ev_str) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, ev_str); else str.append(ev_str);
+			if (ev_str) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, ev_str); else str.append(ev_str); }
 		}
 	}
 	return str.c_str();
@@ -1027,7 +1027,7 @@ const char * decode::dump_eit_x_dvb(uint8_t eit_x, uint16_t service_id)
 			fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, iter_eit->second.name.c_str()/*, iter_eit->second.text.c_str()*/ );
 #endif
 			const char *ev_str = dump_epg_event(&iter_sdt->second, &iter_eit->second);
-			if (ev_str) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, ev_str); else str.append(ev_str);
+			if (ev_str) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, ev_str); else str.append(ev_str); }
 		}
 	}
 	return str.c_str();
@@ -1080,27 +1080,27 @@ const char * decode::dump_epg()
 	str.clear();
 	const char * epg_str;
 
-	if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, false)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, false));
+	if (dump_epg_header_footer_cb) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, false)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, false)); }
 
 	if (decoded_vct.channels.size()) {
 	map_decoded_vct_channels::const_iterator iter_vct;
 	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct) {
-		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true));
+		if (dump_epg_header_footer_cb) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true)); }
 		epg_str = dump_epg_atsc(iter_vct->second.source_id);
 		if (!dump_epg_streamback_cb) if (epg_str) str.append(epg_str);
-		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true));
+		if (dump_epg_header_footer_cb) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true)); }
 	}} else {
 	map_decoded_sdt_services::const_iterator iter_sdt;
 	const decoded_sdt_t *decoded_sdt = get_decoded_sdt();
 	if (decoded_sdt) for (iter_sdt = decoded_sdt->services.begin(); iter_sdt != decoded_sdt->services.end(); ++iter_sdt)
 	if (iter_sdt->second.f_eit_present) {
-		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true));
+		if (dump_epg_header_footer_cb) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, true, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, true, true)); }
 		epg_str = dump_epg_dvb(iter_sdt->second.service_id);
 		if (!dump_epg_streamback_cb) if (epg_str) str.append(epg_str);
-		if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true));
+		if (dump_epg_header_footer_cb) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, true)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, true)); }
 	}}
 
-	if (dump_epg_header_footer_cb) if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, false)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, false));
+	if (dump_epg_header_footer_cb) { if (dump_epg_streamback_cb) dump_epg_streamback_cb(dump_epg_priv, dump_epg_header_footer_cb(dump_epg_priv, false, false)); else str.append(dump_epg_header_footer_cb(dump_epg_priv, false, false)); }
 
 	return str.c_str();
 }
