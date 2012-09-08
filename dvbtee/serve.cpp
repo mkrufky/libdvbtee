@@ -291,6 +291,7 @@ void* serve::serve_thread()
 #endif
 				}
 			}
+		usleep(20*1000);
 	}
 
 	close_socket();
