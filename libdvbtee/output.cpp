@@ -224,6 +224,15 @@ int output_stream::add(void* priv, stream_callback callback)
 	return 0;
 }
 
+int output_stream::add(int socket, unsigned int method)
+{
+	sock = socket;
+	stream_method = method;
+
+	ringbuffer.reset();
+	return 0;
+}
+
 int output_stream::add(char* target)
 {
 	char *save;
@@ -477,6 +486,28 @@ int output::add(void* priv, stream_callback callback)
 			dprintf("failed to add target #%d", num_targets);
 
 		dprintf("~(%d->FUNC)", (ret == 0) ? num_targets - 1 : num_targets);
+
+		return ret;
+	}
+	return -1;
+}
+
+int output::add(int socket, unsigned int method)
+{
+	if (socket >= 0) {
+#if DOUBLE_BUFFER
+		/* allocates out buffer if and only if we have at least one target */
+		if (ringbuffer.get_capacity() <= 0)
+			ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
+#endif
+		/* push data into output buffer */
+		int ret = output_streams[num_targets].add(socket, method);
+		if (ret == 0)
+			num_targets++;
+		else
+			dprintf("failed to add target #%d", num_targets);
+
+		dprintf("~(%d->SOCKET[%d])", (ret == 0) ? num_targets - 1 : num_targets, socket);
 
 		return ret;
 	}

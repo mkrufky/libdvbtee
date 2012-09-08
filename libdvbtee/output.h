@@ -61,6 +61,7 @@ public:
 
 	bool push(uint8_t*, int);
 	int add(char*);
+	int add(int, unsigned int);
 	int add(void*, stream_callback);
 
 private:
@@ -106,6 +107,7 @@ public:
 	bool push(uint8_t* p_data, int size);
 	bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
 	int add(char*);
+	int add(int, unsigned int);
 	int add(void*, stream_callback);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
