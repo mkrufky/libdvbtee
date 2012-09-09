@@ -59,7 +59,7 @@ static char http_conn_close[] =
 
 static inline ssize_t stream_crlf(int socket)
 {
-	return send(socket, CRLF, 2, 0 );
+	return send(socket, CRLF, 2, 0);
 }
 
 static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
@@ -181,8 +181,11 @@ void* output_stream::output_stream_thread()
 		buf_size *= 188;
 
 		ret = stream(data, buf_size);
-		if (ret < 0)
+		if (ret < 0) {
 			perror("streaming failed");
+			stop_without_wait();
+			close_file();
+		}
 
 		ringbuffer.put_read_ptr(buf_size);
 		count_out += buf_size;
@@ -202,16 +205,18 @@ int output_stream::start()
 
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
-		ret = send(sock, http_response, strlen(http_response), 0 );
+		ret = send(sock, http_response, strlen(http_response), 0);
 		break;
 	}
-	if (ret < 0)
+	if (ret < 0) {
 		perror("stream header failed");
+		goto fail;
+	}
 
 	ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
 	if (0 != ret)
 		perror("pthread_create() failed");
-
+fail:
 	return ret;
 }
 
@@ -226,15 +231,14 @@ void output_stream::stop()
 
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
-		int ret = stream_http_chunk(sock, (uint8_t *)"", 0, true);
-		if (ret < 0)
-			perror("stream ending failed");;
-
-		ret = send(sock, http_conn_close, strlen(http_conn_close), 0 );
-		if (ret < 0)
-			perror("stream footer failed");
+		if (stream_http_chunk(sock, (uint8_t *)"", 0, true) < 0)
+			perror("stream empty http chunk failed");
+		else if (send(sock, http_conn_close, strlen(http_conn_close), 0) < 0)
+			perror("stream http connection close failed");
 		break;
 	}
+
+	close_file();
 
 	return;
 }
@@ -300,6 +304,14 @@ int output_stream::stream(uint8_t* p_data, int size)
 		break;
 	}
 	return ret;
+}
+
+void output_stream::close_file()
+{
+	dprintf("()");
+
+	close(sock);
+	sock = -1;
 }
 
 int output_stream::add(void* priv, stream_callback callback)

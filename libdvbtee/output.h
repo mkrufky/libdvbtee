@@ -58,6 +58,7 @@ public:
 
 	int start();
 	void stop();
+	void close_file();
 
 	bool push(uint8_t*, int);
 	int add(char*);
