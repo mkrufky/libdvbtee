@@ -129,6 +129,8 @@ output_stream::output_stream(const output_stream&)
 	f_streaming = false;
 	stream_cb = NULL;
 	stream_cb_priv = NULL;
+	count_in = 0;
+	count_out = 0;
 	sock = -1;
 }
 
@@ -145,6 +147,8 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	f_streaming = false;
 	stream_cb = NULL;
 	stream_cb_priv = NULL;
+	count_in = 0;
+	count_out = 0;
 	sock = -1;
 
 	return *this;
