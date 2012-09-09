@@ -165,7 +165,7 @@ void* output_stream::output_stream_thread(void *p_this)
 void* output_stream::output_stream_thread()
 {
 	uint8_t *data = NULL;
-	int buf_size, ret;
+	int buf_size;
 
 	dprintf("()");
 
@@ -184,12 +184,7 @@ void* output_stream::output_stream_thread()
 		buf_size /= 188;
 		buf_size *= 188;
 
-		ret = stream(data, buf_size);
-		if (ret < 0) {
-			perror("streaming failed");
-			stop_without_wait();
-			close_file();
-		}
+		stream(data, buf_size);
 
 		ringbuffer.put_read_ptr(buf_size);
 		count_out += buf_size;
@@ -296,9 +291,19 @@ int output_stream::stream(uint8_t* p_data, int size)
 		break;
 	case OUTPUT_STREAM_FILE:
 		ret = write(sock, p_data, size);
+		if (ret < 0) {
+			perror("file streaming failed");
+			stop_without_wait();
+			close_file();
+		}
 		break;
 	case OUTPUT_STREAM_HTTP:
 		ret = stream_http_chunk(sock, p_data, size);
+		if (ret < 0) {
+			perror("http streaming failed");
+			stop_without_wait();
+			close_file();
+		}
 		break;
 	case OUTPUT_STREAM_FUNC:
 		if (stream_cb) {
