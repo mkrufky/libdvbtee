@@ -48,6 +48,160 @@ unsigned int dbg_serve = DBG_SERVE;
 
 #define dprintf(fmt, arg...) __dprintf(DBG_SERVE, fmt, ##arg)
 
+	tuner_map tuners;
+
+bool serve::add_tuner(tune *new_tuner) { tuners[tuners.size()] = new_tuner; };
+
+/*****************************************************************************/
+
+static inline ssize_t stream_crlf(int socket)
+{
+	return send(socket, CRLF, 2, 0);
+}
+
+static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
+{
+	dprintf("(length:%d)", (int)length);
+
+	if (socket < 0)
+		return socket;
+
+	if ((length) || (send_zero_length)) {
+		int ret = 0;
+		char sz[5] = { 0 };
+		sprintf(sz, "%x", (unsigned int)length);
+
+		ret = send(socket, sz, strlen(sz), 0);
+		if (ret < 0)
+			return ret;
+
+		ret = stream_crlf(socket);
+		if (ret < 0)
+			return ret;
+
+		if (length) {
+			ret = send(socket, buf, length, 0);
+			if (ret < 0)
+				return ret;
+
+			ret = stream_crlf(socket);
+			if (ret < 0)
+				return ret;
+		}
+	}
+	return 0;
+}
+
+/*****************************************************************************/
+
+serve_client::serve_client()
+  : f_kill_thread(false)
+  , sock_fd(-1)
+{
+	dprintf("()");
+}
+
+serve_client::~serve_client()
+{
+	dprintf("()");
+	stop();
+}
+
+#if 1
+serve_client::serve_client(const serve_client&)
+{
+	dprintf("(copy)");
+	f_kill_thread = false;
+	sock_fd = -1;
+}
+
+serve_client& serve_client::operator= (const serve_client& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	f_kill_thread = false;
+	sock_fd = -1;
+
+	return *this;
+}
+#endif
+
+void serve_client::close_socket()
+{
+	dprintf("()");
+
+	if (sock_fd >= 0) {
+		close(sock_fd);
+		sock_fd = -1;
+	}
+}
+
+void serve_client::stop()
+{
+	dprintf("()");
+
+	stop_without_wait();
+
+	while (-1 != sock_fd) {
+		usleep(20*1000);
+	}
+	return;
+}
+
+int serve_client::start()
+{
+	dprintf("()");
+
+	f_kill_thread = false;
+
+	int ret = pthread_create(&h_thread, NULL, client_thread, this);
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
+//static
+void* serve_client::client_thread(void *p_this)
+{
+	return static_cast<serve_client*>(p_this)->client_thread();
+}
+
+void* serve_client::client_thread()
+{
+	struct sockaddr_in tcpsa;
+	socklen_t salen = sizeof(tcpsa);
+	char buf[1024] = { 0 };
+	int rxlen;
+
+	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
+	dprintf("(sock_fd=%d)", sock_fd);
+
+	while (!f_kill_thread) {
+		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
+		if (rxlen > 0) {
+			bool send_http;
+			fprintf(stderr, "%s: %s\n", __func__, buf);
+			send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
+
+			command(send_http, buf); /* process */
+
+		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+#if 0
+			close(sock_fd);
+			sock_fd = -1;
+#endif
+		}
+		usleep(20*1000);
+	}
+
+	close_socket();
+	pthread_exit(NULL);
+}
+
 serve::serve()
   : f_kill_thread(false)
   , sock_fd(-1)
@@ -95,47 +249,21 @@ serve& serve::operator= (const serve& cSource)
 }
 #endif
 
-static inline ssize_t stream_crlf(int socket)
+//static
+void serve_client::streamback(void *p_this, const char *str)
 {
-	return send(socket, CRLF, 2, 0 );
-}
-
-static int stream_http_chunk(int socket, const uint8_t *str, size_t strlength, const bool send_zero_length = false)
-{
-	dprintf("(length:%d)", (int)strlength);
-
-	if (socket < 0)
-		return socket;
-
-	if ((strlength) || (send_zero_length)) {
-		char sz[5] = { 0 };
-		sprintf(sz, "%x", (unsigned int)strlength);
-
-		send(socket, sz, strlen(sz), 0);
-		stream_crlf(socket);
-		if (strlength) {
-			send(socket, str, strlength, 0);
-			stream_crlf(socket);
-		}
-	}
-	return 0; // FIXME!
+	return static_cast<serve_client*>(p_this)->streamback((uint8_t *)str, strlen(str));
 }
 
 //static
-void serve::streamback(void *p_this, const char *str)
+void serve_client::streamback(void *p_this, const uint8_t *str, size_t length)
 {
-	return static_cast<serve*>(p_this)->streamback((uint8_t *)str, strlen(str));
+	return static_cast<serve_client*>(p_this)->streamback(str, length);
 }
 
-//static
-void serve::streamback(void *p_this, const uint8_t *str, size_t length)
+void serve_client::streamback(const uint8_t *str, size_t length)
 {
-	return static_cast<serve*>(p_this)->streamback(str, length);
-}
-
-void serve::streamback(const uint8_t *str, size_t length)
-{
-	stream_http_chunk(streamback_socket, str, length);
+	stream_http_chunk(sock_fd, str, length);
 }
 
 #define MAX_SOCKETS 4
@@ -172,13 +300,13 @@ static char http_conn_close[] =
 	 CRLF
 	 CRLF;
 
-const char * serve::epg_header_footer_callback(void *context, bool header, bool channel)
+const char * serve_client::epg_header_footer_callback(void *context, bool header, bool channel)
 {
-	return static_cast<serve*>(context)->epg_header_footer_callback(header, channel);
+	return static_cast<serve_client*>(context)->epg_header_footer_callback(header, channel);
 }
 
 
-const char * serve::epg_header_footer_callback(bool header, bool channel)
+const char * serve_client::epg_header_footer_callback(bool header, bool channel)
 {
 	dprintf("()");
 	if ((header) && (!channel)) streamback_started = true;
@@ -189,7 +317,7 @@ const char * serve::epg_header_footer_callback(bool header, bool channel)
 	return ret;
 }
 
-const char * serve::epg_event_callback(void * context,
+const char * serve_client::epg_event_callback(void * context,
 				const char * channel_name,
 				uint16_t chan_major,
 				uint16_t chan_minor,
@@ -200,10 +328,10 @@ const char * serve::epg_event_callback(void * context,
 				const char * name,
 				const char * text)
 {
-	return static_cast<serve*>(context)->epg_event_callback(channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
+	return static_cast<serve_client*>(context)->epg_event_callback(channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
 }
 
-const char * serve::epg_event_callback(
+const char * serve_client::epg_event_callback(
 				const char * channel_name,
 				uint16_t chan_major,
 				uint16_t chan_minor,
@@ -237,65 +365,44 @@ void* serve::serve_thread()
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
+#if 0
+	int rxlen = 0;
+#else
 	int i, rxlen = 0;
-	int sock[MAX_SOCKETS];
+	serve_client clients[MAX_SOCKETS];
+#endif
 
 	dprintf("(sock_fd=%d)", sock_fd);
 
-	for (i = 0; i < MAX_SOCKETS; i++)
-		sock[i] = -1;
+#if 0
+	client_map.clear();
 
 	while (!f_kill_thread) {
+#else
+	for (i = 0; i < MAX_SOCKETS; i++)
+		clients[i].stop();
+	i = 0;
+
+	while ((!f_kill_thread) && (i < MAX_SOCKETS)) {
+#endif
 		int d = accept(sock_fd, (struct sockaddr*)&tcpsa, &salen);
 		if (d != -1) {
-			for (i = 0; i < MAX_SOCKETS; i++)
-				if (sock[i] == -1) {
-					sock[i] = d;
-					break;
-				}
-			if (sock[i] != d)
-				perror("couldn't attach to socket");
+#if 0
+			client_map[d].set_socket(d);
+			//perror("couldn't attach to socket");
+			client_map[d].start();
+#else
+			clients[i].set_socket(d);
+			//perror("couldn't attach to socket");
+			clients[i].start();
+#endif
 		}
-		for (i = 0; i < MAX_SOCKETS; i++)
-			if (sock[i] != -1) {
-				char buf[1024] = { 0 };
-				rxlen = recv(sock[i], buf, sizeof(buf), MSG_DONTWAIT);
-				if (rxlen > 0) {
-					bool send_http;
-					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
-					fprintf(stderr, "%s: %s\n", __func__, buf);
-					send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
-#if 0
-					if (send_http) {
-						streamback_socket = sock[i];
-						streamback_newchannel = false;
-						streamback_started = false;
-						set_dump_epg_cb(this,
-								epg_header_footer_callback,
-								epg_event_callback,
-								streamback);
-						send(streamback_socket, http_response, strlen(http_response), 0 );
-					}
-#endif
-//					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
-					command(send_http, sock[i], buf); /* process */
-#if 0
-					if (send_http) {
-						stream_http_chunk(streamback_socket, (uint8_t *)"", 0, true);
-						send(sock[i], http_conn_close, strlen(http_conn_close), 0 );
-//						close(sock[i]);
-//						streamback_socket = sock[i] = -1;
-					}
-#endif
-				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
-#if 0 // FIXME
-					close(sock[i]);
-					sock[i] = -1;
-#endif
-				}
-			}
 		usleep(20*1000);
 	}
+
+#if 0
+	client_map.clear();
+#endif
 
 	close_socket();
 	pthread_exit(NULL);
@@ -376,7 +483,7 @@ int serve::push(uint8_t* p_data)
 #define CHAR_CMD_SET "/"
 #endif
 
-bool serve::command(bool b_http, int socket, char* cmdline)
+bool serve_client::command(bool b_http, char* cmdline)
 {
 	char *save;
 	bool ret = false;
@@ -384,33 +491,31 @@ bool serve::command(bool b_http, int socket, char* cmdline)
 	bool stream_http_headers = ((b_http) /*&& ((strstr(cmdline, "scan")) || strstr(cmdline, "epg"))*/);
 #if 1
 	if (stream_http_headers) {
-		streamback_socket = socket;
 		streamback_newchannel = false;
 		streamback_started = false;
 		set_dump_epg_cb(this,
 				epg_header_footer_callback,
 				epg_event_callback,
 				streamback);
-		send(socket, http_response, strlen(http_response), 0 );
+		send(sock_fd, http_response, strlen(http_response), 0);
 	}
 #endif
 	if (item) while (item) {
 		if (!item)
 			item = cmdline;
 
-		ret = __command(b_http, socket, item);
+		ret = __command(b_http, item);
 		if (!ret)
 			return ret;
 
 		item = strtok_r(NULL, CHAR_CMD_SEP, &save);
 	} else
-		ret = __command(b_http, socket, cmdline);
+		ret = __command(b_http, cmdline);
 #if 1
 	if (stream_http_headers) {
-		stream_http_chunk(socket, (uint8_t *)"", 0, true);
-		send(socket, http_conn_close, strlen(http_conn_close), 0 );
-//		close(socket);
-		streamback_socket = socket = -1;
+		stream_http_chunk(sock_fd, (uint8_t *)"", 0, true);
+		send(sock_fd, http_conn_close, strlen(http_conn_close), 0);
+//		close_socket();
 	}
 #endif
 	return ret;
@@ -445,7 +550,7 @@ static const char * chandump(void *context,
 	return html_dump_channels(context, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
 }
 
-bool serve::__command(bool b_http, int socket, char* cmdline)
+bool serve_client::__command(bool b_http, char* cmdline)
 {
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);
@@ -513,8 +618,8 @@ bool serve::__command(bool b_http, int socket, char* cmdline)
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.add_output(arg);
 		else {
-			tuner->feeder.parser.add_output(socket, OUTPUT_STREAM_HTTP);
-			streamback_socket = -1; /* disconnect socket from the server process as its attached to the output process */
+			tuner->feeder.parser.add_output(sock_fd, OUTPUT_STREAM_HTTP);
+			sock_fd = -1; /* disconnect socket from the server process as its attached to the output process */
 		}
 	} else if (strstr(cmd, "epg")) {
 		fprintf(stderr, "dumping epg...\n");

@@ -30,41 +30,40 @@
 
 typedef std::map<uint8_t, tune*> tuner_map;
 
-class serve
+class serve_client
 {
 public:
-	serve();
-	~serve();
-
-	int start(uint16_t port_requested = SERVE_DEFAULT_PORT);
-	void stop();
-#if 0
-	int push(uint8_t* p_data);
+	serve_client();
+	~serve_client();
+#if 1
+	serve_client(const serve_client&);
+	serve_client& operator= (const serve_client&);
 #endif
-	bool add_tuner(tune *new_tuner) { tuners[tuners.size()] = new_tuner; };
+	void set_socket(int sock) { sock_fd = sock; };
+
+	int start();
+	void stop();
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
 
-	void *serve_thread();
-	static void *serve_thread(void*);
+	int sock_fd;
+
 	void stop_without_wait() { f_kill_thread = true; };
 	void close_socket();
+
+	void *client_thread();
+	static void *client_thread(void*);
+
+	bool   command(bool, char*);
+	bool __command(bool, char*);
 
 	void streamback(const uint8_t*, size_t);
 	static void streamback(void*, const uint8_t*, size_t);
 	static void streamback(void*, const char*);
-	int streamback_socket;
+
 	bool streamback_started;
 	bool streamback_newchannel;
-
-	bool   command(bool, int, char*);
-	bool __command(bool, int, char*);
-
-	int sock_fd;
-	uint16_t port;
-
-	tuner_map tuners;
 
 	const char * epg_header_footer_callback(bool header, bool channel);
 	const char * epg_event_callback(const char * channel_name,
@@ -88,6 +87,37 @@ private:
 					const char * name,
 					const char * text);
 
+};
+
+#if 0
+typedef std::map<int, serve_client*> serve_client_map;
+#endif
+
+class serve
+{
+public:
+	serve();
+	~serve();
+
+	int start(uint16_t port_requested = SERVE_DEFAULT_PORT);
+	void stop();
+#if 0
+	int push(uint8_t* p_data);
+#endif
+	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
+private:
+	pthread_t h_thread;
+	bool f_kill_thread;
+#if 0
+	serve_client_map client_map;
+#endif
+	void *serve_thread();
+	static void *serve_thread(void*);
+	void stop_without_wait() { f_kill_thread = true; };
+	void close_socket();
+
+	int sock_fd;
+	uint16_t port;
 };
 
 #endif /*__SERVE_H__ */
