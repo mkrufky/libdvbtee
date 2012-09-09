@@ -104,6 +104,9 @@ static int stream_http_chunk(int socket, const uint8_t *str, size_t strlength, c
 {
 	dprintf("(length:%d)", (int)strlength);
 
+	if (socket < 0)
+		return socket;
+
 	if ((strlength) || (send_zero_length)) {
 		char sz[5] = { 0 };
 		sprintf(sz, "%x", (unsigned int)strlength);
@@ -262,7 +265,7 @@ void* serve::serve_thread()
 					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
 					fprintf(stderr, "%s: %s\n", __func__, buf);
 					send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
-#if 1
+#if 0
 					if (send_http) {
 						streamback_socket = sock[i];
 						streamback_newchannel = false;
@@ -276,7 +279,7 @@ void* serve::serve_thread()
 #endif
 //					if (send_http) send(sock[i], http_response, strlen(http_response), 0 );
 					command(send_http, sock[i], buf); /* process */
-#if 1
+#if 0
 					if (send_http) {
 						stream_http_chunk(streamback_socket, (uint8_t *)"", 0, true);
 						send(sock[i], http_conn_close, strlen(http_conn_close), 0 );
@@ -378,7 +381,7 @@ bool serve::command(bool b_http, int socket, char* cmdline)
 	char *save;
 	bool ret = false;
 	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
-	bool stream_http_headers = ((b_http) && ((strstr(cmdline, "scan")) || strstr(cmdline, "epg")));
+	bool stream_http_headers = ((b_http) /*&& ((strstr(cmdline, "scan")) || strstr(cmdline, "epg"))*/);
 #if 1
 	if (stream_http_headers) {
 		streamback_socket = socket;
@@ -407,7 +410,7 @@ bool serve::command(bool b_http, int socket, char* cmdline)
 		stream_http_chunk(socket, (uint8_t *)"", 0, true);
 		send(socket, http_conn_close, strlen(http_conn_close), 0 );
 //		close(socket);
-//		streamback_socket = socket = -1;
+		streamback_socket = socket = -1;
 	}
 #endif
 	return ret;
@@ -509,8 +512,10 @@ bool serve::__command(bool b_http, int socket, char* cmdline)
 		fprintf(stderr, "adding stream target...\n");
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.add_output(arg);
-		else
+		else {
 			tuner->feeder.parser.add_output(socket, OUTPUT_STREAM_HTTP);
+			streamback_socket = -1; /* disconnect socket from the server process as its attached to the output process */
+		}
 	} else if (strstr(cmd, "epg")) {
 		fprintf(stderr, "dumping epg...\n");
 		fprintf(stderr, "%s\n", tuner->feeder.parser.epg_dump());
