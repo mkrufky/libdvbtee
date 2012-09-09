@@ -200,6 +200,10 @@ int output_stream::start()
 {
 	int ret = 0;
 
+	if (f_streaming) {
+		dprintf("(%d) already streaming", sock);
+		goto fail;
+	}
 	dprintf("(%d)", sock);
 
 	switch (stream_method) {
