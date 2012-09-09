@@ -103,7 +103,7 @@ serve_client::serve_client()
 
 serve_client::~serve_client()
 {
-	dprintf("()");
+	dprintf("(%d)", sock_fd);
 	stop();
 }
 
@@ -131,7 +131,7 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 
 void serve_client::close_socket()
 {
-	dprintf("()");
+	dprintf("(%d)", sock_fd);
 
 	if (sock_fd >= 0) {
 		close(sock_fd);
@@ -141,7 +141,7 @@ void serve_client::close_socket()
 
 void serve_client::stop()
 {
-	dprintf("()");
+	dprintf("(%d)", sock_fd);
 
 	stop_without_wait();
 
@@ -153,7 +153,7 @@ void serve_client::stop()
 
 int serve_client::start()
 {
-	dprintf("()");
+	dprintf("(%d)", sock_fd);
 
 	f_kill_thread = false;
 
@@ -178,7 +178,7 @@ void* serve_client::client_thread()
 	int rxlen;
 
 	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
-	dprintf("(sock_fd=%d)", sock_fd);
+	dprintf("(%d)", sock_fd);
 
 	while (!f_kill_thread) {
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);

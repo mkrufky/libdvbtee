@@ -112,7 +112,7 @@ output_stream::output_stream()
 
 output_stream::~output_stream()
 {
-	dprintf("()");
+	dprintf("(%d)", sock);
 
 	stop();
 
@@ -167,7 +167,7 @@ void* output_stream::output_stream_thread()
 	uint8_t *data = NULL;
 	int buf_size;
 
-	dprintf("()");
+	dprintf("(%d)", sock);
 
 	f_streaming = true;
 
@@ -200,7 +200,7 @@ int output_stream::start()
 {
 	int ret = 0;
 
-	dprintf("()");
+	dprintf("(%d)", sock);
 
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
@@ -317,7 +317,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 
 void output_stream::close_file()
 {
-	dprintf("()");
+	dprintf("(%d)", sock);
 
 	close(sock);
 	sock = -1;
