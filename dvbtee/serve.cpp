@@ -365,44 +365,23 @@ void* serve::serve_thread()
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
-#if 0
 	int rxlen = 0;
-#else
-	int i, rxlen = 0;
-	serve_client clients[MAX_SOCKETS];
-#endif
 
 	dprintf("(sock_fd=%d)", sock_fd);
 
-#if 0
 	client_map.clear();
 
 	while (!f_kill_thread) {
-#else
-	for (i = 0; i < MAX_SOCKETS; i++)
-		clients[i].stop();
-	i = 0;
-
-	while ((!f_kill_thread) && (i < MAX_SOCKETS)) {
-#endif
 		int d = accept(sock_fd, (struct sockaddr*)&tcpsa, &salen);
 		if (d != -1) {
-#if 0
 			client_map[d].set_socket(d);
 			//perror("couldn't attach to socket");
 			client_map[d].start();
-#else
-			clients[i].set_socket(d);
-			//perror("couldn't attach to socket");
-			clients[i].start();
-#endif
 		}
 		usleep(20*1000);
 	}
 
-#if 0
 	client_map.clear();
-#endif
 
 	close_socket();
 	pthread_exit(NULL);

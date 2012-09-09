@@ -89,9 +89,7 @@ private:
 
 };
 
-#if 0
-typedef std::map<int, serve_client*> serve_client_map;
-#endif
+typedef std::map<int, serve_client> serve_client_map;
 
 class serve
 {
@@ -108,9 +106,9 @@ public:
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
-#if 0
+
 	serve_client_map client_map;
-#endif
+
 	void *serve_thread();
 	static void *serve_thread(void*);
 	void stop_without_wait() { f_kill_thread = true; };
