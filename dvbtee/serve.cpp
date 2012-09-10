@@ -203,9 +203,6 @@ void* serve_client::client_thread()
 }
 
 serve::serve()
-  : f_kill_thread(false)
-  , sock_fd(-1)
-  , port(0)
 {
 	dprintf("()");
 	tuners.clear();
@@ -216,20 +213,7 @@ serve::~serve()
 	dprintf("()");
 	tuners.clear();
 
-	close_socket();
-}
-
-void serve::close_socket()
-{
-	dprintf("()");
-
 	stop();
-
-	if (sock_fd >= 0) {
-		close(sock_fd);
-		sock_fd = -1;
-	}
-	port = 0;
 }
 
 #if 0
@@ -356,103 +340,34 @@ const char * serve_client::epg_event_callback(
 
 
 //static
-void* serve::serve_thread(void *p_this)
+void serve::add_client(void *p_this, int socket)
 {
-	return static_cast<serve*>(p_this)->serve_thread();
+	return static_cast<serve*>(p_this)->add_client(socket);
 }
 
-void* serve::serve_thread()
+void serve::add_client(int socket)
 {
-	struct sockaddr_in tcpsa;
-	socklen_t salen = sizeof(tcpsa);
-	int rxlen = 0;
-
-	dprintf("(sock_fd=%d)", sock_fd);
-
-	client_map.clear();
-
-	while (!f_kill_thread) {
-		int d = accept(sock_fd, (struct sockaddr*)&tcpsa, &salen);
-		if (d != -1) {
-			client_map[d].set_socket(d);
-			//perror("couldn't attach to socket");
-			client_map[d].start();
-		}
-		usleep(20*1000);
-	}
-
-	client_map.clear();
-
-	close_socket();
-	pthread_exit(NULL);
+	client_map[socket].set_socket(socket);
+	client_map[socket].start();
 }
 
 int serve::start(uint16_t port_requested)
 {
-	struct sockaddr_in tcp_sock;
-
 	dprintf("()");
 
-	memset(&tcp_sock, 0, sizeof(tcp_sock));
+	listener.set_callback(this, add_client);
 
-	f_kill_thread = false;
-
-	sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock_fd < 0) {
-		perror("open socket failed");
-		return sock_fd;
-	}
-
-	int reuse = 1;
-	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-		perror("setting reuse failed");
-		return -1;
-	}
-
-	tcp_sock.sin_family = AF_INET;
-	tcp_sock.sin_port = htons(port_requested);
-	tcp_sock.sin_addr.s_addr = INADDR_ANY;
-
-
-	if (bind(sock_fd, (struct sockaddr*)&tcp_sock, sizeof(tcp_sock)) < 0) {
-		perror("bind to local interface failed");
-		return -1;
-	}
-	port = port_requested;
-
-	int fl = fcntl(sock_fd, F_GETFL, 0);
-	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
-	listen(sock_fd, MAX_SOCKETS);
-
-	int ret = pthread_create(&h_thread, NULL, serve_thread, this);
-
-	if (0 != ret)
-		perror("pthread_create() failed");
-
-	return ret;
+	return listener.start(port_requested);
 }
 
 void serve::stop()
 {
 	dprintf("()");
 
-	stop_without_wait();
+	listener.stop();
 
-	while (-1 != sock_fd) {
-		usleep(20*1000);
-	}
 	return;
 }
-
-#if 0
-int serve::push(uint8_t* p_data)
-{
-	return 0;
-}
-#endif
 
 #if 1//def PRETTY_URLS
 #define CHAR_CMD_SEP "&/"

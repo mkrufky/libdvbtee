@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include "tune.h"
+#include "listen.h"
 
 #define SERVE_DEFAULT_PORT 64080
 
@@ -99,23 +100,14 @@ public:
 
 	int start(uint16_t port_requested = SERVE_DEFAULT_PORT);
 	void stop();
-#if 0
-	int push(uint8_t* p_data);
-#endif
+
 	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
 private:
-	pthread_t h_thread;
-	bool f_kill_thread;
-
+	socket_listen listener;
 	serve_client_map client_map;
 
-	void *serve_thread();
-	static void *serve_thread(void*);
-	void stop_without_wait() { f_kill_thread = true; };
-	void close_socket();
-
-	int sock_fd;
-	uint16_t port;
+	void add_client(int);
+	static void add_client(void*, int);
 };
 
 #endif /*__SERVE_H__ */
