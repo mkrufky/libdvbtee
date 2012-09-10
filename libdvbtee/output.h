@@ -30,6 +30,7 @@
 
 #include <map>
 
+#include "listen.h"
 #include "rbuf.h"
 
 enum output_options {
@@ -112,6 +113,7 @@ public:
 	int add(char*);
 	int add(int, unsigned int);
 	int add(void*, stream_callback);
+	int add_http_server(int);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
 private:
@@ -126,6 +128,9 @@ private:
 	void *output_thread();
 	static void *output_thread(void*);
 
+	void add_http_client(int);
+	static void add_http_client(void*, int);
+
 	void stop_without_wait() { f_kill_thread = true; };
 
 	int __add(char*);
@@ -135,6 +140,8 @@ private:
 	enum output_options options;
 
 	unsigned int count_in, count_out;
+
+	socket_listen listener;
 };
 
 #endif /*__OUTPUT_H__ */
