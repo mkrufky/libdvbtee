@@ -870,9 +870,11 @@ int parse::add_output(char* target)
 		return out.start();
 }
 
+#define CHAR_CMD_COMMA ","
+
 void parse::set_service_ids(char *ids)
 {
-	char *save, *id = strtok_r(ids, ",", &save);
+	char *save, *id = strtok_r(ids, CHAR_CMD_COMMA, &save);
 
 	service_ids.clear();
 	payload_pids.clear();
@@ -881,7 +883,7 @@ void parse::set_service_ids(char *ids)
 		if (!id)
 			id = ids;
 		set_service_id(strtoul(id, NULL, 0));
-		id = strtok_r(NULL, ",", &save);
+		id = strtok_r(NULL, CHAR_CMD_COMMA, &save);
 	} else
 		set_service_id(strtoul(ids, NULL, 0));
 

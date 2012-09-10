@@ -637,11 +637,13 @@ int output::add(int socket, unsigned int method)
 	return -1;
 }
 
+#define CHAR_CMD_COMMA ","
+
 int output::add(char* target)
 {
 	char *save;
 	int ret = -1;
-	char *item = strtok_r(target, ",", &save);
+	char *item = strtok_r(target, CHAR_CMD_COMMA, &save);
 	if (item) while (item) {
 		if (!item)
 			item = target;
@@ -650,7 +652,7 @@ int output::add(char* target)
 		if (ret < 0)
 			return ret;
 
-		item = strtok_r(NULL, ",", &save);
+		item = strtok_r(NULL, CHAR_CMD_COMMA, &save);
 	} else
 		ret = __add(target);
 
