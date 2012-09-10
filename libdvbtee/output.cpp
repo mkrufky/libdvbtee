@@ -509,8 +509,12 @@ void* output::output_thread()
 			buf_size /= 188;
 			buf_size *= 188;
 
-			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
-				iter->second.push(data, buf_size);
+			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
+				if (iter->second.is_streaming())
+					iter->second.push(data, buf_size);
+				else
+					output_streams.erase(iter->first);
+			}
 			ringbuffer.put_read_ptr(buf_size);
 			count_out += buf_size;
 		} else {
@@ -525,6 +529,12 @@ void* output::output_thread()
 int output::start()
 {
 	dprintf("()");
+	/* FIXME:
+	if (f_streaming) {
+		dprintf("(%d) already streaming", sock);
+		goto fail;
+	}
+	*/
 #if DOUBLE_BUFFER
 	int ret = pthread_create(&h_thread, NULL, output_thread, this);
 
