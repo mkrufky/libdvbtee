@@ -601,7 +601,10 @@ bool output::push(uint8_t* p_data, int size)
 	bool ret = true;
 
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
-		iter->second.push(p_data, size);
+		if (iter->second.is_streaming())
+			iter->second.push(p_data, size);
+		else
+			output_streams.erase(iter->first);
 #endif
 	count_in += size;
 
