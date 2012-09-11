@@ -112,7 +112,7 @@ void signal_callback_handler(int signum)
 }
 
 
-void start_server(struct dvbtee_context* context, int num_tuners)
+void start_server(struct dvbtee_context* context, int num_tuners, unsigned int flags)
 {
 	serve server;
 
@@ -131,6 +131,9 @@ void start_server(struct dvbtee_context* context, int num_tuners)
 		}
 	}
 	server.start();
+
+	if (flags & 2)
+		context->tuner.feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1);
 
 	while (1) sleep(1);
 #if 0
@@ -248,6 +251,7 @@ int main(int argc, char **argv)
 	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 	int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
+	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
 	unsigned int scan_min    = 0;
 	unsigned int scan_max    = 0;
@@ -276,7 +280,7 @@ int main(int argc, char **argv)
 #define VERSION "0.0.7"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::SE::o::O:d::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::S::E::o::O:d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -315,8 +319,9 @@ int main(int argc, char **argv)
 			if (scan_method)
 				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
 			break;
-		case 'S': /* server mode */
+		case 'S': /* server mode, optional arg 1 for command server, 2 for http stream server, 3 for both */
 			b_serve = true;
+			serv_flags = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			break;
 		case 'i': /* pull local/remote tcp/udp port for data */
 			strcpy(tcpipfeedurl, optarg);
@@ -383,7 +388,7 @@ int main(int argc, char **argv)
 		context.tuner.feeder.parser.limit_eit(eit_limit);
 	}
 	if (b_serve) {
-		start_server(&context, num_tuners);
+		start_server(&context, num_tuners, serv_flags);
 		goto exit;
 	}
 
