@@ -60,7 +60,7 @@ static char http_conn_close[] =
 static inline ssize_t tcp_send(int sockfd, const void *buf, size_t len, int flags)
 {
 #if 0
-	int ret = 0;	
+	int ret = 0;
 	while (0 >= ret) {
 		fd_set fds;
 		FD_ZERO(&fds);
