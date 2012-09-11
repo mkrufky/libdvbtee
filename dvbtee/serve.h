@@ -49,6 +49,7 @@ private:
 	bool f_kill_thread;
 
 	int sock_fd;
+	bool b_will_stream_data;
 
 	void stop_without_wait() { f_kill_thread = true; };
 	void close_socket();

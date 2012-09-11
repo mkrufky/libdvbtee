@@ -183,19 +183,17 @@ void* serve_client::client_thread()
 	while (!f_kill_thread) {
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
 		if (rxlen > 0) {
-			bool send_http;
 			fprintf(stderr, "%s: %s\n", __func__, buf);
-			send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
+			bool send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
+
+			b_will_stream_data = (strstr(buf, "stream/")) ? true : false;
 
 			command(send_http, buf); /* process */
-
-		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
-#if 0
-			close(sock_fd);
-			sock_fd = -1;
-#endif
-		}
-		usleep(20*1000);
+		} else if ( /*(rxlen == 0) ||*/ ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+			if (!b_will_stream_data)
+				stop_without_wait();
+		} else
+			usleep(20*1000);
 	}
 
 	close_socket();
@@ -382,7 +380,7 @@ bool serve_client::command(bool b_http, char* cmdline)
 	char *save;
 	bool ret = false;
 	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
-	bool stream_http_headers = ((b_http) /*&& ((strstr(cmdline, "scan")) || strstr(cmdline, "epg"))*/);
+	bool stream_http_headers = ((b_http) && (!b_will_stream_data));
 #if 1
 	if (stream_http_headers) {
 		streamback_newchannel = false;
