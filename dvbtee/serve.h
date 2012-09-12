@@ -48,6 +48,7 @@ public:
 	void stop();
 
 	bool socket_active() { return (sock_fd >= 0); };
+	bool check();
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -114,6 +115,8 @@ public:
 	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
 
 	bool is_running() { return listener.is_running(); };
+
+	bool check();
 private:
 	socket_listen listener;
 	serve_client_map client_map;

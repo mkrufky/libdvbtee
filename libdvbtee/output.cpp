@@ -267,6 +267,25 @@ void output_stream::stop()
 	return;
 }
 
+bool output_stream::check()
+{
+	dprintf("(%d)", sock);
+
+	bool ret = is_streaming();
+	if (ret) {
+		dprintf("(%d) %s%s %ul in, %ul out",
+			sock, f_streaming ? "streaming " : "",
+			(stream_method == OUTPUT_STREAM_UDP) ? "UDP" :
+			(stream_method == OUTPUT_STREAM_TCP) ? "TCP" :
+			(stream_method == OUTPUT_STREAM_HTTP) ? "HTTP" :
+			(stream_method == OUTPUT_STREAM_FILE) ? "FILE" :
+			(stream_method == OUTPUT_STREAM_FUNC) ? "FUNC" : "UNKNOWN",
+			count_in, count_out);
+	}
+
+	return ret;
+}
+
 bool output_stream::push(uint8_t* p_data, int size)
 {
 	/* push data into output_stream buffer */
@@ -569,6 +588,18 @@ int output::add_http_server(int port)
 	dprintf("(%d)", port);
 	listener.set_callback(this, add_http_client);
 	return listener.start(port);
+}
+
+bool output::check()
+{
+	dprintf("()");
+
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
+		if (!iter->second.check())
+			output_streams.erase(iter->first);
+	}
+
+	return true;
 }
 
 int output::start()

@@ -92,6 +92,7 @@ public:
 
 	output out;
 
+	bool check();
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;

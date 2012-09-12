@@ -382,6 +382,40 @@ void serve::stop()
 	return;
 }
 
+bool serve_client::check()
+{
+	bool ret = socket_active();
+	if (!ret)
+		dprintf("(%d) socket idle!", sock_fd);
+	else {
+		const char *fmt;
+		switch (data_fmt) {
+		case SERVE_DATA_FMT_NONE:
+			fmt = "NONE";
+			break;
+		case SERVE_DATA_FMT_HTML:
+			fmt = "HTTP";
+			break;
+		case SERVE_DATA_FMT_BIN:
+			fmt = "BIN";
+			break;
+		}
+		dprintf("(%d) format = %s", sock_fd, fmt);
+	}
+	return ret;
+}
+
+bool serve::check()
+{
+	dprintf("()");
+
+	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
+		if (!iter->second.check())
+			client_map.erase(iter->first);
+
+	return true;
+}
+
 #if 1//def PRETTY_URLS
 #define CHAR_CMD_SEP "&/"
 #define CHAR_CMD_SET "="
@@ -537,6 +571,11 @@ bool serve_client::__command(char* cmdline)
 		tuner->close_fe();
 		if (strstr(cmd, "stopoutput"))
 			tuner->feeder.parser.stop();
+	} else if (strstr(cmd, "check")) {
+		fprintf(stderr, "checking server status...\n");
+		server->check();
+		fprintf(stderr, "checking parser / output status...\n");
+		tuner->feeder.parser.check();
 	} else if (strstr(cmd, "quit")) {
 		fprintf(stderr, "stopping server...\n");
 		server->stop();

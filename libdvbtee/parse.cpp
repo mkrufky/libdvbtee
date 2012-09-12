@@ -903,6 +903,39 @@ void parse::set_service_ids(char *ids)
 	}
 }
 
+bool parse::check()
+{
+	dprintf("(%s) "
+		"fed packets: %d, "
+		"ts id: %d, "
+		"mode:%s%s%s, "
+		"has: %s%s%s%s%s%s, "
+		"dumped eit: %d, limit %d, "
+		"%sPAT version offset: %d, PAT continuity counter: %d"
+		//"\t "
+		,
+		//	);
+		enabled ? "enabled" : "disabled",
+		fed_pkt_count,
+		ts_id,
+		epg_mode ? " epg" : "",
+		scan_mode ? " scan" : "",
+		((!epg_mode) && (!scan_mode)) ? " none" : "",
+		has_pat ? "pat " : "",
+		has_mgt ? "mgt " : "",
+		has_vct ? "vct " : "",
+		has_sdt ? "sdt " : "",
+		has_nit ? "nit " : "",
+		expect_vct ? "*expects vct " : "",
+		dumped_eit,
+		eit_collection_limit,
+		process_err_pkts ? "processing error packets, " : "",
+		rewritten_pat_ver_offset,
+		rewritten_pat_cont_ctr);
+
+	return out.check();
+}
+
 int parse::feed(int count, uint8_t* p_data)
 {
 	if (count <= 0) {

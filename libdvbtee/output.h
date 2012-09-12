@@ -67,6 +67,7 @@ public:
 	int add(int, unsigned int);
 	int add(void*, stream_callback);
 
+	bool check();
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -116,6 +117,8 @@ public:
 	int add_http_server(int);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
+
+	bool check();
 private:
 	output_stream_map output_streams;
 
