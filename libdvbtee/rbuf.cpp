@@ -20,11 +20,12 @@
  *****************************************************************************/
 #define DBG 0
 
-#if DBG
-#include <stdio.h> // fprintf
-#endif
 #include <string.h>
 #include "rbuf.h"
+#include "log.h"
+#define CLASS_MODULE "rbuf"
+
+#define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
 rbuf::rbuf()
   : capacity(0)
@@ -32,17 +33,13 @@ rbuf::rbuf()
   , idx_read(0)
   , idx_write(0)
 {
-#if DBG
-	fprintf(stderr, "%s()", __func__);
-#endif
+	dprintf("()");
 	pthread_mutex_init(&mutex, 0);
 }
 
 rbuf::~rbuf()
 {
-#if DBG
-	fprintf(stderr, "%s()", __func__);
-#endif
+	dprintf("()");
 	pthread_mutex_lock(&mutex);
 
 	if (p_data)
@@ -54,9 +51,7 @@ rbuf::~rbuf()
 
 void rbuf::set_capacity(int cap)
 {
-#if DBG
-	fprintf(stderr, "%s(%d)", __func__, cap);
-#endif
+	dprintf("(%d)", cap);
 	pthread_mutex_lock(&mutex);
 
 	if (p_data)
@@ -70,16 +65,14 @@ void rbuf::set_capacity(int cap)
 
 int rbuf::get_capacity()
 {
-#if DBG
-	fprintf(stderr, "%s()", __func__);
-#endif
+	dprintf("(%d)", capacity);
 	return capacity;
 }
 
 int rbuf::get_size()
 {
-#if 0
-	fprintf(stderr, "%s()", __func__);
+#if DBG
+	dprintf("()");
 #endif
 	pthread_mutex_lock(&mutex);
 
@@ -92,9 +85,7 @@ int rbuf::get_size()
 
 void rbuf::reset()
 {
-#if DBG
-	fprintf(stderr, "%s()", __func__);
-#endif
+	dprintf("()");
 	pthread_mutex_lock(&mutex);
 
 	__reset();

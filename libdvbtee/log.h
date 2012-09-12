@@ -22,6 +22,8 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
+#include <stdio.h>
+
 #define DBG_DECODE	1
 #define DBG_PARSE	2
 #define DBG_FEED	4
