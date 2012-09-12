@@ -78,7 +78,7 @@ int rbuf::get_capacity()
 
 int rbuf::get_size()
 {
-#if DBG
+#if 0
 	fprintf(stderr, "%s()", __func__);
 #endif
 	pthread_mutex_lock(&mutex);
@@ -107,24 +107,13 @@ int rbuf::get_write_ptr(void** p)
 {
 	pthread_mutex_lock(&mutex);
 
-	int available = (idx_read <= idx_write) ? capacity - idx_write : idx_read - idx_write;
-
-	if (available <= 0) {
-		pthread_mutex_unlock(&mutex);
-		return available;
-	}
-	*p = &p_data[idx_write];
-
-	return available;
+	return __get_write_ptr(p);
 }
 
 void rbuf::put_write_ptr(int size)
 {
-	if (idx_write + size >= capacity) { // == should be enough FIXME!
-		idx_write = 0;
-	} else {
-		idx_write += size;
-	}
+	__put_write_ptr(size);
+
 	pthread_mutex_unlock(&mutex);
 }
 
@@ -153,8 +142,8 @@ bool rbuf::write(const void* p, int size)
 #else
 bool rbuf::write(const void* p, int size)
 {
-//	pthread_mutex_lock(&mutex);
-	if (get_size() + size > capacity)
+	pthread_mutex_lock(&mutex);
+	if (__get_size() + size > capacity)
 		return false;
 
 	void *q = NULL;
@@ -162,14 +151,14 @@ bool rbuf::write(const void* p, int size)
 	int available;
 
 	while (size) {
-		available = get_write_ptr(&q);
+		available = __get_write_ptr(&q);
 		if (available >= size) {
 			memcpy(q, r, size);
-			put_write_ptr(size);
+			__put_write_ptr(size);
 			size = 0;
 		} else if (available > 0) {
 			memcpy(q, r, available);
-			put_write_ptr(available);
+			__put_write_ptr(available);
 			size -= available;
 			r += available;
 		}
@@ -180,7 +169,7 @@ bool rbuf::write(const void* p, int size)
 		}
 #endif
 	}
-//	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&mutex);
 	return true;
 }
 #endif
@@ -226,6 +215,28 @@ int rbuf::__get_size()
 void rbuf::__reset()
 {
 	idx_read = idx_write = 0;
+}
+
+int rbuf::__get_write_ptr(void** p)
+{
+	int available = (idx_read <= idx_write) ? capacity - idx_write : idx_read - idx_write;
+
+	if (available <= 0) {
+		pthread_mutex_unlock(&mutex);
+		return available;
+	}
+	*p = &p_data[idx_write];
+
+	return available;
+}
+
+void rbuf::__put_write_ptr(int size)
+{
+	if (idx_write + size >= capacity) { // == should be enough FIXME!
+		idx_write = 0;
+	} else {
+		idx_write += size;
+	}
 }
 
 int rbuf::__get_read_ptr(void**p, int size)

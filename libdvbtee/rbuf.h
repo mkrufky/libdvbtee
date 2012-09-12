@@ -55,6 +55,9 @@ private:
     int  __get_size();
     void __reset();
 
+    int  __get_write_ptr(void**);
+    void __put_write_ptr(int);
+
     int  __get_read_ptr(void**, int);
     void __put_read_ptr(int);
 };
