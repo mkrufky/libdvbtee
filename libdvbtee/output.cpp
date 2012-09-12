@@ -212,7 +212,19 @@ void* output_stream::output_stream_thread()
 		dprintf("(thread-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 #endif
 	}
+
 	f_streaming = false;
+
+	switch (stream_method) {
+	case OUTPUT_STREAM_HTTP:
+		if (stream_http_chunk(sock, (uint8_t *)"", 0, true) < 0)
+			perror("stream empty http chunk failed");
+		else if (tcp_send(sock, http_conn_close, strlen(http_conn_close), 0) < 0)
+			perror("stream http connection close failed");
+		break;
+	}
+
+	close_file();
 	pthread_exit(NULL);
 }
 
@@ -251,17 +263,6 @@ void output_stream::stop()
 
 	while (f_streaming)
 		usleep(20*1000);
-
-	switch (stream_method) {
-	case OUTPUT_STREAM_HTTP:
-		if (stream_http_chunk(sock, (uint8_t *)"", 0, true) < 0)
-			perror("stream empty http chunk failed");
-		else if (tcp_send(sock, http_conn_close, strlen(http_conn_close), 0) < 0)
-			perror("stream http connection close failed");
-		break;
-	}
-
-	close_file();
 
 	return;
 }
@@ -320,17 +321,15 @@ int output_stream::stream(uint8_t* p_data, int size)
 	case OUTPUT_STREAM_FILE:
 		ret = write(sock, p_data, size);
 		if (ret < 0) {
-			perror("file streaming failed");
 			stop_without_wait();
-			close_file();
+			perror("file streaming failed");
 		}
 		break;
 	case OUTPUT_STREAM_HTTP:
 		ret = stream_http_chunk(sock, p_data, size);
 		if (ret < 0) {
-			perror("http streaming failed");
 			stop_without_wait();
-			close_file();
+			perror("http streaming failed");
 		}
 		break;
 	case OUTPUT_STREAM_FUNC:
@@ -347,8 +346,10 @@ void output_stream::close_file()
 {
 	dprintf("(%d)", sock);
 
-	close(sock);
-	sock = -1;
+	if (sock >= 0) {
+		close(sock);
+		sock = -1;
+	}
 }
 
 int output_stream::add(void* priv, stream_callback callback)
