@@ -535,6 +535,8 @@ bool serve_client::__command(char* cmdline)
 		fprintf(stderr, "stopping...\n");
 		tuner->stop_feed();
 		tuner->close_fe();
+		if (strstr(cmd, "stopoutput"))
+			tuner->feeder.parser.stop();
 	}
 
 	return true;
