@@ -43,7 +43,7 @@ unsigned int dbg_serve = DBG_SERVE;
 
 #define __dprintf(lvl, fmt, arg...) do {			  \
     if (dbg_serve & lvl)						  \
-      __printf(stderr, "%s: " fmt "\n", __func__, ##arg);	  \
+      __printf(stderr, "server::%s: " fmt "\n", __func__, ##arg);	  \
   } while (0)
 
 #define dprintf(fmt, arg...) __dprintf(DBG_SERVE, fmt, ##arg)
