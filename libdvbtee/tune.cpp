@@ -68,6 +68,13 @@ tune::tune(const tune&)
 	feeder.parser.cleanup();
 	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
+	f_kill_thread = false;
+	adap_id = -1;
+	fe_fd = -1;
+	demux_fd = -1;
+	fe_id = -1;
+	demux_id = -1;
+	dvr_id = -1;
 }
 
 tune& tune::operator= (const tune& cSource)
@@ -81,6 +88,13 @@ tune& tune::operator= (const tune& cSource)
 	feeder.parser.cleanup();
 	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
+	f_kill_thread = false;
+	adap_id = -1;
+	fe_fd = -1;
+	demux_fd = -1;
+	fe_id = -1;
+	demux_id = -1;
+	dvr_id = -1;
 
 	return *this;
 }
