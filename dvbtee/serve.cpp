@@ -148,9 +148,9 @@ void serve_client::stop()
 
 	stop_without_wait();
 
-	while (-1 != sock_fd) {
+	while (-1 != sock_fd)
 		usleep(20*1000);
-	}
+
 	return;
 }
 
