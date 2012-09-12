@@ -269,12 +269,12 @@ void output_stream::stop()
 
 bool output_stream::check()
 {
-	dprintf("(%d)", sock);
-
 	bool ret = is_streaming();
-	if (ret) {
-		dprintf("(%d) %s%s %ul in, %ul out",
-			sock, f_streaming ? "streaming " : "",
+	if (!ret)
+		dprintf("(%d) not streaming!", sock);
+	else {
+		dprintf("(%d) %s %ul in, %ul out",
+			sock,
 			(stream_method == OUTPUT_STREAM_UDP) ? "UDP" :
 			(stream_method == OUTPUT_STREAM_TCP) ? "TCP" :
 			(stream_method == OUTPUT_STREAM_HTTP) ? "HTTP" :
