@@ -157,9 +157,9 @@ void feed::stop()
 	dprintf("()");
 
 	stop_without_wait();
-
+#if 0
 	parser.stop();
-
+#endif
 	while (-1 != fd) {
 		usleep(20*1000);
 	}
