@@ -44,6 +44,8 @@ public:
 
 	int start();
 	void stop();
+
+	bool socket_active() { return (sock_fd >= 0); };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;

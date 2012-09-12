@@ -350,6 +350,16 @@ void serve::add_client(void *p_this, int socket)
 
 void serve::add_client(int socket)
 {
+	if (socket < 0) {
+		dprintf("not attaching to invalid socket, %d", socket);
+		return;
+	}
+
+	/* check for old clients & clean them up */
+	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
+		if (!iter->second.socket_active())
+			client_map.erase(iter->first);
+
 	client_map[socket].set_socket(socket);
 	client_map[socket].start();
 }
