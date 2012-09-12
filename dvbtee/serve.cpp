@@ -299,7 +299,7 @@ const char * serve_client::epg_header_footer_callback(bool header, bool channel)
 	if ((header) && (!channel)) streamback_started = true;
 	if (!streamback_started) return NULL;
 	if ((header) && (channel)) streamback_newchannel = true;
-	const char * ret = html_dump_epg_header_footer_callback(this, header, channel);
+	const char * ret = (data_fmt == SERVE_DATA_FMT_HTML) ? html_dump_epg_header_footer_callback(this, header, channel) : NULL;
 	if ((!header) && (!channel)) fflush(stdout);
 	return ret;
 }
@@ -333,12 +333,12 @@ const char * serve_client::epg_event_callback(
 	if (!streamback_started) return NULL;
 #if 1
 	if (streamback_newchannel) {
-		streamback(this, html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL));
+		streamback(this, (data_fmt == SERVE_DATA_FMT_HTML) ? html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL) : NULL);
 		streamback_newchannel = false;
 		fflush(stdout);
 	}
 #endif
-	return html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+	return (data_fmt == SERVE_DATA_FMT_HTML) ? html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text) : NULL;
 }
 
 
