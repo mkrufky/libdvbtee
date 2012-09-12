@@ -576,6 +576,12 @@ bool serve_client::__command(char* cmdline)
 		server->check();
 		fprintf(stderr, "checking parser / output status...\n");
 		tuner->feeder.parser.check();
+	} else if (strstr(cmd, "debug")) {
+		fprintf(stderr, "setting debug level...\n");
+		if ((arg) && strlen(arg))
+			libdvbtee_set_debug_level(strtoul(arg, NULL, 0));
+		else
+			libdvbtee_set_debug_level(255);
 	} else if (strstr(cmd, "quit")) {
 		fprintf(stderr, "stopping server...\n");
 		server->stop();
