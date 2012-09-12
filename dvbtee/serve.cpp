@@ -97,6 +97,7 @@ static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, cons
 serve_client::serve_client()
   : f_kill_thread(false)
   , sock_fd(-1)
+  , data_fmt(SERVE_DATA_FMT_NONE)
 {
 	dprintf("()");
 }
@@ -113,6 +114,7 @@ serve_client::serve_client(const serve_client&)
 	dprintf("(copy)");
 	f_kill_thread = false;
 	sock_fd = -1;
+	data_fmt = SERVE_DATA_FMT_NONE;
 }
 
 serve_client& serve_client::operator= (const serve_client& cSource)
@@ -124,6 +126,7 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 
 	f_kill_thread = false;
 	sock_fd = -1;
+	data_fmt = SERVE_DATA_FMT_NONE;
 
 	return *this;
 }
@@ -184,13 +187,15 @@ void* serve_client::client_thread()
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
 		if (rxlen > 0) {
 			fprintf(stderr, "%s: %s\n", __func__, buf);
-			bool send_http = ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) ? true : false;
 
-			b_will_stream_data = (strstr(buf, "stream/")) ? true : false;
+			if ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) {
+				data_fmt = (strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN : SERVE_DATA_FMT_HTML;
+			} else
+				data_fmt = SERVE_DATA_FMT_NONE;
 
-			command(send_http, buf); /* process */
+			command(buf); /* process */
 		} else if ( /*(rxlen == 0) ||*/ ( (rxlen == -1) && (errno != EAGAIN) ) ) {
-			if (!b_will_stream_data)
+			if (data_fmt != SERVE_DATA_FMT_BIN)
 				stop_without_wait();
 		} else
 			usleep(20*1000);
@@ -375,12 +380,12 @@ void serve::stop()
 #define CHAR_CMD_SET "/"
 #endif
 
-bool serve_client::command(bool b_http, char* cmdline)
+bool serve_client::command(char* cmdline)
 {
 	char *save;
 	bool ret = false;
 	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
-	bool stream_http_headers = ((b_http) && (!b_will_stream_data));
+	bool stream_http_headers = (data_fmt == SERVE_DATA_FMT_HTML);
 #if 1
 	if (stream_http_headers) {
 		streamback_newchannel = false;
@@ -396,13 +401,13 @@ bool serve_client::command(bool b_http, char* cmdline)
 		if (!item)
 			item = cmdline;
 
-		ret = __command(b_http, item);
+		ret = __command(item);
 		if (!ret)
 			return ret;
 
 		item = strtok_r(NULL, CHAR_CMD_SEP, &save);
 	} else
-		ret = __command(b_http, cmdline);
+		ret = __command(cmdline);
 #if 1
 	if (stream_http_headers) {
 		stream_http_chunk(sock_fd, (uint8_t *)"", 0, true);
@@ -442,7 +447,7 @@ static const char * chandump(void *context,
 	return html_dump_channels(context, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
 }
 
-bool serve_client::__command(bool b_http, char* cmdline)
+bool serve_client::__command(char* cmdline)
 {
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);

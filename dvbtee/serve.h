@@ -49,7 +49,10 @@ private:
 	bool f_kill_thread;
 
 	int sock_fd;
-	bool b_will_stream_data;
+#define SERVE_DATA_FMT_NONE 0
+#define SERVE_DATA_FMT_HTML 1
+#define SERVE_DATA_FMT_BIN  2
+	unsigned int data_fmt;
 
 	void stop_without_wait() { f_kill_thread = true; };
 	void close_socket();
@@ -57,8 +60,8 @@ private:
 	void *client_thread();
 	static void *client_thread(void*);
 
-	bool   command(bool, char*);
-	bool __command(bool, char*);
+	bool   command(char*);
+	bool __command(char*);
 
 	void streamback(const uint8_t*, size_t);
 	static void streamback(void*, const uint8_t*, size_t);
