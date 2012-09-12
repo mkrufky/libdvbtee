@@ -185,10 +185,21 @@ void* output_stream::output_stream_thread(void *p_this)
 void* output_stream::output_stream_thread()
 {
 	uint8_t *data = NULL;
-	int buf_size;
+	int buf_size, ret = 0;
 
 	dprintf("(%d)", sock);
+#if 1
+	switch (stream_method) {
+	case OUTPUT_STREAM_HTTP:
+		ret = tcp_send(sock, http_response, strlen(http_response), 0);
+		break;
+	}
+	if (ret < 0) {
+		perror("stream header failed");
+		goto fail;
+	}
 
+#endif
 	f_streaming = true;
 
 	/* push data from output_stream buffer to target */
@@ -214,7 +225,7 @@ void* output_stream::output_stream_thread()
 	}
 
 	f_streaming = false;
-
+#if 0
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
 		if (stream_http_chunk(sock, (uint8_t *)"", 0, true) < 0)
@@ -223,35 +234,24 @@ void* output_stream::output_stream_thread()
 			perror("stream http connection close failed");
 		break;
 	}
-
+#endif
+fail:
 	close_file();
 	pthread_exit(NULL);
 }
 
 int output_stream::start()
 {
-	int ret = 0;
-
 	if (f_streaming) {
 		dprintf("(%d) already streaming", sock);
-		goto fail;
+		return 0;
 	}
 	dprintf("(%d)", sock);
 
-	switch (stream_method) {
-	case OUTPUT_STREAM_HTTP:
-		ret = tcp_send(sock, http_response, strlen(http_response), 0);
-		break;
-	}
-	if (ret < 0) {
-		perror("stream header failed");
-		goto fail;
-	}
-
-	ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
+	int ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
 	if (0 != ret)
 		perror("pthread_create() failed");
-fail:
+
 	return ret;
 }
 
