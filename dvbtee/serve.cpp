@@ -360,7 +360,7 @@ void serve::add_client(int socket)
 		if (!iter->second.socket_active())
 			client_map.erase(iter->first);
 
-	client_map[socket].set_socket(socket);
+	client_map[socket].setup(this, socket);
 	client_map[socket].start();
 }
 
@@ -537,6 +537,9 @@ bool serve_client::__command(char* cmdline)
 		tuner->close_fe();
 		if (strstr(cmd, "stopoutput"))
 			tuner->feeder.parser.stop();
+	} else if (strstr(cmd, "quit")) {
+		fprintf(stderr, "stopping server...\n");
+		server->stop();
 	}
 
 	return true;

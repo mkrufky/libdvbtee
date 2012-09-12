@@ -31,6 +31,8 @@
 
 typedef std::map<uint8_t, tune*> tuner_map;
 
+class serve;
+
 class serve_client
 {
 public:
@@ -40,7 +42,7 @@ public:
 	serve_client(const serve_client&);
 	serve_client& operator= (const serve_client&);
 #endif
-	void set_socket(int sock) { sock_fd = sock; };
+	void setup(serve *parent, int sock) { server = parent; sock_fd = sock; };
 
 	int start();
 	void stop();
@@ -49,6 +51,8 @@ public:
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
+
+	serve *server;
 
 	int sock_fd;
 #define SERVE_DATA_FMT_NONE 0
