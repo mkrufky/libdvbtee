@@ -135,10 +135,7 @@ void start_server(struct dvbtee_context* context, int num_tuners, unsigned int f
 	if (flags & 2)
 		context->tuner.feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1);
 
-	while (1) sleep(1);
-#if 0
-	server.stop();
-#endif
+	while (server.is_running()) sleep(1);
 }
 
 #if 0

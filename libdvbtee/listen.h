@@ -43,6 +43,8 @@ public:
 
 	int start(uint16_t port_requested);
 	void stop();
+
+	bool is_running() { return ((f_kill_thread == false) && (sock_fd >= 0) /* && (port) */ ); };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;

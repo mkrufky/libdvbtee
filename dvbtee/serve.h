@@ -108,6 +108,8 @@ public:
 	void stop();
 
 	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
+
+	bool is_running() { return listener.is_running(); };
 private:
 	socket_listen listener;
 	serve_client_map client_map;
