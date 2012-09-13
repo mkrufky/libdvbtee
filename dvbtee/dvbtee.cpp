@@ -275,7 +275,7 @@ int main(int argc, char **argv)
 	char service_ids[64];
 	memset(&service_ids, 0, sizeof(service_ids));
 
-#define VERSION "0.0.7"
+#define VERSION "0.0.8"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
         while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::S::E::o::O:d::")) != -1) {
