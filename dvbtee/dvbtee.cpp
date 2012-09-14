@@ -38,6 +38,7 @@ struct dvbtee_context
 {
 	feed _file_feeder;
 	tune tuner;
+	serve *server;
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
@@ -46,6 +47,11 @@ map_pid_to_context context_map;
 
 void cleanup(struct dvbtee_context* context, bool quick = false)
 {
+	if (context->server) {
+		context->server->stop();
+		delete context->server;
+		context->server = NULL;
+	}
 	if (quick) {
 		context->_file_feeder.stop_without_wait();
 
@@ -114,10 +120,10 @@ void signal_callback_handler(int signum)
 
 void start_server(struct dvbtee_context* context, int num_tuners, unsigned int flags)
 {
-	serve server;
+	context->server = new serve;
 
 	if (num_tuners < 0) {
-		server.add_tuner(&context->tuner);
+		context->server->add_tuner(&context->tuner);
 		if (flags & 2)
 			context->tuner.feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1);
 	} else {
@@ -129,14 +135,17 @@ void start_server(struct dvbtee_context* context, int num_tuners, unsigned int f
 			int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
 			tuners[i].set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
-			server.add_tuner(&tuners[i]);
+			context->server->add_tuner(&tuners[i]);
 			if (flags & 2)
 				tuners[i].feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+i);
 		}
 	}
-	server.start();
+	context->server->start();
 
-	while (server.is_running()) sleep(1);
+	while (context->server->is_running()) sleep(1);
+
+	delete context->server;
+	context->server = NULL;
 }
 
 #if 0
@@ -242,6 +251,8 @@ int main(int argc, char **argv)
 	bool b_output_stdout = false;
 	bool b_serve    = false;
 	bool b_kernel_pid_filters = false;
+
+	context.server = NULL;
 
 	/* LinuxDVB context: */
 	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
