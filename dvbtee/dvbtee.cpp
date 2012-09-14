@@ -275,6 +275,9 @@ int main(int argc, char **argv)
 	char service_ids[64];
 	memset(&service_ids, 0, sizeof(service_ids));
 
+	char channel_list[256];
+	memset(&channel_list, 0, sizeof(channel_list));
+
 #define VERSION "0.0.8"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
@@ -288,13 +291,23 @@ int main(int argc, char **argv)
 			scan_flags = strtoul(optarg, NULL, 0);
 			b_read_dvr = true;
 			break;
-		case 'c': /* channel / scan min */
+		case 'c': /* channel list | channel / scan min */
+			if (strstr(optarg, ","))
+				strcpy(channel_list, optarg);
+
+			/* if a list was provided, use the first item */
 			channel = strtoul(optarg, NULL, 0);
 			scan_min = strtoul(optarg, NULL, 0);
+
 			b_read_dvr = true;
 			break;
-		case 'C': /* channel / scan max */
+		case 'C': /* channel list | channel / scan max */
+			if (strstr(optarg, ","))
+				strcpy(channel_list, optarg);
+
+			/* if a list was provided, use the first item */
 			scan_max = strtoul(optarg, NULL, 0);
+
 			b_read_dvr = true;
 			break;
 		case 'f': /* frontend */
@@ -398,9 +411,13 @@ int main(int argc, char **argv)
 
 	if ((b_scan) && ((b_read_dvr) || (num_tuners >= 0))) {
 		if (num_tuners >= 0)
-			multiscan(&context, num_tuners, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit);
-		else
-			context.tuner.scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
+			multiscan(&context, num_tuners, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
+		else {
+			if (strlen(channel_list))
+				context.tuner.scan_for_services(scan_flags, channel_list, scan_epg);
+			else
+				context.tuner.scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
+		}
 		goto exit;
 	}
 
