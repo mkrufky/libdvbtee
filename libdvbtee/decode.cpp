@@ -50,7 +50,8 @@ void set_dump_epg_cb(void* context,
 
 void streamback_callback(const char *str)
 {
-	if ((str) && (strlen(str))) dump_epg_streamback_cb(dump_epg_priv, str);
+	if ((dump_epg_streamback_cb) && ((str) && (strlen(str))))
+		dump_epg_streamback_cb(dump_epg_priv, str);
 }
 
 #define dprintf(fmt, arg...)					\
