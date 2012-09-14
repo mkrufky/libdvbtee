@@ -32,6 +32,20 @@
 
 bool fshowtime;
 
+#define dprintf(fmt, arg...)					\
+do {								\
+	__dprintf(DBG_DECODE, fmt, ##arg);			\
+	fshowtime = true;					\
+} while (0)
+
+#define dbg_time(fmt, arg...)					\
+do {								\
+	if ((fshowtime) | (dbg & DBG_TIME)) {			\
+		__dprintf((DBG_DECODE | DBG_TIME), fmt, ##arg);	\
+		fshowtime = false;				\
+	}							\
+} while (0)
+
 static dump_epg_header_footer_callback dump_epg_header_footer_cb = NULL;
 static dump_epg_event_callback dump_epg_event_cb = NULL;
 static dump_epg_streamback_callback dump_epg_streamback_cb = NULL;
@@ -53,20 +67,6 @@ void streamback_callback(const char *str)
 	if ((dump_epg_streamback_cb) && ((str) && (strlen(str))))
 		dump_epg_streamback_cb(dump_epg_priv, str);
 }
-
-#define dprintf(fmt, arg...)					\
-do {								\
-	__dprintf(DBG_DECODE, fmt, ##arg);			\
-	fshowtime = true;					\
-} while (0)
-
-#define dbg_time(fmt, arg...)					\
-do {								\
-	if ((fshowtime) | (dbg & DBG_TIME)) {			\
-		__dprintf((DBG_DECODE | DBG_TIME), fmt, ##arg);	\
-		fshowtime = false;				\
-	}							\
-} while (0)
 
 static map_network_decoder   networks;
 
