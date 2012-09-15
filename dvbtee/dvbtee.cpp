@@ -45,13 +45,13 @@ typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 map_pid_to_context context_map;
 
 
+void stop_server(struct dvbtee_context* context);
+
 void cleanup(struct dvbtee_context* context, bool quick = false)
 {
-	if (context->server) {
-		context->server->stop();
-		delete context->server;
-		context->server = NULL;
-	}
+	if (context->server)
+		stop_server(context);
+
 	if (quick) {
 		context->_file_feeder.stop_without_wait();
 
@@ -118,7 +118,20 @@ void signal_callback_handler(int signum)
 }
 
 
-void start_server(struct dvbtee_context* context, int num_tuners, unsigned int flags)
+void stop_server(struct dvbtee_context* context)
+{
+	if (!context->server)
+		return;
+
+	context->server->stop();
+
+	delete context->server;
+	context->server = NULL;
+
+	return;
+}
+
+int start_server(struct dvbtee_context* context, int num_tuners, unsigned int flags)
 {
 	context->server = new serve;
 
@@ -140,12 +153,16 @@ void start_server(struct dvbtee_context* context, int num_tuners, unsigned int f
 				tuners[i].feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+i);
 		}
 	}
-	context->server->start();
+	int ret = context->server->start();
 
 	while (context->server->is_running()) sleep(1);
-
+#if 0
 	delete context->server;
 	context->server = NULL;
+#else
+	stop_server(context);
+#endif
+	return ret;
 }
 
 #if 0
