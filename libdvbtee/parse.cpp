@@ -564,12 +564,13 @@ parse::parse()
   , dumped_eit(0)
   , eit_collection_limit(-1)
   , process_err_pkts(false)
+  , chandump_cb(NULL)
+  , chandump_context(NULL)
   , addfilter_cb(NULL)
   , addfilter_context(NULL)
   , enabled(true)
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
-  , chandump_cb(NULL)
 {
 	dprintf("()");
 
