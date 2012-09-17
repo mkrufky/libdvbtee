@@ -500,7 +500,7 @@ bool serve_client::__command(char* cmdline)
 		cmd = cmdline;
 	arg = strtok_r(NULL, CHAR_CMD_SET, &save);
 
-	unsigned int tuner_id, scan_flags = 0; // FIXME
+	unsigned int tuner_id, scan_flags = 0;
 
 	if (strstr(cmd, "tuner")) {
 		tuner_id = atoi(arg);
@@ -508,6 +508,8 @@ bool serve_client::__command(char* cmdline)
 		arg = strtok_r(NULL, CHAR_CMD_SET, &save);
 	} else
 		tuner_id = 0;
+
+	scan_flags = server->get_scan_flags(tuner_id);
 
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {

@@ -114,6 +114,9 @@ public:
 
 	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
 
+	void set_scan_flags(unsigned int tuner_id, unsigned int flags) { scan_flags = flags; };
+	unsigned int get_scan_flags(unsigned int tuner_id) { return scan_flags; };
+
 	bool is_running() { return listener.is_running(); };
 
 	bool check();
@@ -123,6 +126,8 @@ private:
 
 	void add_client(int);
 	static void add_client(void*, int);
+
+	unsigned int scan_flags;
 };
 
 #endif /*__SERVE_H__ */

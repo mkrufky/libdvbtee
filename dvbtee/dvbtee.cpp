@@ -156,6 +156,8 @@ int start_server(struct dvbtee_context* context, int num_tuners, unsigned int fl
 		}
 	}
 #endif
+	context->server->set_scan_flags(0, flags >> 2);
+
 	int ret = context->server->start();
 
 	while (context->server->is_running()) sleep(1);
@@ -430,7 +432,7 @@ int main(int argc, char **argv)
 		context.tuner.feeder.parser.limit_eit(eit_limit);
 	}
 	if (b_serve) {
-		start_server(&context, num_tuners, serv_flags);
+		start_server(&context, num_tuners, serv_flags | (scan_flags << 2));
 		goto exit;
 	}
 
