@@ -134,11 +134,13 @@ void stop_server(struct dvbtee_context* context)
 int start_server(struct dvbtee_context* context, int num_tuners, unsigned int flags)
 {
 	context->server = new serve;
-
+#if 0
 	if (num_tuners < 0) {
+#endif
 		context->server->add_tuner(&context->tuner);
 		if (flags & 2)
 			context->tuner.feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1);
+#if 0
 	} else {
 		tune tuners[num_tuners];
 		for (int i = 0; i < num_tuners; i++) {
@@ -153,6 +155,7 @@ int start_server(struct dvbtee_context* context, int num_tuners, unsigned int fl
 				tuners[i].feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+i);
 		}
 	}
+#endif
 	int ret = context->server->start();
 
 	while (context->server->is_running()) sleep(1);
@@ -524,6 +527,10 @@ int main(int argc, char **argv)
 	if (scan_epg)
 		context.tuner.feeder.parser.epg_dump();
 exit:
+	if (context.server) {
+		while (context.server->is_running()) sleep(1);
+		stop_server(&context);
+	}
 //	cleanup(&context);
 #if 1 /* FIXME */
 	ATSCMultipleStringsDeInit();
