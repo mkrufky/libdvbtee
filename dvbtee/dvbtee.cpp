@@ -158,16 +158,7 @@ int start_server(struct dvbtee_context* context, int num_tuners, unsigned int fl
 #endif
 	context->server->set_scan_flags(0, flags >> 2);
 
-	int ret = context->server->start();
-
-	while (context->server->is_running()) sleep(1);
-#if 0
-	delete context->server;
-	context->server = NULL;
-#else
-	stop_server(context);
-#endif
-	return ret;
+	return context->server->start();
 }
 
 #if 0
@@ -431,10 +422,8 @@ int main(int argc, char **argv)
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
 		context.tuner.feeder.parser.limit_eit(eit_limit);
 	}
-	if (b_serve) {
+	if (b_serve)
 		start_server(&context, num_tuners, serv_flags | (scan_flags << 2));
-		goto exit;
-	}
 
 	if ((scan_min) && (!scan_max))
 		scan_max = scan_min;
