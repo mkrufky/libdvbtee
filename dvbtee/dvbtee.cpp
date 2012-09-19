@@ -443,6 +443,9 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
+	if (b_serve)
+		goto exit;
+
 	if (strlen(filename)) {
 		if (0 <= context._file_feeder.open_file(filename)) {
 			if (0 == context._file_feeder.start()) {
