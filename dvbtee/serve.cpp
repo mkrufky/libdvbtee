@@ -530,6 +530,12 @@ bool serve_client::__command(char* cmdline)
 		else
 			tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false);
 
+	} else if (strstr(cmd, "channels")) {
+		fprintf(stderr, "dumping channel list...\n");
+
+		tuner->feeder.parser.set_chandump_callback(chandump);
+		tuner->get_scan_results(false);
+
 	} else if (strstr(cmd, "channel")) {
 		int channel = atoi(arg);
 		fprintf(stderr, "TUNE to channel %d...(%s)\n", channel, arg);
