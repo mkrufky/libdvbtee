@@ -537,6 +537,8 @@ bool serve_client::__command(char* cmdline)
 		tuner->get_scan_results(false);
 
 	} else if (strstr(cmd, "channel")) {
+		if ((arg) && strlen(arg)) {
+
 		int channel = atoi(arg);
 		fprintf(stderr, "TUNE to channel %d...(%s)\n", channel, arg);
 		if (tuner->open_fe() < 0) {
@@ -557,7 +559,7 @@ bool serve_client::__command(char* cmdline)
 							     (scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 							     (scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 			tuner->start_feed();
-		}
+		}} else fprintf(stderr, "missing channel number?\n");
 
 	} else if (strstr(cmd, "service")) {
 		fprintf(stderr, "selecting service id...\n");
