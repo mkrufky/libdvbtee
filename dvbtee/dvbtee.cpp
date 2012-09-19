@@ -498,12 +498,16 @@ int main(int argc, char **argv)
 	if (b_read_dvr) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
-		if (0 == context.tuner.start_feed()) {
-			context.tuner.feeder.wait_for_event_or_timeout(timeout, wait_event);
-			context.tuner.stop_feed();
+		if (b_serve) /* if we're running in server mode, we dont wait, stop or close */
+			context.tuner.start_feed();
+		else {
+			if (0 == context.tuner.start_feed()) {
+				context.tuner.feeder.wait_for_event_or_timeout(timeout, wait_event);
+				context.tuner.stop_feed();
+			}
+			if (channel) /* if we tuned the frontend ourselves then close it */
+				context.tuner.close_fe();
 		}
-		if (channel) /* if we tuned the frontend ourselves then close it */
-			context.tuner.close_fe();
 	}
 	else
 	if (0 == context._file_feeder.parser.get_fed_pkt_count()) {
