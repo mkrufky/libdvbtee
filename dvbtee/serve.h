@@ -59,6 +59,8 @@ private:
 #define SERVE_DATA_FMT_NONE 0
 #define SERVE_DATA_FMT_HTML 1
 #define SERVE_DATA_FMT_BIN  2
+#define SERVE_DATA_FMT_JSON 4
+#define SERVE_DATA_FMT_TEXT (SERVE_DATA_FMT_HTML | SERVE_DATA_FMT_JSON)
 	unsigned int data_fmt;
 
 	void stop_without_wait() { f_kill_thread = true; };

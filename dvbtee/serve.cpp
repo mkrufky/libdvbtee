@@ -182,16 +182,18 @@ void* serve_client::client_thread()
 
 	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
 	dprintf("(%d)", sock_fd);
-
+#if 0
+	data_fmt = SERVE_DATA_FMT_NONE;
+#endif
 	while (!f_kill_thread) {
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
 		if (rxlen > 0) {
 			fprintf(stderr, "%s: %s\n", __func__, buf);
 
 			if ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) {
-				data_fmt = (strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN : SERVE_DATA_FMT_HTML;
-			} else
-				data_fmt = SERVE_DATA_FMT_NONE;
+				data_fmt =	(strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN :
+						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON : SERVE_DATA_FMT_HTML;
+			}
 
 			command(buf); /* process */
 		} else if ( /*(rxlen == 0) ||*/ ( (rxlen == -1) && (errno != EAGAIN) ) ) {
@@ -399,6 +401,9 @@ bool serve_client::check()
 		case SERVE_DATA_FMT_BIN:
 			fmt = "BIN";
 			break;
+		case SERVE_DATA_FMT_JSON:
+			fmt = "JSON";
+			break;
 		}
 		dprintf("(%d) format = %s", sock_fd, fmt);
 	}
@@ -429,7 +434,7 @@ bool serve_client::command(char* cmdline)
 	char *save;
 	bool ret = false;
 	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
-	bool stream_http_headers = (data_fmt == SERVE_DATA_FMT_HTML);
+	bool stream_http_headers = (data_fmt & SERVE_DATA_FMT_TEXT) ? true : false;
 #if 1
 	if (stream_http_headers) {
 		streamback_newchannel = false;
