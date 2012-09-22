@@ -421,6 +421,4 @@ void set_dump_epg_cb(void* context,
 		     dump_epg_event_callback ev_cb,
 		     dump_epg_streamback_callback streamback_cb);
 
-void streamback_callback(const char *);
-
 #endif /* __DECODE_H__ */

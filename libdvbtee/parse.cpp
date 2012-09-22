@@ -779,7 +779,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 		if (!chandump_cb)
 			chandump_cb = xine_chandump;
 
-		streamback_callback(chandump_cb(chandump_context, lcn, major, minor, channel, freq, modulation, service_name, vpid, apid, program_number));
+		chandump_cb(chandump_context, lcn, major, minor, channel, freq, modulation, service_name, vpid, apid, program_number);
 		count++;
 	}
 	return count;

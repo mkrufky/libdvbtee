@@ -62,12 +62,6 @@ void set_dump_epg_cb(void* context,
 	dump_epg_priv = context;
 };
 
-void streamback_callback(const char *str)
-{
-	if ((dump_epg_streamback_cb) && ((str) && (strlen(str))))
-		dump_epg_streamback_cb(dump_epg_priv, str);
-}
-
 static map_network_decoder   networks;
 
 void clear_decoded_networks()

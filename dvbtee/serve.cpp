@@ -528,9 +528,13 @@ const char * serve_client::chandump(
 		program_number,
 		physical_channel);
 #endif
-	return (USE_JSON) ?
+	const char *str = (USE_JSON) ?
 		json_dump_channels(this, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number) :
 		html_dump_channels(this, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
+
+	streamback((const uint8_t *)str, strlen(str));
+
+	return str;
 }
 
 bool serve_client::__command(char* cmdline)
