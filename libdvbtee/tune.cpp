@@ -549,21 +549,18 @@ int tune::start_scan(unsigned int mode, bool epg)
 	return ret;
 }
 
-unsigned int tune::get_scan_results(bool wait)
+unsigned int tune::get_scan_results(bool wait, chandump_callback chandump_cb, void* chandump_context)
 {
 	if (wait) wait_for_scan_complete();
-#if 0
-	return feeder.parser.xine_dump();
-#else
-	unsigned int ret = feeder.parser.xine_dump();
+
+	unsigned int ret = feeder.parser.xine_dump(chandump_cb, chandump_context);
 
 	if (scan_epg) feeder.parser.epg_dump();
 
 	return ret;
-#endif
 };
 
-int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg)
+int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, chandump_callback chandump_cb, void* chandump_context)
 {
 	unsigned int count = 0;
 
@@ -573,13 +570,13 @@ int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg)
 	if (0 != start_scan(scan_mode, channel_list, epg))
 		return -1;
 
-	count += get_scan_results(true);
+	count += get_scan_results(true, chandump_cb, chandump_context);
 	fprintf(stderr, "found %d services\n", count);
 
 	return 0;
 }
 
-int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg)
+int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, chandump_callback chandump_cb, void* chandump_context)
 {
 	unsigned int count = 0;
 	unsigned int total_count = 0;
@@ -594,7 +591,7 @@ int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int ma
 		if (0 != start_scan(scan_mode, min, max, epg))
 			return -1;
 
-		count += get_scan_results(true);
+		count += get_scan_results(true, chandump_cb, chandump_context);
 		total_count += count;
 #if 0
 		for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)

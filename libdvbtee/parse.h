@@ -66,8 +66,7 @@ public:
 	int add_output(int, unsigned int);
 	int add_output(void* priv, stream_callback);
 
-	unsigned int xine_dump(uint16_t ts_id) { return xine_dump(ts_id, &channel_info[ts_id]); };
-	unsigned int xine_dump(); /* full channel dump  */
+	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
 	const char * epg_dump(); /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
@@ -87,8 +86,6 @@ public:
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 
 	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; reset_filters(); }
-
-	void set_chandump_callback(chandump_callback cb, void* context = NULL) { chandump_context = context; chandump_cb = cb; }
 
 	output out;
 
@@ -129,7 +126,9 @@ private:
 
 	void attach_table(dvbpsi_handle, uint8_t, uint16_t);
 
-	unsigned int xine_dump(uint16_t, channel_info_t*);
+	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
+	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); };
+	unsigned int xine_dump(uint16_t, channel_info_t*, chandump_callback, void* chandump_context);
 
 	void set_ts_id(uint16_t new_ts_id) { fprintf(stderr, "%s(%04x|%d)\n", __func__, new_ts_id, new_ts_id); ts_id = new_ts_id; memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t)); };
 	void set_service_id(uint16_t id) { service_ids[id] = 0; }
@@ -165,9 +164,6 @@ private:
 
 	bool process_err_pkts;
 	map_pidtype payload_pids;
-
-	chandump_callback chandump_cb;
-	void* chandump_context;
 
 	addfilter_callback addfilter_cb;
 	void* addfilter_context;

@@ -141,3 +141,67 @@ const char * html_dump_channels(void *context,
 
 	return str.c_str();
 }
+
+const char * json_dump_channels(void *context,
+			       uint16_t lcn, uint16_t major, uint16_t minor,
+			       uint16_t physical_channel, uint32_t freq, const char *modulation,
+			       unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+{
+	std::string str;
+	str.clear();
+	char channelno[7] = { 0 }; /* XXX.XXX */
+	char chan_major[3] = { 0 };
+	char chan_minor[3] = { 0 };
+	if (major + minor > 1) {
+		sprintf(channelno, "%d.%d", major, minor);
+		sprintf(chan_major, "%d", major);
+		sprintf(chan_minor, "%d", minor);
+	} else if (lcn) {
+		sprintf(channelno, "%d", lcn);
+		sprintf(chan_major, "%d", lcn);
+		sprintf(chan_minor, "%d", 0);
+	} else {
+		sprintf(channelno, "%d", physical_channel);
+		sprintf(chan_major, "%d", physical_channel);
+		sprintf(chan_minor, "%d", program_number);
+	}
+
+	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+		channelno,
+		service_name,
+		freq,//iter_vct->second.carrier_freq,
+		modulation,
+		vpid, apid, program_number);
+
+	char phy_chan[4] = { 0 };
+	char svc_id[6] = { 0 };
+
+	sprintf(phy_chan, "%d", physical_channel);
+	sprintf(svc_id, "%d", program_number);
+
+	str.append("{");
+	str.append("\"Id\":\"");
+	str.append("tune");
+	str.append("&channel=");
+	str.append(phy_chan);
+	str.append("&service=");
+	str.append(svc_id);
+	str.append("\"");
+	str.append(",");
+	str.append("\"DisplayName\":\"");
+	str.append((const char *)service_name);
+	str.append("\"");
+	str.append(",");
+	str.append("\"MajorChannelNo\":\"");
+	str.append(chan_major);
+	str.append("\"");
+	str.append(",");
+	str.append("\"MinorChannelNo\":\"");
+	str.append(chan_minor);
+	str.append("\"");
+	str.append("}");
+
+	str.append(",");
+
+	return str.c_str();
+}

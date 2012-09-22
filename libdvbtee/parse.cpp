@@ -564,8 +564,6 @@ parse::parse()
   , dumped_eit(0)
   , eit_collection_limit(-1)
   , process_err_pkts(false)
-  , chandump_cb(NULL)
-  , chandump_context(NULL)
   , addfilter_cb(NULL)
   , addfilter_context(NULL)
   , enabled(true)
@@ -708,7 +706,7 @@ static const char * xine_chandump(void *context,
 	return NULL;
 }
 
-unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
+unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chandump_callback chandump_cb, void* chandump_context)
 {
 	uint32_t freq          = channel_info->frequency;
 	uint16_t channel       = channel_info->channel;
@@ -779,7 +777,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 				sprintf((char*)service_name, "%04d_UNKNOWN", program_number);
 		}
 		if (!chandump_cb)
-			set_chandump_callback(xine_chandump);
+			chandump_cb = xine_chandump;
 
 		streamback_callback(chandump_cb(chandump_context, lcn, major, minor, channel, freq, modulation, service_name, vpid, apid, program_number));
 		count++;
@@ -789,7 +787,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info)
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
-unsigned int parse::xine_dump()
+unsigned int parse::xine_dump(chandump_callback chandump_cb, void* chandump_context)
 {
 	map_chan_to_ts_id channels;
 	int count = 0;
@@ -805,7 +803,7 @@ unsigned int parse::xine_dump()
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		count += xine_dump(iter->second, &channel_info[iter->second]);
+		count += xine_dump(iter->second, &channel_info[iter->second], chandump_cb, chandump_context);
 
 	channels.clear();
 #endif

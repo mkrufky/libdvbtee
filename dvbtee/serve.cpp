@@ -284,6 +284,27 @@ static char http_response[] =
 	 CRLF
 	 CRLF;
 
+static char json_response[] =
+	 HTTP_200_OK
+	 CRLF
+	 CONTENT_TYPE TEXT_PLAIN
+	 CRLF
+#if 0
+	 "Content-length: 0"
+#else
+	 ENC_CHUNKED
+#endif
+#if 0
+	 CRLF
+	 "Cache-Control: no-cache,no-store,private"
+	 CRLF
+	 "Expires: -1"
+	 CRLF
+	 CONN_CLOSE
+#endif
+	 CRLF
+	 CRLF;
+
 static char http_conn_close[] =
 	 CONN_CLOSE
 	 CRLF
@@ -429,6 +450,8 @@ bool serve::check()
 #define CHAR_CMD_SET "/"
 #endif
 
+#define USE_JSON (data_fmt & SERVE_DATA_FMT_JSON)
+
 bool serve_client::command(char* cmdline)
 {
 	char *save;
@@ -443,7 +466,10 @@ bool serve_client::command(char* cmdline)
 				epg_header_footer_callback,
 				epg_event_callback,
 				streamback);
-		send(sock_fd, http_response, strlen(http_response), 0);
+		if (USE_JSON)
+			send(sock_fd, json_response, strlen(json_response), 0);
+		else
+			send(sock_fd, http_response, strlen(http_response), 0);
 	}
 #endif
 	if (item) while (item) {
@@ -467,7 +493,16 @@ bool serve_client::command(char* cmdline)
 	return ret;
 }
 
-static const char * chandump(void *context,
+const char * serve_client::chandump(void *context,
+		     uint16_t lcn, uint16_t major, uint16_t minor,
+		     uint16_t physical_channel, uint32_t freq, const char *modulation,
+		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+{
+	return static_cast<serve_client*>(context)->chandump(lcn, major, minor,
+		physical_channel, freq, modulation, service_name, vpid, apid, program_number);
+}
+
+const char * serve_client::chandump(
 		     uint16_t lcn, uint16_t major, uint16_t minor,
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
@@ -493,7 +528,9 @@ static const char * chandump(void *context,
 		program_number,
 		physical_channel);
 #endif
-	return html_dump_channels(context, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
+	return (USE_JSON) ?
+		json_dump_channels(this, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number) :
+		html_dump_channels(this, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
 }
 
 bool serve_client::__command(char* cmdline)
@@ -529,17 +566,15 @@ bool serve_client::__command(char* cmdline)
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
-		tuner->feeder.parser.set_chandump_callback(chandump);
 		if ((arg) && strlen(arg))
-			tuner->scan_for_services(scan_flags, arg, (strstr(cmd, "epg")) ? true : false);
+			tuner->scan_for_services(scan_flags, arg, (strstr(cmd, "epg")) ? true : false, chandump, this);
 		else
-			tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false);
+			tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false, chandump, this);
 
 	} else if (strstr(cmd, "channels")) {
 		fprintf(stderr, "dumping channel list...\n");
 
-		tuner->feeder.parser.set_chandump_callback(chandump);
-		tuner->get_scan_results(false);
+		tuner->get_scan_results(false, chandump, this);
 
 	} else if (strstr(cmd, "channel")) {
 		if ((arg) && strlen(arg)) {
