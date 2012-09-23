@@ -67,7 +67,7 @@ public:
 	int add_output(void* priv, stream_callback);
 
 	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
-	const char * epg_dump(); /* full channel dump  */
+	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
 	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; };

@@ -98,6 +98,7 @@ serve_client::serve_client()
   : f_kill_thread(false)
   , sock_fd(-1)
   , data_fmt(SERVE_DATA_FMT_NONE)
+  , reporter(NULL)
 {
 	dprintf("()");
 }
@@ -310,24 +311,27 @@ static char http_conn_close[] =
 	 CRLF
 	 CRLF;
 
-const char * serve_client::epg_header_footer_callback(void *context, bool header, bool channel)
+void serve_client::epg_header_footer_callback(void *context, bool header, bool channel)
 {
 	return static_cast<serve_client*>(context)->epg_header_footer_callback(header, channel);
 }
 
 
-const char * serve_client::epg_header_footer_callback(bool header, bool channel)
+void serve_client::epg_header_footer_callback(bool header, bool channel)
 {
 	dprintf("()");
 	if ((header) && (!channel)) streamback_started = true;
-	if (!streamback_started) return NULL;
+	if (!streamback_started) return;
 	if ((header) && (channel)) streamback_newchannel = true;
-	const char * ret = (data_fmt == SERVE_DATA_FMT_HTML) ? html_dump_epg_header_footer_callback(this, header, channel) : NULL;
+	if (data_fmt == SERVE_DATA_FMT_HTML) {
+		const char *str = html_dump_epg_header_footer_callback(this, header, channel);
+		streamback((const uint8_t *)str, strlen(str));
+	}
 	if ((!header) && (!channel)) fflush(stdout);
-	return ret;
+	return;
 }
 
-const char * serve_client::epg_event_callback(void * context,
+void serve_client::epg_event_callback(void * context,
 				const char * channel_name,
 				uint16_t chan_major,
 				uint16_t chan_minor,
@@ -341,7 +345,7 @@ const char * serve_client::epg_event_callback(void * context,
 	return static_cast<serve_client*>(context)->epg_event_callback(channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
 }
 
-const char * serve_client::epg_event_callback(
+void serve_client::epg_event_callback(
 				const char * channel_name,
 				uint16_t chan_major,
 				uint16_t chan_minor,
@@ -353,7 +357,7 @@ const char * serve_client::epg_event_callback(
 				const char * text)
 {
 	dprintf("()");
-	if (!streamback_started) return NULL;
+	if (!streamback_started) return;
 #if 1
 	if (streamback_newchannel) {
 		streamback(this, (data_fmt == SERVE_DATA_FMT_HTML) ? html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL) : NULL);
@@ -361,7 +365,11 @@ const char * serve_client::epg_event_callback(
 		fflush(stdout);
 	}
 #endif
-	return (data_fmt == SERVE_DATA_FMT_HTML) ? html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text) : NULL;
+	if (data_fmt == SERVE_DATA_FMT_HTML) {
+		const char *str = html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+		streamback((const uint8_t *)str, strlen(str));
+	}
+	return;
 }
 
 
@@ -462,10 +470,10 @@ bool serve_client::command(char* cmdline)
 	if (stream_http_headers) {
 		streamback_newchannel = false;
 		streamback_started = false;
-		set_dump_epg_cb(this,
+		reporter = new decode_report;
+		reporter->set_dump_epg_cb(this,
 				epg_header_footer_callback,
-				epg_event_callback,
-				streamback);
+				epg_event_callback);
 		if (USE_JSON)
 			send(sock_fd, json_response, strlen(json_response), 0);
 		else
@@ -488,6 +496,8 @@ bool serve_client::command(char* cmdline)
 		stream_http_chunk(sock_fd, (uint8_t *)"", 0, true);
 		send(sock_fd, http_conn_close, strlen(http_conn_close), 0);
 //		close_socket();
+		delete reporter;
+		reporter = NULL;
 	}
 #endif
 	return ret;
@@ -622,7 +632,7 @@ bool serve_client::__command(char* cmdline)
 		}
 	} else if (strstr(cmd, "epg")) {
 		fprintf(stderr, "dumping epg...\n");
-		fprintf(stderr, "%s\n", tuner->feeder.parser.epg_dump());
+		tuner->feeder.parser.epg_dump(reporter);
 	} else if (strstr(cmd, "stop")) {
 		fprintf(stderr, "stopping...\n");
 		tuner->stop_feed();

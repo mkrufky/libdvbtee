@@ -72,6 +72,8 @@ private:
 	bool   command(char*);
 	bool __command(char*);
 
+	decode_report *reporter;
+
 	void streamback(const uint8_t*, size_t);
 	static void streamback(void*, const uint8_t*, size_t);
 	static void streamback(void*, const char*);
@@ -79,8 +81,8 @@ private:
 	bool streamback_started;
 	bool streamback_newchannel;
 
-	const char * epg_header_footer_callback(bool header, bool channel);
-	const char * epg_event_callback(const char * channel_name,
+	void epg_header_footer_callback(bool header, bool channel);
+	void epg_event_callback(const char * channel_name,
 					uint16_t chan_major,
 					uint16_t chan_minor,
 					//
@@ -89,8 +91,8 @@ private:
 					uint32_t length_sec,
 					const char * name,
 					const char * text);
-	static const char * epg_header_footer_callback(void * context, bool header, bool channel);
-	static const char * epg_event_callback(void * context,
+	static void epg_header_footer_callback(void * context, bool header, bool channel);
+	static void epg_event_callback(void * context,
 					const char * channel_name,
 					uint16_t chan_major,
 					uint16_t chan_minor,

@@ -244,22 +244,6 @@ typedef struct
 	map_decoded_sdt_services        services;
 } decoded_sdt_t;
 
-typedef const char *(*dump_epg_header_footer_callback)(void */* context */,
-						       bool/* true = header / false = footer*/,
-						       bool/* true = channel / false = body*/);
-
-typedef const char *(*dump_epg_event_callback)(void * context,
-					       const char * channel_name,
-					       uint16_t chan_major,
-					       uint16_t chan_minor,
-					       //
-					       uint16_t event_id,
-					       time_t start_time,
-					       uint32_t length_sec,
-					       const char * name,
-					       const char * text);
-
-typedef void (*dump_epg_streamback_callback)(void *, const char *);
 
 typedef std::map<uint16_t, bool> map_rcvd;
 
@@ -324,6 +308,48 @@ typedef std::map<uint16_t, decode_network> map_network_decoder;
 
 void clear_decoded_networks();
 
+typedef void (*dump_epg_header_footer_callback)(void */* context */,
+						bool/* true = header / false = footer*/,
+						bool/* true = channel / false = body*/);
+
+typedef void (*dump_epg_event_callback)(void * context,
+					const char * channel_name,
+					uint16_t chan_major,
+					uint16_t chan_minor,
+					//
+					uint16_t event_id,
+					time_t start_time,
+					uint32_t length_sec,
+					const char * name,
+					const char * text);
+
+typedef void (*dump_epg_streamback_callback)(void *, const char *);
+
+class decode_report
+{
+public:
+	decode_report();
+	~decode_report();
+
+	void set_dump_epg_cb(void* ctxt, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb) { dump_epg_header_footer_cb = hf_cb; dump_epg_event_cb = ev_cb; context = ctxt; };
+
+	void dump_epg_header_footer(bool a, bool b) { if (dump_epg_header_footer_cb) dump_epg_header_footer_cb(context, a, b); };
+	void dump_epg_event(const char * channel_name,
+			    uint16_t chan_major,
+			    uint16_t chan_minor,
+			    //
+			    uint16_t event_id,
+			    time_t start_time,
+			    uint32_t length_sec,
+			    const char * name,
+			    const char * text)
+	{ if (dump_epg_event_cb) dump_epg_event_cb(context, channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text); };
+private:
+	void *context;
+	dump_epg_header_footer_callback dump_epg_header_footer_cb;
+	dump_epg_event_callback dump_epg_event_cb;
+};
+
 class decode
 {
 public:
@@ -373,14 +399,14 @@ public:
 
 	const decode_network*  get_decoded_network();
 
-	void dump_eit_x(uint8_t eit_x, uint16_t source_id = 0);
+	void dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
 	bool got_all_eit(int limit = -1);
 
-	const char * dump_epg();
+	void dump_epg(decode_report *reporter);
 
-	const char * dump_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*);
-	const char * dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*);
+	void dump_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter);
+	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter);
 private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -405,20 +431,15 @@ private:
 
 	desc descriptors;
 
-	const char * dump_eit_x_atsc(uint8_t eit_x, uint16_t source_id = 0);
-	const char * dump_eit_x_dvb(uint8_t eit_x, uint16_t source_id = 0);
+	void dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
+	void dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 
-	const char * dump_epg_atsc(uint16_t source_id);
-	const char * dump_epg_dvb(uint16_t source_id);
+	void dump_epg_atsc(decode_report *reporter, uint16_t source_id);
+	void dump_epg_dvb(decode_report *reporter, uint16_t source_id);
 
 	bool eit_x_complete_atsc(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_pf();
 };
-
-void set_dump_epg_cb(void* context,
-		     dump_epg_header_footer_callback hf_cb,
-		     dump_epg_event_callback ev_cb,
-		     dump_epg_streamback_callback streamback_cb);
 
 #endif /* __DECODE_H__ */
