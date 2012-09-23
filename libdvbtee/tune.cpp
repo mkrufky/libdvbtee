@@ -154,6 +154,10 @@ int tune::open_fe()
 	struct dvb_frontend_info fe_info;
 	char filename[32];
 
+	if (fe_fd >= 0) {
+		fprintf(stderr, "open_frontend: already open!\n");
+		return -1;
+	}
 	fe_fd = -1;
 
 	sprintf(filename, "/dev/dvb/adapter%i/frontend%i", adap_id, fe_id);
@@ -252,6 +256,10 @@ int tune::start_feed()
 	char filename[80]; // max path length??
 
 	dprintf("()");
+	if (demux_fd >= 0) {
+		fprintf(stderr, "tune::start_feed: demux already open!\n");
+		return -1;
+	}
 	demux_fd = -1;
 
 	sprintf(filename, "/dev/dvb/adapter%i/demux%i", adap_id, demux_id);
