@@ -323,8 +323,17 @@ void serve_client::epg_header_footer_callback(bool header, bool channel)
 	if ((header) && (!channel)) streamback_started = true;
 	if (!streamback_started) return;
 	if ((header) && (channel)) streamback_newchannel = true;
-	if (data_fmt == SERVE_DATA_FMT_HTML) {
-		const char *str = html_dump_epg_header_footer_callback(this, header, channel);
+	if (data_fmt & SERVE_DATA_FMT_TEXT) {
+		const char *str;
+		switch (data_fmt) {
+		default: // FIXME
+		case SERVE_DATA_FMT_HTML:
+			str = html_dump_epg_header_footer_callback(this, header, channel);
+			break;
+		case SERVE_DATA_FMT_JSON:
+			str = json_dump_epg_header_footer_callback(this, header, channel);
+			break;
+		}
 		streamback((const uint8_t *)str, strlen(str));
 	}
 	if ((!header) && (!channel)) fflush(stdout);
@@ -368,8 +377,17 @@ void serve_client::epg_event_callback(
 		fflush(stdout);
 	}
 #endif
-	if (data_fmt == SERVE_DATA_FMT_HTML) {
-		const char *str = html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+	if (data_fmt & SERVE_DATA_FMT_TEXT) {
+		const char *str;
+		switch (data_fmt) {
+		default: // FIXME
+		case SERVE_DATA_FMT_HTML:
+			str = html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+			break;
+		case SERVE_DATA_FMT_JSON:
+			str = json_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+			break;
+		}
 		streamback((const uint8_t *)str, strlen(str));
 	}
 	return;

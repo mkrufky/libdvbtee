@@ -40,6 +40,24 @@ const char * html_dump_epg_header_footer_callback(void *, bool header, bool chan
 	return str;
 }
 
+const char * json_dump_epg_header_footer_callback(void *, bool header, bool channel)
+{
+	//fprintf(stderr, "%s(%s, %s)\n", __func__, (header) ? "header" : "footer", (channel) ? "channel" : "body");
+	const char *str = NULL;
+	if (header)
+		if (channel)
+			str = "{\"Entries\":\n[";
+		else
+			str = "[";
+	else
+		if (channel)
+			str = "]}";
+		else
+			str = "]";
+//	fprintf(stderr, "%s", str);
+	return str;
+}
+
 const char * html_dump_epg_event_callback(void * context,
 					  const char * channel_name,
 					  uint16_t chan_major,
@@ -83,6 +101,52 @@ const char * html_dump_epg_event_callback(void * context,
 		str.append("</nobr>");
 	}
 	str.append("</td>");
+//	fprintf(stderr, "%s", str.c_str());
+	return str.c_str();
+}
+
+const char * json_dump_epg_event_callback(void * context,
+					  const char * channel_name,
+					  uint16_t chan_major,
+					  uint16_t chan_minor,
+					  //
+					  uint16_t event_id,
+					  time_t start_time,
+					  uint32_t length_sec,
+					  const char * name,
+					  const char * text)
+{
+	time_t end_time = start_time + length_sec;
+	char time_str[15] = { 0 };
+	//fprintf(stderr, "%s()\n", __func__);
+	std::string str;
+	str.clear();
+	str.append("{");
+
+	str.append("\"StartTime\":");
+#if 1
+	snprintf(time_str, sizeof(time_str), "%lld", (long long int)start_time);
+	str.append(time_str);
+#else
+	str.append(ctime(&start_time));
+#endif
+	str.append(",");
+	str.append("\"EndTime\":");
+#if 1
+	snprintf(time_str, sizeof(time_str), "%lld", (long long int)end_time); // "%jd", (intmax_t)end_time);
+	str.append(time_str);
+#else
+	str.append(ctime(&end_time));
+#endif
+	str.append(",");
+	str.append("\"Title\":\"");
+	str.append(name);
+	str.append("\",");
+	str.append("\"ShortDescription\":\"");
+	//str.append(text);
+	str.append("\"");
+
+	str.append("}");
 //	fprintf(stderr, "%s", str.c_str());
 	return str.c_str();
 }

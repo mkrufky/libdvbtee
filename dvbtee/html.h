@@ -24,7 +24,21 @@
 #include <stdint.h>
 
 const char * html_dump_epg_header_footer_callback(void *, bool, bool);
+
+const char * json_dump_epg_header_footer_callback(void *, bool, bool);
+
 const char * html_dump_epg_event_callback(void * context,
+					  const char * channel_name,
+					  uint16_t chan_major,
+					  uint16_t chan_minor,
+					  //
+					  uint16_t event_id,
+					  time_t start_time,
+					  uint32_t length_sec,
+					  const char * name,
+					  const char * text);
+
+const char * json_dump_epg_event_callback(void * context,
 					  const char * channel_name,
 					  uint16_t chan_major,
 					  uint16_t chan_minor,
