@@ -46,6 +46,8 @@ public:
 
 	void close_file();
 
+	bool check();
+
 	parse parser;
 
 #define FEED_EVENT_PSIP 1

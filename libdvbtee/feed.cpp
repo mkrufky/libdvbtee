@@ -95,6 +95,12 @@ void feed::close_file()
 	fd = -1;
 }
 
+bool feed::check()
+{
+	dprintf("(%d, %s)", fd, filename);
+	return true; //FIXME
+}
+
 //static
 void* feed::feed_thread(void *p_this)
 {
@@ -413,6 +419,7 @@ int feed::start_stdin()
 		return -1;
 	}
 	fprintf(stderr, "%s: using STDIN\n", __func__);
+	strcpy(filename, "STDIN");
 
 	f_kill_thread = false;
 
@@ -440,6 +447,7 @@ int feed::start_socket(char* source)
 	int ret;
 
 	dprintf("(<--%s)", source);
+	strcpy(filename, source);
 
 	if (strstr(source, ":")) {
 		ip = strtok_r(source, ":", &save);
@@ -501,6 +509,7 @@ int feed::start_tcp_listener(uint16_t port_requested)
 	struct sockaddr_in tcp_sock;
 
 	dprintf("(%d)", port_requested);
+	sprintf(filename, "TCPLISTEN: %d", port_requested);
 
 	memset(&tcp_sock, 0, sizeof(tcp_sock));
 
@@ -554,6 +563,7 @@ int feed::start_udp_listener(uint16_t port_requested)
 	struct sockaddr_in udp_sock;
 
 	dprintf("(%d)", port_requested);
+	sprintf(filename, "UDPLISTEN: %d", port_requested);
 
 	memset(&udp_sock, 0, sizeof(udp_sock));
 

@@ -644,6 +644,8 @@ bool serve_client::__command(char* cmdline)
 		server->check();
 		fprintf(stderr, "checking tuner status...\n");
 		tuner->check();
+		fprintf(stderr, "checking feeder status...\n");
+		tuner->feeder.check();
 		fprintf(stderr, "checking parser / output status...\n");
 		tuner->feeder.parser.check();
 	} else if (strstr(cmd, "debug")) {
