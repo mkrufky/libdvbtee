@@ -138,8 +138,11 @@ bool tune::check()
 		dprintf("tuner not configured!");
 	else {
 		dprintf("(adap: %d, fe: %d, demux: %d, dvr: %d)", adap_id, fe_id, demux_id, dvr_id);
-		if (cur_chan)
-			dprintf("tuned to channel: %d", cur_chan);
+		if (cur_chan) {
+			fe_status_t status = fe_status();
+			uint16_t snr = get_snr();
+			dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
+		}
 	}
 
 	return ret;
@@ -206,6 +209,20 @@ fe_status_t tune::fe_status()
 		(status & FE_HAS_LOCK)    ? "L" : "");
 
 	return status;
+}
+
+uint16_t tune::get_snr()
+{
+	uint16_t snr = 0;
+
+	if (ioctl(fe_fd, FE_READ_SNR, &snr) < 0) {
+		perror("FE_READ_SNR failed");
+#if 0
+	} else {
+#endif
+	}
+
+	return snr;
 }
 
 bool tune::wait_for_lock_or_timeout(unsigned int time_ms)

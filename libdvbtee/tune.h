@@ -104,6 +104,7 @@ private:
 	//map_chan_to_ts_id channels;
 
 	fe_status_t fe_status();
+	uint16_t get_snr();
 
 	fe_type_t fe_type;
 
