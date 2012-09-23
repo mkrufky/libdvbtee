@@ -360,7 +360,10 @@ void serve_client::epg_event_callback(
 	if (!streamback_started) return;
 #if 1
 	if (streamback_newchannel) {
-		streamback(this, (data_fmt == SERVE_DATA_FMT_HTML) ? html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL) : NULL);
+		if (data_fmt == SERVE_DATA_FMT_HTML) {
+			const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
+			streamback((const uint8_t *)str, strlen(str));
+		}
 		streamback_newchannel = false;
 		fflush(stdout);
 	}
