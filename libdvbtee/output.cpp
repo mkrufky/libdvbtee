@@ -136,7 +136,7 @@ output_stream::~output_stream()
 
 	stop();
 
-	dprintf("(stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
+	dprintf("(stream) %u packets in, %u packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 }
 
 #if 1
@@ -273,7 +273,7 @@ bool output_stream::check()
 	if (!ret)
 		dprintf("(%d) not streaming!", sock);
 	else {
-		dprintf("(%d) %s %ul in, %ul out",
+		dprintf("(%d) %s %u in, %u out",
 			sock,
 			(stream_method == OUTPUT_STREAM_UDP) ? "UDP" :
 			(stream_method == OUTPUT_STREAM_TCP) ? "TCP" :
@@ -502,7 +502,7 @@ output::~output()
 
 	output_streams.clear();
 
-	dprintf("(intermediate) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
+	dprintf("(intermediate) %u packets in, %u packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 }
 
 #if 1
