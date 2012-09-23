@@ -127,7 +127,6 @@ output_stream::output_stream()
 {
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 	memset(&name, 0, sizeof(name));
 }
 
@@ -145,7 +144,6 @@ output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 	f_kill_thread = false;
 	f_streaming = false;
 	stream_cb = NULL;
@@ -164,7 +162,6 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 		return *this;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 	f_kill_thread = false;
 	f_streaming = false;
 	stream_cb = NULL;
@@ -250,6 +247,8 @@ int output_stream::start()
 		return 0;
 	}
 	dprintf("(%d)", sock);
+
+	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 
 	int ret = pthread_create(&h_thread, NULL, output_stream_thread, this);
 	if (0 != ret)
