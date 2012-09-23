@@ -44,6 +44,7 @@ tune::tune()
   , fe_id(-1)
   , demux_id(-1)
   , dvr_id(-1)
+  , cur_chan(0)
 {
 	dprintf("()");
 //	channels.clear();
@@ -75,6 +76,7 @@ tune::tune(const tune&)
 	fe_id = -1;
 	demux_id = -1;
 	dvr_id = -1;
+	cur_chan = 0;
 }
 
 tune& tune::operator= (const tune& cSource)
@@ -95,6 +97,7 @@ tune& tune::operator= (const tune& cSource)
 	fe_id = -1;
 	demux_id = -1;
 	dvr_id = -1;
+	cur_chan = 0;
 
 	return *this;
 }
@@ -117,13 +120,29 @@ bool tune::set_device_ids(int adap, int fe, int demux, int dvr, bool kernel_pid_
 int tune::close_fe() {
 	close(fe_fd);
 	fe_fd = -1;
+	cur_chan = 0;
 	return fe_fd;
 }
 
 int tune::close_demux() {
 	close(demux_fd);
 	demux_fd = -1;
+	cur_chan = 0; // FIXME???
 	return demux_fd;
+}
+
+bool tune::check()
+{
+	bool ret = ((adap_id >= 0) && (fe_id >= 0) && (demux_id >= 0) && (dvr_id >= 0));
+	if (!ret)
+		dprintf("tuner not configured!");
+	else {
+		dprintf("(adap: %d, fe: %d, demux: %d, dvr: %d)", adap_id, fe_id, demux_id, dvr_id);
+		if (cur_chan)
+			dprintf("tuned to channel: %d", cur_chan);
+	}
+
+	return ret;
 }
 
 
@@ -270,15 +289,23 @@ fail_demux:
 
 bool tune::tune_channel(fe_modulation_t modulation, unsigned int channel)
 {
+	bool ret;
+
 	switch (fe_type) {
 	case FE_ATSC:
-		return tune_atsc(modulation, channel);
+		ret = tune_atsc(modulation, channel);
+		break;
 	case FE_OFDM:
-		return tune_dvbt(channel);
+		ret = tune_dvbt(channel);
+		break;
 	default:
 		fprintf(stderr, "unsupported FE TYPE\n");
-		return false;
+		ret = false;
 	}
+	if (ret)
+		cur_chan = channel;
+
+	return ret;
 }
 
 bool tune::tune_atsc(fe_modulation_t modulation, unsigned int channel)

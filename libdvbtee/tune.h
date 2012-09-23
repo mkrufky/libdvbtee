@@ -61,6 +61,8 @@ public:
 
 	bool tune_channel(fe_modulation_t, unsigned int);
 
+	bool check();
+
 #define SCAN_VSB 1
 #define SCAN_QAM 2
 	int scan_for_services(unsigned int, char *, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
@@ -91,6 +93,8 @@ private:
 	int    fe_id;
 	int demux_id;
 	int   dvr_id;
+
+	unsigned int cur_chan;
 
 	int          scan_mode;
 	channel_map  scan_channel_list;
