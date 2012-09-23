@@ -128,6 +128,7 @@ output_stream::output_stream()
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
+	memset(&name, 0, sizeof(name));
 }
 
 output_stream::~output_stream()
@@ -152,6 +153,7 @@ output_stream::output_stream(const output_stream&)
 	count_in = 0;
 	count_out = 0;
 	sock = -1;
+	memset(&name, 0, sizeof(name));
 }
 
 output_stream& output_stream::operator= (const output_stream& cSource)
@@ -170,6 +172,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	count_in = 0;
 	count_out = 0;
 	sock = -1;
+	memset(&name, 0, sizeof(name));
 
 	return *this;
 }
@@ -271,10 +274,10 @@ bool output_stream::check()
 {
 	bool ret = is_streaming();
 	if (!ret)
-		dprintf("(%d) not streaming!", sock);
+		dprintf("(%d: %s) not streaming!", sock, name);
 	else {
-		dprintf("(%d) %s %u in, %u out",
-			sock,
+		dprintf("(%d: %s) %s %u in, %u out",
+			sock, name,
 			(stream_method == OUTPUT_STREAM_UDP) ? "UDP" :
 			(stream_method == OUTPUT_STREAM_TCP) ? "TCP" :
 			(stream_method == OUTPUT_STREAM_HTTP) ? "HTTP" :
@@ -363,7 +366,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 
 void output_stream::close_file()
 {
-	dprintf("(%d)", sock);
+	dprintf("(%d, %s)", sock, name);
 
 	if (sock >= 0) {
 		close(sock);
@@ -378,6 +381,7 @@ int output_stream::add(void* priv, stream_callback callback)
 
 	ringbuffer.reset();
 	stream_method = OUTPUT_STREAM_FUNC;
+	strcpy(name, "FUNC");
 	return 0;
 }
 
@@ -385,6 +389,7 @@ int output_stream::add(int socket, unsigned int method)
 {
 	sock = socket;
 	stream_method = method;
+	strcpy(name, "SOCKET");
 
 	ringbuffer.reset();
 	return 0;
@@ -400,6 +405,8 @@ int output_stream::add(char* target)
 	bool b_file = false;
 
 	dprintf("(-->%s)", target);
+
+	strcpy(name, target);
 
 	if (strstr(target, ":")) {
 		ip = strtok_r(target, ":", &save);

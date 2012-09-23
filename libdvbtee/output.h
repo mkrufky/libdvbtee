@@ -74,6 +74,8 @@ private:
 	bool f_streaming;
 	int sock;
 
+	char name[21];
+
 	rbuf ringbuffer;
 
 	void *output_stream_thread();
