@@ -120,9 +120,9 @@ void* feed::stdin_feed_thread(void *p_this)
 }
 
 //static
-void* feed::tcp_listen_feed_thread(void *p_this)
+void* feed::tcp_client_feed_thread(void *p_this)
 {
-	return static_cast<feed*>(p_this)->tcp_listen_feed_thread();
+	return static_cast<feed*>(p_this)->tcp_client_feed_thread();
 }
 
 //static
@@ -167,6 +167,8 @@ void feed::stop()
 #if 0
 	parser.stop();
 #endif
+	listener.stop();
+
 	dprintf("waiting...");
 
 	while (-1 != fd) {
@@ -309,13 +311,11 @@ void *feed::stdin_feed_thread()
 	pthread_exit(NULL);
 }
 
-void *feed::tcp_listen_feed_thread()
+void *feed::tcp_client_feed_thread()
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
-	int i, rxlen = 0;
-#define MAX_SOCKETS 1
-	int sock[MAX_SOCKETS];
+	int rxlen = 0;
 #if FEED_BUFFER
 	void *q = NULL;
 #else
@@ -325,46 +325,29 @@ void *feed::tcp_listen_feed_thread()
 
 	dprintf("(sock_fd=%d)", fd);
 
-	for (i = 0; i < MAX_SOCKETS; i++)
-		sock[i] = -1;
+	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
 
 	while (!f_kill_thread) {
-		int d = accept(fd, (struct sockaddr*)&tcpsa, &salen);
-		if (d != -1) {
-			for (i = 0; i < MAX_SOCKETS; i++)
-				if (sock[i] == -1) {
-					sock[i] = d;
-					break;
-				}
-			if (sock[i] != d)
-				perror("couldn't attach to socket");
-		}
-		for (i = 0; i < MAX_SOCKETS; i++)
-			if (sock[i] != -1) {
-
 #if FEED_BUFFER
-				available = ringbuffer.get_write_ptr(&q);
+		available = ringbuffer.get_write_ptr(&q);
 #else
-				available = sizeof(q);
+		available = sizeof(q);
 #endif
-				available = (available < (BUFSIZE)) ? available : (BUFSIZE);
-				rxlen = recv(sock[i], q, available, MSG_WAITALL);
-				if (rxlen > 0) {
-					if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
-					getpeername(sock[i], (struct sockaddr*)&tcpsa, &salen);
+		available = (available < (BUFSIZE)) ? available : (BUFSIZE);
+		rxlen = recv(fd, q, available, MSG_WAITALL);
+		if (rxlen > 0) {
+			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
 #if !FEED_BUFFER
-					parser.feed(rxlen, q);
+			parser.feed(rxlen, q);
 #endif
-				} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
-					close(sock[i]);
-					sock[i] = -1;
-				} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
-					usleep(50*1000);
-				}
+		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+			stop_without_wait();
+		} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
+			usleep(50*1000);
+		}
 #if FEED_BUFFER
-				ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
+		ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
 #endif
-			}
 	}
 	close_file();
 	pthread_exit(NULL);
@@ -401,8 +384,7 @@ void *feed::udp_listen_feed_thread()
 			parser.feed(rxlen, q);
 #endif
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
-//			close(sock[i]);
-//			sock[i] = -1;
+			stop_without_wait();
 		} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
 			usleep(50*1000);
 		}
@@ -508,58 +490,50 @@ int feed::start_socket(char* source)
 	return ret;
 }
 
+//static
+void feed::add_tcp_feed(void *p_this, int socket)
+{
+	return static_cast<feed*>(p_this)->add_tcp_feed(socket);
+}
+
+void feed::add_tcp_feed(int socket)
+{
+	dprintf("(%d)", socket);
+	if (fd >= 0) {
+		dprintf("(%d) this build only supports one tcp input feed connection at a time", socket);
+		close(socket);
+		return;
+	}
+
+	fd = socket;
+
+	f_kill_thread = false;
+
+	int ret = pthread_create(&h_thread, NULL, tcp_client_feed_thread, this);
+
+	if (0 != ret) {
+		perror("pthread_create() failed");
+		close_file();
+#if FEED_BUFFER
+	} else {
+		start_feed();
+#endif
+	}
+	return;
+}
+
 int feed::start_tcp_listener(uint16_t port_requested)
 {
-	struct sockaddr_in tcp_sock;
-
 	dprintf("(%d)", port_requested);
 	sprintf(filename, "TCPLISTEN: %d", port_requested);
-
-	memset(&tcp_sock, 0, sizeof(tcp_sock));
 
 	f_kill_thread = false;
 
 	fd = -1;
 
-	fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (fd < 0) {
-		perror("open socket failed");
-		return fd;
-	}
+	listener.set_callback(this, add_tcp_feed);
 
-	int reuse = 1;
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-		perror("setting reuse failed");
-		return -1;
-	}
-
-	tcp_sock.sin_family = AF_INET;
-	tcp_sock.sin_port = htons(port_requested);
-	tcp_sock.sin_addr.s_addr = INADDR_ANY;
-
-	if (bind(fd, (struct sockaddr*)&tcp_sock, sizeof(tcp_sock)) < 0) {
-		perror("bind to local interface failed");
-		return -1;
-	}
-	//	port = port_requested;
-#if 0
-	int fl = fcntl(fd, F_GETFL, 0);
-	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
-#endif
-	listen(fd, 1);
-
-	int ret = pthread_create(&h_thread, NULL, tcp_listen_feed_thread, this);
-
-	if (0 != ret)
-		perror("pthread_create() failed");
-#if FEED_BUFFER
-	else
-		start_feed();
-#endif
-	return ret;
+	return listener.start(port_requested);
 }
 
 int feed::start_udp_listener(uint16_t port_requested)

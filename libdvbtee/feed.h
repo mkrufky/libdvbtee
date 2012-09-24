@@ -73,12 +73,12 @@ private:
 	void            *feed_thread();
 	void       *file_feed_thread();
 	void      *stdin_feed_thread();
-	void *tcp_listen_feed_thread();
+	void *tcp_client_feed_thread();
 	void *udp_listen_feed_thread();
 	static void            *feed_thread(void*);
 	static void       *file_feed_thread(void*);
 	static void      *stdin_feed_thread(void*);
-	static void *tcp_listen_feed_thread(void*);
+	static void *tcp_client_feed_thread(void*);
 	static void *udp_listen_feed_thread(void*);
 
 	int start_tcp_listener(uint16_t);
@@ -87,6 +87,10 @@ private:
 	void set_filename(char*);
 	int  open_file();
 	int start_feed();
+
+	socket_listen listener;
+	void add_tcp_feed(int);
+	static void add_tcp_feed(void*, int);
 };
 
 #endif /*__FEED_H__ */
