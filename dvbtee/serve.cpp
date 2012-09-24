@@ -657,9 +657,12 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "stop")) {
 		fprintf(stderr, "stopping...\n");
 		tuner->stop_feed();
+		fprintf(stderr, "closing frontend...\n");
 		tuner->close_fe();
-		if (strstr(cmd, "stopoutput"))
+		if (strstr(cmd, "stopoutput")) {
+			fprintf(stderr, "stopping output...\n");
 			tuner->feeder.parser.stop();
+		}
 	} else if (strstr(cmd, "check")) {
 		fprintf(stderr, "checking server status...\n");
 		server->check();
