@@ -51,10 +51,12 @@ decode_report::decode_report()
   , dump_epg_header_footer_cb(NULL)
   , dump_epg_event_cb(NULL)
 {
+	dprintf("()");
 }
 
 decode_report::~decode_report()
 {
+	dprintf("()");
 }
 
 static map_network_decoder   networks;
