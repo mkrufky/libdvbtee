@@ -282,7 +282,7 @@ bool output_stream::check()
 			(stream_method == OUTPUT_STREAM_HTTP) ? "HTTP" :
 			(stream_method == OUTPUT_STREAM_FILE) ? "FILE" :
 			(stream_method == OUTPUT_STREAM_FUNC) ? "FUNC" : "UNKNOWN",
-			count_in, count_out);
+			count_in / 188, count_out / 188);
 	}
 
 	return ret;
@@ -562,8 +562,11 @@ void* output::output_thread()
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 				if (iter->second.is_streaming())
 					iter->second.push(data, buf_size);
-				else
+				else {
+					dprintf("erasing idle output stream...");
 					output_streams.erase(iter->first);
+					dprintf("garbage collection complete");
+				}
 			}
 			ringbuffer.put_read_ptr(buf_size);
 			count_out += buf_size;
@@ -601,8 +604,11 @@ bool output::check()
 	dprintf("()");
 
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
-		if (!iter->second.check())
+		if (!iter->second.check()) {
+			dprintf("erasing idle output stream...");
 			output_streams.erase(iter->first);
+			dprintf("garbage collection complete");
+		}
 	}
 
 	return true;
@@ -665,8 +671,11 @@ bool output::push(uint8_t* p_data, int size)
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		if (iter->second.is_streaming())
 			iter->second.push(p_data, size);
-		else
+		else {
+			dprintf("erasing idle output stream...");
 			output_streams.erase(iter->first);
+			dprintf("garbage collection complete");
+		}
 #endif
 	count_in += size;
 
