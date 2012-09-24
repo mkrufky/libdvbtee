@@ -97,7 +97,7 @@ void feed::close_file()
 
 bool feed::check()
 {
-	dprintf("(%d, %s)", fd, filename);
+	dprintf("(%d, %s) %s", fd, filename, (f_kill_thread) ? "stopping" : "running");
 	return true; //FIXME
 }
 
@@ -167,9 +167,13 @@ void feed::stop()
 #if 0
 	parser.stop();
 #endif
+	dprintf("waiting...");
+
 	while (-1 != fd) {
 		usleep(20*1000);
 	}
+
+	dprintf("done");
 }
 
 void *feed::feed_thread()
