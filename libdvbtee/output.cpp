@@ -562,11 +562,13 @@ void* output::output_thread()
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 				if (iter->second.is_streaming())
 					iter->second.push(data, buf_size);
+#if 0
 				else {
 					dprintf("erasing idle output stream...");
 					output_streams.erase(iter->first);
 					dprintf("garbage collection complete");
 				}
+#endif
 			}
 			ringbuffer.put_read_ptr(buf_size);
 			count_out += buf_size;
@@ -602,14 +604,19 @@ int output::add_http_server(int port)
 bool output::check()
 {
 	dprintf("()");
+	unsigned int dead = 0;
 
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 		if (!iter->second.check()) {
+#if 0
 			dprintf("erasing idle output stream...");
 			output_streams.erase(iter->first);
 			dprintf("garbage collection complete");
+#endif
+			dead++;
 		}
 	}
+	dprintf("%d dead streams found", dead);
 
 	return true;
 }
@@ -671,11 +678,13 @@ bool output::push(uint8_t* p_data, int size)
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		if (iter->second.is_streaming())
 			iter->second.push(p_data, size);
+#if 0
 		else {
 			dprintf("erasing idle output stream...");
 			output_streams.erase(iter->first);
 			dprintf("garbage collection complete");
 		}
+#endif
 #endif
 	count_in += size;
 
