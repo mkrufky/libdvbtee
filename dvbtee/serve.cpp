@@ -507,11 +507,12 @@ bool serve_client::command(char* cmdline)
 
 		ret = __command(item);
 		if (!ret)
-			return ret;
+			goto exit;
 
 		item = strtok_r(NULL, CHAR_CMD_SEP, &save);
 	} else
 		ret = __command(cmdline);
+exit:
 #if 1
 	if (stream_http_headers) {
 		stream_http_chunk(sock_fd, (uint8_t *)"", 0, true);
