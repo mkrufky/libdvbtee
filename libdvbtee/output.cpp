@@ -84,8 +84,10 @@ static inline ssize_t stream_crlf(int socket)
 
 static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
 {
+	if (socket < 0)
+		return socket;
 #if DBG
-	dprintf("(length:%d)", length);
+	dprintf("(length:%d)", (int)length);
 #endif
 	if ((length) || (send_zero_length)) {
 		int ret = 0;
