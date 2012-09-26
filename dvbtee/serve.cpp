@@ -200,20 +200,17 @@ void* serve_client::client_thread()
 
 			command(buf); /* process */
 
-			if (httpget) {
-				/* terminate after processing the HTTP input buffer */
+			if (data_fmt == SERVE_DATA_FMT_BIN) {
+				/* terminate thread after processing the HTTP input buffer */
 				stop_without_wait();
 
-				if (data_fmt == SERVE_DATA_FMT_BIN) {
-					/* disconnect socket from the server process
-					   as it's now attached to the output process */
-					sock_fd = -1;
-				}
+				/* disconnect socket from the server process
+				   as it's now attached to the output process */
+				sock_fd = -1;
 			}
 
-		} else if ( /*(rxlen == 0) ||*/ ( (rxlen == -1) && (errno != EAGAIN) ) ) {
-			if (data_fmt != SERVE_DATA_FMT_BIN)
-				stop_without_wait();
+		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+			stop_without_wait();
 		} else
 			usleep(20*1000);
 	}
