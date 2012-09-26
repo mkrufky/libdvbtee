@@ -190,7 +190,7 @@ void* serve_client::client_thread()
 	while (!f_kill_thread) {
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
 		if (rxlen > 0) {
-			fprintf(stderr, "%s(%d): %s\n", __func__, sock_fd, buf);
+			dprintf("(%d): %s", sock_fd, buf);
 
 			httpget = ((strstr(buf, "HTTP")) && (strstr(buf, "GET")));
 			if (httpget) {
@@ -200,8 +200,16 @@ void* serve_client::client_thread()
 
 			command(buf); /* process */
 
-			if (httpget) /* if it's an HTTP client, terminate after processing the input buffer */
+			if (httpget) {
+				/* terminate after processing the HTTP input buffer */
 				stop_without_wait();
+
+				if (data_fmt == SERVE_DATA_FMT_BIN) {
+					/* disconnect socket from the server process
+					   as it's now attached to the output process */
+					sock_fd = -1;
+				}
+			}
 
 		} else if ( /*(rxlen == 0) ||*/ ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			if (data_fmt != SERVE_DATA_FMT_BIN)
@@ -654,10 +662,9 @@ bool serve_client::__command(char* cmdline)
 		fprintf(stderr, "adding stream target...\n");
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.add_output(arg);
-		else {
+		else
 			tuner->feeder.parser.add_output(sock_fd, OUTPUT_STREAM_HTTP);
-			sock_fd = -1; /* disconnect socket from the server process as its attached to the output process */
-		}
+
 	} else if (strstr(cmd, "epg")) {
 		fprintf(stderr, "dumping epg...\n");
 		tuner->feeder.parser.epg_dump(reporter);
