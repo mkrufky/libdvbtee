@@ -180,6 +180,7 @@ void* serve_client::client_thread()
 	socklen_t salen = sizeof(tcpsa);
 	char buf[1024] = { 0 };
 	int rxlen;
+	bool httpget;
 
 	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
 	dprintf("(%d)", sock_fd);
@@ -189,14 +190,19 @@ void* serve_client::client_thread()
 	while (!f_kill_thread) {
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
 		if (rxlen > 0) {
-			fprintf(stderr, "%s: %s\n", __func__, buf);
+			fprintf(stderr, "%s(%d): %s\n", __func__, sock_fd, buf);
 
-			if ((strstr(buf, "HTTP")) && (strstr(buf, "GET"))) {
+			httpget = ((strstr(buf, "HTTP")) && (strstr(buf, "GET")));
+			if (httpget) {
 				data_fmt =	(strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN :
 						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON : SERVE_DATA_FMT_HTML;
 			}
 
 			command(buf); /* process */
+
+			if (httpget) /* if it's an HTTP client, terminate after processing the input buffer */
+				stop_without_wait();
+
 		} else if ( /*(rxlen == 0) ||*/ ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			if (data_fmt != SERVE_DATA_FMT_BIN)
 				stop_without_wait();
