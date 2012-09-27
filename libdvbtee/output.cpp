@@ -626,19 +626,18 @@ bool output::check()
 int output::start()
 {
 	dprintf("()");
-	/* FIXME:
-	if (f_streaming) {
-		dprintf("(%d) already streaming", sock);
-		goto fail;
-	}
-	*/
+
+	int ret = 0;
 #if DOUBLE_BUFFER
-	int ret = pthread_create(&h_thread, NULL, output_thread, this);
+	if (f_streaming) {
+		dprintf("() already streaming!");
+		goto started;
+	}
+	ret = pthread_create(&h_thread, NULL, output_thread, this);
 
 	if (0 != ret)
 		perror("pthread_create() failed");
-#else
-	int ret = 0;
+started:
 #endif
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.start();
