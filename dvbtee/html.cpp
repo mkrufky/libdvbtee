@@ -269,3 +269,23 @@ const char * json_dump_channels(void *context,
 
 	return str.c_str();
 }
+
+const char * html_playing_video(void *)
+{
+	std::string str;
+	str.clear();
+	str.append("<html><body>");
+//	str.append("<video height=\"1280\" width=\"720\" controls>");
+	str.append("<div style=\"position:relative;width:604px;height:256px;float:center;\">");
+	str.append("<video controls=\"controls\"  autoplay=\"autoplay\" poster=\"http://easyhtml5video.com/images/happyfit2.jpg\" width=\"604\" height=\"256\" onclick=\"if(/Android/.test(navigator.userAgent))this.play();\">");
+//	str.append("<video controls>");
+	str.append("<source src=\"/stream/\"");
+	str.append(" type='video/mp2ts");
+	str.append("; codecs=\"ac-3\"");
+	str.append("'>");
+	str.append("<source src=\"http://easyhtml5video.com/images/happyfit2.mp4\" type=\"video/mp4\">");
+	str.append("</video>");
+	str.append("</div>");
+	str.append("</body></html>");
+	return str.c_str();
+}

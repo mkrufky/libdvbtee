@@ -59,4 +59,6 @@ const char * json_dump_channels(void *context,
 				uint16_t physical_channel, uint32_t freq, const char *modulation,
 				unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
 
+const char * html_playing_video(void *);
+
 #endif /* __HTML_H__ */
