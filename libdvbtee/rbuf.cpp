@@ -65,7 +65,9 @@ void rbuf::set_capacity(int cap)
 
 int rbuf::get_capacity()
 {
+#if DBG
 	dprintf("(%d)", capacity);
+#endif
 	return capacity;
 }
 
