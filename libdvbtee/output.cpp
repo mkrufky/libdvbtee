@@ -618,7 +618,8 @@ bool output::check()
 			dead++;
 		}
 	}
-	dprintf("%d dead streams found", dead);
+	if (dead)
+		dprintf("%d dead streams found", dead);
 
 	return true;
 }
