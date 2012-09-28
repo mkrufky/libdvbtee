@@ -663,8 +663,8 @@ bool serve_client::__command(char* cmdline)
 			tuner->feeder.parser.add_output(sock_fd, OUTPUT_STREAM_HTTP);
 
 	} else if (strstr(cmd, "video")) {
-		fprintf(stderr, "streaming video via html5...\n");
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
+			fprintf(stderr, "streaming video via html5...\n");
 			const char *str = html_playing_video(this);
 			streamback((const uint8_t *)str, strlen(str));
 		}
