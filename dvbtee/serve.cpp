@@ -32,8 +32,6 @@
 #include "serve.h"
 #include "html.h"
 
-#define CRLF "\r\n"
-
 //FIXME:
 #define DBG_SERVE 1
 
@@ -53,6 +51,63 @@ unsigned int dbg_serve = DBG_SERVE;
 bool serve::add_tuner(tune *new_tuner) { tuners[tuners.size()] = new_tuner; };
 
 /*****************************************************************************/
+
+#define CRLF "\r\n"
+
+#define MAX_SOCKETS 4
+#define HTTP_200_OK  "HTTP/1.1 200 OK"
+#define CONTENT_TYPE "Content-type: "
+#define TEXT_HTML    "text/html"
+#define TEXT_PLAIN   "text/plain"
+#define ENC_CHUNKED  "Transfer-Encoding: chunked"
+#define CONN_CLOSE   "Connection: close"
+
+static char http_response[] =
+	 HTTP_200_OK
+	 CRLF
+	 CONTENT_TYPE TEXT_HTML
+	 CRLF
+#if 0
+	 "Content-length: 0"
+#else
+	 ENC_CHUNKED
+#endif
+#if 0
+	 CRLF
+	 "Cache-Control: no-cache,no-store,private"
+	 CRLF
+	 "Expires: -1"
+	 CRLF
+	 CONN_CLOSE
+#endif
+	 CRLF
+	 CRLF;
+
+static char json_response[] =
+	 HTTP_200_OK
+	 CRLF
+	 CONTENT_TYPE TEXT_PLAIN
+	 CRLF
+#if 0
+	 "Content-length: 0"
+#else
+	 ENC_CHUNKED
+#endif
+#if 0
+	 CRLF
+	 "Cache-Control: no-cache,no-store,private"
+	 CRLF
+	 "Expires: -1"
+	 CRLF
+	 CONN_CLOSE
+#endif
+	 CRLF
+	 CRLF;
+
+static char http_conn_close[] =
+	 CONN_CLOSE
+	 CRLF
+	 CRLF;
 
 static inline ssize_t stream_crlf(int socket)
 {
@@ -266,61 +321,6 @@ void serve_client::streamback(const uint8_t *str, size_t length)
 {
 	stream_http_chunk(sock_fd, str, length);
 }
-
-#define MAX_SOCKETS 4
-#define HTTP_200_OK  "HTTP/1.1 200 OK"
-#define CONTENT_TYPE "Content-type: "
-#define TEXT_HTML    "text/html"
-#define TEXT_PLAIN   "text/plain"
-#define ENC_CHUNKED  "Transfer-Encoding: chunked"
-#define CONN_CLOSE   "Connection: close"
-
-static char http_response[] =
-	 HTTP_200_OK
-	 CRLF
-	 CONTENT_TYPE TEXT_HTML
-	 CRLF
-#if 0
-	 "Content-length: 0"
-#else
-	 ENC_CHUNKED
-#endif
-#if 0
-	 CRLF
-	 "Cache-Control: no-cache,no-store,private"
-	 CRLF
-	 "Expires: -1"
-	 CRLF
-	 CONN_CLOSE
-#endif
-	 CRLF
-	 CRLF;
-
-static char json_response[] =
-	 HTTP_200_OK
-	 CRLF
-	 CONTENT_TYPE TEXT_PLAIN
-	 CRLF
-#if 0
-	 "Content-length: 0"
-#else
-	 ENC_CHUNKED
-#endif
-#if 0
-	 CRLF
-	 "Cache-Control: no-cache,no-store,private"
-	 CRLF
-	 "Expires: -1"
-	 CRLF
-	 CONN_CLOSE
-#endif
-	 CRLF
-	 CRLF;
-
-static char http_conn_close[] =
-	 CONN_CLOSE
-	 CRLF
-	 CRLF;
 
 void serve_client::epg_header_footer_callback(void *context, bool header, bool channel)
 {
