@@ -262,6 +262,9 @@ void* serve_client::client_thread()
 				/* disconnect socket from the server process
 				   as it's now attached to the output process */
 				sock_fd = -1;
+			} else if (data_fmt & SERVE_DATA_FMT_TEXT) {
+				/* terminate thread after processing the HTTP input buffer */
+				stop_without_wait();
 			}
 
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
