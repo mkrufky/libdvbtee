@@ -62,6 +62,11 @@ bool serve::add_tuner(tune *new_tuner) { tuners[tuners.size()] = new_tuner; };
 #define ENC_CHUNKED  "Transfer-Encoding: chunked"
 #define CONN_CLOSE   "Connection: close"
 
+static char http200ok[] =
+	 HTTP_200_OK
+	 CRLF
+	 CRLF;
+
 static char http_response[] =
 	 HTTP_200_OK
 	 CRLF
@@ -235,7 +240,7 @@ void* serve_client::client_thread()
 	socklen_t salen = sizeof(tcpsa);
 	char buf[1024] = { 0 };
 	int rxlen;
-	bool httpget;
+	bool http, httpget, httphead;
 
 	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
 	dprintf("(%d)", sock_fd);
@@ -247,24 +252,31 @@ void* serve_client::client_thread()
 		if (rxlen > 0) {
 			dprintf("(%d): %s", sock_fd, buf);
 
-			httpget = ((strstr(buf, "HTTP")) && (strstr(buf, "GET")));
+			http = (strstr(buf, "HTTP")) ? true : false;
+			httpget = ((http) && (strstr(buf, "GET")));
+			httphead = ((http) && (strstr(buf, "HEAD")));
 			if (httpget) {
 				data_fmt =	(strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN :
 						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON : SERVE_DATA_FMT_HTML;
 			}
 
-			command(buf); /* process */
+			if (httphead) {
+				/* send http 200 ok, do not process commands (FIXME) and close connection */
+				send(sock_fd, http200ok, strlen(http200ok), 0);
+			} else {
+				/* httpget - process commands */
+				command(buf);
+			}
 
-			if (data_fmt == SERVE_DATA_FMT_BIN) {
+			if (http) {
 				/* terminate thread after processing the HTTP input buffer */
 				stop_without_wait();
 
-				/* disconnect socket from the server process
-				   as it's now attached to the output process */
-				sock_fd = -1;
-			} else if (data_fmt & SERVE_DATA_FMT_TEXT) {
-				/* terminate thread after processing the HTTP input buffer */
-				stop_without_wait();
+				if (data_fmt == SERVE_DATA_FMT_BIN) {
+					/* disconnect socket from the server process
+					   as it's now attached to the output process */
+					sock_fd = -1;
+				}
 			}
 
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
