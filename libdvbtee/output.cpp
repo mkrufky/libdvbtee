@@ -650,6 +650,9 @@ void output::stop()
 {
 	dprintf("()");
 
+#if DOUBLE_BUFFER
+	stop_without_wait();
+#endif
 	/* call stop_without_wait() on everybody first before we call stop() on everybody, which is a blocking function */
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.stop_without_wait();
@@ -657,8 +660,6 @@ void output::stop()
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.stop();
 #if DOUBLE_BUFFER
-	stop_without_wait();
-
 	while (f_streaming)
 		usleep(20*1000);
 #endif
