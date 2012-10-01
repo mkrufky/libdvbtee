@@ -95,11 +95,17 @@ void rbuf::reset()
 	pthread_mutex_unlock(&mutex);
 }
 
-void rbuf::check()
+bool rbuf::check()
 {
+	if (!capacity) {
+		dprintf("capacity not set!!!");
+		return false;
+	}
 	int size = get_size();
 
 	dprintf("%d%% usage (%d / %d)", 100 * size / capacity, size, capacity);
+
+	return true;
 }
 
 int rbuf::get_write_ptr(void** p)

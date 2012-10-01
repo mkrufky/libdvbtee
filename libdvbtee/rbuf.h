@@ -34,7 +34,7 @@ public:
     int  get_capacity();
     int  get_size();
     void reset();
-    void check();
+    bool check();
 
     int  get_write_ptr(void**);
     void put_write_ptr(int);
