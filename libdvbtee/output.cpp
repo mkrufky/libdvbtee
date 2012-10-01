@@ -286,6 +286,7 @@ bool output_stream::check()
 			(stream_method == OUTPUT_STREAM_FUNC) ? "FUNC" : "UNKNOWN",
 			count_in / 188, count_out / 188);
 	}
+	ringbuffer.check();
 
 	return ret;
 }
@@ -620,7 +621,9 @@ bool output::check()
 	}
 	if (dead)
 		dprintf("%d dead streams found", dead);
-
+#if DOUBLE_BUFFER
+	ringbuffer.check();
+#endif
 	return true;
 }
 
