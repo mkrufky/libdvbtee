@@ -32,7 +32,6 @@
 
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
-#define DOUBLE_BUFFER 0
 #define PREVENT_RBUF_DEADLOCK 1
 
 #define HTTP_200_OK  "HTTP/1.1 200 OK"
@@ -631,9 +630,9 @@ bool output::check()
 	}
 	if (dead)
 		dprintf("%d dead streams found", dead);
-#if DOUBLE_BUFFER
+
 	ringbuffer.check();
-#endif
+
 	return true;
 }
 
@@ -642,20 +641,28 @@ int output::start()
 	dprintf("()");
 
 	int ret = 0;
-#if DOUBLE_BUFFER
+
+	if (output_streams.size() <= 1)
+		goto nobuffer;
+
 	if (f_streaming) {
 		dprintf("() already streaming!");
-		goto started;
+		goto nobuffer;
 	}
 	ret = pthread_create(&h_thread, NULL, output_thread, this);
 
-	if (0 != ret)
+	if (0 != ret) {
 		perror("pthread_create() failed");
-started:
-#endif
+		goto fail;
+	}
+
+	/* allocates out buffer if and only if we have begun streaming output */
+	if (ringbuffer.get_capacity() <= 0)
+		ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
+nobuffer:
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.start();
-
+fail:
 	return ret;
 }
 
@@ -663,35 +670,32 @@ void output::stop()
 {
 	dprintf("()");
 
-#if DOUBLE_BUFFER
 	stop_without_wait();
-#endif
+
 	/* call stop_without_wait() on everybody first before we call stop() on everybody, which is a blocking function */
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.stop_without_wait();
 
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		iter->second.stop();
-#if DOUBLE_BUFFER
+
 	while (f_streaming)
 		usleep(20*1000);
-#endif
+
 	return;
 }
 
 bool output::push(uint8_t* p_data, int size)
 {
-#if DOUBLE_BUFFER
-	if (!ringbuffer.get_capacity())
-		return false;
-	/* push data into output buffer */
-	bool ret = ringbuffer.write(p_data, size);
-	if (!ret)
-		fprintf(stderr, "%s: FAILED: %d bytes dropped\n", __func__, size);
-#else
 	bool ret = true;
 
-	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+	if (ringbuffer.get_capacity()) {
+
+		/* push data into output buffer */
+		ret = ringbuffer.write(p_data, size);
+		if (!ret)
+			fprintf(stderr, "%s: FAILED: %d bytes dropped\n", __func__, size);
+	} else for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 		if (iter->second.is_streaming())
 			iter->second.push(p_data, size);
 #if 0
@@ -701,7 +705,7 @@ bool output::push(uint8_t* p_data, int size)
 			dprintf("garbage collection complete");
 		}
 #endif
-#endif
+	}
 	count_in += size;
 
 	return ret;
@@ -715,11 +719,7 @@ bool output::push(uint8_t* p_data, enum output_options opt)
 int output::add(void* priv, stream_callback callback)
 {
 	if ((callback) && (priv)) {
-#if DOUBLE_BUFFER
-		/* allocates out buffer if and only if we have at least one target */
-		if (ringbuffer.get_capacity() <= 0)
-			ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
-#endif
+
 		/* push data into output buffer */
 		int ret = output_streams[num_targets].add(priv, callback);
 		if (ret == 0)
@@ -737,11 +737,7 @@ int output::add(void* priv, stream_callback callback)
 int output::add(int socket, unsigned int method)
 {
 	if (socket >= 0) {
-#if DOUBLE_BUFFER
-		/* allocates out buffer if and only if we have at least one target */
-		if (ringbuffer.get_capacity() <= 0)
-			ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
-#endif
+
 		/* push data into output buffer */
 		int ret = output_streams[num_targets].add(socket, method);
 		if (ret == 0)
@@ -781,11 +777,7 @@ int output::add(char* target)
 int output::__add(char* target)
 {
 	dprintf("(%d->%s)", num_targets, target);
-#if DOUBLE_BUFFER
-	/* allocates out buffer if and only if we have at least one target */
-	if (ringbuffer.get_capacity() <= 0)
-		ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE*2);
-#endif
+
 	/* push data into output buffer */
 	int ret = output_streams[num_targets].add(target);
 	if (ret == 0)
