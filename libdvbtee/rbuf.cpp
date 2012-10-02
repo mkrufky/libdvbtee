@@ -46,6 +46,30 @@ rbuf::~rbuf()
 	pthread_mutex_destroy(&mutex);
 }
 
+rbuf::rbuf(const rbuf&)
+{
+	dprintf("(copy)");
+	p_data    = NULL;
+	capacity  = 0;
+	idx_read  = 0;
+	idx_write = 0;
+}
+
+rbuf& rbuf::operator= (const rbuf& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	p_data    = NULL;
+	capacity  = 0;
+	idx_read  = 0;
+	idx_write = 0;
+
+	return *this;
+}
+
 void rbuf::dealloc()
 {
 	dprintf("()");

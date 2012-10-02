@@ -30,6 +30,9 @@ public:
     rbuf();
     ~rbuf();
 
+    rbuf(const rbuf&);
+    rbuf& operator= (const rbuf&);
+
     void set_capacity(int);
     int  get_capacity();
     int  get_size();
