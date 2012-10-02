@@ -139,7 +139,10 @@ bool rbuf::check()
 	}
 	int size = get_size();
 
-	dprintf("%d%% usage (%d / %d)", 100 * size / capacity, size, capacity);
+	dprintf("%d.%02d%% usage (%d / %d)",
+		100 * size / capacity,
+		100 * (100 * size % capacity) / capacity,
+		size, capacity);
 
 	return true;
 }
