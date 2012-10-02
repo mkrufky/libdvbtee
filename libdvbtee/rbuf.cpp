@@ -40,13 +40,25 @@ rbuf::rbuf()
 rbuf::~rbuf()
 {
 	dprintf("()");
+
+	dealloc();
+
+	pthread_mutex_destroy(&mutex);
+}
+
+void rbuf::dealloc()
+{
+	dprintf("()");
 	pthread_mutex_lock(&mutex);
 
 	if (p_data)
 		delete p_data;
+	p_data = NULL;
+
+	capacity = 0;
+	__reset();
 
 	pthread_mutex_unlock(&mutex);
-	pthread_mutex_destroy(&mutex);
 }
 
 void rbuf::set_capacity(int cap)

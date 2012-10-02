@@ -33,6 +33,8 @@ public:
     void set_capacity(int);
     int  get_capacity();
     int  get_size();
+    void dealloc();
+
     void reset();
     bool check();
 
