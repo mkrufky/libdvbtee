@@ -32,6 +32,7 @@
 
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
+#define DOUBLE_BUFFER 0
 #define PREVENT_RBUF_DEADLOCK 1
 
 #define HTTP_200_OK  "HTTP/1.1 200 OK"
@@ -640,6 +641,7 @@ int output::start()
 {
 	dprintf("()");
 
+#if DOUBLE_BUFFER
 	int ret = 0;
 
 	if (output_streams.size() <= 1)
@@ -664,6 +666,11 @@ nobuffer:
 		iter->second.start();
 fail:
 	return ret;
+#else
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		iter->second.start();
+	return 0;
+#endif
 }
 
 void output::stop()
