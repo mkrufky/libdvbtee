@@ -33,6 +33,7 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
 #define DOUBLE_BUFFER 0
+#define PREVENT_RBUF_DEADLOCK 1
 
 #define HTTP_200_OK  "HTTP/1.1 200 OK"
 #define CONTENT_TYPE "Content-type: "
@@ -217,9 +218,18 @@ void* output_stream::output_stream_thread()
 		buf_size /= 188;
 		buf_size *= 188;
 
+#if PREVENT_RBUF_DEADLOCK
+		{
+			uint8_t newdata[buf_size];
+			memcpy(newdata, data, buf_size);
+			ringbuffer.put_read_ptr(buf_size);
+			stream(newdata, buf_size);
+		}
+#else
 		stream(data, buf_size);
 
 		ringbuffer.put_read_ptr(buf_size);
+#endif
 		count_out += buf_size;
 #if 0
 		dprintf("(thread-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
