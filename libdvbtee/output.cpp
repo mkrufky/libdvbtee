@@ -34,6 +34,7 @@
 
 #define DOUBLE_BUFFER 0
 #define PREVENT_RBUF_DEADLOCK 1
+#define NON_BLOCKING_TCP_SEND 0
 
 #define HTTP_200_OK  "HTTP/1.1 200 OK"
 #define CONTENT_TYPE "Content-type: "
@@ -60,7 +61,7 @@ static char http_conn_close[] =
 
 static inline ssize_t tcp_send(int sockfd, const void *buf, size_t len, int flags)
 {
-#if 0
+#if NON_BLOCKING_TCP_SEND
 	int ret = 0;
 	while (0 >= ret) {
 		fd_set fds;
@@ -70,12 +71,23 @@ static inline ssize_t tcp_send(int sockfd, const void *buf, size_t len, int flag
 		struct timeval sel_timeout = {0, 10000};
 
 		ret = select(sockfd + 1, NULL, &fds, NULL, &sel_timeout);
-		if (ret < 0)
-			perror("error!");
-		usleep(20*1000);
+		if (ret == -1) {
+			perror("error sending data to TCP socket!");
+			/*
+			switch (errno) {
+			case EBADF:  // invalid file descriptor
+			case EINTR:  // signal caught
+			case EINVAL: // negative fd or invalid timeout
+			case ENOMEM: // unable to allocate memory
+			}
+			*/
+			break;
+		}
 	}
-#endif
+	return (ret > 0) ? send(sockfd, buf, len, flags) : ret;
+#else
 	return send(sockfd, buf, len, flags);
+#endif
 }
 
 static inline ssize_t stream_crlf(int socket)
@@ -334,23 +346,11 @@ int output_stream::stream(uint8_t* p_data, int size)
 		ret = sendto(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
 		break;
 	case OUTPUT_STREAM_TCP:
-#if 0
-		while (0 >= ret) {
-		  fd_set fds;
-		  FD_ZERO(&fds);
-		  FD_SET(sock, &fds);
-
-		  struct timeval sel_timeout = {0, 10000};
-
-		  ret = select(sock + 1, NULL, &fds, NULL, &sel_timeout);
-		  if (ret < 0)
-		    perror("error!");
-		  usleep(20*1000);
-		}
-		ret = send(sock, p_data, size, 0);
-#else
 		ret = tcp_send(sock, p_data, size, 0);
-#endif
+		if (ret < 0) {
+			stop_without_wait();
+			perror("tcp streaming failed");
+		}
 		break;
 	case OUTPUT_STREAM_FILE:
 		ret = write(sock, p_data, size);
@@ -403,6 +403,11 @@ int output_stream::add(int socket, unsigned int method)
 	stream_method = method;
 	strcpy(name, "SOCKET");
 
+#if NON_BLOCKING_TCP_SEND
+	int fl = fcntl(sock, F_GETFL, 0);
+	if (fcntl(socket, F_SETFL, fl | O_NONBLOCK) < 0)
+		perror("set non-blocking failed");
+#endif
 	ringbuffer.reset();
 	return 0;
 }
