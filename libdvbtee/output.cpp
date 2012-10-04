@@ -563,7 +563,9 @@ void* output::output_thread(void *p_this)
 void* output::output_thread()
 {
 	int buf_size;
+#if !PREVENT_RBUF_DEADLOCK
 	uint8_t *data = NULL;
+#endif
 
 	f_streaming = true;
 
@@ -573,9 +575,14 @@ void* output::output_thread()
 		buf_size = ringbuffer.get_size();
 		//data = NULL;
 		if (buf_size >= 188) {
+#if !PREVENT_RBUF_DEADLOCK
 			buf_size = ringbuffer.get_read_ptr((void**)&data, buf_size);
 			buf_size /= 188;
 			buf_size *= 188;
+#else
+			uint8_t data[buf_size];
+			buf_size = ringbuffer.read(data, buf_size);
+#endif
 
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 				if (iter->second.is_streaming())
@@ -588,7 +595,9 @@ void* output::output_thread()
 				}
 #endif
 			}
+#if !PREVENT_RBUF_DEADLOCK
 			ringbuffer.put_read_ptr(buf_size);
+#endif
 			count_out += buf_size;
 		} else {
 			usleep(1000);
