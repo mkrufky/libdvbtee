@@ -34,7 +34,7 @@
 
 #define DOUBLE_BUFFER 0
 #define PREVENT_RBUF_DEADLOCK 1
-#define NON_BLOCKING_TCP_SEND 0
+#define NON_BLOCKING_TCP_SEND 1
 
 #define HTTP_200_OK  "HTTP/1.1 200 OK"
 #define CONTENT_TYPE "Content-type: "
