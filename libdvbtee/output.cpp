@@ -270,6 +270,9 @@ int output_stream::start()
 		dprintf("(%d) already streaming", sock);
 		return 0;
 	}
+	if (sock < 0)
+		return sock;
+
 	dprintf("(%d)", sock);
 
 	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
