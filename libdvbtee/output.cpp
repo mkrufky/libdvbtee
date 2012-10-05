@@ -270,7 +270,7 @@ int output_stream::start()
 		dprintf("(%d) already streaming", sock);
 		return 0;
 	}
-	if (sock < 0)
+	if ((sock < 0) && (stream_method != OUTPUT_STREAM_FUNC))
 		return sock;
 
 	dprintf("(%d)", sock);
