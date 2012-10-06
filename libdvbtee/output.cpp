@@ -59,7 +59,8 @@ static char http_conn_close[] =
 	CRLF
 	CRLF;
 
-ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags)
+ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
+		    const struct sockaddr *dest_addr, socklen_t addrlen)
 {
 	int ret = 0;
 	while (0 >= ret) {
@@ -71,7 +72,7 @@ ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags)
 
 		ret = select(sockfd + 1, NULL, &fds, NULL, &sel_timeout);
 		if (ret == -1) {
-			perror("error sending data to TCP socket!");
+			perror("error sending data to socket!");
 			/*
 			switch (errno) {
 			case EBADF:  // invalid file descriptor
@@ -83,7 +84,11 @@ ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags)
 			break;
 		}
 	}
-	return (ret > 0) ? send(sockfd, buf, len, flags) : ret;
+	return (ret > 0) ?
+		((dest_addr) && (addrlen)) ?
+			sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
+			send(sockfd, buf, len, flags) :
+		ret;
 }
 
 static inline ssize_t stream_crlf(int socket)
@@ -342,7 +347,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 	/* stream data to target */
 	switch (stream_method) {
 	case OUTPUT_STREAM_UDP:
-		ret = sendto(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		ret = socket_send(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
 		break;
 	case OUTPUT_STREAM_TCP:
 		ret = socket_send(sock, p_data, size, 0);

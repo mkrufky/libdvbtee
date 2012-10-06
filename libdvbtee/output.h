@@ -33,7 +33,8 @@
 #include "listen.h"
 #include "rbuf.h"
 
-ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
+		    const struct sockaddr *dest_addr = NULL, socklen_t addrlen = 0);
 
 enum output_options {
 	OUTPUT_NONE    = 0,
