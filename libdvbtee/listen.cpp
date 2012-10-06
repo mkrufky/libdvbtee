@@ -32,69 +32,6 @@
 
 #define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
 
-#if 0
-#define HTTP_200_OK  "HTTP/1.1 200 OK"
-#define CONTENT_TYPE "Content-type: "
-#define TEXT_HTML    "text/html"
-#define TEXT_PLAIN   "text/plain"
-#define OCTET_STREAM "application/octet-stream"
-#define ENC_CHUNKED  "Transfer-Encoding: chunked"
-#define CONN_CLOSE   "Connection: close"
-#define CRLF         "\r\n"
-
-static char http_response[] =
-	HTTP_200_OK
-	CRLF
-	CONTENT_TYPE OCTET_STREAM
-	CRLF
-	ENC_CHUNKED
-	CRLF
-	CRLF;
-
-static char http_conn_close[] =
-	CONN_CLOSE
-	CRLF
-	CRLF;
-
-static inline ssize_t stream_crlf(int socket)
-{
-	return send(socket, CRLF, 2, 0);
-}
-
-static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
-{
-	if (socket < 0)
-		return socket;
-#if DBG
-	dprintf("(length:%d)", (int)length);
-#endif
-	if ((length) || (send_zero_length)) {
-		int ret = 0;
-		char sz[5] = { 0 };
-		sprintf(sz, "%x", (unsigned int)length);
-
-		ret = send(socket, sz, strlen(sz), 0);
-		if (ret < 0)
-			return ret;
-
-		ret = stream_crlf(socket);
-		if (ret < 0)
-			return ret;
-
-		if (length) {
-			ret = send(socket, buf, length, 0);
-			if (ret < 0)
-				return ret;
-
-			ret = stream_crlf(socket);
-			if (ret < 0)
-				return ret;
-		}
-	}
-	return 0;
-}
-#endif
-
 
 socket_listen::socket_listen()
   : f_kill_thread(false)

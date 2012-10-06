@@ -36,6 +36,8 @@
 ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 		    const struct sockaddr *dest_addr = NULL, socklen_t addrlen = 0);
 
+int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false);
+
 enum output_options {
 	OUTPUT_NONE    = 0,
 	OUTPUT_PATPMT  = 1,

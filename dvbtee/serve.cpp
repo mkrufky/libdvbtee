@@ -114,44 +114,6 @@ static char http_conn_close[] =
 	 CRLF
 	 CRLF;
 
-static inline ssize_t stream_crlf(int socket)
-{
-	return send(socket, CRLF, 2, 0);
-}
-
-static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
-{
-	dprintf("(length:%d)", (int)length);
-
-	if (socket < 0)
-		return socket;
-
-	if ((length) || (send_zero_length)) {
-		int ret = 0;
-		char sz[5] = { 0 };
-		sprintf(sz, "%x", (unsigned int)length);
-
-		ret = send(socket, sz, strlen(sz), 0);
-		if (ret < 0)
-			return ret;
-
-		ret = stream_crlf(socket);
-		if (ret < 0)
-			return ret;
-
-		if (length) {
-			ret = send(socket, buf, length, 0);
-			if (ret < 0)
-				return ret;
-
-			ret = stream_crlf(socket);
-			if (ret < 0)
-				return ret;
-		}
-	}
-	return 0;
-}
-
 /*****************************************************************************/
 
 serve_client::serve_client()

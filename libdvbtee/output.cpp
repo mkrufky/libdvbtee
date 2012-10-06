@@ -100,7 +100,7 @@ static inline ssize_t stream_crlf(int socket)
 	return socket_send(socket, CRLF, 2, 0);
 }
 
-static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
+int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length)
 {
 	if (socket < 0)
 		return socket;
