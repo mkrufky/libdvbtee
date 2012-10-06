@@ -47,7 +47,7 @@ enum output_options {
 
 #define OUTPUT_STREAM_BUF_SIZE 188*7*198
 
-typedef void (*stream_callback)(void *, const uint8_t *, size_t);
+typedef int (*stream_callback)(void *, const uint8_t *, size_t);
 
 class output_stream
 {

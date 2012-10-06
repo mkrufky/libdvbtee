@@ -375,9 +375,11 @@ int output_stream::stream(uint8_t* p_data, int size)
 		}
 		break;
 	case OUTPUT_STREAM_FUNC:
-		if (stream_cb) {
-			stream_cb(stream_cb_priv, p_data, size);
-			ret = 0;
+		if (stream_cb)
+			ret = stream_cb(stream_cb_priv, p_data, size);
+		if (ret < 0) {
+			stop_without_wait();
+			perror("streaming via callback failed");
 		}
 		break;
 	}
