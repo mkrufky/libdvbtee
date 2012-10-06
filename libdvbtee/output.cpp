@@ -85,9 +85,13 @@ ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 		}
 	}
 	return (ret > 0) ?
+#if 0
 		((dest_addr) && (addrlen)) ?
 			sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
 			send(sockfd, buf, len, flags) :
+#else
+		sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
+#endif
 		ret;
 }
 
