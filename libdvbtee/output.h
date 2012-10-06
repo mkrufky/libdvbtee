@@ -33,6 +33,8 @@
 #include "listen.h"
 #include "rbuf.h"
 
+ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags);
+
 enum output_options {
 	OUTPUT_NONE    = 0,
 	OUTPUT_PATPMT  = 1,

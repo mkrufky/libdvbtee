@@ -59,9 +59,8 @@ static char http_conn_close[] =
 	CRLF
 	CRLF;
 
-static inline ssize_t tcp_send(int sockfd, const void *buf, size_t len, int flags)
+ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags)
 {
-#if NON_BLOCKING_TCP_SEND
 	int ret = 0;
 	while (0 >= ret) {
 		fd_set fds;
@@ -85,14 +84,11 @@ static inline ssize_t tcp_send(int sockfd, const void *buf, size_t len, int flag
 		}
 	}
 	return (ret > 0) ? send(sockfd, buf, len, flags) : ret;
-#else
-	return send(sockfd, buf, len, flags);
-#endif
 }
 
 static inline ssize_t stream_crlf(int socket)
 {
-	return tcp_send(socket, CRLF, 2, 0);
+	return socket_send(socket, CRLF, 2, 0);
 }
 
 static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false)
@@ -107,7 +103,7 @@ static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, cons
 		char sz[5] = { 0 };
 		sprintf(sz, "%x", (unsigned int)length);
 
-		ret = tcp_send(socket, sz, strlen(sz), 0);
+		ret = socket_send(socket, sz, strlen(sz), 0);
 		if (ret < 0)
 			return ret;
 
@@ -116,7 +112,7 @@ static int stream_http_chunk(int socket, const uint8_t *buf, size_t length, cons
 			return ret;
 
 		if (length) {
-			ret = tcp_send(socket, buf, length, 0);
+			ret = socket_send(socket, buf, length, 0);
 			if (ret < 0)
 				return ret;
 
@@ -206,7 +202,7 @@ void* output_stream::output_stream_thread()
 #if 1
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
-		ret = tcp_send(sock, http_response, strlen(http_response), 0);
+		ret = socket_send(sock, http_response, strlen(http_response), 0);
 		break;
 	}
 	if (ret < 0) {
@@ -254,7 +250,7 @@ void* output_stream::output_stream_thread()
 	case OUTPUT_STREAM_HTTP:
 		if (stream_http_chunk(sock, (uint8_t *)"", 0, true) < 0)
 			perror("stream empty http chunk failed");
-		else if (tcp_send(sock, http_conn_close, strlen(http_conn_close), 0) < 0)
+		else if (socket_send(sock, http_conn_close, strlen(http_conn_close), 0) < 0)
 			perror("stream http connection close failed");
 		break;
 	}
@@ -349,7 +345,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 		ret = sendto(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
 		break;
 	case OUTPUT_STREAM_TCP:
-		ret = tcp_send(sock, p_data, size, 0);
+		ret = socket_send(sock, p_data, size, 0);
 		if (ret < 0) {
 			stop_without_wait();
 			perror("tcp streaming failed");
