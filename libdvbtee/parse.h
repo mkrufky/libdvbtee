@@ -90,6 +90,7 @@ public:
 	output out;
 
 	bool check();
+	bool is_enabled() { return enabled; }
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
