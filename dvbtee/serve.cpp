@@ -442,6 +442,9 @@ bool serve_client::check()
 		case SERVE_DATA_FMT_JSON:
 			fmt = "JSON";
 			break;
+		case SERVE_DATA_FMT_CLI:
+			fmt = "CLI";
+			break;
 		}
 		dprintf("(%d) format = %s", sock_fd, fmt);
 	}
