@@ -523,10 +523,11 @@ bool serve_client::command(char* cmdline)
 	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
 	bool stream_http_headers = (data_fmt & SERVE_DATA_FMT_TEXT) ? true : false;
 #if 1
+	reporter = new decode_report;
+
 	if (stream_http_headers) {
 		streamback_newchannel = false;
 		streamback_started = false;
-		reporter = new decode_report;
 		reporter->set_dump_epg_cb(this,
 				epg_header_footer_callback,
 				epg_event_callback);
@@ -534,7 +535,8 @@ bool serve_client::command(char* cmdline)
 			send(sock_fd, json_response, strlen(json_response), 0);
 		else
 			send(sock_fd, http_response, strlen(http_response), 0);
-	}
+	} else if (data_fmt & SERVE_DATA_FMT_CLI)
+		reporter->set_print_cb(this, cli_print);
 #endif
 	if (item) while (item) {
 		if (!item)
@@ -553,9 +555,10 @@ exit:
 		stream_http_chunk(sock_fd, (uint8_t *)"", 0, true);
 		send(sock_fd, http_conn_close, strlen(http_conn_close), 0);
 //		close_socket();
-		delete reporter;
-		reporter = NULL;
 	}
+
+	delete reporter;
+	reporter = NULL;
 #endif
 	return ret;
 }

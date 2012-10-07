@@ -325,6 +325,8 @@ typedef void (*dump_epg_event_callback)(void * context,
 
 typedef void (*dump_epg_streamback_callback)(void *, const char *);
 
+typedef void (*print_callback)(void *, const char *, ...);
+
 class decode_report
 {
 public:
@@ -332,6 +334,7 @@ public:
 	~decode_report();
 
 	void set_dump_epg_cb(void* ctxt, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb) { dump_epg_header_footer_cb = hf_cb; dump_epg_event_cb = ev_cb; context = ctxt; };
+	void set_print_cb(void* ctxt, print_callback cb) { print_cb = cb; context = ctxt; };
 
 	void dump_epg_header_footer(bool a, bool b) { if (dump_epg_header_footer_cb) dump_epg_header_footer_cb(context, a, b); };
 	void dump_epg_event(const char * channel_name,
@@ -344,10 +347,12 @@ public:
 			    const char * name,
 			    const char * text)
 	{ if (dump_epg_event_cb) dump_epg_event_cb(context, channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text); };
+	void print(const char *fmt, ...);
 private:
 	void *context;
 	dump_epg_header_footer_callback dump_epg_header_footer_cb;
 	dump_epg_event_callback dump_epg_event_cb;
+	print_callback print_cb;
 };
 
 class decode

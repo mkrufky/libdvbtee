@@ -21,6 +21,7 @@
 
 #define DBG 0
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,6 +51,7 @@ decode_report::decode_report()
   : context(NULL)
   , dump_epg_header_footer_cb(NULL)
   , dump_epg_event_cb(NULL)
+  , print_cb(NULL)
 {
 	dprintf("()");
 }
@@ -57,6 +59,16 @@ decode_report::decode_report()
 decode_report::~decode_report()
 {
 	dprintf("()");
+}
+
+void decode_report::print(const char *fmt, ...)
+{
+	if ((!print_cb) || (!context))
+		return;
+	va_list args;
+	va_start(args, fmt);
+	print_cb(context, fmt, args);
+	va_end(args);
 }
 
 static map_network_decoder   networks;
