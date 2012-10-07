@@ -22,6 +22,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -220,7 +221,8 @@ void* serve_client::client_thread()
 			if (httpget) {
 				data_fmt =	(strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN :
 						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON : SERVE_DATA_FMT_HTML;
-			}
+			} else
+				data_fmt = SERVE_DATA_FMT_CLI;
 
 			if (httphead) {
 				/* send http 200 ok, do not process commands (FIXME) and close connection */
@@ -462,6 +464,31 @@ bool serve::check()
 	return true;
 }
 
+
+void serve_client::cli_print(const char *fmt, ...)
+{
+	char buf[256] = { 0 };
+	int bufsize;
+	va_list args;
+
+	va_start(args, fmt);
+
+	vsprintf(buf, fmt, args);
+
+	bufsize = sizeof(buf);
+
+	if (bufsize) {
+
+		fprintf(stderr, "%s", buf);
+
+		if ((data_fmt & SERVE_DATA_FMT_CLI) && (sock_fd >= 0))
+			socket_send(sock_fd, buf, bufsize, 0);
+	}
+	va_end(args);
+}
+
+/*****************************************************************************/
+
 #if 1//def PRETTY_URLS
 #define CHAR_CMD_SEP "&/"
 #define CHAR_CMD_SET "="
@@ -582,13 +609,13 @@ bool serve_client::__command(char* cmdline)
 
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
-		fprintf(stderr, "NO TUNER!\n");
+		cli_print("NO TUNER!\n");
 		return false;
 	}
 //	if (strstr(cmd, "channels")) {
-//		fprintf(stderr, "dumping channel list...\n");
+//		cli_print("dumping channel list...\n");
 	if (strstr(cmd, "scan")) {
-		fprintf(stderr, "scanning for services...\n");
+		cli_print("scanning for services...\n");
 
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
@@ -599,7 +626,7 @@ bool serve_client::__command(char* cmdline)
 			tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false, chandump, this);
 
 	} else if (strstr(cmd, "channels")) {
-		fprintf(stderr, "dumping channel list...\n");
+		cli_print("dumping channel list...\n");
 
 		tuner->get_scan_results(false, chandump, this);
 
@@ -607,9 +634,9 @@ bool serve_client::__command(char* cmdline)
 		if ((arg) && strlen(arg)) {
 
 		int channel = atoi(arg);
-		fprintf(stderr, "TUNE to channel %d...(%s)\n", channel, arg);
+		cli_print("TUNE to channel %d...(%s)\n", channel, arg);
 		if (tuner->open_fe() < 0) {
-			fprintf(stderr, "open_fe() failed!\n");
+			cli_print("open_fe() failed!\n");
 			return false;
 		}
 		if (!scan_flags)
@@ -619,24 +646,24 @@ bool serve_client::__command(char* cmdline)
 
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
 				tuner->close_fe();
-				fprintf(stderr, "no lock!\n");
+				cli_print("no lock!\n");
 				return false; /* NO LOCK! */
 			}
 			tuner->feeder.parser.set_channel_info(channel,
 							     (scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 							     (scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 			tuner->start_feed();
-		}} else fprintf(stderr, "missing channel number?\n");
+		}} else cli_print("missing channel number?\n");
 
 	} else if (strstr(cmd, "service")) {
-		fprintf(stderr, "selecting service id...\n");
+		cli_print("selecting service id...\n");
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.set_service_ids(arg);
 		else
 			tuner->feeder.parser.set_service_ids(NULL);
 
 	} else if (strstr(cmd, "stream")) {
-		fprintf(stderr, "adding stream target...\n");
+		cli_print("adding stream target...\n");
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.add_output(arg);
 		else
@@ -644,33 +671,33 @@ bool serve_client::__command(char* cmdline)
 
 	} else if (strstr(cmd, "video")) {
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
-			fprintf(stderr, "streaming video via html5...\n");
+			cli_print("streaming video via html5...\n");
 			const char *str = html_playing_video(this);
 			streamback((const uint8_t *)str, strlen(str));
 		}
 	} else if (strstr(cmd, "epg")) {
-		fprintf(stderr, "dumping epg...\n");
+		cli_print("dumping epg...\n");
 		tuner->feeder.parser.epg_dump(reporter);
 	} else if (strstr(cmd, "stop")) {
-		fprintf(stderr, "stopping...\n");
+		cli_print("stopping...\n");
 		tuner->stop_feed();
-		fprintf(stderr, "closing frontend...\n");
+		cli_print("closing frontend...\n");
 		tuner->close_fe();
 		if (strstr(cmd, "stopoutput")) {
-			fprintf(stderr, "stopping output...\n");
+			cli_print("stopping output...\n");
 			tuner->feeder.parser.stop();
 		}
 	} else if (strstr(cmd, "check")) {
-		fprintf(stderr, "checking server status...\n");
+		cli_print("checking server status...\n");
 		server->check();
-		fprintf(stderr, "checking tuner status...\n");
+		cli_print("checking tuner status...\n");
 		tuner->check();
-		fprintf(stderr, "checking feeder status...\n");
+		cli_print("checking feeder status...\n");
 		tuner->feeder.check();
-		fprintf(stderr, "checking parser / output status...\n");
+		cli_print("checking parser / output status...\n");
 		tuner->feeder.parser.check();
 	} else if (strstr(cmd, "debug")) {
-		fprintf(stderr, "setting debug level...\n");
+		cli_print("setting debug level...\n");
 		if ((arg) && strlen(arg))
 			libdvbtee_set_debug_level(strtoul(arg, NULL, 0));
 		else
@@ -678,9 +705,9 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "parser")) {
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.enable((strtoul(arg, NULL, 0)) ? true : false);
-		fprintf(stderr, "parser is %sabled.\n", (tuner->feeder.parser.is_enabled()) ? "en" : "dis");
+		cli_print("parser is %sabled.\n", (tuner->feeder.parser.is_enabled()) ? "en" : "dis");
 	} else if (strstr(cmd, "quit")) {
-		fprintf(stderr, "stopping server...\n");
+		cli_print("stopping server...\n");
 		server->stop();
 	}
 
