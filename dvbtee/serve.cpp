@@ -211,6 +211,7 @@ void* serve_client::client_thread()
 	data_fmt = SERVE_DATA_FMT_NONE;
 #endif
 	while (!f_kill_thread) {
+
 		memset(buf, 0, sizeof(buf));
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
 		if (rxlen > 0) {
@@ -232,6 +233,9 @@ void* serve_client::client_thread()
 				/* httpget - process commands */
 				command(buf);
 			}
+
+			if (data_fmt & SERVE_DATA_FMT_CLI)
+				cli_print("CLI> ");
 
 			if (http) {
 				/* terminate thread after processing the HTTP input buffer */
