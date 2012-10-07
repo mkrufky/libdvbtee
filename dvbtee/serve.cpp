@@ -637,7 +637,7 @@ bool serve_client::__command(char* cmdline)
 		if ((arg) && strlen(arg)) {
 
 		int channel = atoi(arg);
-		cli_print("TUNE to channel %d...(%s)\n", channel, arg);
+		cli_print("TUNE to channel %d...\n", channel);
 		if (tuner->open_fe() < 0) {
 			cli_print("open_fe() failed!\n");
 			return false;
