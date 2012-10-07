@@ -712,6 +712,11 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "quit")) {
 		cli_print("stopping server...\n");
 		server->stop();
+		/* disable CLI prompt */
+		if (data_fmt & SERVE_DATA_FMT_CLI)
+			data_fmt = SERVE_DATA_FMT_NONE;
+		/* prevent further command processing */
+		return true;
 	}
 
 	return true;
