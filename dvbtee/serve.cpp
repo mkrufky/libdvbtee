@@ -201,7 +201,7 @@ void* serve_client::client_thread()
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
-	char buf[1024] = { 0 };
+	char buf[1024];
 	int rxlen;
 	bool http, httpget, httphead;
 
@@ -211,6 +211,7 @@ void* serve_client::client_thread()
 	data_fmt = SERVE_DATA_FMT_NONE;
 #endif
 	while (!f_kill_thread) {
+		memset(buf, 0, sizeof(buf));
 		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
 		if (rxlen > 0) {
 			dprintf("(%d): %s", sock_fd, buf);
