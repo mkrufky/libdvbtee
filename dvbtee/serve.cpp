@@ -617,8 +617,6 @@ bool serve_client::__command(char* cmdline)
 		cli_print("NO TUNER!\n");
 		return false;
 	}
-//	if (strstr(cmd, "channels")) {
-//		cli_print("dumping channel list...\n");
 	if (strstr(cmd, "scan")) {
 		cli_print("scanning for services...\n");
 
