@@ -470,6 +470,18 @@ bool serve::check()
 }
 
 
+//static
+void serve_client::cli_print(void *p_this, const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+
+	static_cast<serve_client*>(p_this)->cli_print(fmt, args);
+
+	va_end(args);
+}
+
 void serve_client::cli_print(const char *fmt, ...)
 {
 	char buf[256] = { 0 };

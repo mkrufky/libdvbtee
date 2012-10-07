@@ -113,7 +113,8 @@ private:
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
 
-	void cli_print(const char *fmt, ...);
+	void cli_print(const char *, ...);
+	static void cli_print(void *, const char *, ...);
 };
 
 typedef std::map<int, serve_client> serve_client_map;
