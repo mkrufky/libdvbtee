@@ -495,9 +495,11 @@ void serve_client::cli_print(const char *fmt, ...)
 	bufsize = sizeof(buf);
 
 	if (bufsize) {
-
+#if 0
 		fprintf(stderr, "%s", buf);
-
+#else
+		fprintf(stderr, "server::%s: %s", __func__, buf);
+#endif
 		if ((data_fmt & SERVE_DATA_FMT_CLI) && (sock_fd >= 0))
 			socket_send(sock_fd, buf, bufsize, 0);
 	}
