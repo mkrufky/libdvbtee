@@ -383,7 +383,7 @@ static inline const char *weekday(int x)
 	case  1: ret = "Mon"; break;
 	case  2: ret = "Tue"; break;
 	case  3: ret = "Wed"; break;
-	case  4: ret = "The"; break;
+	case  4: ret = "Thu"; break;
 	case  5: ret = "Fri"; break;
 	case  6: ret = "Sat"; break;
 	}
