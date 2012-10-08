@@ -202,9 +202,13 @@ void* serve_client::client_thread()
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
 	char buf[1024];
+	char hostname[16] = { 0 };
 	int rxlen;
 	bool http, httpget, httphead;
 
+	gethostname(hostname, sizeof(hostname));
+	if (!strlen(hostname))
+		strcpy(hostname, "darkwing");
 	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
 	dprintf("(%d)", sock_fd);
 #if 0
@@ -235,7 +239,7 @@ void* serve_client::client_thread()
 			}
 
 			if (data_fmt & SERVE_DATA_FMT_CLI)
-				cli_print("CLI> ");
+				cli_print("%s> ", hostname);
 
 			if (http) {
 				/* terminate thread after processing the HTTP input buffer */
