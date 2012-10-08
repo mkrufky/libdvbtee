@@ -351,6 +351,41 @@ void serve_client::epg_event_callback(void * context,
 	return static_cast<serve_client*>(context)->epg_event_callback(channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
 }
 
+static inline const char *month(int x)
+{
+	const char *ret = NULL;
+	switch (x) {
+	case  0: ret = "Jan"; break;
+	case  1: ret = "Feb"; break;
+	case  2: ret = "Mar"; break;
+	case  3: ret = "Apr"; break;
+	case  4: ret = "May"; break;
+	case  5: ret = "Jun"; break;
+	case  6: ret = "Jul"; break;
+	case  7: ret = "Aug"; break;
+	case  8: ret = "Sep"; break;
+	case  9: ret = "Oct"; break;
+	case 10: ret = "Nov"; break;
+	case 11: ret = "Dec"; break;
+	}
+	return ret;
+}
+
+static inline const char *weekday(int x)
+{
+	const char *ret = NULL;
+	switch (x) {
+	case  0: ret = "Sun"; break;
+	case  1: ret = "Mon"; break;
+	case  2: ret = "Tue"; break;
+	case  3: ret = "Wed"; break;
+	case  4: ret = "The"; break;
+	case  5: ret = "Fri"; break;
+	case  6: ret = "Sat"; break;
+	}
+	return ret;
+}
+
 void serve_client::epg_event_callback(
 				const char * channel_name,
 				uint16_t chan_major,
@@ -381,9 +416,12 @@ void serve_client::epg_event_callback(
 		struct tm tms = *localtime( &start_time );
 		struct tm tme = *localtime( &end_time );
 
-		char time_str[14] = { 0 };
+		char time_str[26] = { 0 };
 
-		snprintf(time_str, sizeof(time_str), "%02d:%02d - %02d:%02d", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min);
+		snprintf(time_str, sizeof(time_str), "%s %s %02d %02d:%02d-%02d:%02d",
+			 weekday(tms.tm_wday), month(tms.tm_mon), tms.tm_mday,
+			 tms.tm_hour, tms.tm_min,
+			 tme.tm_hour, tme.tm_min);
 
 		cli_print("%s\t %s\n", time_str, name);
 	}
