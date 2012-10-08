@@ -66,6 +66,26 @@ feed::~feed()
 	close_file();
 }
 
+feed::feed(const feed&)
+{
+	dprintf("(copy)");
+	f_kill_thread = false;
+	fd = -1;
+}
+
+feed& feed::operator= (const feed& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	f_kill_thread = false;
+	fd = -1;
+
+	return *this;
+}
+
 void feed::set_filename(char* new_file)
 {
 	dprintf("(%s)", new_file);
@@ -505,6 +525,9 @@ void feed::add_tcp_feed(int socket)
 		return;
 	}
 
+	if (!strlen(filename))
+		sprintf(filename, "TCPSOCKET: %d", socket);
+
 	fd = socket;
 
 	f_kill_thread = false;
@@ -613,4 +636,47 @@ bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_eve
 	default:
 		return f_kill_thread;
 	}
+}
+
+/*****************************************************************************/
+
+feed_server::feed_server()
+{
+	dprintf("()");
+
+	feeders.clear();
+}
+
+feed_server::~feed_server()
+{
+	dprintf("()");
+
+	listener.stop();
+
+	feeders.clear();
+}
+
+//static
+void feed_server::add_tcp_feed(void *p_this, int socket)
+{
+	return static_cast<feed_server*>(p_this)->add_tcp_feed(socket);
+}
+
+void feed_server::add_tcp_feed(int socket)
+{
+	if (socket >= 0) {
+		dprintf("(%d)", socket);
+
+		feeders[socket].add_tcp_feed(socket);
+	}
+	return;
+}
+
+int feed_server::start_tcp_listener(uint16_t port_requested)
+{
+	dprintf("(%d)", port_requested);
+
+	listener.set_callback(this, add_tcp_feed);
+
+	return listener.start(port_requested);
 }

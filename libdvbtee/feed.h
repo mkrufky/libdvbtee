@@ -35,6 +35,9 @@ public:
 	feed();
 	~feed();
 
+	feed(const feed&);
+	feed& operator= (const feed&);
+
 	int open_file(char* new_file) { set_filename(new_file); return open_file(); };
 	int open_file(int new_fd) { fd = new_fd; return fd; }; /* assumes already open */
 
@@ -60,6 +63,7 @@ public:
 
 	inline bool wait_for_epg(unsigned int time_ms) { return wait_for_event_or_timeout(time_ms / 1000, FEED_EVENT_EPG); }
 
+	void add_tcp_feed(int);
 private:
 	pthread_t h_thread;
 	pthread_t h_feed_thread;
@@ -89,8 +93,26 @@ private:
 	int start_feed();
 
 	socket_listen listener;
+	static void add_tcp_feed(void*, int);
+};
+
+typedef std::map<int, feed> feed_map;
+
+class feed_server
+{
+public:
+	feed_server();
+	~feed_server();
+
+	int start_tcp_listener(uint16_t);
+private:
+	feed_map feeders;
+	socket_listen listener;
+
 	void add_tcp_feed(int);
 	static void add_tcp_feed(void*, int);
 };
+
+typedef std::map<int, feed_server> feed_server_map;
 
 #endif /*__FEED_H__ */

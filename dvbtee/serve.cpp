@@ -262,12 +262,14 @@ serve::serve()
 {
 	dprintf("()");
 	tuners.clear();
+	feed_servers.clear();
 }
 
 serve::~serve()
 {
 	dprintf("()");
 	tuners.clear();
+	feed_servers.clear();
 
 	stop();
 }
@@ -750,6 +752,13 @@ bool serve_client::__command(char* cmdline)
 		if ((arg) && strlen(arg))
 			tuner->feeder.parser.enable((strtoul(arg, NULL, 0)) ? true : false);
 		cli_print("parser is %sabled.\n", (tuner->feeder.parser.is_enabled()) ? "en" : "dis");
+	} else if (strstr(cmd, "listen")) {
+		if ((arg) && strlen(arg)) {
+			int portnum = strtoul(arg, NULL, 0);
+			cli_print("starting TS listener on TCP port %d... ", portnum);
+			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum) : -1;
+			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
+		}
 	} else if (strstr(cmd, "quit")) {
 		cli_print("stopping server...\n");
 		server->stop();

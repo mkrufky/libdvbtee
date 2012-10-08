@@ -136,6 +136,8 @@ public:
 	bool is_running() { return listener.is_running(); };
 
 	bool check();
+
+	feed_server_map feed_servers;
 private:
 	socket_listen listener;
 	serve_client_map client_map;
