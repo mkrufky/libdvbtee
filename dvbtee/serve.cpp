@@ -577,6 +577,7 @@ const char * serve_client::chandump(
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
 {
+	const char *str = NULL;
 	char channelno[7]; /* XXX.XXX */
 	if (major + minor > 1)
 		sprintf(channelno, "%d.%d", major, minor);
@@ -584,25 +585,30 @@ const char * serve_client::chandump(
 		sprintf(channelno, "%d", lcn);
 	else
 		sprintf(channelno, "%d", physical_channel);
-#if 0
-	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+
+	cli_print("%s-%s:%d:%s:%d:%d:%d\t channel=%d&service=%d\n",
 		channelno,
 		service_name,
 		freq,//iter_vct->second.carrier_freq,
 		modulation,
-		vpid, apid, program_number);
-#else
-	fprintf(stdout, "%s-%s: service/%d;channel/%d\n",
-		channelno,
-		service_name,
-		program_number,
-		physical_channel);
-#endif
-	const char *str = (USE_JSON) ?
-		json_dump_channels(this, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number) :
-		html_dump_channels(this, lcn, major, minor, physical_channel, freq, modulation, service_name, vpid, apid, program_number);
+		vpid, apid, program_number,
+		physical_channel,
+		program_number);
 
-	streamback((const uint8_t *)str, strlen(str));
+	if (data_fmt & SERVE_DATA_FMT_TEXT) {
+
+		str = (USE_JSON) ?
+			json_dump_channels(this, lcn, major, minor,
+					   physical_channel, freq,
+					   modulation, service_name,
+					   vpid, apid, program_number) :
+			html_dump_channels(this, lcn, major, minor,
+					   physical_channel, freq,
+					   modulation, service_name,
+					   vpid, apid, program_number);
+
+		streamback((const uint8_t *)str, strlen(str));
+	}
 
 	return str;
 }
