@@ -203,6 +203,7 @@ void* serve_client::client_thread()
 	socklen_t salen = sizeof(tcpsa);
 	char buf[1024];
 	char hostname[16] = { 0 };
+	char cli_prompt[sizeof(hostname)+3] = { 0 };
 	int rxlen;
 	bool http, httpget, httphead;
 
@@ -210,6 +211,9 @@ void* serve_client::client_thread()
 	if (!strlen(hostname))
 		strcpy(hostname, "darkwing");
 	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
+
+	snprintf(cli_prompt, sizeof(cli_prompt), "%s> ", hostname);
+
 	dprintf("(%d)", sock_fd);
 #if 0
 	data_fmt = SERVE_DATA_FMT_NONE;
@@ -238,8 +242,8 @@ void* serve_client::client_thread()
 				command(buf);
 			}
 
-			if (data_fmt & SERVE_DATA_FMT_CLI)
-				cli_print("%s> ", hostname);
+			if (data_fmt == SERVE_DATA_FMT_CLI)
+				socket_send(sock_fd, cli_prompt, sizeof(cli_prompt), 0);
 
 			if (http) {
 				/* terminate thread after processing the HTTP input buffer */
@@ -405,7 +409,7 @@ void serve_client::epg_event_callback(
 	if (!streamback_started) return;
 #if 1
 	if (streamback_newchannel) {
-		if (data_fmt & SERVE_DATA_FMT_CLI)
+		if (data_fmt == SERVE_DATA_FMT_CLI)
 			cli_print("\n%d.%d-%s\n", chan_major, chan_minor, channel_name);
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
@@ -415,7 +419,7 @@ void serve_client::epg_event_callback(
 		fflush(stdout);
 	}
 #endif
-	if (data_fmt & SERVE_DATA_FMT_CLI) {
+	if (data_fmt == SERVE_DATA_FMT_CLI) {
 		time_t end_time = start_time + length_sec;
 		struct tm tms = *localtime( &start_time );
 		struct tm tme = *localtime( &end_time );
@@ -558,7 +562,7 @@ void serve_client::cli_print(const char *fmt, ...)
 		if (dbg_serve & DBG_SERVE)
 			fprintf(stderr, "server::%s: %s", __func__, buf);
 #endif
-		if ((data_fmt & SERVE_DATA_FMT_CLI) && (sock_fd >= 0))
+		if ((data_fmt == SERVE_DATA_FMT_CLI) && (sock_fd >= 0))
 			socket_send(sock_fd, buf, bufsize, 0);
 	}
 	va_end(args);
@@ -574,7 +578,7 @@ void serve_client::cli_print(const char *fmt, ...)
 #define CHAR_CMD_SET "/"
 #endif
 
-#define USE_JSON (data_fmt & SERVE_DATA_FMT_JSON)
+#define USE_JSON (data_fmt == SERVE_DATA_FMT_JSON)
 
 bool serve_client::command(char* cmdline)
 {
@@ -596,7 +600,7 @@ bool serve_client::command(char* cmdline)
 		else
 			send(sock_fd, http_response, strlen(http_response), 0);
 	} else
-	if (data_fmt & SERVE_DATA_FMT_CLI) {
+	if (data_fmt == SERVE_DATA_FMT_CLI) {
 		reporter->set_print_cb(this, cli_print);
 	}
 #endif
@@ -805,7 +809,7 @@ bool serve_client::__command(char* cmdline)
 		cli_print("stopping server...\n");
 		server->stop();
 		/* disable CLI prompt */
-		if (data_fmt & SERVE_DATA_FMT_CLI)
+		if (data_fmt == SERVE_DATA_FMT_CLI)
 			data_fmt = SERVE_DATA_FMT_NONE;
 		/* prevent further command processing */
 		return true;
