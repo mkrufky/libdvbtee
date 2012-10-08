@@ -364,6 +364,8 @@ void serve_client::epg_event_callback(
 	if (!streamback_started) return;
 #if 1
 	if (streamback_newchannel) {
+		if (data_fmt & SERVE_DATA_FMT_CLI)
+			cli_print("\n%d.%d-%s\n", chan_major, chan_minor, channel_name);
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
 			streamback((const uint8_t *)str, strlen(str));
@@ -372,6 +374,17 @@ void serve_client::epg_event_callback(
 		fflush(stdout);
 	}
 #endif
+	if (data_fmt & SERVE_DATA_FMT_CLI) {
+		time_t end_time = start_time + length_sec;
+		struct tm tms = *localtime( &start_time );
+		struct tm tme = *localtime( &end_time );
+
+		char time_str[14] = { 0 };
+
+		snprintf(time_str, sizeof(time_str), "%02d:%02d - %02d:%02d", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min);
+
+		cli_print("%s\t %s\n", time_str, name);
+	}
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 		const char *str;
 		switch (data_fmt) {
@@ -526,19 +539,21 @@ bool serve_client::command(char* cmdline)
 	bool stream_http_headers = (data_fmt & SERVE_DATA_FMT_TEXT) ? true : false;
 #if 1
 	reporter = new decode_report;
+	streamback_newchannel = false;
+	streamback_started = false;
+	reporter->set_dump_epg_cb(this,
+			epg_header_footer_callback,
+			epg_event_callback);
 
 	if (stream_http_headers) {
-		streamback_newchannel = false;
-		streamback_started = false;
-		reporter->set_dump_epg_cb(this,
-				epg_header_footer_callback,
-				epg_event_callback);
 		if (USE_JSON)
 			send(sock_fd, json_response, strlen(json_response), 0);
 		else
 			send(sock_fd, http_response, strlen(http_response), 0);
-	} else if (data_fmt & SERVE_DATA_FMT_CLI)
+	} else
+	if (data_fmt & SERVE_DATA_FMT_CLI) {
 		reporter->set_print_cb(this, cli_print);
+	}
 #endif
 	if (item) while (item) {
 		if (!item)
