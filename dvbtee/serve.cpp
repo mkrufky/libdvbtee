@@ -511,7 +511,8 @@ void serve_client::cli_print(const char *fmt, ...)
 #if 0
 		fprintf(stderr, "%s", buf);
 #else
-		fprintf(stderr, "server::%s: %s", __func__, buf);
+		if (dbg_serve & DBG_SERVE)
+			fprintf(stderr, "server::%s: %s", __func__, buf);
 #endif
 		if ((data_fmt & SERVE_DATA_FMT_CLI) && (sock_fd >= 0))
 			socket_send(sock_fd, buf, bufsize, 0);
@@ -675,7 +676,7 @@ bool serve_client::__command(char* cmdline)
 		if ((arg) && strlen(arg)) {
 
 		int channel = atoi(arg);
-		cli_print("TUNE to channel %d...\n", channel);
+		cli_print("TUNE to channel %d... ", channel);
 		if (tuner->open_fe() < 0) {
 			cli_print("open_fe() failed!\n");
 			return false;
@@ -689,12 +690,14 @@ bool serve_client::__command(char* cmdline)
 				tuner->close_fe();
 				cli_print("no lock!\n");
 				return false; /* NO LOCK! */
-			}
+			} else
+				cli_print("LOCK!\n");
 			tuner->feeder.parser.set_channel_info(channel,
 							     (scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 							     (scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 			tuner->start_feed();
-		}} else cli_print("missing channel number?\n");
+		} else cli_print("tune_channel() failed!\n");
+		} else cli_print("missing channel number?\n");
 
 	} else if (strstr(cmd, "service")) {
 		cli_print("selecting service id...\n");
