@@ -75,9 +75,21 @@ public:
 	unsigned int get_scan_results(bool wait = true, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
 
 	feed feeder;
+#define TUNE_STATE_IDLE 0
+#define TUNE_STATE_OPEN 1
+#define TUNE_STATE_LOCK 2
+#define TUNE_STATE_SCAN 4
+#define TUNE_STATE_FEED 8
+	inline bool is_idle() { return (state ==TUNE_STATE_IDLE); };
+	inline bool is_open() { return (state & TUNE_STATE_OPEN); };
+	inline bool is_lock() { return (state & TUNE_STATE_LOCK); };
+	inline bool is_scan() { return (state & TUNE_STATE_SCAN); };
+	inline bool is_feed() { return (state & TUNE_STATE_FEED); };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
+
+	unsigned int state;
 
 	void *scan_thread();
 	static void *scan_thread(void*);

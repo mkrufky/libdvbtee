@@ -38,6 +38,7 @@ static map_chan_to_ts_id channels;
 
 tune::tune()
   : f_kill_thread(false)
+  , state(TUNE_STATE_IDLE)
   , adap_id(-1)
   , fe_fd(-1)
   , demux_fd(-1)
@@ -77,6 +78,7 @@ tune::tune(const tune&)
 	demux_id = -1;
 	dvr_id = -1;
 	cur_chan = 0;
+	state = TUNE_STATE_IDLE;
 }
 
 tune& tune::operator= (const tune& cSource)
@@ -98,6 +100,7 @@ tune& tune::operator= (const tune& cSource)
 	demux_id = -1;
 	dvr_id = -1;
 	cur_chan = 0;
+	state = TUNE_STATE_IDLE;
 
 	return *this;
 }
@@ -121,6 +124,8 @@ int tune::close_fe() {
 	close(fe_fd);
 	fe_fd = -1;
 	cur_chan = 0;
+	state &= ~TUNE_STATE_OPEN;
+	state &= ~TUNE_STATE_LOCK;
 	return fe_fd;
 }
 
@@ -137,7 +142,12 @@ bool tune::check()
 	if (!ret)
 		dprintf("tuner not configured!");
 	else {
-		dprintf("(adap: %d, fe: %d, demux: %d, dvr: %d)", adap_id, fe_id, demux_id, dvr_id);
+		dprintf("(adap: %d, fe: %d, demux: %d, dvr: %d) state:%s%s%s%s%s", adap_id, fe_id, demux_id, dvr_id,
+			is_idle() ? " idle" : "",
+			is_open() ? " open" : "",
+			is_lock() ? " lock" : "",
+			is_scan() ? " scan" : "",
+			is_feed() ? " feed" : "");
 		if (cur_chan) {
 			fe_status_t status = fe_status();
 			uint16_t snr = get_snr();
@@ -154,7 +164,7 @@ int tune::open_fe()
 	struct dvb_frontend_info fe_info;
 	char filename[32];
 
-	if (fe_fd >= 0) {
+	if ((fe_fd >= 0) || (is_open())) {
 		fprintf(stderr, "open_frontend: already open!\n");
 		return -1;
 	}
@@ -188,6 +198,7 @@ int tune::open_fe()
 			goto fail;
 		}
 		fe_type = fe_info.type;
+		state |= TUNE_STATE_OPEN;
 		return fe_fd;
 	default:
 		fprintf(stderr, "frontend is not a supported device type!\n");
@@ -211,6 +222,10 @@ fe_status_t tune::fe_status()
 		(status & FE_HAS_VITERBI) ? "V" : "",
 		(status & FE_HAS_SYNC)    ? "Y" : "",
 		(status & FE_HAS_LOCK)    ? "L" : "");
+
+	state &= ~TUNE_STATE_LOCK;
+	if (status & FE_HAS_LOCK)
+		state |= TUNE_STATE_LOCK;
 
 	return status;
 }
@@ -246,8 +261,8 @@ bool tune::wait_for_lock_or_timeout(unsigned int time_ms)
 void tune::stop_feed()
 {
 	feeder.stop();
+	state &= ~TUNE_STATE_FEED;
 	feeder.close_file();
-
 	close_demux();
 }
 
@@ -302,8 +317,10 @@ int tune::start_feed()
 		}
 	}
 
-	if (0 == feeder.start())
+	if (0 == feeder.start()) {
+		state |= TUNE_STATE_FEED;
 		return 0;
+	}
 fail_dvr:
 	feeder.close_file();
 fail_filter:
@@ -464,6 +481,10 @@ void* tune::scan_thread(void *p_this)
 
 void* tune::scan_thread()
 {
+	if (!is_scan()) {
+
+	state |= TUNE_STATE_SCAN;
+
 	feeder.parser.set_scan_mode(true);
 	feeder.parser.set_epg_mode(scan_epg);
 
@@ -520,6 +541,8 @@ void* tune::scan_thread()
 	}
 	close_fe();
 	scan_complete = true;
+	state &= ~TUNE_STATE_SCAN;
+	}
 	pthread_exit(NULL);
 }
 
