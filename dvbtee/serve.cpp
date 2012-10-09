@@ -714,7 +714,7 @@ bool serve_client::cmd_tuner_channel(tune* tuner, int channel, unsigned int flag
 		} else
 			cli_print("tune_channel() failed!\n");
 	} else
-		cli_print("missing channel number?\n");
+		cli_print("invalid channel number.\n");
 
 	return false;
 }
