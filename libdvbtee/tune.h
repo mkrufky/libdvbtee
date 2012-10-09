@@ -68,6 +68,7 @@ public:
 #define SCAN_QAM 2
 	int scan_for_services(unsigned int, char *, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
 	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
+	/* FIXME: deprecate start_scan & move to private */
 	int start_scan(unsigned int, char *, bool epg = false);
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); };
