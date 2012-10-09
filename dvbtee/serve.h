@@ -75,7 +75,7 @@ private:
 
 	bool cmd_tuner_stop(tune*);
 	bool cmd_tuner_channel(tune*, int, unsigned int);
-	bool cmd_tuner_scan(tune*, char*, bool, unsigned int);
+	bool cmd_tuner_scan(tune*, char*, bool, bool, unsigned int);
 
 	decode_report *reporter;
 

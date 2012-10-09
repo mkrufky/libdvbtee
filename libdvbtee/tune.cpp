@@ -612,7 +612,7 @@ unsigned int tune::get_scan_results(bool wait, chandump_callback chandump_cb, vo
 	return ret;
 };
 
-int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, chandump_callback chandump_cb, void* chandump_context)
+int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
 	unsigned int count = 0;
 
@@ -622,13 +622,14 @@ int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, cha
 	if (0 != start_scan(scan_mode, channel_list, epg))
 		return -1;
 
-	count += get_scan_results(true, chandump_cb, chandump_context);
-	fprintf(stderr, "found %d services\n", count);
-
+	if (wait_for_results) {
+		count += get_scan_results(true, chandump_cb, chandump_context);
+		fprintf(stderr, "found %d services\n", count);
+	}
 	return 0;
 }
 
-int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, chandump_callback chandump_cb, void* chandump_context)
+int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
 	unsigned int count = 0;
 	unsigned int total_count = 0;
@@ -643,14 +644,17 @@ int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int ma
 		if (0 != start_scan(scan_mode, min, max, epg))
 			return -1;
 
-		count += get_scan_results(true, chandump_cb, chandump_context);
-		total_count += count;
+		if (wait_for_results) {
+
+			count += get_scan_results(true, chandump_cb, chandump_context);
+			total_count += count;
 #if 0
-		for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
-			fprintf(stderr, "found ts_id %05d on channel %d\n", iter->second, iter->first);
-		channels.clear(); //
+			for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
+				fprintf(stderr, "found ts_id %05d on channel %d\n", iter->second, iter->first);
+			channels.clear(); //
 #endif
-		fprintf(stderr, "found %d services\n", count);
+			fprintf(stderr, "found %d services\n", count);
+		}
 	}
 	if (count != total_count)
 		fprintf(stderr, "found %d services in total\n", total_count);
