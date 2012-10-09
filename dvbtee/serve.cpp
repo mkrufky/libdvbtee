@@ -679,6 +679,49 @@ const char * serve_client::chandump(
 	return str;
 }
 
+bool serve_client::cmd_tuner_stop(tune* tuner)
+{
+	cli_print("stopping data feed...\n");
+	tuner->stop_feed();
+	cli_print("closing frontend...\n");
+	tuner->close_fe();
+	return true;
+}
+
+bool serve_client::cmd_tuner_channel(tune* tuner, int channel, unsigned int flags)
+{
+	if (channel > 0) {
+		cli_print("TUNE to channel %d... ", channel);
+		if (tuner->open_fe() < 0) {
+			cli_print("open_fe() failed!\n");
+			return false;
+		}
+		if (!flags)
+			flags = SCAN_VSB;
+
+		if (tuner->tune_channel((flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
+
+			if (!tuner->wait_for_lock_or_timeout(2000)) {
+				tuner->close_fe();
+				cli_print("no lock!\n");
+				return false; /* NO LOCK! */
+			} else
+				cli_print("LOCK!\n");
+			tuner->feeder.parser.set_channel_info(channel,
+							     (flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) :
+							                           atsc_qam_chan_to_freq(channel),
+							     (flags == SCAN_VSB) ? "8VSB" : "QAM_256");
+			tuner->start_feed();
+
+			return true;
+		} else
+			cli_print("tune_channel() failed!\n");
+	} else
+		cli_print("missing channel number?\n");
+
+	return false;
+}
+
 bool serve_client::__command(char* cmdline)
 {
 	char *arg, *save;
@@ -715,37 +758,51 @@ bool serve_client::__command(char* cmdline)
 		else
 			tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false, chandump, this);
 
+	} else if (strstr(cmd, "tune")) {
+		char *cmdtune, *ser = NULL;
+		unsigned int phy = 0;
+		unsigned int cur = 0;
+		bool tuned = false;
+
+		if ((arg) && strlen(arg)) {
+			phy = strtoul(strtok_r(arg, ".-+", &cmdtune), NULL, 0);
+			ser = strtok_r(NULL, ".-+", &cmdtune);
+		}
+
+		cli_print("preparing to tune to physical channel %d...\n", phy, ser);
+
+		/* see if tuner has the right physical channel, if not then change it */
+		cur = tuner->get_channel();
+		if ((cur) && (cur != phy))
+			cmd_tuner_stop(tuner);
+		if (cur == phy) /* (cur) */ {
+			cli_print("already tuned to physical channel %d.\n");
+			tuned = true;
+		} else
+			tuned = cmd_tuner_channel(tuner, strtoul(arg, NULL, 0), scan_flags);
+
+		if (tuned) {
+			/* set service, if any */
+			if ((ser) && strlen(ser)) {
+				cli_print("selecting service id (%s)...\n", ser);
+				tuner->feeder.parser.set_service_ids(ser);
+			}
+#if 0
+			else
+				tuner->feeder.parser.set_service_ids(NULL);
+#endif
+		}
+
 	} else if (strstr(cmd, "channels")) {
 		cli_print("dumping channel list...\n");
 
 		tuner->get_scan_results(false, chandump, this);
 
 	} else if (strstr(cmd, "channel")) {
-		if ((arg) && strlen(arg)) {
-
-		int channel = atoi(arg);
-		cli_print("TUNE to channel %d... ", channel);
-		if (tuner->open_fe() < 0) {
-			cli_print("open_fe() failed!\n");
-			return false;
-		}
-		if (!scan_flags)
-			scan_flags = SCAN_VSB;
-
-		if (tuner->tune_channel((scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
-
-			if (!tuner->wait_for_lock_or_timeout(2000)) {
-				tuner->close_fe();
-				cli_print("no lock!\n");
-				return false; /* NO LOCK! */
-			} else
-				cli_print("LOCK!\n");
-			tuner->feeder.parser.set_channel_info(channel,
-							     (scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
-							     (scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
-			tuner->start_feed();
-		} else cli_print("tune_channel() failed!\n");
-		} else cli_print("missing channel number?\n");
+		if ((arg) && strlen(arg))
+			cmd_tuner_channel(tuner, strtoul(arg, NULL, 0), scan_flags);
+		else
+			cli_print("missing channel number?\n");
 
 	} else if (strstr(cmd, "service")) {
 		cli_print("selecting service id...\n");
@@ -771,10 +828,7 @@ bool serve_client::__command(char* cmdline)
 		cli_print("dumping epg...\n");
 		tuner->feeder.parser.epg_dump(reporter);
 	} else if (strstr(cmd, "stop")) {
-		cli_print("stopping...\n");
-		tuner->stop_feed();
-		cli_print("closing frontend...\n");
-		tuner->close_fe();
+		cmd_tuner_stop(tuner);
 		if (strstr(cmd, "stopoutput")) {
 			cli_print("stopping output...\n");
 			tuner->feeder.parser.stop();

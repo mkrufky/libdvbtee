@@ -73,6 +73,9 @@ private:
 	bool   command(char*);
 	bool __command(char*);
 
+	bool cmd_tuner_stop(tune*);
+	bool cmd_tuner_channel(tune*, int, unsigned int);
+
 	decode_report *reporter;
 
 	void streamback(const uint8_t*, size_t);
