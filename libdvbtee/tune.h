@@ -60,6 +60,7 @@ public:
 	bool wait_for_lock_or_timeout(unsigned int);
 
 	bool tune_channel(fe_modulation_t, unsigned int);
+	unsigned int get_channel() { return cur_chan; };
 
 	bool check();
 
