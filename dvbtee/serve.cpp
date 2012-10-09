@@ -719,6 +719,21 @@ bool serve_client::cmd_tuner_channel(tune* tuner, int channel, unsigned int flag
 	return false;
 }
 
+bool serve_client::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, unsigned int flags)
+{
+	cli_print("scanning for services...\n");
+
+	if (!flags)
+		flags = SCAN_VSB;
+
+	if ((arg) && strlen(arg))
+		tuner->scan_for_services(flags, arg, scanepg, chandump, this);
+	else
+		tuner->scan_for_services(flags, 0, 0, scanepg, chandump, this);
+
+	return true;
+}
+
 bool serve_client::__command(char* cmdline)
 {
 	char *arg, *save;
@@ -745,15 +760,7 @@ bool serve_client::__command(char* cmdline)
 		return false;
 	}
 	if (strstr(cmd, "scan")) {
-		cli_print("scanning for services...\n");
-
-		if (!scan_flags)
-			scan_flags = SCAN_VSB;
-
-		if ((arg) && strlen(arg))
-			tuner->scan_for_services(scan_flags, arg, (strstr(cmd, "epg")) ? true : false, chandump, this);
-		else
-			tuner->scan_for_services(scan_flags, 0, 0, (strstr(cmd, "epg")) ? true : false, chandump, this);
+		cmd_tuner_scan(tuner, arg, (strstr(cmd, "epg")) ? true : false, scan_flags);
 
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;
