@@ -780,7 +780,6 @@ static uint16_t derive_physical_channel(uint32_t freq, const char *modulation)
 
 bool serve_client::cmd_config_channels_conf_load()
 {
-	char cmd_buf[32] = { 0 };
 	char *homedir = getenv ("HOME");
 	const char *subdir = "/.dvbtee";
 	const char *slashchannelsconf = "/channels.conf";
