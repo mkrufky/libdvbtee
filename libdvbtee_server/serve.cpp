@@ -50,7 +50,11 @@ unsigned int dbg_serve = DBG_SERVE;
 
 	tuner_map tuners;
 
-bool serve::add_tuner(tune *new_tuner) { tuners[tuners.size()] = new_tuner; };
+bool serve::add_tuner(tune *new_tuner)
+{
+	tuners[tuners.size()] = new_tuner;
+	return true;
+};
 
 /*****************************************************************************/
 
