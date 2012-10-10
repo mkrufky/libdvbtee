@@ -3,23 +3,24 @@
  *
  * Author: Michael Krufky <mkrufky@linuxtv.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * version 2 as published by the Free Software Foundation.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public
- * License along with this program; if not, write to the Free Software
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
 
-#ifndef __HTML_H__
-#define __HTML_H__
+#ifndef __TEXT_H__
+#define __TEXT_H__
 
 #include <stdint.h>
 
@@ -61,4 +62,4 @@ const char * json_dump_channels(void *context,
 
 const char * html_playing_video(void *);
 
-#endif /* __HTML_H__ */
+#endif /* __TEXT_H__ */
