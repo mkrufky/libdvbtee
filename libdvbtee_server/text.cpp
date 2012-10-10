@@ -183,11 +183,10 @@ const char * html_dump_channels(void *context,
 	str.append("<table>");
 	str.append("<tr>");
 	str.append("<td>");
-	str.append("<a href='/tune/stop");
-	str.append("&service=");
-	str.append(svc_id);
-	str.append("&channel=");
+	str.append("<a href='/tune=");
 	str.append(phy_chan);
+	str.append("+");
+	str.append(svc_id);
 	str.append("'>");
 	str.append(channelno);
 	str.append(": ");
