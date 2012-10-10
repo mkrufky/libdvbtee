@@ -212,6 +212,7 @@ void* serve_client::client_thread()
 	char cli_prompt[sizeof(hostname)+3] = { 0 };
 	int rxlen;
 	bool http, httpget, httphead;
+	char *tmpbuf, *cmdbuf, *save;
 
 	gethostname(hostname, sizeof(hostname));
 	if (!strlen(hostname))
@@ -237,15 +238,24 @@ void* serve_client::client_thread()
 			if (httpget) {
 				data_fmt =	(strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN :
 						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON : SERVE_DATA_FMT_HTML;
-			} else
+				tmpbuf = strtok_r(buf, " ", &save);
+				if (strstr(tmpbuf, "GET")) {
+					cmdbuf = strtok_r(NULL, " ", &save);
+					if (!cmdbuf)
+						cmdbuf = buf;
+				} else
+					cmdbuf = buf;
+			} else {
 				data_fmt = SERVE_DATA_FMT_CLI;
+				cmdbuf = buf;
+			}
 
 			if (httphead) {
 				/* send http 200 ok, do not process commands (FIXME) and close connection */
 				send(sock_fd, http200ok, strlen(http200ok), 0);
 			} else {
 				/* httpget - process commands */
-				command(buf);
+				command(cmdbuf);
 			}
 
 			if (data_fmt == SERVE_DATA_FMT_CLI)
