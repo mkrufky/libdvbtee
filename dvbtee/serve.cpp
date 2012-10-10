@@ -758,6 +758,21 @@ bool serve_client::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wai
 	return true;
 }
 
+static uint16_t derive_physical_channel(uint32_t freq, const char *modulation)
+{
+	uint16_t ret = 0;
+
+	if (modulation) {
+		if (strstr(modulation, "VSB"))
+			ret = atsc_vsb_freq_to_chan(freq);
+		else if (strstr(modulation, "QAM_256"))
+			ret = atsc_qam_freq_to_chan(freq);
+		else /* DVB-T */
+			ret = dvbt_freq_to_chan(freq);
+	}
+	return ret;
+}
+
 bool serve_client::cmd_config_channels_conf_load()
 {
 	char cmd_buf[32] = { 0 };
@@ -787,8 +802,48 @@ bool serve_client::cmd_config_channels_conf_load()
 	FILE *channels_conf = fopen(filepath, "r");
 	if (channels_conf) {
 		char line[128] = { 0 };
-		while (fgets(line, sizeof(line), channels_conf))
+		while (fgets(line, sizeof(line), channels_conf)) {
 			cli_print("%s", line);
+
+			uint32_t freq;
+			uint16_t lcn, major, minor, physical_channel, vpid, apid, program_number;
+			unsigned char *service_name;
+			const char *modulation;
+			char *save, *temp, *chan, *name = strtok_r(line, ":", &save);
+
+			temp = strtok_r(NULL, ":", &save);
+			freq = (temp) ? strtoul(temp, NULL, 0) : 0;
+			temp = strtok_r(NULL, ":", &save);
+			modulation = (temp) ? temp : "";
+
+			temp = strtok_r(NULL, ":", &save);
+			vpid = (temp) ? strtoul(temp, NULL, 0) : 0;
+			temp = strtok_r(NULL, ":", &save);
+			apid = (temp) ? strtoul(temp, NULL, 0) : 0;
+			temp = strtok_r(NULL, ":", &save);
+			program_number = (temp) ? strtoul(temp, NULL, 0) : 0;
+
+			chan = strtok_r(name, "-", &save);
+			temp = strtok_r(NULL, "-", &save);
+			service_name = (unsigned char *)((temp) ? temp : chan);
+
+			temp = strtok_r(chan, ".", &save);
+			if (temp) {
+				major = strtoul(temp, NULL, 0);
+				temp = strtok_r(NULL, ".", &save);
+				minor = (temp) ? strtoul(temp, NULL, 0): 0;
+			} else {
+				major = 0;
+				minor = 0;
+			}
+			lcn = major;
+
+			physical_channel = derive_physical_channel(freq, modulation);
+
+			chandump(false, lcn, major, minor,
+				 physical_channel, freq, modulation,
+				 service_name, vpid, apid, program_number);
+		}
 		fclose(channels_conf);
 	}
 }
@@ -966,7 +1021,7 @@ bool serve_client::__command(char* cmdline)
 			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum) : -1;
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
-	} else if (strstr(cmd, "load")) {
+	} else if (strstr(cmd, "loadchanconf")) {
 		cmd_config_channels_conf_load();
 
 	} else if (strstr(cmd, "save")) {

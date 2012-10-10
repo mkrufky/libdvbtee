@@ -19,6 +19,7 @@
  *
  *****************************************************************************/
 
+#include <stdlib.h>
 #include "channels.h"
 
 static int atsc_vsb_base_offset(const unsigned int channel)
@@ -94,7 +95,7 @@ unsigned int atsc_qam_chan_to_freq(const unsigned int channel)
 unsigned int atsc_vsb_freq_to_chan(const unsigned int frequency)
 {
 	for (int channel=2; channel <= 69; channel++) {
-		if (atsc_vsb_chan_to_freq(channel) == frequency)
+		if (abs(atsc_vsb_chan_to_freq(channel) - frequency) < 1000000)
 			return channel;
 	}
 	return 0;
@@ -103,7 +104,7 @@ unsigned int atsc_vsb_freq_to_chan(const unsigned int frequency)
 unsigned int atsc_qam_freq_to_chan(const unsigned int frequency)
 {
 	for (int channel=2; channel <= 133; channel++) {
-		if (atsc_qam_chan_to_freq(channel) == frequency)
+		if (abs(atsc_qam_chan_to_freq(channel) == frequency) < 1000000)
 			return channel;
 	}
 	return 0;
@@ -123,7 +124,7 @@ unsigned int dvbt_chan_to_freq(const unsigned int channel)
 unsigned int dvbt_freq_to_chan(const unsigned int frequency)
 {
 	for (int channel=5; channel <= 69; channel++) {
-		if (dvbt_chan_to_freq(channel) == frequency)
+		if (abs(dvbt_chan_to_freq(channel) == frequency) < 1000000)
 			return channel;
 	}
 	return 0;
