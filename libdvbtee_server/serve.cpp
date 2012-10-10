@@ -876,7 +876,10 @@ bool serve_client::cmd_tuner_scan_channels_save(tune* tuner)
 
 	if (stat(dir, &st) != 0) {
 		sprintf(cmd_buf, "mkdir -p %s", dir);
-		system(cmd_buf);
+		if (system(cmd_buf) < 0) {
+			perror("could not create ~/.dvbtee/");
+			cli_print("error: could not create %s!\n", dir);
+		}
 	}
 
 	int channels_fd = creat(filepath, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
