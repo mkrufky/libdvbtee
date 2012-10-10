@@ -849,7 +849,9 @@ bool serve_client::cmd_config_channels_conf_load()
 				 service_name, vpid, apid, program_number);
 		}
 		fclose(channels_conf);
+		return true;
 	}
+	return false;
 }
 
 bool serve_client::cmd_tuner_scan_channels_save(tune* tuner)
