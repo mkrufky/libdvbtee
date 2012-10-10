@@ -758,6 +758,41 @@ bool serve_client::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wai
 	return true;
 }
 
+bool serve_client::cmd_config_channels_conf_load()
+{
+	char cmd_buf[32] = { 0 };
+	char *homedir = getenv ("HOME");
+	const char *subdir = "/.dvbtee";
+	const char *slashchannelsconf = "/channels.conf";
+	char dir[/*strlen(homedir)+strlen(subdir)*/64] = { 0 };
+	char filepath[/*strlen(dir)+strlen(slashchannelsconf)*/78] = { 0 };
+	struct stat st;
+
+	//snprintf(dir, strlen(dir), "%s%s", homedir, subdir);
+	memcpy(dir, homedir, strlen(homedir));
+	memcpy(dir + strlen(homedir), subdir, strlen(subdir) + 1);
+	//snprintf(filepath, strlen(filepath), "%s%s", dir, slashchannelsconf);
+
+	if (stat(dir, &st) != 0)
+		return false;
+
+	memcpy(filepath, dir, strlen(dir));
+	memcpy(filepath + strlen(dir), slashchannelsconf, strlen(slashchannelsconf) + 1);
+
+	if (stat(filepath, &st) != 0)
+		return false;
+
+	cli_print("reading %s...\n", filepath);
+
+	FILE *channels_conf = fopen(filepath, "r");
+	if (channels_conf) {
+		char line[128] = { 0 };
+		while (fgets(line, sizeof(line), channels_conf))
+			cli_print("%s", line);
+		fclose(channels_conf);
+	}
+}
+
 bool serve_client::cmd_tuner_scan_channels_save(tune* tuner)
 {
 	char cmd_buf[32] = { 0 };
@@ -931,6 +966,9 @@ bool serve_client::__command(char* cmdline)
 			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum) : -1;
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
+	} else if (strstr(cmd, "load")) {
+		cmd_config_channels_conf_load();
+
 	} else if (strstr(cmd, "save")) {
 		cmd_tuner_scan_channels_save(tuner);
 
