@@ -120,6 +120,7 @@ static char http_conn_close[] =
 serve_client::serve_client()
   : f_kill_thread(false)
   , sock_fd(-1)
+  , channels_conf_file(NULL)
   , data_fmt(SERVE_DATA_FMT_NONE)
   , reporter(NULL)
 {
@@ -631,11 +632,20 @@ const char * serve_client::chandump(void *context,
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
 {
-	return static_cast<serve_client*>(context)->chandump(lcn, major, minor,
+	return static_cast<serve_client*>(context)->chandump(false, lcn, major, minor,
 		physical_channel, freq, modulation, service_name, vpid, apid, program_number);
 }
 
-const char * serve_client::chandump(
+const char * serve_client::chandump_to_disk(void *context,
+		     uint16_t lcn, uint16_t major, uint16_t minor,
+		     uint16_t physical_channel, uint32_t freq, const char *modulation,
+		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+{
+	return static_cast<serve_client*>(context)->chandump(true, lcn, major, minor,
+		physical_channel, freq, modulation, service_name, vpid, apid, program_number);
+}
+
+const char * serve_client::chandump(bool save_to_disk,
 		     uint16_t lcn, uint16_t major, uint16_t minor,
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
@@ -658,6 +668,20 @@ const char * serve_client::chandump(
 		physical_channel,
 		program_number);
 
+	if (save_to_disk) {
+		//char diskbuf[96] = { 0 };
+		//snprintf(diskbuf, 96,
+		fprintf(channels_conf_file,
+			"%s-%s:%d:%s:%d:%d:%d\n",
+			channelno,
+			service_name,
+			freq,//iter_vct->second.carrier_freq,
+			modulation,
+			vpid, apid, program_number);
+
+		//if (channels_fd >= 0)
+		//	write(channels_fd, (const void *)diskbuf, sizeof(diskbuf));
+	} else
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 
 		str = (USE_JSON) ?
@@ -731,6 +755,48 @@ bool serve_client::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wai
 	else
 		tuner->scan_for_services(flags, 0, 0, scanepg, chandump, this, wait_for_results);
 
+	return true;
+}
+
+bool serve_client::cmd_tuner_scan_channels_save(tune* tuner)
+{
+	char cmd_buf[32] = { 0 };
+	char *homedir = getenv ("HOME");
+	const char *subdir = "/.dvbtee";
+	const char *slashchannelsconf = "/channels.conf";
+	char dir[/*strlen(homedir)+strlen(subdir)*/64] = { 0 };
+	char filepath[/*strlen(dir)+strlen(slashchannelsconf)*/78] = { 0 };
+	struct stat st;
+
+	//snprintf(dir, strlen(dir), "%s%s", homedir, subdir);
+	memcpy(dir, homedir, strlen(homedir));
+	memcpy(dir + strlen(homedir), subdir, strlen(subdir) + 1);
+	//snprintf(filepath, strlen(filepath), "%s%s", dir, slashchannelsconf);
+	memcpy(filepath, dir, strlen(dir));
+	memcpy(filepath + strlen(dir), slashchannelsconf, strlen(slashchannelsconf) + 1);
+
+	cli_print("%ssaving scanned channel list to %s... \n",
+		  tuner->is_scan() ?
+		  "waiting for channel scan to complete and " : "",
+		  filepath);
+
+	if (stat(dir, &st) != 0) {
+		sprintf(cmd_buf, "mkdir -p %s", dir);
+		system(cmd_buf);
+	}
+
+	int channels_fd = creat(filepath, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+	if (channels_fd < 0) {
+		perror("could not create channels.conf");
+		cli_print("error %d: could not create %s!\n", channels_fd, filepath);
+		return false;
+	}
+	channels_conf_file = fdopen(channels_fd, "w");
+	tuner->get_scan_results(true, chandump_to_disk, this);
+	fclose(channels_conf_file);
+	channels_conf_file = NULL;
+	close(channels_fd);
+	cli_print("done\n");
 	return true;
 }
 
@@ -865,6 +931,9 @@ bool serve_client::__command(char* cmdline)
 			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum) : -1;
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
+	} else if (strstr(cmd, "save")) {
+		cmd_tuner_scan_channels_save(tuner);
+
 	} else if (strstr(cmd, "quit")) {
 		cli_print("stopping server...\n");
 		server->stop();

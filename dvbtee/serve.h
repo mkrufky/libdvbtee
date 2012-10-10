@@ -56,6 +56,7 @@ private:
 	serve *server;
 
 	int sock_fd;
+	FILE *channels_conf_file;
 #define SERVE_DATA_FMT_NONE 0
 #define SERVE_DATA_FMT_HTML 1
 #define SERVE_DATA_FMT_BIN  2
@@ -76,6 +77,7 @@ private:
 	bool cmd_tuner_stop(tune*);
 	bool cmd_tuner_channel(tune*, int, unsigned int);
 	bool cmd_tuner_scan(tune*, char*, bool, bool, unsigned int);
+	bool cmd_tuner_scan_channels_save(tune* tuner);
 
 	decode_report *reporter;
 
@@ -108,11 +110,15 @@ private:
 					const char * name,
 					const char * text);
 
-	const char * chandump(
+	const char * chandump(bool save_to_disk,
 		     uint16_t lcn, uint16_t major, uint16_t minor,
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
 	static const char * chandump(void *context,
+		     uint16_t lcn, uint16_t major, uint16_t minor,
+		     uint16_t physical_channel, uint32_t freq, const char *modulation,
+		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
+	static const char * chandump_to_disk(void *context,
 		     uint16_t lcn, uint16_t major, uint16_t minor,
 		     uint16_t physical_channel, uint32_t freq, const char *modulation,
 		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
