@@ -947,7 +947,7 @@ bool serve_client::__command(char* cmdline)
 		if ((cur) && (cur != phy))
 			cmd_tuner_stop(tuner);
 		if (cur == phy) /* (cur) */ {
-			cli_print("already tuned to physical channel %d.\n");
+			cli_print("already tuned to physical channel %d.\n", phy);
 			tuned = true;
 		} else
 			tuned = cmd_tuner_channel(tuner, strtoul(arg, NULL, 0), scan_flags);
