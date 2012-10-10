@@ -11,14 +11,16 @@ CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -
 LDADD = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi
 LIBS = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi
 
-shared: libdvbtee
+shared: libdvbtee libdvbtee_server
 	$(GPP) $(INCLUDES) $(CPPFLAGS) dvbtee.cpp -o dvbtee $(LIBS)
 
-static: libdvbtee
+static: libdvbtee libdvbtee_server
 	$(GPP) $(INCLUDES) $(CPPFLAGS) dvbtee.cpp ../libdvbtee/libdvbtee.a ../libdvbtee_server/libdvbtee_server.a -o dvbtee
 
 libdvbtee:
 	make -C ../libdvbtee
+
+libdvbtee_server:
 	make -C ../libdvbtee_server
 
 .PHONY: all
