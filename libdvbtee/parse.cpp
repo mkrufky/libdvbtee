@@ -934,6 +934,13 @@ bool parse::check()
 	return out.check();
 }
 
+void parse::set_ts_id(uint16_t new_ts_id)
+{
+	dprintf("(%04x|%d)\n", new_ts_id, new_ts_id);
+	ts_id = new_ts_id;
+	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
+};
+
 int parse::feed(int count, uint8_t* p_data)
 {
 	if (count <= 0) {

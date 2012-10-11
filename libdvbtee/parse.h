@@ -131,7 +131,7 @@ private:
 	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); };
 	unsigned int xine_dump(uint16_t, channel_info_t*, chandump_callback, void* chandump_context);
 
-	void set_ts_id(uint16_t new_ts_id) { fprintf(stderr, "%s(%04x|%d)\n", __func__, new_ts_id, new_ts_id); ts_id = new_ts_id; memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t)); };
+	void set_ts_id(uint16_t);
 	void set_service_id(uint16_t id) { service_ids[id] = 0; }
 	void detach_demux();
 
