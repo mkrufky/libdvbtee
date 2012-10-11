@@ -187,7 +187,7 @@ const char * html_dump_channels(void *context,
 	str.append(phy_chan);
 	str.append("+");
 	str.append(svc_id);
-	str.append("'>");
+	str.append("&channels'>");
 	str.append(channelno);
 	str.append(": ");
 	str.append((const char *)service_name);
