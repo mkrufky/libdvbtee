@@ -123,17 +123,17 @@ void stop_server(struct dvbtee_context* context)
 	return;
 }
 
-int start_server(struct dvbtee_context* context, unsigned int flags)
+int start_server(struct dvbtee_context* context, unsigned int flags, int port, int eavesdropping_port = 0)
 {
 	context->server = new serve;
 	context->server->add_tuner(&context->tuner);
 
-	if (flags & 2)
-		context->tuner.feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1);
+	if (eavesdropping_port)
+		context->tuner.feeder.parser.out.add_http_server(eavesdropping_port);
 
-	context->server->set_scan_flags(0, flags >> 2);
+	context->server->set_scan_flags(0, flags);
 
-	return context->server->start(62080);
+	return context->server->start(port);
 }
 
 
@@ -171,7 +171,7 @@ bool list_channels(serve *server)
 	if (!server)
 		return false;
 
-	return server->get_channels(chandump, NULL)
+	return server->get_channels(chandump, NULL);
 }
 
 bool start_async_channel_scan(serve *server, unsigned int flags = 0)
@@ -237,7 +237,7 @@ int main(int argc, char **argv)
 	context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, false);
 	context.tuner.feeder.parser.limit_eit(-1);
 
-	start_server(&context, serv_flags | (scan_flags << 2));
+	start_server(&context, scan_flags, 62080, 62081);
 
 	if (context.server) {
 		while (context.server->is_running()) sleep(1);
