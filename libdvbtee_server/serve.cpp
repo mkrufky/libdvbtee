@@ -830,6 +830,8 @@ bool serve_client::cmd_config_channels_conf_load()
 			temp = strtok_r(NULL, ":", &save);
 			modulation = (temp) ? temp : "";
 
+			physical_channel = derive_physical_channel(freq, modulation);
+
 			temp = strtok_r(NULL, ":", &save);
 			vpid = (temp) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
@@ -851,8 +853,6 @@ bool serve_client::cmd_config_channels_conf_load()
 				minor = 0;
 			}
 			lcn = major;
-
-			physical_channel = derive_physical_channel(freq, modulation);
 
 			chandump(false, lcn, major, minor,
 				 physical_channel, freq, modulation,
