@@ -20,8 +20,11 @@
  *****************************************************************************/
 
 #include <arpa/inet.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -49,6 +52,7 @@ void libdvbtee_set_debug_level(unsigned int debug)
 feed::feed()
   : f_kill_thread(false)
   , fd(-1)
+  , feed_thread_prio(100)
   , ringbuffer()
 {
 	dprintf("()");
@@ -71,6 +75,7 @@ feed::feed(const feed&)
 	dprintf("(copy)");
 	f_kill_thread = false;
 	fd = -1;
+	feed_thread_prio = 100;
 }
 
 feed& feed::operator= (const feed& cSource)
@@ -82,6 +87,7 @@ feed& feed::operator= (const feed& cSource)
 
 	f_kill_thread = false;
 	fd = -1;
+	feed_thread_prio = 100;
 
 	return *this;
 }
@@ -164,6 +170,18 @@ int feed::start_feed()
 	return ret;
 }
 
+int feed::setup_feed(int prio)
+{
+	feed_thread_prio = prio;
+
+	return start_feed();
+}
+
+int feed::push(int size, const uint8_t* data)
+{
+	return (ringbuffer.write((const void*)data, size)) ? 0 : -1;
+}
+
 int feed::start()
 {
 	f_kill_thread = false;
@@ -203,6 +221,11 @@ void *feed::feed_thread()
 	unsigned char *data = NULL;
 	int size, read_size;
 
+	if (feed_thread_prio != 100) {
+		pid_t tid = syscall(SYS_gettid);
+		dprintf("setting priority from %d to %d", getpriority(PRIO_PROCESS, tid), feed_thread_prio);
+		setpriority(PRIO_PROCESS, tid, feed_thread_prio);
+	}
 	dprintf("()");
 	while (!f_kill_thread) {
 		size = ringbuffer.get_size();

@@ -46,6 +46,9 @@ public:
 	int start();
 	int start_stdin();
 	int start_socket(char* source);
+	/* initialize for feed via functional interface */
+	int setup_feed(int prio);
+	int push(int, const uint8_t*);
 
 	void close_file();
 
@@ -71,6 +74,7 @@ private:
 
 	char filename[256];
 	int fd;
+	int feed_thread_prio;
 
 	rbuf ringbuffer;
 
