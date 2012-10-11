@@ -941,6 +941,14 @@ void parse::set_ts_id(uint16_t new_ts_id)
 	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
 };
 
+uint16_t parse::get_ts_id(unsigned int channel)
+{
+	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
+		if (channel == iter->second.channel)
+			return iter->first;
+	return 0;
+}
+
 int parse::feed(int count, uint8_t* p_data)
 {
 	if (count <= 0) {

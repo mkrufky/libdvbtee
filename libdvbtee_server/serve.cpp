@@ -788,7 +788,7 @@ static uint16_t derive_physical_channel(uint32_t freq, const char *modulation)
 	return ret;
 }
 
-bool serve_client::cmd_config_channels_conf_load()
+bool serve_client::cmd_config_channels_conf_load(tune* tuner)
 {
 	char *homedir = getenv ("HOME");
 	const char *subdir = "/.dvbtee";
@@ -831,6 +831,10 @@ bool serve_client::cmd_config_channels_conf_load()
 			modulation = (temp) ? temp : "";
 
 			physical_channel = derive_physical_channel(freq, modulation);
+
+			uint16_t ts_id = tuner->feeder.parser.get_ts_id(physical_channel);
+			if (ts_id) /* dont load data for channels we already know about */
+				continue;
 
 			temp = strtok_r(NULL, ":", &save);
 			vpid = (temp) ? strtoul(temp, NULL, 0) : 0;
@@ -978,6 +982,8 @@ bool serve_client::__command(char* cmdline)
 		cli_print("dumping channel list...\n");
 
 		tuner->get_scan_results(false, chandump, this);
+		/* load remaining channels that we saved previously but havent seen during this session */
+		cmd_config_channels_conf_load(tuner);
 
 	} else if (strstr(cmd, "channel")) {
 		if ((arg) && strlen(arg))
@@ -1040,9 +1046,10 @@ bool serve_client::__command(char* cmdline)
 			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum) : -1;
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
+#if 0
 	} else if (strstr(cmd, "loadchanconf")) {
-		cmd_config_channels_conf_load();
-
+		cmd_config_channels_conf_load(tuner);
+#endif
 	} else if (strstr(cmd, "save")) {
 		cmd_tuner_scan_channels_save(tuner);
 
