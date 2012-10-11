@@ -159,8 +159,6 @@ const char * chandump(void *context,
 		modulation,
 		vpid, apid, program_number);
 
-	char svc_id[6] = { 0 };
-
 	/* link to http stream */
 	fprintf(stdout, "<a href='/tune=%d+%d&stream/here'>%s: %s</a>",
 		physical_channel, program_number, channelno, service_name);
