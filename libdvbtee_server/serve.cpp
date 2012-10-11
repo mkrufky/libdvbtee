@@ -953,14 +953,17 @@ bool serve_client::cmd_tuner_scan_channels_save(tune* tuner)
 
 bool serve_client::__command(char* cmdline)
 {
+	unsigned int feeder_id, tuner_id, scan_flags = 0;
+	tune *tuner = NULL;
+	feed *feeder = NULL;
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);
+
+	feeder_id = 0;
 
 	if (!cmd)
 		cmd = cmdline;
 	arg = strtok_r(NULL, CHAR_CMD_SET, &save);
-
-	unsigned int tuner_id, scan_flags = 0;
 
 	if (strstr(cmd, "tuner")) {
 		tuner_id = atoi(arg);
@@ -971,12 +974,23 @@ bool serve_client::__command(char* cmdline)
 
 	scan_flags = server->get_scan_flags(tuner_id);
 
-	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+	tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
 		cli_print("NO TUNER!\n");
-		return false;
-	}
+		//return false;
+		feeder = (feeders.count(feeder_id)) ? feeders[feeder_id] : NULL;
+		if (!feeder) {
+			cli_print("NO FEEDER!\n");
+			return false;
+		}
+	} else
+		feeder = &tuner->feeder;
+
 	if (strstr(cmd, "scan")) {
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
 		cli_print("scanning for services...\n");
 		server->cmd_tuner_scan(tuner, arg,
 				      (strstr(cmd, "scanepg")) ? true : false,
@@ -989,6 +1003,10 @@ bool serve_client::__command(char* cmdline)
 		unsigned int cur = 0;
 		bool tuned = false;
 
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
 		if ((arg) && strlen(arg)) {
 			phy = strtoul(strtok_r(arg, ".-+", &cmdtune), NULL, 0);
 			ser = strtok_r(NULL, ".-+", &cmdtune);
@@ -1019,6 +1037,10 @@ bool serve_client::__command(char* cmdline)
 		}
 
 	} else if (strstr(cmd, "channels")) {
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
 		cli_print("dumping channel list...\n");
 
 		/* channels verified during this session */
@@ -1027,6 +1049,10 @@ bool serve_client::__command(char* cmdline)
 		server->cmd_config_channels_conf_load(tuner, chandump, this);
 
 	} else if (strstr(cmd, "channel")) {
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
 		if ((arg) && strlen(arg))
 			cmd_tuner_channel(tuner, strtoul(arg, NULL, 0), scan_flags);
 		else
@@ -1035,16 +1061,16 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "service")) {
 		cli_print("selecting service id...\n");
 		if ((arg) && strlen(arg))
-			tuner->feeder.parser.set_service_ids(arg);
+			feeder->parser.set_service_ids(arg);
 		else
-			tuner->feeder.parser.set_service_ids(NULL);
+			feeder->parser.set_service_ids(NULL);
 
 	} else if (strstr(cmd, "stream")) {
 		cli_print("adding stream target...\n");
 		if ((arg) && strlen(arg))
-			tuner->feeder.parser.add_output(arg);
+			feeder->parser.add_output(arg);
 		else
-			tuner->feeder.parser.add_output(sock_fd, OUTPUT_STREAM_HTTP);
+			feeder->parser.add_output(sock_fd, OUTPUT_STREAM_HTTP);
 
 	} else if (strstr(cmd, "video")) {
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
@@ -1054,22 +1080,27 @@ bool serve_client::__command(char* cmdline)
 		}
 	} else if (strstr(cmd, "epg")) {
 		cli_print("dumping epg...\n");
-		tuner->feeder.parser.epg_dump(reporter);
+		feeder->parser.epg_dump(reporter);
 	} else if (strstr(cmd, "stop")) {
-		cmd_tuner_stop(tuner);
+		if (tuner)
+			cmd_tuner_stop(tuner);
+		else
+			feeder->stop();
 		if (strstr(cmd, "stopoutput")) {
 			cli_print("stopping output...\n");
-			tuner->feeder.parser.stop();
+			feeder->parser.stop();
 		}
 	} else if (strstr(cmd, "check")) {
 		cli_print("checking server status...\n");
 		server->check();
-		cli_print("checking tuner status...\n");
-		tuner->check();
+		if (tuner) {
+			cli_print("checking tuner status...\n");
+			tuner->check();
+		}
 		cli_print("checking feeder status...\n");
-		tuner->feeder.check();
+		feeder->check();
 		cli_print("checking parser / output status...\n");
-		tuner->feeder.parser.check();
+		feeder->parser.check();
 	} else if (strstr(cmd, "debug")) {
 		cli_print("setting debug level...\n");
 		if ((arg) && strlen(arg))
@@ -1078,8 +1109,8 @@ bool serve_client::__command(char* cmdline)
 			libdvbtee_set_debug_level(255);
 	} else if (strstr(cmd, "parser")) {
 		if ((arg) && strlen(arg))
-			tuner->feeder.parser.enable((strtoul(arg, NULL, 0)) ? true : false);
-		cli_print("parser is %sabled.\n", (tuner->feeder.parser.is_enabled()) ? "en" : "dis");
+			feeder->parser.enable((strtoul(arg, NULL, 0)) ? true : false);
+		cli_print("parser is %sabled.\n", (feeder->parser.is_enabled()) ? "en" : "dis");
 	} else if (strstr(cmd, "listen")) {
 		if ((arg) && strlen(arg)) {
 			int portnum = strtoul(arg, NULL, 0);
@@ -1088,6 +1119,10 @@ bool serve_client::__command(char* cmdline)
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
 	} else if (strstr(cmd, "save")) {
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
 		cmd_tuner_scan_channels_save(tuner);
 
 	} else if (strstr(cmd, "quit")) {
