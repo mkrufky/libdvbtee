@@ -79,7 +79,6 @@ private:
 	bool cmd_tuner_channel(tune*, int, unsigned int);
 	bool cmd_tuner_scan(tune*, char*, bool, bool, unsigned int);
 	bool cmd_tuner_scan_channels_save(tune* tuner);
-	bool cmd_config_channels_conf_load(tune* tuner);
 
 	decode_report *reporter;
 
@@ -141,6 +140,7 @@ public:
 	void stop();
 
 	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
+	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
 
 	void set_scan_flags(unsigned int tuner_id, unsigned int flags) { scan_flags = flags; };
 	unsigned int get_scan_flags(unsigned int tuner_id) { return scan_flags; };
@@ -148,6 +148,8 @@ public:
 	bool is_running() { return listener.is_running(); };
 
 	bool check();
+
+	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
 
 	feed_server_map feed_servers;
 private:

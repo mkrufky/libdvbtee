@@ -56,6 +56,22 @@ bool serve::add_tuner(tune *new_tuner)
 	return true;
 };
 
+bool serve::get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+{
+	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+	if (!tuner) {
+		dprintf("NO TUNER!\n");
+		return false;
+	}
+
+	/* channels verified during this session */
+	tuner->get_scan_results(false, chandump_cb, chandump_context);
+	/* load remaining channels that we saved previously but havent seen during this session */
+	cmd_config_channels_conf_load(tuner, chandump_cb, chandump_context);
+
+	return true;
+}
+
 /*****************************************************************************/
 
 #define CRLF "\r\n"
@@ -788,7 +804,7 @@ static uint16_t derive_physical_channel(uint32_t freq, const char *modulation)
 	return ret;
 }
 
-bool serve_client::cmd_config_channels_conf_load(tune* tuner)
+bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context)
 {
 	char *homedir = getenv ("HOME");
 	const char *subdir = "/.dvbtee";
@@ -811,14 +827,15 @@ bool serve_client::cmd_config_channels_conf_load(tune* tuner)
 	if (stat(filepath, &st) != 0)
 		return false;
 
-	cli_print("reading %s...\n", filepath);
+	dprintf("reading %s...", filepath);
 
 	FILE *channels_conf = fopen(filepath, "r");
 	if (channels_conf) {
 		char line[128] = { 0 };
 		while (fgets(line, sizeof(line), channels_conf)) {
+#if 0
 			cli_print("%s", line);
-
+#endif
 			uint32_t freq;
 			uint16_t lcn, major, minor, physical_channel, vpid, apid, program_number;
 			unsigned char *service_name;
@@ -858,7 +875,7 @@ bool serve_client::cmd_config_channels_conf_load(tune* tuner)
 			}
 			lcn = major;
 
-			chandump(false, lcn, major, minor,
+			chandump_cb(chandump_context, lcn, major, minor,
 				 physical_channel, freq, modulation,
 				 service_name, vpid, apid, program_number);
 		}
@@ -981,9 +998,10 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "channels")) {
 		cli_print("dumping channel list...\n");
 
+		/* channels verified during this session */
 		tuner->get_scan_results(false, chandump, this);
 		/* load remaining channels that we saved previously but havent seen during this session */
-		cmd_config_channels_conf_load(tuner);
+		server->cmd_config_channels_conf_load(tuner, chandump, this);
 
 	} else if (strstr(cmd, "channel")) {
 		if ((arg) && strlen(arg))
@@ -1046,10 +1064,6 @@ bool serve_client::__command(char* cmdline)
 			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum) : -1;
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
-#if 0
-	} else if (strstr(cmd, "loadchanconf")) {
-		cmd_config_channels_conf_load(tuner);
-#endif
 	} else if (strstr(cmd, "save")) {
 		cmd_tuner_scan_channels_save(tuner);
 
