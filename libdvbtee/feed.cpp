@@ -172,14 +172,22 @@ int feed::start_feed()
 
 int feed::setup_feed(int prio)
 {
+#if FEED_BUFFER
 	feed_thread_prio = prio;
 
 	return start_feed();
+#else
+	return 0;
+#endif
 }
 
 int feed::push(int size, const uint8_t* data)
 {
+#if FEED_BUFFER
 	return (ringbuffer.write((const void*)data, size)) ? 0 : -1;
+#else
+	return parser.feed(size, (uint8_t*)data);
+#endif
 }
 
 int feed::start()
