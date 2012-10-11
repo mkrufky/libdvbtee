@@ -31,6 +31,7 @@
 #define SERVE_DEFAULT_PORT 64080
 
 typedef std::map<uint8_t, tune*> tuner_map;
+typedef std::map<uint8_t, feed*> feeder_map;
 
 class serve;
 
@@ -139,6 +140,7 @@ public:
 	void stop();
 
 	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
+	bool add_feeder(feed *new_feeder) /*{ feeders[feeders.size()] = new_feeder; }*/;
 	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
 		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL, unsigned int tuner_id = 0);

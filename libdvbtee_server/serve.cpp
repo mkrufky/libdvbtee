@@ -48,7 +48,14 @@ unsigned int dbg_serve = DBG_SERVE;
 
 #define dprintf(fmt, arg...) __dprintf(DBG_SERVE, fmt, ##arg)
 
-	tuner_map tuners;
+	tuner_map  tuners;
+	feeder_map feeders;
+
+bool serve::add_feeder(feed *new_feeder)
+{
+	feeders[feeders.size()] = new_feeder;
+	return true;
+};
 
 bool serve::add_tuner(tune *new_tuner)
 {
