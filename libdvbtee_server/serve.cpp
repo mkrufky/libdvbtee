@@ -72,6 +72,19 @@ bool serve::get_channels(chandump_callback chandump_cb, void *chandump_context, 
 	return true;
 }
 
+bool serve::scan(unsigned int flags, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+{
+	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+	if (!tuner) {
+		dprintf("NO TUNER!\n");
+		return false;
+	}
+
+	bool wait_for_results = (chandump_cb != NULL) ? true : false;
+
+	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, chandump_cb, chandump_context);
+}
+
 /*****************************************************************************/
 
 #define CRLF "\r\n"
@@ -774,17 +787,18 @@ bool serve_client::cmd_tuner_channel(tune* tuner, int channel, unsigned int flag
 	return false;
 }
 
-bool serve_client::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags)
+bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
+			   chandump_callback chandump_cb, void *chandump_context)
 {
-	cli_print("scanning for services...\n");
+	dprintf("scanning for services...");
 
 	if (!flags)
 		flags = SCAN_VSB;
 
 	if ((arg) && strlen(arg))
-		tuner->scan_for_services(flags, arg, scanepg, chandump, this, wait_for_results);
+		tuner->scan_for_services(flags, arg, scanepg, chandump_cb, chandump_context, wait_for_results);
 	else
-		tuner->scan_for_services(flags, 0, 0, scanepg, chandump, this, wait_for_results);
+		tuner->scan_for_services(flags, 0, 0, scanepg, chandump_cb, chandump_context, wait_for_results);
 
 	return true;
 }
@@ -956,9 +970,11 @@ bool serve_client::__command(char* cmdline)
 		return false;
 	}
 	if (strstr(cmd, "scan")) {
-		cmd_tuner_scan(tuner, arg,
-			       (strstr(cmd, "scanepg")) ? true : false,
-			       (strstr(cmd, "startscan")) ? false : true, scan_flags);
+		cli_print("scanning for services...\n");
+		server->cmd_tuner_scan(tuner, arg,
+				      (strstr(cmd, "scanepg")) ? true : false,
+				      (strstr(cmd, "startscan")) ? false : true,
+				      scan_flags, chandump, this);
 
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;

@@ -136,6 +136,56 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 	return context->server->start(62080);
 }
 
+
+//FIXME: we return const char * for no reason - this will be converted to bool, int or void
+const char * chandump(void *context,
+		      uint16_t lcn, uint16_t major, uint16_t minor,
+		      uint16_t physical_channel, uint32_t freq, const char *modulation,
+		      unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+{
+	char channelno[7]; /* XXX.XXX */
+	if (major + minor > 1)
+		sprintf(channelno, "%d.%d", major, minor);
+	else if (lcn)
+		sprintf(channelno, "%d", lcn);
+	else
+		sprintf(channelno, "%d", physical_channel);
+
+	/* xine format */
+	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+		channelno,
+		service_name,
+		freq,//iter_vct->second.carrier_freq,
+		modulation,
+		vpid, apid, program_number);
+
+	char svc_id[6] = { 0 };
+
+	/* link to http stream */
+	fprintf(stdout, "<a href='/tune=%d+%d&stream/here'>%s: %s</a>",
+		physical_channel, program_number, channelno, service_name);
+
+	return NULL;
+}
+
+bool list_channels(serve *server)
+{
+	if (!server)
+		return false;
+
+	return server->get_channels(chandump, NULL)
+}
+
+bool start_async_channel_scan(serve *server, unsigned int flags = 0)
+{
+	server->scan(flags);
+}
+
+bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
+{
+	server->scan(flags, chandump, NULL);
+}
+
 int main(int argc, char **argv)
 {
 	int opt;
