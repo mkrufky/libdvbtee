@@ -870,7 +870,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 			}
 			c.lcn = c.major;
 
-			chandump_cb(chandump_context, &c);
+			if (chandump_cb) chandump_cb(chandump_context, &c);
 		}
 		fclose(channels_conf);
 		return true;
