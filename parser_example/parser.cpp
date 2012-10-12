@@ -137,11 +137,20 @@ int main(int argc, char **argv)
 {
 	int opt;
 	dvbtee_context context;
+	unsigned int timeout = 0;
+	char filename[256];
 
 	context.server = NULL;
 
-        while ((opt = getopt(argc, argv, "d::")) != -1) {
+        while ((opt = getopt(argc, argv, "F:t:d::")) != -1) {
 		switch (opt) {
+		case 'F': /* Filename */
+			strcpy(filename, optarg);
+			break;
+
+		case 't': /* timeout */
+			timeout = strtoul(optarg, NULL, 0);
+			break;
 		case 'd':
 			if (optarg)
 				libdvbtee_set_debug_level(strtoul(optarg, NULL, 0));
@@ -169,6 +178,25 @@ int main(int argc, char **argv)
 
 	start_server(&context, 62080, 62081);
 
+	if (strlen(filename)) {
+		/* first, try to open it as a file */
+		if (0 <= context.feeder.open_file(filename)) {
+			if (0 == context.feeder.start()) {
+				context.feeder.wait_for_streaming_or_timeout(timeout);
+				context.feeder.stop();
+			}
+			context.feeder.close_file();
+		} else
+		/* next, try to open it as a url */
+		if (0 <= context.feeder.start_socket(filename)) {
+			context.feeder.wait_for_streaming_or_timeout(timeout);
+			context.feeder.stop();
+			context.feeder.close_file();
+		}
+		goto exit;
+        }
+
+	/* if we're not feeding a file or url then read from stdin */
 	if (NULL == freopen(NULL, "rb", stdin)) {
 		fprintf(stderr, "failed to open stdin!\n");
 		goto exit;
@@ -177,7 +205,11 @@ int main(int argc, char **argv)
 #define BUFSIZE ((4096/188)*188)
 	if (context.server) {
 		/* 100 is the magic number to signify:
-		   "do not call setpriority on feed thread" */
+		   "do not call setpriority on feed thread"
+		   otherwise, set a value between -20 and 19
+		   **prio only works if the feed class is
+		   built with double-buffer support.
+		 */
 		context.feeder.setup_feed(100);
 		while (context.server->is_running()) {
 			ssize_t r;
@@ -198,13 +230,12 @@ int main(int argc, char **argv)
 					stop_server(&context);
 				}
 			}
+			/* push data into the library */
 			context.feeder.push(r * 188, q);
 		}
-#if 0
-		stop_server(&context);
-#endif
 	}
 exit:
+	if (context.server) stop_server(&context);
 //	cleanup(&context);
 #if 1 /* FIXME */
 	ATSCMultipleStringsDeInit();

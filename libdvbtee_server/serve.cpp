@@ -948,11 +948,9 @@ bool serve_client::__command(char* cmdline)
 
 	tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
-		cli_print("NO TUNER!\n");
-		//return false;
 		feeder = (feeders.count(feeder_id)) ? feeders[feeder_id] : NULL;
 		if (!feeder) {
-			cli_print("NO FEEDER!\n");
+			cli_print("NO TUNER / FEEDER!\n");
 			return false;
 		}
 	} else
