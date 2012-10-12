@@ -550,6 +550,8 @@ eit_complete:
 }
 #endif
 
+static bool hello = false;
+
 parse::parse()
   : fed_pkt_count(0)
   , ts_id(0)
@@ -570,6 +572,7 @@ parse::parse()
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
 {
+	if (!hello) fprintf(stderr, "dvbtee v" LIBDVBTEE_VERSION ", built " __DATE__ " " __TIME__ "\n\n"); hello = true;
 	dprintf("()");
 
 	memset(&new_channel_info, 0, sizeof(channel_info_t));
