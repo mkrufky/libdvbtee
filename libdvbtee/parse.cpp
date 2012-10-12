@@ -756,7 +756,6 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 				}
 
 		unsigned char service_name[256] = { 0 };
-		service_name[7] = 0;
 		c.lcn = 0;
 		c.major = 0;
 		c.minor = 0;
@@ -765,16 +764,18 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 			c.major = iter_vct->second.chan_major;
 			c.minor = iter_vct->second.chan_minor;
 			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
+			c.service_name = service_name;
 		} else { // FIXME: use SDT info
 			c.lcn = decoders[ts_id].get_lcn(c.program_number);
 
 			decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
 			if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
-				strcpy((char*)service_name, (const char *)decoded_sdt->services[c.program_number].service_name);
-			else
+				c.service_name = decoded_sdt->services[c.program_number].service_name;
+			else {
 				sprintf((char*)service_name, "%04d_UNKNOWN", c.program_number);
+				c.service_name = service_name;
+			}
 		}
-		c.service_name = service_name;
 		if (!chandump_cb)
 			chandump_cb = xine_chandump;
 
