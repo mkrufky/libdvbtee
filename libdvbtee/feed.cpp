@@ -292,7 +292,7 @@ void *feed::file_feed_thread()
 				break;
 			case EINTR: /* maybe ok? */
 				fprintf(stderr, "%s: r = %d, errno = EINTR\n", __func__, (int)r);
-				//f_kill_thread = true;
+				f_kill_thread = true;
 				break;
 			case EINVAL:
 				fprintf(stderr, "%s: r = %d, errno = EINVAL\n", __func__, (int)r);
