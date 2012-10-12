@@ -884,6 +884,34 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 	return true;
 }
 
+void decode_report::dump_epg_event(const char * channel_name,
+		    uint16_t chan_major,
+		    uint16_t chan_minor,
+		    //
+		    uint16_t event_id,
+		    time_t start_time,
+		    uint32_t length_sec,
+		    const char * name,
+		    const char * text)
+{
+	if (!dump_epg_event_cb)
+		return;
+
+	decoded_event_t e;
+	e.channel_name = channel_name;
+	e.chan_major   = chan_major;
+	e.chan_minor   = chan_minor;
+
+	e.event_id     = event_id;
+	e.start_time   = start_time;
+	e.length_sec   = length_sec;
+	e.name         = name;
+	e.text         = text;
+
+	dump_epg_event_cb(context, &e);
+};
+
+
 void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decode_report *reporter)
 {
 	unsigned char service_name[8] = { 0 };

@@ -312,16 +312,21 @@ typedef void (*dump_epg_header_footer_callback)(void */* context */,
 						bool/* true = header / false = footer*/,
 						bool/* true = channel / false = body*/);
 
-typedef void (*dump_epg_event_callback)(void * context,
-					const char * channel_name,
-					uint16_t chan_major,
-					uint16_t chan_minor,
-					//
-					uint16_t event_id,
-					time_t start_time,
-					uint32_t length_sec,
-					const char * name,
-					const char * text);
+typedef struct
+{
+	const char *channel_name;
+	uint16_t    chan_major;
+	uint16_t    chan_minor;
+
+	uint16_t    event_id;
+	time_t      start_time;
+	uint32_t    length_sec;
+	const char *name;
+	const char *text;
+} decoded_event_t;
+
+
+typedef void (*dump_epg_event_callback)(void * context, decoded_event_t *e);
 
 typedef void (*dump_epg_streamback_callback)(void *, const char *);
 
@@ -345,8 +350,7 @@ public:
 			    time_t start_time,
 			    uint32_t length_sec,
 			    const char * name,
-			    const char * text)
-	{ if (dump_epg_event_cb) dump_epg_event_cb(context, channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text); };
+			    const char * text);
 	void print(const char *fmt, ...);
 private:
 	void *context;

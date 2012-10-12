@@ -59,41 +59,32 @@ const char * json_dump_epg_header_footer_callback(void *, bool header, bool chan
 	return str;
 }
 
-const char * html_dump_epg_event_callback(void * context,
-					  const char * channel_name,
-					  uint16_t chan_major,
-					  uint16_t chan_minor,
-					  //
-					  uint16_t event_id,
-					  time_t start_time,
-					  uint32_t length_sec,
-					  const char * name,
-					  const char * text)
+const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 {
 	//fprintf(stderr, "%s()\n", __func__);
 	std::string str;
 	str.clear();
 	str.append("<td>");
 	//str.append("channel: ");
-	if (channel_name) {
+	if (e->channel_name) {
 		char chan_nbr[12] = { 0 };
 
-		snprintf(chan_nbr, sizeof(chan_nbr), "%d.%d: ", chan_major, chan_minor);
+		snprintf(chan_nbr, sizeof(chan_nbr), "%d.%d: ", e->chan_major, e->chan_minor);
 
 		str.append("<nobr>");
 		str.append(chan_nbr);
-		str.append(channel_name);
+		str.append(e->channel_name);
 		str.append("</nobr>");
 	}
 	//str.append("show: ");
-	if (name) {
-		time_t end_time = start_time + length_sec;
-		struct tm tms = *localtime( &start_time );
+	if (e->name) {
+		time_t end_time = e->start_time + e->length_sec;
+		struct tm tms = *localtime( &e->start_time );
 		struct tm tme = *localtime( &end_time );
 
 		char time_str[14] = { 0 };
 
-		str.append(name);
+		str.append(e->name);
 
 		snprintf(time_str, sizeof(time_str), "%02d:%02d - %02d:%02d", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min);
 
@@ -106,18 +97,9 @@ const char * html_dump_epg_event_callback(void * context,
 	return str.c_str();
 }
 
-const char * json_dump_epg_event_callback(void * context,
-					  const char * channel_name,
-					  uint16_t chan_major,
-					  uint16_t chan_minor,
-					  //
-					  uint16_t event_id,
-					  time_t start_time,
-					  uint32_t length_sec,
-					  const char * name,
-					  const char * text)
+const char * json_dump_epg_event_callback(void * context, decoded_event_t *e)
 {
-	time_t end_time = start_time + length_sec;
+	time_t end_time = e->start_time + e->length_sec;
 	char time_str[15] = { 0 };
 	//fprintf(stderr, "%s()\n", __func__);
 	std::string str;
@@ -126,10 +108,10 @@ const char * json_dump_epg_event_callback(void * context,
 
 	str.append("\"StartTime\":");
 #if 1
-	snprintf(time_str, sizeof(time_str), "%lld", (long long int)start_time);
+	snprintf(time_str, sizeof(time_str), "%lld", (long long int)e->start_time);
 	str.append(time_str);
 #else
-	str.append(ctime(&start_time));
+	str.append(ctime(&e->start_time));
 #endif
 	str.append(",");
 	str.append("\"EndTime\":");
@@ -141,7 +123,7 @@ const char * json_dump_epg_event_callback(void * context,
 #endif
 	str.append(",");
 	str.append("\"Title\":\"");
-	str.append(name);
+	str.append(e->name);
 	str.append("\",");
 	str.append("\"ShortDescription\":\"");
 	//str.append(text);

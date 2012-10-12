@@ -397,18 +397,9 @@ void serve_client::epg_header_footer_callback(bool header, bool channel)
 	return;
 }
 
-void serve_client::epg_event_callback(void * context,
-				const char * channel_name,
-				uint16_t chan_major,
-				uint16_t chan_minor,
-				//
-				uint16_t event_id,
-				time_t start_time,
-				uint32_t length_sec,
-				const char * name,
-				const char * text)
+void serve_client::epg_event_callback(void * context, decoded_event_t *e)
 {
-	return static_cast<serve_client*>(context)->epg_event_callback(channel_name, chan_major, chan_minor, event_id, start_time, length_sec, name, text);
+	return static_cast<serve_client*>(context)->epg_event_callback(e);
 }
 
 static inline const char *month(int x)
@@ -446,25 +437,21 @@ static inline const char *weekday(int x)
 	return ret;
 }
 
-void serve_client::epg_event_callback(
-				const char * channel_name,
-				uint16_t chan_major,
-				uint16_t chan_minor,
-				//
-				uint16_t event_id,
-				time_t start_time,
-				uint32_t length_sec,
-				const char * name,
-				const char * text)
+void serve_client::epg_event_callback(decoded_event_t *e)
 {
 	dprintf("()");
 	if (!streamback_started) return;
 #if 1
 	if (streamback_newchannel) {
 		if (data_fmt == SERVE_DATA_FMT_CLI)
-			cli_print("\n%d.%d-%s\n", chan_major, chan_minor, channel_name);
+			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name);
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
-			const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
+			decoded_event_t ee = { 0 };
+			ee.channel_name = e->channel_name;
+			ee.chan_major = e->chan_major;
+			ee.chan_minor = e->chan_minor;
+			//const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
+			const char *str = html_dump_epg_event_callback(this, &ee);
 			streamback((const uint8_t *)str, strlen(str));
 		}
 		streamback_newchannel = false;
@@ -472,8 +459,8 @@ void serve_client::epg_event_callback(
 	}
 #endif
 	if (data_fmt == SERVE_DATA_FMT_CLI) {
-		time_t end_time = start_time + length_sec;
-		struct tm tms = *localtime( &start_time );
+		time_t end_time = e->start_time + e->length_sec;
+		struct tm tms = *localtime( &e->start_time );
 		struct tm tme = *localtime( &end_time );
 
 		char time_str[26] = { 0 };
@@ -483,17 +470,24 @@ void serve_client::epg_event_callback(
 			 tms.tm_hour, tms.tm_min,
 			 tme.tm_hour, tme.tm_min);
 
-		cli_print("%s\t %s\n", time_str, name);
+		cli_print("%s\t %s\n", time_str, e->name);
 	}
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
+		decoded_event_t ee = { 0 };
+		ee.event_id = e->event_id;
+		ee.start_time = e->start_time;
+		ee.length_sec = e->length_sec;
+		ee.name = e->name;
+		ee.text = e->text;
+
 		const char *str;
 		switch (data_fmt) {
 		default: // FIXME
 		case SERVE_DATA_FMT_HTML:
-			str = html_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+			str = html_dump_epg_event_callback(this, &ee);
 			break;
 		case SERVE_DATA_FMT_JSON:
-			str = json_dump_epg_event_callback(this, NULL, 0, 0, event_id, start_time, length_sec, name, text);
+			str = json_dump_epg_event_callback(this, &ee);
 			break;
 		}
 		streamback((const uint8_t *)str, strlen(str));

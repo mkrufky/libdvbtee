@@ -90,26 +90,9 @@ private:
 	bool streamback_newchannel;
 
 	void epg_header_footer_callback(bool header, bool channel);
-	void epg_event_callback(const char * channel_name,
-					uint16_t chan_major,
-					uint16_t chan_minor,
-					//
-					uint16_t event_id,
-					time_t start_time,
-					uint32_t length_sec,
-					const char * name,
-					const char * text);
+	void epg_event_callback(decoded_event_t *e);
 	static void epg_header_footer_callback(void * context, bool header, bool channel);
-	static void epg_event_callback(void * context,
-					const char * channel_name,
-					uint16_t chan_major,
-					uint16_t chan_minor,
-					//
-					uint16_t event_id,
-					time_t start_time,
-					uint32_t length_sec,
-					const char * name,
-					const char * text);
+	static void epg_event_callback(void * context, decoded_event_t *e);
 
 	const char * chandump(bool save_to_disk, parsed_channel_info_t *c);
 	static const char * chandump(void *context, parsed_channel_info_t *c);
