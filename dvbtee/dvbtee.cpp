@@ -302,7 +302,7 @@ int main(int argc, char **argv)
 	char channel_list[256];
 	memset(&channel_list, 0, sizeof(channel_list));
 
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 	fprintf(stderr, "dvbtee v" VERSION ", built " __DATE__ " " __TIME__ "\n\n");
 
         while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::S::E::o::O:d::")) != -1) {
