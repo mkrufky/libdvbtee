@@ -152,33 +152,30 @@ const char * json_dump_epg_event_callback(void * context,
 	return str.c_str();
 }
 
-const char * html_dump_channels(void *context,
-			       uint16_t lcn, uint16_t major, uint16_t minor,
-			       uint16_t physical_channel, uint32_t freq, const char *modulation,
-			       unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+const char * html_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
         str.clear();
 	char channelno[7]; /* XXX.XXX */
-	if (major + minor > 1)
-		sprintf(channelno, "%d.%d", major, minor);
-	else if (lcn)
-		sprintf(channelno, "%d", lcn);
+	if (c->major + c->minor > 1)
+		sprintf(channelno, "%d.%d", c->major, c->minor);
+	else if (c->lcn)
+		sprintf(channelno, "%d", c->lcn);
 	else
-		sprintf(channelno, "%d", physical_channel);
+		sprintf(channelno, "%d", c->physical_channel);
 
 	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
 		channelno,
-		service_name,
-		freq,//iter_vct->second.carrier_freq,
-		modulation,
-		vpid, apid, program_number);
+		c->service_name,
+		c->freq,//iter_vct->second.carrier_freq,
+		c->modulation,
+		c->vpid, c->apid, c->program_number);
 
 	char phy_chan[4] = { 0 };
 	char svc_id[6] = { 0 };
 
-	sprintf(phy_chan, "%d", physical_channel);
-	sprintf(svc_id, "%d", program_number);
+	sprintf(phy_chan, "%d", c->physical_channel);
+	sprintf(svc_id, "%d", c->program_number);
 
 	str.append("<table>");
 	str.append("<tr>");
@@ -190,7 +187,7 @@ const char * html_dump_channels(void *context,
 	str.append("&channels'>");
 	str.append(channelno);
 	str.append(": ");
-	str.append((const char *)service_name);
+	str.append((const char *)c->service_name);
 	str.append("</a>");
 #if 0
 	str.append("</td>");
@@ -206,42 +203,39 @@ const char * html_dump_channels(void *context,
 	return str.c_str();
 }
 
-const char * json_dump_channels(void *context,
-			       uint16_t lcn, uint16_t major, uint16_t minor,
-			       uint16_t physical_channel, uint32_t freq, const char *modulation,
-			       unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+const char * json_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
 	char channelno[7] = { 0 }; /* XXX.XXX */
 	char chan_major[3] = { 0 };
 	char chan_minor[3] = { 0 };
-	if (major + minor > 1) {
-		sprintf(channelno, "%d.%d", major, minor);
-		sprintf(chan_major, "%d", major);
-		sprintf(chan_minor, "%d", minor);
-	} else if (lcn) {
-		sprintf(channelno, "%d", lcn);
-		sprintf(chan_major, "%d", lcn);
+	if (c->major + c->minor > 1) {
+		sprintf(channelno, "%d.%d", c->major, c->minor);
+		sprintf(chan_major, "%d", c->major);
+		sprintf(chan_minor, "%d", c->minor);
+	} else if (c->lcn) {
+		sprintf(channelno, "%d", c->lcn);
+		sprintf(chan_major, "%d", c->lcn);
 		sprintf(chan_minor, "%d", 0);
 	} else {
-		sprintf(channelno, "%d", physical_channel);
-		sprintf(chan_major, "%d", physical_channel);
-		sprintf(chan_minor, "%d", program_number);
+		sprintf(channelno, "%d", c->physical_channel);
+		sprintf(chan_major, "%d", c->physical_channel);
+		sprintf(chan_minor, "%d", c->program_number);
 	}
 
 	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
 		channelno,
-		service_name,
-		freq,//iter_vct->second.carrier_freq,
-		modulation,
-		vpid, apid, program_number);
+		c->service_name,
+		c->freq,//iter_vct->second.carrier_freq,
+		c->modulation,
+		c->vpid, c->apid, c->program_number);
 
 	char phy_chan[4] = { 0 };
 	char svc_id[6] = { 0 };
 
-	sprintf(phy_chan, "%d", physical_channel);
-	sprintf(svc_id, "%d", program_number);
+	sprintf(phy_chan, "%d", c->physical_channel);
+	sprintf(svc_id, "%d", c->program_number);
 
 	str.append("{");
 	str.append("\"Id\":\"");
@@ -253,7 +247,7 @@ const char * json_dump_channels(void *context,
 	str.append("\"");
 	str.append(",");
 	str.append("\"DisplayName\":\"");
-	str.append((const char *)service_name);
+	str.append((const char *)c->service_name);
 	str.append("\"");
 	str.append(",");
 	str.append("\"MajorChannelNo\":\"");

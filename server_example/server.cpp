@@ -138,30 +138,27 @@ int start_server(struct dvbtee_context* context, unsigned int flags, int port, i
 
 
 //FIXME: we return const char * for no reason - this will be converted to bool, int or void
-const char * chandump(void *context,
-		      uint16_t lcn, uint16_t major, uint16_t minor,
-		      uint16_t physical_channel, uint32_t freq, const char *modulation,
-		      unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+const char * chandump(void *context, parsed_channel_info_t *c)
 {
 	char channelno[7]; /* XXX.XXX */
-	if (major + minor > 1)
-		sprintf(channelno, "%d.%d", major, minor);
-	else if (lcn)
-		sprintf(channelno, "%d", lcn);
+	if (c->major + c->minor > 1)
+		sprintf(channelno, "%d.%d", c->major, c->minor);
+	else if (c->lcn)
+		sprintf(channelno, "%d", c->lcn);
 	else
-		sprintf(channelno, "%d", physical_channel);
+		sprintf(channelno, "%d", c->physical_channel);
 
 	/* xine format */
 	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
 		channelno,
-		service_name,
-		freq,//iter_vct->second.carrier_freq,
-		modulation,
-		vpid, apid, program_number);
+		c->service_name,
+		c->freq,//iter_vct->second.carrier_freq,
+		c->modulation,
+		c->vpid, c->apid, c->program_number);
 
 	/* link to http stream */
 	fprintf(stdout, "<a href='/tune=%d+%d&stream/here'>%s: %s</a>",
-		physical_channel, program_number, channelno, service_name);
+		c->physical_channel, c->program_number, channelno, c->service_name);
 
 	return NULL;
 }

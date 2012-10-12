@@ -683,34 +683,32 @@ inline uint16_t tp_pkt_pid(uint8_t* pkt)
 	return (pkt[0] == 0x47) ? ((uint16_t) (pkt[1] & 0x1f) << 8) + pkt[2] : (uint16_t) - 1;
 }
 
-static const char * xine_chandump(void *context,
-			  uint16_t lcn, uint16_t major, uint16_t minor,
-			  uint16_t physical_channel, uint32_t freq, const char *modulation,
-			  unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+static const char * xine_chandump(void *context, parsed_channel_info_t *c)
 {
 	char channelno[7]; /* XXX.XXX */
-	if (major + minor > 1)
-		sprintf(channelno, "%d.%d", major, minor);
-	else if (lcn)
-		sprintf(channelno, "%d", lcn);
+	if (c->major + c->minor > 1)
+		sprintf(channelno, "%d.%d", c->major, c->minor);
+	else if (c->lcn)
+		sprintf(channelno, "%d", c->lcn);
 	else
-		sprintf(channelno, "%d", physical_channel);
+		sprintf(channelno, "%d", c->physical_channel);
 
 	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
 		channelno,
-		service_name,
-		freq,//iter_vct->second.carrier_freq,
-		modulation,
-		vpid, apid, program_number);
+		c->service_name,
+		c->freq,//iter_vct->second.carrier_freq,
+		c->modulation,
+		c->vpid, c->apid, c->program_number);
 
 	return NULL;
 }
 
 unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chandump_callback chandump_cb, void* chandump_context)
 {
-	uint32_t freq          = channel_info->frequency;
-	uint16_t channel       = channel_info->channel;
-	const char* modulation = channel_info->modulation;;
+	parsed_channel_info_t c;
+	c.freq             = channel_info->frequency;
+	c.physical_channel = channel_info->channel;
+	c.modulation       = channel_info->modulation;
 
 	int count = 0;
 
@@ -718,18 +716,18 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
 	const decoded_vct_t* decoded_vct = decoders[ts_id].get_decoded_vct();
 
-	fprintf(stdout, "\n# channel %d, %d, %s %s\n", channel, freq, "", "");
+	fprintf(stdout, "\n# channel %d, %d, %s %s\n", c.physical_channel, c.freq, "", "");
 
 	if (decoders.count(ts_id))
 	for (map_decoded_pat_programs::const_iterator iter_pat = decoded_pat->programs.begin();
 	     iter_pat != decoded_pat->programs.end(); ++iter_pat) {
-		int program_number = iter_pat->first;
+		c.program_number = iter_pat->first;
 		//int pmt_pid        = iter_pat->second;
 
-		int apid = 0;
-		int vpid = 0;
+		c.apid = 0;
+		c.vpid = 0;
 
-		map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(program_number);
+		map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(c.program_number);
 		if (iter_pmt == decoded_pmt->end())
 			continue;
 		//map_ts_elementary_streams::iterator iter_pmt_es = iter_pmt->second.es_streams.find(program_number);
@@ -743,7 +741,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 				case ST_ATSC_VideoMpeg2:
 #endif
 				case ST_VideoMpeg2:
-					if (!vpid) vpid = iter_pmt_es->second.pid;
+					if (!c.vpid) c.vpid = iter_pmt_es->second.pid;
 					break;
 #if 1
 				case ST_AudioMpeg1:
@@ -753,33 +751,33 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 				case ST_ATSC_AudioEAC3:
 #endif
 				case ST_ATSC_AudioAC3:
-					if (!apid) apid = iter_pmt_es->second.pid;
+					if (!c.apid) c.apid = iter_pmt_es->second.pid;
 					break;
 				}
 
-		unsigned char service_name[256] = { 0 };
-		service_name[7] = 0;
-		uint16_t lcn = 0;
-		uint16_t major = 0;
-		uint16_t minor = 0;
-		map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(program_number);
+		memset(c.service_name, 0, sizeof(c.service_name));
+		c.service_name[7] = 0;
+		c.lcn = 0;
+		c.major = 0;
+		c.minor = 0;
+		map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(c.program_number);
 		if (iter_vct != decoded_vct->channels.end()) {
-			major = iter_vct->second.chan_major;
-			minor = iter_vct->second.chan_minor;
-			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
+			c.major = iter_vct->second.chan_major;
+			c.minor = iter_vct->second.chan_minor;
+			for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
 		} else { // FIXME: use SDT info
-			lcn = decoders[ts_id].get_lcn(program_number);
+			c.lcn = decoders[ts_id].get_lcn(c.program_number);
 
 			decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
-			if ((decoded_sdt) && (decoded_sdt->services.count(program_number)))
-				strcpy((char*)service_name, (const char *)decoded_sdt->services[program_number].service_name);
+			if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
+				strcpy((char*)c.service_name, (const char *)decoded_sdt->services[c.program_number].service_name);
 			else
-				sprintf((char*)service_name, "%04d_UNKNOWN", program_number);
+				sprintf((char*)c.service_name, "%04d_UNKNOWN", c.program_number);
 		}
 		if (!chandump_cb)
 			chandump_cb = xine_chandump;
 
-		chandump_cb(chandump_context, lcn, major, minor, channel, freq, modulation, service_name, vpid, apid, program_number);
+		chandump_cb(chandump_context, &c);
 		count++;
 	}
 	return count;

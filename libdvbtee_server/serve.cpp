@@ -678,46 +678,35 @@ exit:
 	return ret;
 }
 
-const char * serve_client::chandump(void *context,
-		     uint16_t lcn, uint16_t major, uint16_t minor,
-		     uint16_t physical_channel, uint32_t freq, const char *modulation,
-		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+const char * serve_client::chandump(void *context, parsed_channel_info_t *c)
 {
-	return static_cast<serve_client*>(context)->chandump(false, lcn, major, minor,
-		physical_channel, freq, modulation, service_name, vpid, apid, program_number);
+	return static_cast<serve_client*>(context)->chandump(false, c);
 }
 
-const char * serve_client::chandump_to_disk(void *context,
-		     uint16_t lcn, uint16_t major, uint16_t minor,
-		     uint16_t physical_channel, uint32_t freq, const char *modulation,
-		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+const char * serve_client::chandump_to_disk(void *context, parsed_channel_info_t *c)
 {
-	return static_cast<serve_client*>(context)->chandump(true, lcn, major, minor,
-		physical_channel, freq, modulation, service_name, vpid, apid, program_number);
+	return static_cast<serve_client*>(context)->chandump(true, c);
 }
 
-const char * serve_client::chandump(bool save_to_disk,
-		     uint16_t lcn, uint16_t major, uint16_t minor,
-		     uint16_t physical_channel, uint32_t freq, const char *modulation,
-		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number)
+const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 {
 	const char *str = NULL;
 	char channelno[7]; /* XXX.XXX */
-	if (major + minor > 1)
-		sprintf(channelno, "%d.%d", major, minor);
-	else if (lcn)
-		sprintf(channelno, "%d", lcn);
+	if (c->major + c->minor > 1)
+		sprintf(channelno, "%d.%d", c->major, c->minor);
+	else if (c->lcn)
+		sprintf(channelno, "%d", c->lcn);
 	else
-		sprintf(channelno, "%d", physical_channel);
+		sprintf(channelno, "%d", c->physical_channel);
 
 	cli_print("%s-%s:%d:%s:%d:%d:%d\t channel=%d&service=%d\n",
-		channelno,
-		service_name,
-		freq,//iter_vct->second.carrier_freq,
-		modulation,
-		vpid, apid, program_number,
-		physical_channel,
-		program_number);
+		  channelno,
+		  c->service_name,
+		  c->freq,//iter_vct->second.carrier_freq,
+		  c->modulation,
+		  c->vpid, c->apid, c->program_number,
+		  c->physical_channel,
+		  c->program_number);
 
 	if (save_to_disk) {
 		//char diskbuf[96] = { 0 };
@@ -725,10 +714,10 @@ const char * serve_client::chandump(bool save_to_disk,
 		fprintf(channels_conf_file,
 			"%s-%s:%d:%s:%d:%d:%d\n",
 			channelno,
-			service_name,
-			freq,//iter_vct->second.carrier_freq,
-			modulation,
-			vpid, apid, program_number);
+			c->service_name,
+			c->freq,//iter_vct->second.carrier_freq,
+			c->modulation,
+			c->vpid, c->apid, c->program_number);
 
 		//if (channels_fd >= 0)
 		//	write(channels_fd, (const void *)diskbuf, sizeof(diskbuf));
@@ -736,14 +725,8 @@ const char * serve_client::chandump(bool save_to_disk,
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 
 		str = (USE_JSON) ?
-			json_dump_channels(this, lcn, major, minor,
-					   physical_channel, freq,
-					   modulation, service_name,
-					   vpid, apid, program_number) :
-			html_dump_channels(this, lcn, major, minor,
-					   physical_channel, freq,
-					   modulation, service_name,
-					   vpid, apid, program_number);
+			json_dump_channels(this, c) :
+			html_dump_channels(this, c);
 
 		streamback((const uint8_t *)str, strlen(str));
 	}
@@ -857,48 +840,43 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 #if 0
 			cli_print("%s", line);
 #endif
-			uint32_t freq;
-			uint16_t lcn, major, minor, physical_channel, vpid, apid, program_number;
-			unsigned char *service_name;
-			const char *modulation;
+			parsed_channel_info_t c;
 			char *save, *temp, *chan, *name = strtok_r(line, ":", &save);
 
 			temp = strtok_r(NULL, ":", &save);
-			freq = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.freq = (temp) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
-			modulation = (temp) ? temp : "";
+			c.modulation = (temp) ? temp : "";
 
-			physical_channel = derive_physical_channel(freq, modulation);
+			c.physical_channel = derive_physical_channel(c.freq, c.modulation);
 
-			uint16_t ts_id = tuner->feeder.parser.get_ts_id(physical_channel);
+			uint16_t ts_id = tuner->feeder.parser.get_ts_id(c.physical_channel);
 			if (ts_id) /* dont load data for channels we already know about */
 				continue;
 
 			temp = strtok_r(NULL, ":", &save);
-			vpid = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.vpid = (temp) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
-			apid = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.apid = (temp) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
-			program_number = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.program_number = (temp) ? strtoul(temp, NULL, 0) : 0;
 
 			chan = strtok_r(name, "-", &save);
 			temp = strtok_r(NULL, "-", &save);
-			service_name = (unsigned char *)((temp) ? temp : chan);
+			c.service_name = (unsigned char *)((temp) ? temp : chan);
 
 			temp = strtok_r(chan, ".", &save);
 			if (temp) {
-				major = strtoul(temp, NULL, 0);
+				c.major = strtoul(temp, NULL, 0);
 				temp = strtok_r(NULL, ".", &save);
-				minor = (temp) ? strtoul(temp, NULL, 0): 0;
+				c.minor = (temp) ? strtoul(temp, NULL, 0): 0;
 			} else {
-				major = 0;
-				minor = 0;
+				c.major = 0;
+				c.minor = 0;
 			}
-			lcn = major;
+			c.lcn = c.major;
 
-			chandump_cb(chandump_context, lcn, major, minor,
-				 physical_channel, freq, modulation,
-				 service_name, vpid, apid, program_number);
+			chandump_cb(chandump_context, &c);
 		}
 		fclose(channels_conf);
 		return true;

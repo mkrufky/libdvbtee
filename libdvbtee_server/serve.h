@@ -111,18 +111,9 @@ private:
 					const char * name,
 					const char * text);
 
-	const char * chandump(bool save_to_disk,
-		     uint16_t lcn, uint16_t major, uint16_t minor,
-		     uint16_t physical_channel, uint32_t freq, const char *modulation,
-		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
-	static const char * chandump(void *context,
-		     uint16_t lcn, uint16_t major, uint16_t minor,
-		     uint16_t physical_channel, uint32_t freq, const char *modulation,
-		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
-	static const char * chandump_to_disk(void *context,
-		     uint16_t lcn, uint16_t major, uint16_t minor,
-		     uint16_t physical_channel, uint32_t freq, const char *modulation,
-		     unsigned char *service_name, uint16_t vpid, uint16_t apid, uint16_t program_number);
+	const char * chandump(bool save_to_disk, parsed_channel_info_t *c);
+	static const char * chandump(void *context, parsed_channel_info_t *c);
+	static const char * chandump_to_disk(void *context, parsed_channel_info_t *c);
 
 	void cli_print(const char *, ...);
 	static void cli_print(void *, const char *, ...);
