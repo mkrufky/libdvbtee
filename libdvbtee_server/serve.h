@@ -82,6 +82,9 @@ private:
 	bool cmd_tuner_channel(int, unsigned int);
 	bool cmd_tuner_scan_channels_save();
 
+	bool list_feeders();
+	bool list_tuners();
+
 	decode_report *reporter;
 
 	void streamback(const uint8_t*, size_t);

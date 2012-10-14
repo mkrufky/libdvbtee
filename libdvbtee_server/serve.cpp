@@ -56,6 +56,31 @@ bool serve::add_tuner(tune *new_tuner)
 	return true;
 };
 
+bool serve_client::list_feeders()
+{
+	cli_print("%d feeders.\n", feeders.size());
+	for (feeder_map::iterator iter = feeders.begin(); iter != feeders.end(); ++iter)
+		iter->second->check();
+	return true;
+}
+
+bool serve_client::list_tuners()
+{
+	cli_print("%d tuners.\n", tuners.size());
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if (iter->second->check()) {
+			unsigned int cur_chan = iter->second->get_channel();
+			cli_print("tuner %d:\tchannel %d, state:%s%s%s%s%s\n",
+				  iter->first, cur_chan,
+				  iter->second->is_idle() ? " idle" : "",
+				  iter->second->is_open() ? " open" : "",
+				  iter->second->is_lock() ? " lock" : "",
+				  iter->second->is_scan() ? " scan" : "",
+				  iter->second->is_feed() ? " feed" : "");
+		}
+	return true;
+}
+
 bool serve::get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
@@ -947,7 +972,7 @@ bool serve_client::__command(char* cmdline)
 				if (tuner) feeder = &tuner->feeder;
 			}
 		} else {
-			// list tuners
+			list_tuners();
 		}
 		return true;
 	} else
@@ -959,7 +984,7 @@ bool serve_client::__command(char* cmdline)
 				if (feeder) tuner = NULL;
 			}
 		} else {
-			// list feeders
+			list_feeders();
 		}
 		return true;
 	}
