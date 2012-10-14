@@ -701,15 +701,22 @@ void feed_server::add_tcp_feed(int socket)
 		dprintf("(%d)", socket);
 
 		feeders[socket].add_tcp_feed(socket);
+
+		if (connection_notify_cb) connection_notify_cb(parent_context, &feeders[socket]);
 	}
 	return;
 }
 
-int feed_server::start_tcp_listener(uint16_t port_requested)
+int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_callback notify_cb, void *context)
 {
 	dprintf("(%d)", port_requested);
 
+	/* set listener callback to notify us (feed_server) of new connections */
 	listener.set_callback(this, add_tcp_feed);
+
+	/* set connection notify callback to notify out parent server new feeds */
+	connection_notify_cb = notify_cb;
+	parent_context = context;
 
 	return listener.start(port_requested);
 }

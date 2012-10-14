@@ -44,6 +44,12 @@ unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 	tuner_map  tuners;
 	feeder_map feeders;
 
+//static
+bool serve::add_feeder(void *p_this, feed *new_feeder)
+{
+	return static_cast<serve*>(p_this)->add_feeder(new_feeder);
+}
+
 bool serve::add_feeder(feed *new_feeder)
 {
 	feeders[feeders.size()] = new_feeder;
@@ -1140,7 +1146,7 @@ bool serve_client::__command(char* cmdline)
 		if ((arg) && strlen(arg)) {
 			int portnum = strtoul(arg, NULL, 0);
 			cli_print("starting TS listener on TCP port %d... ", portnum);
-			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum) : -1;
+			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder, server) : -1;
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
 	} else if (strstr(cmd, "save")) {

@@ -102,16 +102,21 @@ private:
 
 typedef std::map<int, feed> feed_map;
 
+typedef bool (*feed_server_callback)(void*, feed*);
+
 class feed_server
 {
 public:
 	feed_server();
 	~feed_server();
 
-	int start_tcp_listener(uint16_t);
+	int start_tcp_listener(uint16_t port_requested, feed_server_callback notify_cb = NULL, void *context = NULL);
 private:
 	feed_map feeders;
 	socket_listen listener;
+
+	feed_server_callback connection_notify_cb;
+	void *parent_context;
 
 	void add_tcp_feed(int);
 	static void add_tcp_feed(void*, int);
