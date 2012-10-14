@@ -931,11 +931,9 @@ bool serve_client::__command(char* cmdline)
 		cmd = cmdline;
 	arg = strtok_r(NULL, CHAR_CMD_SET, &save);
 
-	if (strstr(cmd, "tuner")) {
-		tuner_id = atoi(arg);
-		cmd = strtok_r(NULL, CHAR_CMD_SET, &save);
-		arg = strtok_r(NULL, CHAR_CMD_SET, &save);
-	} else
+	if (strstr(cmd, "tuner"))
+		tuner_id =  ((arg) && strlen(arg)) ? strtoul(arg, NULL, 0) : 0;
+	else
 		tuner_id = 0;
 
 	scan_flags = server->get_scan_flags(tuner_id);
