@@ -53,12 +53,16 @@ decode_report::decode_report()
   , dump_epg_event_cb(NULL)
   , print_cb(NULL)
 {
+#if DBG
 	dprintf("()");
+#endif
 }
 
 decode_report::~decode_report()
 {
+#if DBG
 	dprintf("()");
+#endif
 }
 
 void decode_report::print(const char *fmt, ...)
