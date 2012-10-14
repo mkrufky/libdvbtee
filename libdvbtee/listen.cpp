@@ -30,7 +30,7 @@
 #include "log.h"
 #define CLASS_MODULE "listen"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
+#define dprintf(fmt, arg...) __dprintf(DBG_SERVE, fmt, ##arg)
 
 
 socket_listen::socket_listen()

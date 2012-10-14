@@ -28,10 +28,11 @@
 #define DBG_PARSE	2
 #define DBG_FEED	4
 #define DBG_TUNE	8
-#define DBG_ATSCTEXT	16
-#define DBG_DESC	32
-#define DBG_OUTPUT	64
-#define DBG_TIME	128
+#define DBG_OUTPUT	16
+#define DBG_SERVE	32
+#define DBG_TIME	64
+#define DBG_DESC	128
+#define DBG_ATSCTEXT	256
 
 extern unsigned int dbg;
 

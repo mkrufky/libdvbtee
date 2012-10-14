@@ -31,20 +31,13 @@
 #include <sys/socket.h>
 #include <string.h>
 
+#include "log.h"
 #include "serve.h"
 #include "text.h"
 
-//FIXME:
-#define DBG_SERVE 1
+unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 
-unsigned int dbg_serve = DBG_SERVE;
-
-#define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
-
-#define __dprintf(lvl, fmt, arg...) do {			  \
-    if (dbg_serve & lvl)						  \
-      __printf(stderr, "server::%s: " fmt "\n", __func__, ##arg);	  \
-  } while (0)
+#define CLASS_MODULE "server"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_SERVE, fmt, ##arg)
 
@@ -88,6 +81,8 @@ bool serve::scan(unsigned int flags, chandump_callback chandump_cb, void *chandu
 	}
 
 	bool wait_for_results = (chandump_cb != NULL) ? true : false;
+
+	dprintf("scanning for services...");
 
 	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, chandump_cb, chandump_context);
 }
@@ -505,7 +500,7 @@ void serve::add_client(void *p_this, int socket)
 void serve::add_client(int socket)
 {
 	if (socket < 0) {
-		dprintf("not attaching to invalid socket, %d", socket);
+		fprintf(stderr, "not attaching to invalid socket, %d\n", socket);
 		return;
 	}
 
@@ -540,10 +535,11 @@ bool serve_client::check()
 {
 	bool ret = socket_active();
 	if (!ret)
-		dprintf("(%d) socket idle!", sock_fd);
+		cli_print("(%d) socket idle!\n", sock_fd);
 	else {
 		const char *fmt;
 		switch (data_fmt) {
+		default:
 		case SERVE_DATA_FMT_NONE:
 			fmt = "NONE";
 			break;
@@ -560,7 +556,7 @@ bool serve_client::check()
 			fmt = "CLI";
 			break;
 		}
-		dprintf("(%d) format = %s", sock_fd, fmt);
+		cli_print("(%d) format = %s\n", sock_fd, fmt);
 	}
 	return ret;
 }
@@ -774,8 +770,6 @@ bool serve_client::cmd_tuner_channel(tune* tuner, int channel, unsigned int flag
 bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
 			   chandump_callback chandump_cb, void *chandump_context)
 {
-	dprintf("scanning for services...");
-
 	if (!flags)
 		flags = SCAN_VSB;
 
