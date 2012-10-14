@@ -56,6 +56,8 @@ private:
 	bool f_kill_thread;
 
 	serve *server;
+	tune *tuner;
+	feed *feeder;
 
 	int sock_fd;
 	FILE *channels_conf_file;
@@ -76,9 +78,9 @@ private:
 	bool   command(char*);
 	bool __command(char*);
 
-	bool cmd_tuner_stop(tune*);
-	bool cmd_tuner_channel(tune*, int, unsigned int);
-	bool cmd_tuner_scan_channels_save(tune* tuner);
+	bool cmd_tuner_stop();
+	bool cmd_tuner_channel(int, unsigned int);
+	bool cmd_tuner_scan_channels_save();
 
 	decode_report *reporter;
 

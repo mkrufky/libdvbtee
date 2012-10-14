@@ -155,6 +155,9 @@ static char http_conn_close[] =
 
 serve_client::serve_client()
   : f_kill_thread(false)
+  , server(NULL)
+  , tuner(NULL)
+  , feeder(NULL)
   , sock_fd(-1)
   , channels_conf_file(NULL)
   , data_fmt(SERVE_DATA_FMT_NONE)
@@ -174,6 +177,9 @@ serve_client::serve_client(const serve_client&)
 {
 	dprintf("(copy)");
 	f_kill_thread = false;
+	server = NULL;
+	tuner = NULL;
+	feeder = NULL;
 	sock_fd = -1;
 	data_fmt = SERVE_DATA_FMT_NONE;
 }
@@ -186,6 +192,9 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 		return *this;
 
 	f_kill_thread = false;
+	server = NULL;
+	tuner = NULL;
+	feeder = NULL;
 	sock_fd = -1;
 	data_fmt = SERVE_DATA_FMT_NONE;
 
@@ -724,7 +733,7 @@ const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 	return str;
 }
 
-bool serve_client::cmd_tuner_stop(tune* tuner)
+bool serve_client::cmd_tuner_stop()
 {
 	cli_print("stopping data feed...\n");
 	tuner->stop_feed();
@@ -733,7 +742,7 @@ bool serve_client::cmd_tuner_stop(tune* tuner)
 	return true;
 }
 
-bool serve_client::cmd_tuner_channel(tune* tuner, int channel, unsigned int flags)
+bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 {
 	if (channel > 0) {
 		cli_print("TUNE to channel %d... ", channel);
@@ -872,7 +881,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 	return false;
 }
 
-bool serve_client::cmd_tuner_scan_channels_save(tune* tuner)
+bool serve_client::cmd_tuner_scan_channels_save()
 {
 	char cmd_buf[32] = { 0 };
 	char *homedir = getenv ("HOME");
@@ -919,35 +928,64 @@ bool serve_client::cmd_tuner_scan_channels_save(tune* tuner)
 
 bool serve_client::__command(char* cmdline)
 {
-	unsigned int feeder_id, tuner_id, scan_flags = 0;
-	tune *tuner = NULL;
-	feed *feeder = NULL;
+	unsigned int scan_flags = 0;
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);
 
-	feeder_id = 0;
+	int feeder_id = -1;
+	int tuner_id  = -1;
 
 	if (!cmd)
 		cmd = cmdline;
 	arg = strtok_r(NULL, CHAR_CMD_SET, &save);
 
-	if (strstr(cmd, "tuner"))
-		tuner_id =  ((arg) && strlen(arg)) ? strtoul(arg, NULL, 0) : 0;
-	else
-		tuner_id = 0;
-
-	scan_flags = server->get_scan_flags(tuner_id);
-
-	tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
-	if (!tuner) {
-		feeder = (feeders.count(feeder_id)) ? feeders[feeder_id] : NULL;
-		if (!feeder) {
-			cli_print("NO TUNER / FEEDER!\n");
-			return false;
+	if (strstr(cmd, "tuner")) {
+		if ((arg) && strlen(arg)) {
+			tuner_id = strtoul(arg, NULL, 0);
+			if (tuner_id >= 0) {
+				tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+				if (tuner) feeder = &tuner->feeder;
+			}
+		} else {
+			// list tuners
 		}
+		return true;
 	} else
+	if (strstr(cmd, "feeder")) {
+		if ((arg) && strlen(arg)) {
+			feeder_id = strtoul(arg, NULL, 0);
+			if (feeder_id >= 0) {
+				feeder = (feeders.count(feeder_id)) ? feeders[feeder_id] : NULL;
+				if (feeder) tuner = NULL;
+			}
+		} else {
+			// list feeders
+		}
+		return true;
+	}
+
+	if ((tuner) && (!feeder))
 		feeder = &tuner->feeder;
 
+	if ((!feeder) && (tuners.size())) {
+		tuner_id = 0;
+		tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+		if (tuner) feeder = &tuner->feeder;
+	}
+
+	if ((!feeder) && (feeders.size())) {
+		feeder_id = 0;
+		feeder = (feeders.count(feeder_id)) ? feeders[feeder_id] : NULL;
+		if (feeder) tuner = NULL;
+	}
+
+	if (tuner)
+		scan_flags = server->get_scan_flags(tuner_id);
+
+	if (!feeder) {
+		cli_print("NO TUNER / FEEDER!\n");
+		return false;
+	} else
 	if (strstr(cmd, "scan")) {
 		if (!tuner) {
 			cli_print("NO TUNER!\n");
@@ -979,12 +1017,12 @@ bool serve_client::__command(char* cmdline)
 		/* see if tuner has the right physical channel, if not then change it */
 		cur = tuner->get_channel();
 		if ((cur) && (cur != phy))
-			cmd_tuner_stop(tuner);
+			cmd_tuner_stop();
 		if (cur == phy) /* (cur) */ {
 			cli_print("already tuned to physical channel %d.\n", phy);
 			tuned = true;
 		} else
-			tuned = cmd_tuner_channel(tuner, strtoul(arg, NULL, 0), scan_flags);
+			tuned = cmd_tuner_channel(strtoul(arg, NULL, 0), scan_flags);
 
 		if (tuned) {
 			/* set service, if any */
@@ -1016,7 +1054,7 @@ bool serve_client::__command(char* cmdline)
 			return false;
 		}
 		if ((arg) && strlen(arg))
-			cmd_tuner_channel(tuner, strtoul(arg, NULL, 0), scan_flags);
+			cmd_tuner_channel(strtoul(arg, NULL, 0), scan_flags);
 		else
 			cli_print("missing channel number?\n");
 
@@ -1045,7 +1083,7 @@ bool serve_client::__command(char* cmdline)
 		feeder->parser.epg_dump(reporter);
 	} else if (strstr(cmd, "stop")) {
 		if (tuner)
-			cmd_tuner_stop(tuner);
+			cmd_tuner_stop();
 		else
 			feeder->stop();
 		if (strstr(cmd, "stopoutput")) {
@@ -1085,7 +1123,7 @@ bool serve_client::__command(char* cmdline)
 			cli_print("NO TUNER!\n");
 			return false;
 		}
-		cmd_tuner_scan_channels_save(tuner);
+		cmd_tuner_scan_channels_save();
 
 	} else if (strstr(cmd, "quit")) {
 		cli_print("stopping server...\n");
