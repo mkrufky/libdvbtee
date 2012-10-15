@@ -59,6 +59,24 @@ const char * json_dump_epg_header_footer_callback(void *, bool header, bool chan
 	return str;
 }
 
+const char * xml_dump_epg_header_footer_callback(void *, bool header, bool channel)
+{
+	//fprintf(stderr, "%s(%s, %s)\n", __func__, (header) ? "header" : "footer", (channel) ? "channel" : "body");
+	const char *str = NULL;
+	if (header)
+		if (channel)
+			str = "";
+		else
+			str = "<tv generator-info-name='dvbtee v"LIBDVBTEE_VERSION"'>\n";
+	else
+		if (channel)
+			str = "";
+		else
+			str = "</tv>\n";
+//	fprintf(stderr, "%s", str);
+	return str;
+}
+
 const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 {
 	//fprintf(stderr, "%s()\n", __func__);
@@ -131,6 +149,62 @@ const char * json_dump_epg_event_callback(void * context, decoded_event_t *e)
 
 	str.append("}");
 //	fprintf(stderr, "%s", str.c_str());
+	return str.c_str();
+}
+
+
+const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len)
+{
+	struct tm tm_time;
+	if (!time_str)
+		return NULL;
+
+	localtime_r(the_time, &tm_time);
+	snprintf(time_str, str_len, "%04d%02d%02d%02d%02d",
+		 tm_time.tm_year, tm_time.tm_mon, tm_time.tm_mday,
+		 tm_time.tm_hour, tm_time.tm_min);
+
+	return time_str;
+}
+
+
+const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
+{
+	time_t end_time = e->start_time + e->length_sec;
+	char time_str[15] = { 0 };
+	char chan_nbr[12] = { 0 };
+	//fprintf(stderr, "%s()\n", __func__);
+	std::string str;
+
+	str.clear();
+	str.append("<programme start='");
+
+	memset(time_str, 0, sizeof(time_str));
+	str.append(bcd_time_str(&e->start_time, time_str, sizeof(time_str)));
+
+	str.append("' stop='");
+
+	memset(time_str, 0, sizeof(time_str));
+	str.append(bcd_time_str(&end_time, time_str, sizeof(time_str)));
+
+	str.append("' channel='");
+
+	snprintf(chan_nbr, sizeof(chan_nbr), "%d.%d: ", e->chan_major, e->chan_minor);
+
+	str.append(chan_nbr);
+	str.append(" ");
+	str.append(e->channel_name);
+	str.append("'>\n");
+	str.append("<title lang='en'>");
+	str.append(e->name);
+	str.append("</title>\n");
+#if 0
+	str.append("<desc lang='en'>");
+	str.append(e->text);
+	str.append("</desc>\n");
+#endif
+	str.append("</programme>\n");
+
 	return str.c_str();
 }
 
@@ -242,6 +316,61 @@ const char * json_dump_channels(void *context, parsed_channel_info_t *c)
 	str.append("}");
 
 	str.append(",");
+
+	return str.c_str();
+}
+
+const char * xml_dump_channels(void *context, parsed_channel_info_t *c)
+{
+	std::string str;
+	str.clear();
+	char channelno[7] = { 0 }; /* XXX.XXX */
+	char chan_major[3] = { 0 };
+	char chan_minor[3] = { 0 };
+	if (c->major + c->minor > 1) {
+		sprintf(channelno, "%d.%d", c->major, c->minor);
+		sprintf(chan_major, "%d", c->major);
+		sprintf(chan_minor, "%d", c->minor);
+	} else if (c->lcn) {
+		sprintf(channelno, "%d", c->lcn);
+		sprintf(chan_major, "%d", c->lcn);
+		sprintf(chan_minor, "%d", 0);
+	} else {
+		sprintf(channelno, "%d", c->physical_channel);
+		sprintf(chan_major, "%d", c->physical_channel);
+		sprintf(chan_minor, "%d", c->program_number);
+	}
+
+	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+		channelno,
+		c->service_name,
+		c->freq,//iter_vct->second.carrier_freq,
+		c->modulation,
+		c->vpid, c->apid, c->program_number);
+
+	char phy_chan[4] = { 0 };
+	char svc_id[6] = { 0 };
+
+	sprintf(phy_chan, "%d", c->physical_channel);
+	sprintf(svc_id, "%d", c->program_number);
+
+	str.append("<channel id='");
+	str.append(phy_chan);
+	str.append("+");
+	str.append(svc_id);
+	str.append("'>\n");
+	str.append("<display-name>");
+	str.append(channelno);
+	str.append(" ");
+	str.append((const char *)c->service_name);
+	str.append("</display-name>\n");
+	str.append("<display-name>");
+	str.append(channelno);
+	str.append("</display-name>\n");
+	str.append("<display-name>");
+	str.append((const char *)c->service_name);
+	str.append("</display-name>\n");
+	str.append("</channel>\n");
 
 	return str.c_str();
 }

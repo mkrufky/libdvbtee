@@ -29,13 +29,19 @@ const char * html_dump_epg_header_footer_callback(void *, bool, bool);
 
 const char * json_dump_epg_header_footer_callback(void *, bool, bool);
 
+const char * xml_dump_epg_header_footer_callback(void *, bool, bool);
+
 const char * html_dump_epg_event_callback(void * context, decoded_event_t *e);
 
 const char * json_dump_epg_event_callback(void * context, decoded_event_t *e);
 
+const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e);
+
 const char * html_dump_channels(void *context, parsed_channel_info_t *c);
 
 const char * json_dump_channels(void *context, parsed_channel_info_t *c);
+
+const char * xml_dump_channels(void *context, parsed_channel_info_t *c);
 
 const char * html_playing_video(void *);
 
