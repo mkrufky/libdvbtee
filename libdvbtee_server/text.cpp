@@ -161,7 +161,8 @@ const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len
 
 	localtime_r(the_time, &tm_time);
 	snprintf(time_str, str_len, "%04d%02d%02d%02d%02d",
-		 tm_time.tm_year, tm_time.tm_mon, tm_time.tm_mday,
+		 1900 + tm_time.tm_year,
+		 1 + tm_time.tm_mon, tm_time.tm_mday,
 		 tm_time.tm_hour, tm_time.tm_min);
 
 	return time_str;

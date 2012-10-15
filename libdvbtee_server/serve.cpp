@@ -157,7 +157,7 @@ static char http_response[] =
 	 CRLF
 	 CRLF;
 
-static char json_response[] =
+static char text_response[] =
 	 HTTP_200_OK
 	 CRLF
 	 CONTENT_TYPE TEXT_PLAIN
@@ -309,7 +309,8 @@ void* serve_client::client_thread()
 			httphead = ((http) && (strstr(buf, "HEAD")));
 			if (httpget) {
 				data_fmt =	(strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN :
-						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON : SERVE_DATA_FMT_HTML;
+						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON :
+						(strstr(buf, "xml/")) ? SERVE_DATA_FMT_XML : SERVE_DATA_FMT_HTML;
 				tmpbuf = strtok_r(buf, " ", &save);
 				if (strstr(tmpbuf, "GET")) {
 					cmdbuf = strtok_r(NULL, " ", &save);
@@ -426,6 +427,9 @@ void serve_client::epg_header_footer_callback(bool header, bool channel)
 		case SERVE_DATA_FMT_JSON:
 			str = json_dump_epg_header_footer_callback(this, header, channel);
 			break;
+		case SERVE_DATA_FMT_XML:
+			str = xml_dump_epg_header_footer_callback(this, header, channel);
+			break;
 		}
 		streamback((const uint8_t *)str, strlen(str));
 	}
@@ -523,7 +527,10 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			str = html_dump_epg_event_callback(this, &ee);
 			break;
 		case SERVE_DATA_FMT_JSON:
-			str = json_dump_epg_event_callback(this, &ee);
+			str = json_dump_epg_event_callback(this, e);
+			break;
+		case SERVE_DATA_FMT_XML:
+			str = xml_dump_epg_event_callback(this, e);
 			break;
 		}
 		streamback((const uint8_t *)str, strlen(str));
@@ -585,7 +592,7 @@ bool serve_client::check()
 			fmt = "NONE";
 			break;
 		case SERVE_DATA_FMT_HTML:
-			fmt = "HTTP";
+			fmt = "HTML";
 			break;
 		case SERVE_DATA_FMT_BIN:
 			fmt = "BIN";
@@ -595,6 +602,9 @@ bool serve_client::check()
 			break;
 		case SERVE_DATA_FMT_CLI:
 			fmt = "CLI";
+			break;
+		case SERVE_DATA_FMT_XML:
+			fmt = "XML";
 			break;
 		}
 		cli_print("(%d) format = %s\n", sock_fd, fmt);
@@ -659,6 +669,8 @@ void serve_client::cli_print(const char *fmt, ...)
 #endif
 
 #define USE_JSON (data_fmt == SERVE_DATA_FMT_JSON)
+#define USE_HTML (data_fmt == SERVE_DATA_FMT_HTML)
+#define USE_XML  (data_fmt == SERVE_DATA_FMT_XML)
 
 bool serve_client::command(char* cmdline)
 {
@@ -675,8 +687,8 @@ bool serve_client::command(char* cmdline)
 			epg_event_callback);
 
 	if (stream_http_headers) {
-		if (USE_JSON)
-			send(sock_fd, json_response, strlen(json_response), 0);
+		if ((USE_JSON) || (USE_XML))
+			send(sock_fd, text_response, strlen(text_response), 0);
 		else
 			send(sock_fd, http_response, strlen(http_response), 0);
 	} else
@@ -755,8 +767,11 @@ const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 	} else
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 
-		str = (USE_JSON) ?
+		str =
+		  (USE_JSON) ?
 			json_dump_channels(this, c) :
+		  (USE_XML) ?
+			xml_dump_channels(this, c) :
 			html_dump_channels(this, c);
 
 		streamback((const uint8_t *)str, strlen(str));
