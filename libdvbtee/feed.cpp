@@ -714,7 +714,7 @@ int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_callbac
 	/* set listener callback to notify us (feed_server) of new connections */
 	listener.set_callback(this, add_tcp_feed);
 
-	/* set connection notify callback to notify out parent server new feeds */
+	/* set connection notify callback to notify parent server of new feeds */
 	connection_notify_cb = notify_cb;
 	parent_context = context;
 
