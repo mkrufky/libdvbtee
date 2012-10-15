@@ -364,8 +364,8 @@ void *feed::stdin_feed_thread()
 
 void *feed::tcp_client_feed_thread()
 {
-	struct sockaddr_in tcpsa;
-	socklen_t salen = sizeof(tcpsa);
+//	struct sockaddr_in tcpsa;
+//	socklen_t salen = sizeof(tcpsa);
 	int rxlen = 0;
 #if FEED_BUFFER
 	void *q = NULL;
@@ -376,7 +376,7 @@ void *feed::tcp_client_feed_thread()
 
 	dprintf("(sock_fd=%d)", fd);
 
-	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
+//	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
 
 	while (!f_kill_thread) {
 #if FEED_BUFFER
@@ -551,6 +551,10 @@ void feed::add_tcp_feed(void *p_this, int socket)
 
 void feed::add_tcp_feed(int socket)
 {
+	struct sockaddr_in tcpsa;
+	socklen_t salen = sizeof(tcpsa);
+	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
+
 	dprintf("(%d)", socket);
 	if (fd >= 0) {
 		dprintf("(%d) this build only supports one tcp input feed connection at a time", socket);
