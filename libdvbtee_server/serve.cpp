@@ -1145,8 +1145,14 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "listen")) {
 		if ((arg) && strlen(arg)) {
 			int portnum = strtoul(arg, NULL, 0);
-			cli_print("starting TS listener on TCP port %d... ", portnum);
-			int ret = (portnum) ? server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder, server) : -1;
+			int ret;
+			if (strstr(cmd, "udp")) {
+				cli_print("starting TS listener on UDP port %d... ", portnum);
+				ret = server->feed_servers[portnum].start_udp_listener(portnum, server->add_feeder, server);
+			} else {
+				cli_print("starting TS listener on TCP port %d... ", portnum);
+				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder, server);
+			}
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
 	} else if (strstr(cmd, "save")) {

@@ -674,6 +674,8 @@ bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_eve
 /*****************************************************************************/
 
 feed_server::feed_server()
+  : connection_notify_cb(NULL)
+  , parent_context(NULL)
 {
 	dprintf("()");
 
@@ -707,7 +709,7 @@ void feed_server::add_tcp_feed(int socket)
 	return;
 }
 
-int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_callback notify_cb, void *context)
+int feed_server::start_tcp_listener(uint16_t port_requested, feed_notify_callback notify_cb, void *context)
 {
 	dprintf("(%d)", port_requested);
 
@@ -720,3 +722,16 @@ int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_callbac
 
 	return listener.start(port_requested);
 }
+
+int feed_server::start_udp_listener(uint16_t port_requested, feed_notify_callback notify_cb, void *context)
+{
+	int ret = feeders[0].start_udp_listener(port_requested);
+	if (ret < 0)
+		goto fail;
+
+	/* call connection notify callback to notify parent server of new feed */
+	if (notify_cb) notify_cb(context, &feeders[0]);
+fail:
+	return ret;
+}
+
