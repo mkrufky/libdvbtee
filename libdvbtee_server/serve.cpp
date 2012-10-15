@@ -66,7 +66,8 @@ bool serve_client::list_feeders()
 {
 	cli_print("%d feeders.\n", feeders.size());
 	for (feeder_map::iterator iter = feeders.begin(); iter != feeders.end(); ++iter)
-		iter->second->check();
+		if (iter->second->check())
+			cli_print("feeder %d:\t%s\n", iter->first, iter->second->get_filename());
 	return true;
 }
 

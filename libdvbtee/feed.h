@@ -55,6 +55,7 @@ public:
 
 	void close_file();
 
+	char* get_filename() { return filename; };
 	bool check();
 
 	parse parser;
