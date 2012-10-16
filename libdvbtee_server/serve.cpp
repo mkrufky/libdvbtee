@@ -310,7 +310,10 @@ void* serve_client::client_thread()
 			if (httpget) {
 				data_fmt =	(strstr(buf, "stream/")) ? SERVE_DATA_FMT_BIN :
 						(strstr(buf, "json/")) ? SERVE_DATA_FMT_JSON :
-						(strstr(buf, "xml/")) ? SERVE_DATA_FMT_XML : SERVE_DATA_FMT_HTML;
+						(strstr(buf, "xml/")) ? SERVE_DATA_FMT_XML :
+						(strstr(buf, "html/")) ? SERVE_DATA_FMT_HTML :
+						(strstr(buf, "xmltv")) ? SERVE_DATA_FMT_XML :
+									SERVE_DATA_FMT_HTML;
 				tmpbuf = strtok_r(buf, " ", &save);
 				if (strstr(tmpbuf, "GET")) {
 					cmdbuf = strtok_r(NULL, " ", &save);
@@ -428,7 +431,7 @@ void serve_client::epg_header_footer_callback(bool header, bool channel)
 			str = json_dump_epg_header_footer_callback(this, header, channel);
 			break;
 		case SERVE_DATA_FMT_XML:
-			str = xml_dump_epg_header_footer_callback(this, header, channel);
+			str = "";//xml_dump_epg_header_footer_callback(this, header, channel);
 			break;
 		}
 		streamback((const uint8_t *)str, strlen(str));
@@ -487,9 +490,11 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name);
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			decoded_event_t ee = { 0 };
-			ee.channel_name = e->channel_name;
-			ee.chan_major = e->chan_major;
-			ee.chan_minor = e->chan_minor;
+			ee.channel_name  = e->channel_name;
+			ee.chan_major    = e->chan_major;
+			ee.chan_minor    = e->chan_minor;
+			ee.chan_physical = e->chan_physical;
+			ee.chan_svc_id   = e->chan_svc_id;
 			//const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
 			const char *str = html_dump_epg_event_callback(this, &ee);
 			streamback((const uint8_t *)str, strlen(str));
@@ -1128,6 +1133,27 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "epg")) {
 		cli_print("dumping epg...\n");
 		feeder->parser.epg_dump(reporter);
+	} else if (strstr(cmd, "xmltv")) {
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
+		cli_print("dumping xmltv...\n");
+		const char *str;
+
+		str = xml_dump_epg_header_footer_callback(this, true, false);
+		streamback((const uint8_t*)str, strlen(str));
+
+		/* channels verified during this session */
+		tuner->get_scan_results(false, chandump, this);
+		/* load remaining channels that we saved previously but havent seen during this session */
+		server->cmd_config_channels_conf_load(tuner, chandump, this);
+		/* and finally, the epg data */
+		feeder->parser.epg_dump(reporter);
+
+		str = xml_dump_epg_header_footer_callback(this, false, false);
+		streamback((const uint8_t*)str, strlen(str));
+
 	} else if (strstr(cmd, "stop")) {
 		if (tuner)
 			cmd_tuner_stop();

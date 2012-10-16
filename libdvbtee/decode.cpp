@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "functions.h"
+#include "channels.h"
 #include "decode.h"
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -889,28 +890,33 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 }
 
 void decode_report::dump_epg_event(const char * channel_name,
-		    uint16_t chan_major,
-		    uint16_t chan_minor,
-		    //
-		    uint16_t event_id,
-		    time_t start_time,
-		    uint32_t length_sec,
-		    const char * name,
-		    const char * text)
+				   uint16_t chan_major,
+				   uint16_t chan_minor,
+				   uint16_t chan_physical,
+				   uint16_t chan_svc_id,
+				   //
+				   uint16_t event_id,
+				   time_t start_time,
+				   uint32_t length_sec,
+				   const char * name,
+				   const char * text)
 {
 	if (!dump_epg_event_cb)
 		return;
 
 	decoded_event_t e;
-	e.channel_name = channel_name;
-	e.chan_major   = chan_major;
-	e.chan_minor   = chan_minor;
+	e.channel_name  = channel_name;
+	e.chan_major    = chan_major;
+	e.chan_minor    = chan_minor;
 
-	e.event_id     = event_id;
-	e.start_time   = start_time;
-	e.length_sec   = length_sec;
-	e.name         = name;
-	e.text         = text;
+	e.chan_physical = chan_physical;
+	e.chan_svc_id   = chan_svc_id;
+
+	e.event_id      = event_id;
+	e.start_time    = start_time;
+	e.length_sec    = length_sec;
+	e.name          = name;
+	e.text          = text;
 
 	dump_epg_event_cb(context, &e);
 };
@@ -943,6 +949,14 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 	if (reporter)
 		reporter->dump_epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
+#if 0
+					 0, 0, // FIXME
+#else
+					 (decoded_vct.cable_vct) ?
+					 atsc_qam_freq_to_chan(channel->carrier_freq) :
+					 atsc_vsb_freq_to_chan(channel->carrier_freq),
+					 channel->program,
+#endif
 					 event->event_id,
 					 start,
 					 event->length_sec,
@@ -970,6 +984,11 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 	if (reporter)
 		reporter->dump_epg_event((const char *)service->service_name,
 					 get_lcn(service->service_id), 0,
+#if 0
+					 0, 0, // FIXME
+#else
+					 0, service->service_id,
+#endif
 					 event->event_id,
 					 start,
 					 event->length_sec,

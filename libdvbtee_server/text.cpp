@@ -189,12 +189,17 @@ const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 	str.append(bcd_time_str(&end_time, time_str, sizeof(time_str)));
 
 	str.append("' channel='");
-
+#if 0
 	snprintf(chan_nbr, sizeof(chan_nbr), "%d.%d: ", e->chan_major, e->chan_minor);
 
 	str.append(chan_nbr);
 	str.append(" ");
 	str.append(e->channel_name);
+#else
+	snprintf(chan_nbr, sizeof(chan_nbr), "%d+%d", e->chan_physical, e->chan_svc_id);
+
+	str.append(chan_nbr);
+#endif
 	str.append("'>\n");
 	str.append("<title lang='en'>");
 	str.append(e->name);

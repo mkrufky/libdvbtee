@@ -317,6 +317,8 @@ typedef struct
 	const char *channel_name;
 	uint16_t    chan_major;
 	uint16_t    chan_minor;
+	uint16_t    chan_physical;
+	uint16_t    chan_svc_id;
 
 	uint16_t    event_id;
 	time_t      start_time;
@@ -345,6 +347,8 @@ public:
 	void dump_epg_event(const char * channel_name,
 			    uint16_t chan_major,
 			    uint16_t chan_minor,
+			    uint16_t chan_physical,
+			    uint16_t chan_svc_id,
 			    //
 			    uint16_t event_id,
 			    time_t start_time,
