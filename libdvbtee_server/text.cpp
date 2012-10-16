@@ -213,7 +213,7 @@ const char * html_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
         str.clear();
-	char channelno[7]; /* XXX.XXX */
+	char channelno[8]; /* XXX.XXX */
 	if (c->major + c->minor > 1)
 		sprintf(channelno, "%d.%d", c->major, c->minor);
 	else if (c->lcn)
@@ -264,9 +264,9 @@ const char * json_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
-	char channelno[7] = { 0 }; /* XXX.XXX */
-	char chan_major[3] = { 0 };
-	char chan_minor[3] = { 0 };
+	char channelno[8] = { 0 }; /* XXX.XXX */
+	char chan_major[4] = { 0 };
+	char chan_minor[4] = { 0 };
 	if (c->major + c->minor > 1) {
 		sprintf(channelno, "%d.%d", c->major, c->minor);
 		sprintf(chan_major, "%d", c->major);
@@ -325,9 +325,9 @@ const char * xml_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
-	char channelno[7] = { 0 }; /* XXX.XXX */
-	char chan_major[3] = { 0 };
-	char chan_minor[3] = { 0 };
+	char channelno[8] = { 0 }; /* XXX.XXX */
+	char chan_major[4] = { 0 };
+	char chan_minor[4] = { 0 };
 	if (c->major + c->minor > 1) {
 		sprintf(channelno, "%d.%d", c->major, c->minor);
 		sprintf(chan_major, "%d", c->major);

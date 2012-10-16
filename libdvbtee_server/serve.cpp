@@ -734,7 +734,7 @@ const char * serve_client::chandump_to_disk(void *context, parsed_channel_info_t
 const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 {
 	const char *str = NULL;
-	char channelno[7]; /* XXX.XXX */
+	char channelno[7] = { 0 }; /* XXX.XXX */
 	if (c->major + c->minor > 1)
 		sprintf(channelno, "%d.%d", c->major, c->minor);
 	else if (c->lcn)
@@ -888,9 +888,9 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 			char *save, *temp, *chan, *name = strtok_r(line, ":", &save);
 
 			temp = strtok_r(NULL, ":", &save);
-			c.freq = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.freq = ((temp) && strlen(temp)) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
-			c.modulation = (temp) ? temp : "";
+			c.modulation = ((temp) && strlen(temp)) ? temp : "";
 
 			c.physical_channel = derive_physical_channel(c.freq, c.modulation);
 
@@ -899,21 +899,21 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 				continue;
 
 			temp = strtok_r(NULL, ":", &save);
-			c.vpid = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.vpid = ((temp) && strlen(temp)) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
-			c.apid = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.apid = ((temp) && strlen(temp)) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
-			c.program_number = (temp) ? strtoul(temp, NULL, 0) : 0;
+			c.program_number = ((temp) && strlen(temp)) ? strtoul(temp, NULL, 0) : 0;
 
 			chan = strtok_r(name, "-", &save);
 			temp = strtok_r(NULL, "-", &save);
-			c.service_name = (unsigned char *)((temp) ? temp : chan);
+			c.service_name = (unsigned char *)(((temp) && strlen(temp)) ? temp : chan);
 
 			temp = strtok_r(chan, ".", &save);
 			if (temp) {
 				c.major = strtoul(temp, NULL, 0);
 				temp = strtok_r(NULL, ".", &save);
-				c.minor = (temp) ? strtoul(temp, NULL, 0): 0;
+				c.minor = ((temp) && strlen(temp)) ? strtoul(temp, NULL, 0): 0;
 			} else {
 				c.major = 0;
 				c.minor = 0;
