@@ -111,17 +111,17 @@ int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool 
 #endif
 	if ((length) || (send_zero_length)) {
 		int ret = 0;
-		char sz[5] = { 0 };
-		sprintf(sz, "%x", (unsigned int)length);
+		char sz[7] = { 0 };
+		sprintf(sz, "%x\r\n", (unsigned int)length);
 
 		ret = socket_send(socket, sz, strlen(sz), 0);
 		if (ret < 0)
 			return ret;
-
+#if 0
 		ret = stream_crlf(socket);
 		if (ret < 0)
 			return ret;
-
+#endif
 		if (length) {
 			ret = socket_send(socket, buf, length, 0);
 			if (ret < 0)
