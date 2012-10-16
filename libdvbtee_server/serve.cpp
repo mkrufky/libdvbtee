@@ -1095,10 +1095,22 @@ bool serve_client::__command(char* cmdline)
 		}
 		cli_print("dumping channel list...\n");
 
+		const char *str;
+
+		if (data_fmt == SERVE_DATA_FMT_XML) {
+			str = xml_dump_epg_header_footer_callback(this, true, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
+
 		/* channels verified during this session */
 		tuner->get_scan_results(false, chandump, this);
 		/* load remaining channels that we saved previously but havent seen during this session */
 		server->cmd_config_channels_conf_load(tuner, chandump, this);
+
+		if (data_fmt == SERVE_DATA_FMT_XML) {
+			str = xml_dump_epg_header_footer_callback(this, false, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
 
 	} else if (strstr(cmd, "channel")) {
 		if (!tuner) {
@@ -1132,7 +1144,21 @@ bool serve_client::__command(char* cmdline)
 		}
 	} else if (strstr(cmd, "epg")) {
 		cli_print("dumping epg...\n");
+
+		const char *str;
+
+		if (data_fmt == SERVE_DATA_FMT_XML) {
+			str = xml_dump_epg_header_footer_callback(this, true, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
+
 		feeder->parser.epg_dump(reporter);
+
+		if (data_fmt == SERVE_DATA_FMT_XML) {
+			str = xml_dump_epg_header_footer_callback(this, false, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
+
 	} else if (strstr(cmd, "xmltv")) {
 		if (!tuner) {
 			cli_print("NO TUNER!\n");
