@@ -328,7 +328,7 @@ void* serve_client::client_thread()
 
 			if (httphead) {
 				/* send http 200 ok, do not process commands (FIXME) and close connection */
-				send(sock_fd, http200ok, strlen(http200ok), 0);
+				socket_send(sock_fd, http200ok, strlen(http200ok), 0);
 			} else {
 				/* httpget - process commands */
 				command(cmdbuf);
@@ -693,9 +693,9 @@ bool serve_client::command(char* cmdline)
 
 	if (stream_http_headers) {
 		if ((USE_JSON) || (USE_XML))
-			send(sock_fd, text_response, strlen(text_response), 0);
+			socket_send(sock_fd, text_response, strlen(text_response), 0);
 		else
-			send(sock_fd, http_response, strlen(http_response), 0);
+			socket_send(sock_fd, http_response, strlen(http_response), 0);
 	} else
 	if (data_fmt == SERVE_DATA_FMT_CLI) {
 		reporter->set_print_cb(this, cli_print);
@@ -716,7 +716,7 @@ exit:
 #if 1
 	if (stream_http_headers) {
 		stream_http_chunk(sock_fd, (uint8_t *)"", 0, true);
-		send(sock_fd, http_conn_close, strlen(http_conn_close), 0);
+		socket_send(sock_fd, http_conn_close, strlen(http_conn_close), 0);
 //		close_socket();
 	}
 
