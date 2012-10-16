@@ -225,6 +225,7 @@ decode::decode()
   : orig_network_id(0)
   , network_id(0)
   , eit_x(0)
+  , physical_channel(0)
 {
 	dprintf("()");
 
@@ -321,6 +322,8 @@ decode::decode(const decode&)
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
+
+	physical_channel = 0;
 }
 
 decode& decode::operator= (const decode& cSource)
@@ -360,6 +363,8 @@ decode& decode::operator= (const decode& cSource)
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
+
+	physical_channel = 0;
 
 	return *this;
 }
@@ -952,9 +957,13 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 #if 0
 					 0, 0, // FIXME
 #else
+#if 0
 					 (decoded_vct.cable_vct) ?
 					 atsc_qam_freq_to_chan(channel->carrier_freq) :
 					 atsc_vsb_freq_to_chan(channel->carrier_freq),
+#else
+					 physical_channel,
+#endif
 					 channel->program,
 #endif
 					 event->event_id,
@@ -987,7 +996,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 #if 0
 					 0, 0, // FIXME
 #else
-					 0, service->service_id,
+					 physical_channel, service->service_id,
 #endif
 					 event->event_id,
 					 start,

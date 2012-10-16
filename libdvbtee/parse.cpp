@@ -942,6 +942,7 @@ void parse::set_ts_id(uint16_t new_ts_id)
 	dprintf("(%04x|%d)\n", new_ts_id, new_ts_id);
 	ts_id = new_ts_id;
 	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
+	decoders[ts_id].set_physical_channel(channel_info[ts_id].channel);
 };
 
 uint16_t parse::get_ts_id(unsigned int channel)

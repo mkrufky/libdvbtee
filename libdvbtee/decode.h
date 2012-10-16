@@ -420,6 +420,8 @@ public:
 
 	void dump_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter);
 	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter);
+
+	void set_physical_channel(unsigned int chan) { physical_channel = chan; };
 private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -453,6 +455,8 @@ private:
 	bool eit_x_complete_atsc(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_pf();
+
+	unsigned int physical_channel;
 };
 
 #endif /* __DECODE_H__ */
