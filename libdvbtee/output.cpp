@@ -126,7 +126,7 @@ ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 			sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
 			send(sockfd, buf, len, flags) :
 #else
-		sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
+		sendto(sockfd, buf, len, flags|MSG_NOSIGNAL, dest_addr, addrlen) :
 #endif
 		ret;
 }
