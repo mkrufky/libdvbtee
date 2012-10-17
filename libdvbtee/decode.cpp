@@ -27,7 +27,6 @@
 #include <string.h>
 
 #include "functions.h"
-#include "channels.h"
 #include "decode.h"
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -954,18 +953,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 	if (reporter)
 		reporter->dump_epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
-#if 0
-					 0, 0, // FIXME
-#else
-#if 0
-					 (decoded_vct.cable_vct) ?
-					 atsc_qam_freq_to_chan(channel->carrier_freq) :
-					 atsc_vsb_freq_to_chan(channel->carrier_freq),
-#else
-					 physical_channel,
-#endif
-					 channel->program,
-#endif
+					 physical_channel, channel->program,
 					 event->event_id,
 					 start,
 					 event->length_sec,
@@ -993,11 +981,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 	if (reporter)
 		reporter->dump_epg_event((const char *)service->service_name,
 					 get_lcn(service->service_id), 0,
-#if 0
-					 0, 0, // FIXME
-#else
 					 physical_channel, service->service_id,
-#endif
 					 event->event_id,
 					 start,
 					 event->length_sec,
