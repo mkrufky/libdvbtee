@@ -20,7 +20,9 @@
  *****************************************************************************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string>
+#include "functions.h"
 #include "text.h"
 
 const char * html_dump_epg_header_footer_callback(void *, bool header, bool channel)
@@ -91,7 +93,13 @@ const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 
 		str.append("<nobr>");
 		str.append(chan_nbr);
+#if 0
+		char *hstr = url_encode((char *)e->channel_name);
+		str.append(hstr);
+		free(hstr);
+#else
 		str.append(e->channel_name);
+#endif
 		str.append("</nobr>");
 	}
 	//str.append("show: ");
@@ -101,9 +109,13 @@ const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 		struct tm tme = *localtime( &end_time );
 
 		char time_str[14] = { 0 };
-
+#if 0
+		char *hstr = url_encode((char *)e->name);
+		str.append(hstr);
+		free(hstr);
+#else
 		str.append(e->name);
-
+#endif
 		snprintf(time_str, sizeof(time_str), "%02d:%02d - %02d:%02d", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min);
 
 		str.append("<hr><nobr>");
@@ -141,7 +153,13 @@ const char * json_dump_epg_event_callback(void * context, decoded_event_t *e)
 #endif
 	str.append(",");
 	str.append("\"Title\":\"");
+#if 0
+	char *hstr = url_encode((char *)e->name);
+	str.append(hstr);
+	free(hstr);
+#else
 	str.append(e->name);
+#endif
 	str.append("\",");
 	str.append("\"ShortDescription\":\"");
 	//str.append(text);
@@ -202,11 +220,23 @@ const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 #endif
 	str.append("'>\n");
 	str.append("<title lang='en'>");
+#if 1
+	char *hstr = url_encode((char *)e->name);
+	str.append(hstr);
+	free(hstr);
+#else
 	str.append(e->name);
+#endif
 	str.append("</title>\n");
 #if 0
 	str.append("<desc lang='en'>");
+#if 1
+	hstr = url_encode(e->text);
+	str.append(hstr);
+	free(hstr);
+#else
 	str.append(e->text);
+#endif
 	str.append("</desc>\n");
 #endif
 	str.append("</programme>\n");
@@ -249,7 +279,13 @@ const char * html_dump_channels(void *context, parsed_channel_info_t *c)
 	str.append("&channels'>");
 	str.append(channelno);
 	str.append(": ");
+#if 0
+	char *hstr = url_encode((char *)c->service_name);
+	str.append(hstr);
+	free(hstr);
+#else
 	str.append((const char *)c->service_name);
+#endif
 	str.append("</a>");
 #if 0
 	str.append("</td>");
@@ -309,7 +345,13 @@ const char * json_dump_channels(void *context, parsed_channel_info_t *c)
 	str.append("\"");
 	str.append(",");
 	str.append("\"DisplayName\":\"");
+#if 0
+	char *hstr = url_encode((char *)c->service_name);
+	str.append(hstr);
+	free(hstr);
+#else
 	str.append((const char *)c->service_name);
+#endif
 	str.append("\"");
 	str.append(",");
 	str.append("\"MajorChannelNo\":\"");
@@ -368,13 +410,25 @@ const char * xml_dump_channels(void *context, parsed_channel_info_t *c)
 	str.append("<display-name>");
 	str.append(channelno);
 	str.append(" ");
+#if 1
+	char *hstr = url_encode((char *)c->service_name);
+	str.append(hstr);
+	free(hstr);
+#else
 	str.append((const char *)c->service_name);
+#endif
 	str.append("</display-name>\n");
 	str.append("<display-name>");
 	str.append(channelno);
 	str.append("</display-name>\n");
 	str.append("<display-name>");
+#if 1
+	hstr = url_encode((char *)c->service_name);
+	str.append(hstr);
+	free(hstr);
+#else
 	str.append((const char *)c->service_name);
+#endif
 	str.append("</display-name>\n");
 	str.append("</channel>\n");
 
