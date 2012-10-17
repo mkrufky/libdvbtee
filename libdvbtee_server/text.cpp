@@ -116,6 +116,17 @@ const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 #else
 		str.append(e->name);
 #endif
+		if ((e->text) && strlen(e->text)) {
+			str.append(": <br><font size=-3>");
+#if 0
+			hstr = url_encode((char *)e->text);
+			str.append(hstr);
+			free(hstr);
+#else
+			str.append(e->text);
+#endif
+			str.append("</font>");
+		}
 		snprintf(time_str, sizeof(time_str), "%02d:%02d - %02d:%02d", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min);
 
 		str.append("<hr><nobr>");
@@ -162,7 +173,13 @@ const char * json_dump_epg_event_callback(void * context, decoded_event_t *e)
 #endif
 	str.append("\",");
 	str.append("\"ShortDescription\":\"");
-	//str.append(text);
+#if 0
+	hstr = url_encode((char *)e->text);
+	str.append(hstr);
+	free(hstr);
+#else
+	str.append(e->text);
+#endif
 	str.append("\"");
 
 	str.append("}");
