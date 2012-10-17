@@ -131,6 +131,7 @@ bool serve::scan(unsigned int flags, chandump_callback chandump_cb, void *chandu
 #define ENC_CHUNKED  "Transfer-Encoding: chunked"
 #define CONN_CLOSE   "Connection: close"
 
+/*
 static char http200ok[] =
 	 HTTP_200_OK
 	 CRLF
@@ -177,6 +178,7 @@ static char text_response[] =
 #endif
 	 CRLF
 	 CRLF;
+*/
 
 static char http_conn_close[] =
 	 CONN_CLOSE
@@ -328,7 +330,8 @@ void* serve_client::client_thread()
 
 			if (httphead) {
 				/* send http 200 ok, do not process commands (FIXME) and close connection */
-				socket_send(sock_fd, http200ok, strlen(http200ok), 0);
+				const char *str = http_response(MIMETYPE_NONE);
+				socket_send(sock_fd, str, strlen(str), 0);
 			} else {
 				/* httpget - process commands */
 				command(cmdbuf);
@@ -692,10 +695,12 @@ bool serve_client::command(char* cmdline)
 			epg_event_callback);
 
 	if (stream_http_headers) {
+		const char *str;
 		if ((USE_JSON) || (USE_XML))
-			socket_send(sock_fd, text_response, strlen(text_response), 0);
+			str = http_response(MIMETYPE_TEXT_PLAIN);
 		else
-			socket_send(sock_fd, http_response, strlen(http_response), 0);
+			str = http_response(MIMETYPE_TEXT_HTML);
+		socket_send(sock_fd, str, strlen(str), 0);
 	} else
 	if (data_fmt == SERVE_DATA_FMT_CLI) {
 		reporter->set_print_cb(this, cli_print);

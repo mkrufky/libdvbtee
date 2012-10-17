@@ -45,6 +45,15 @@ enum output_options {
 	OUTPUT_PSIP    = 4,
 };
 
+enum output_mimetype {
+	MIMETYPE_NONE,
+	MIMETYPE_OCTET_STREAM,
+	MIMETYPE_TEXT_PLAIN,
+	MIMETYPE_TEXT_HTML,
+};
+
+const char * http_response(enum output_mimetype mimetype);
+
 #define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES)
 
 #define OUTPUT_STREAM_BUF_SIZE 188*7*198
@@ -78,6 +87,7 @@ private:
 	bool f_kill_thread;
 	bool f_streaming;
 	int sock;
+	enum output_mimetype mimetype;
 
 	char name[21];
 

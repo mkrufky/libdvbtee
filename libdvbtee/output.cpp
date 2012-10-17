@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <string>
 
 #include "output.h"
 #include "log.h"
@@ -45,19 +46,52 @@
 #define CONN_CLOSE   "Connection: close"
 #define CRLF         "\r\n"
 
-static char http_response[] =
-	HTTP_200_OK
-	CRLF
-	CONTENT_TYPE OCTET_STREAM
-	CRLF
-	ENC_CHUNKED
-	CRLF
-	CRLF;
-
 static char http_conn_close[] =
 	CONN_CLOSE
 	CRLF
 	CRLF;
+
+static const char * __http_response(const char *mimetype)
+{
+	std::string str;
+	str.clear();
+
+	str.append(HTTP_200_OK
+		   CRLF);
+	if (mimetype) {
+		str.append(CONTENT_TYPE);
+		str.append(mimetype);
+		str.append(CRLF
+			   ENC_CHUNKED
+			   CRLF);
+	}
+	str.append(CRLF);
+
+	return str.c_str();
+}
+
+const char * http_response(enum output_mimetype mimetype)
+{
+	const char *str;
+
+	switch (mimetype) {
+	default:
+	case MIMETYPE_OCTET_STREAM:
+		str = OCTET_STREAM;
+		break;
+	case MIMETYPE_TEXT_PLAIN:
+		str = TEXT_PLAIN;
+		break;
+	case MIMETYPE_TEXT_HTML:
+		str = TEXT_HTML;
+		break;
+	case MIMETYPE_NONE:
+		str = NULL;
+		break;
+	}
+
+	return __http_response(str);
+}
 
 ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 		    const struct sockaddr *dest_addr, socklen_t addrlen)
@@ -140,6 +174,7 @@ output_stream::output_stream()
   : f_kill_thread(false)
   , f_streaming(false)
   , sock(-1)
+  , mimetype(MIMETYPE_OCTET_STREAM)
   , ringbuffer()
   , stream_method(OUTPUT_STREAM_UDP)
   , count_in(0)
@@ -173,6 +208,7 @@ output_stream::output_stream(const output_stream&)
 	count_in = 0;
 	count_out = 0;
 	sock = -1;
+	mimetype = MIMETYPE_OCTET_STREAM;
 	memset(&name, 0, sizeof(name));
 }
 
@@ -191,6 +227,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	count_in = 0;
 	count_out = 0;
 	sock = -1;
+	mimetype = MIMETYPE_OCTET_STREAM;
 	memset(&name, 0, sizeof(name));
 
 	return *this;
@@ -213,7 +250,8 @@ void* output_stream::output_stream_thread()
 #if 1
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
-		ret = socket_send(sock, http_response, strlen(http_response), 0);
+		const char *str = http_response(mimetype);
+		ret = socket_send(sock, str, strlen(str), 0);
 		break;
 	}
 	if (ret < 0) {
