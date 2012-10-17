@@ -204,7 +204,11 @@ char *url_encode(char *str) {
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~')
 			*pbuf++ = *pstr;
 		else if (*pstr == ' ')
+#if 0
 			*pbuf++ = '+';
+#else
+			*pbuf++ = ' ';
+#endif
 		else
 			*pbuf++ = '%', *pbuf++ = to_hex(*pstr >> 4), *pbuf++ = to_hex(*pstr & 15);
 		pstr++;

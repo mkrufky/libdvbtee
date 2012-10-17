@@ -166,6 +166,7 @@ private:
 
 	bool epg_mode;
 	bool scan_mode;
+	bool dont_collect_ett;
 	bool has_pat;
 	bool has_mgt;
 	bool has_vct;

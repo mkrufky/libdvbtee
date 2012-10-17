@@ -270,7 +270,8 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 			}
 			break;
 		case 0x0200 ... 0x027f: /* ETT-0 to ETT-127 */
-			break;
+			if (dont_collect_ett)
+				break;
 
 			if (scan_mode)
 				break;
@@ -557,6 +558,7 @@ parse::parse()
   , ts_id(0)
   , epg_mode(false)
   , scan_mode(false)
+  , dont_collect_ett(false)
   , has_pat(false)
   , has_mgt(false)
   , has_vct(false)

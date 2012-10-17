@@ -950,7 +950,8 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 	struct tm tme = *localtime( &end  );
 	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 
-	if (reporter)
+	if (reporter) {
+		unsigned char message[256];
 		reporter->dump_epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
 					 physical_channel, channel->program,
@@ -958,7 +959,8 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 					 start,
 					 event->length_sec,
 					 (const char *)name,
-					 NULL);
+					 (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message));
+	}
 	return;
 }
 
@@ -986,7 +988,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 					 start,
 					 event->length_sec,
 					 event->name.c_str(),
-					 NULL);
+					 event->text.c_str());
 	return;
 }
 
@@ -1137,6 +1139,18 @@ void decode::dump_epg(decode_report *reporter)
 	return;
 }
 
+unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message)
+{
+	// we're assuming that message is an array of 256 unsigned char's
+	memset(message, 0, sizeof(char) * 256);
+
+	if (decoded_ett.count(etm_id))
+		decode_multiple_string(decoded_ett[etm_id].etm,
+				       decoded_ett[etm_id].etm_length,
+				       message);
+
+	return message;
+}
 
 bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 {

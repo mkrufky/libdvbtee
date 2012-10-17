@@ -228,10 +228,10 @@ const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 	str.append(e->name);
 #endif
 	str.append("</title>\n");
-#if 0
+#if 1
 	str.append("<desc lang='en'>");
 #if 1
-	hstr = url_encode(e->text);
+	hstr = url_encode((char *)e->text);
 	str.append(hstr);
 	free(hstr);
 #else
