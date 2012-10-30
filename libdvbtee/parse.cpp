@@ -568,6 +568,7 @@ parse::parse()
   , dumped_eit(0)
   , eit_collection_limit(-1)
   , process_err_pkts(false)
+  , tei_count(0)
   , addfilter_cb(NULL)
   , addfilter_context(NULL)
   , enabled(true)
@@ -665,6 +666,7 @@ void parse::reset()
 
 	ts_id = 0;
 	dumped_eit = 0;
+	tei_count = 0;
 	has_pat = false;
 	has_mgt = false;
 	has_vct = false;
@@ -989,7 +991,11 @@ int parse::feed(int count, uint8_t* p_data)
 		}
 
 		if (p[1] & 0x80) {
-			fprintf(stderr, "\tTEI\t");//"%s: TEI detected, dropping packet\n", __func__);
+			if (!tei_count)
+				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
+			else if (tei_count % 100 == 0)
+				fprintf(stderr, ".");
+			tei_count++;
 			if (!process_err_pkts) continue;
 		}
 

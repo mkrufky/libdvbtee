@@ -181,6 +181,7 @@ private:
 	int eit_collection_limit;
 
 	bool process_err_pkts;
+	unsigned int tei_count;
 	map_pidtype payload_pids;
 
 	addfilter_callback addfilter_cb;
