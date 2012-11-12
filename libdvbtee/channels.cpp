@@ -124,7 +124,7 @@ unsigned int dvbt_chan_to_freq(const unsigned int channel)
 unsigned int dvbt_freq_to_chan(const unsigned int frequency)
 {
 	for (int channel=5; channel <= 69; channel++) {
-		if (abs(dvbt_chan_to_freq(channel) == frequency) < 1000000)
+		if (abs(dvbt_chan_to_freq(channel) - frequency) < 1000000)
 			return channel;
 	}
 	return 0;
