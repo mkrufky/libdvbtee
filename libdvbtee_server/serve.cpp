@@ -889,7 +889,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 
 	FILE *channels_conf = fopen(filepath, "r");
 	if (channels_conf) {
-		char line[128] = { 0 };
+		char line[256] = { 0 };
 		while (fgets(line, sizeof(line), channels_conf)) {
 #if 0
 			cli_print("%s", line);
