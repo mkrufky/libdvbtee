@@ -902,6 +902,26 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 			temp = strtok_r(NULL, ":", &save);
 			c.modulation = ((temp) && strlen(temp)) ? temp : "";
 
+			if (strstr(temp, "INVERSION")) {
+				//quick hack for DVB-T
+				bool bw7mhz = false;
+
+				temp = strtok_r(NULL, ":", &save);
+				if (strstr(temp, "BANDWIDTH_7_MHZ"))
+					bw7mhz = true;
+
+				temp = strtok_r(NULL, ":", &save); // FEC_AUTO
+				temp = strtok_r(NULL, ":", &save); // FEC_AUTO
+				temp = strtok_r(NULL, ":", &save); // QAM_AUTO
+				temp = strtok_r(NULL, ":", &save); // TRANSMISSION_MODE_AUTO
+				temp = strtok_r(NULL, ":", &save); // GUARD_INTERVAL_AUTO
+				temp = strtok_r(NULL, ":", &save); // HIERARCHY_AUTO
+
+				c.modulation = (bw7mhz) ?
+					"INVERSION_AUTO:BANDWIDTH_7_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO" :
+					"INVERSION_AUTO:BANDWIDTH_8_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO";
+			}
+
 			c.physical_channel = derive_physical_channel(c.freq, c.modulation);
 
 			uint16_t ts_id = tuner->feeder.parser.get_ts_id(c.physical_channel);
