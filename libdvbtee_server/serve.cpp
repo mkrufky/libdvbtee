@@ -1085,8 +1085,8 @@ bool serve_client::__command(char* cmdline)
 			return false;
 		}
 		if ((arg) && strlen(arg)) {
-			phy = strtoul(strtok_r(arg, ".-+", &cmdtune), NULL, 0);
-			ser = strtok_r(NULL, ".-+", &cmdtune);
+			phy = strtoul(strtok_r(arg, ".-+~", &cmdtune), NULL, 0);
+			ser = strtok_r(NULL, ".-+~", &cmdtune);
 		}
 
 		cli_print("preparing to tune to physical channel %d...\n", phy, ser);

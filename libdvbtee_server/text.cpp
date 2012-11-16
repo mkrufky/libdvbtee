@@ -291,7 +291,7 @@ const char * html_dump_channels(void *context, parsed_channel_info_t *c)
 	str.append("<td>");
 	str.append("<a href='/tune=");
 	str.append(phy_chan);
-	str.append("+");
+	str.append("~");
 	str.append(svc_id);
 	str.append("&channels'>");
 	str.append(channelno);
@@ -354,10 +354,8 @@ const char * json_dump_channels(void *context, parsed_channel_info_t *c)
 
 	str.append("{");
 	str.append("\"Id\":\"");
-	str.append("tune");
-	str.append("&channel=");
 	str.append(phy_chan);
-	str.append("&service=");
+	str.append("~");
 	str.append(svc_id);
 	str.append("\"");
 	str.append(",");
@@ -421,7 +419,7 @@ const char * xml_dump_channels(void *context, parsed_channel_info_t *c)
 
 	str.append("<channel id='");
 	str.append(phy_chan);
-	str.append("+");
+	str.append("~");
 	str.append(svc_id);
 	str.append("'>\n");
 	str.append("<display-name>");
