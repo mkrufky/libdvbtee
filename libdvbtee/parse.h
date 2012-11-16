@@ -28,7 +28,7 @@
 #include "decode.h"
 #include "output.h"
 
-#define LIBDVBTEE_VERSION "0.1.3"
+#define LIBDVBTEE_VERSION "0.1.4"
 
 #define USE_STATIC_DECODE_MAP 1
 
