@@ -752,7 +752,7 @@ const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 	else
 		sprintf(channelno, "%d", c->physical_channel);
 
-	cli_print("%s-%s:%d:%s:%d:%d:%d\t channel=%d&service=%d\n",
+	cli_print("%s-%s:%d:%s:%d:%d:%d\t tune=%d~%d\n",
 		  channelno,
 		  c->service_name,
 		  c->freq,//iter_vct->second.carrier_freq,
