@@ -33,7 +33,51 @@
 #define USE_STATIC_DECODE_MAP 1
 
 #include <map>
-typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
+
+typedef void (*dvbpsi_detach_table_callback)(dvbpsi_t *, uint8_t, uint16_t);
+
+typedef struct {
+	dvbpsi_detach_table_callback detach_cb;
+	uint8_t  table_id;
+	uint16_t table_id_ext;
+} detach_table_t;
+
+typedef std::map<uint32_t, detach_table_t> detach_table_map;
+
+#define attach_table_auto_detach(class, attach, detach, callback, id, ext) \
+  if (attach(class->get_handle(), id, ext, callback, this)) class->set_detach(detach, id, ext);
+
+
+class dvbpsi_class
+{
+public:
+	dvbpsi_class();
+	~dvbpsi_class();
+
+	dvbpsi_class(const dvbpsi_class&);
+	dvbpsi_class& operator= (const dvbpsi_class&);
+
+	bool packet_push(uint8_t* p_data);
+	dvbpsi_t* get_handle() { return handle; };
+	void set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext)
+		{
+		  uint32_t idx = (((id << 16) & 0x00ff0000) | (ext & 0x0000ffff));
+		  fprintf(stderr, "%s: attaching table %02x|%04x\n", __func__, id, ext);
+		  tables[idx].detach_cb = cb;
+		  tables[idx].table_id = id;
+		  tables[idx].table_id_ext = ext;
+		};
+	void detach_demux();
+
+	void purge();
+private:
+	dvbpsi_t* handle;
+	detach_table_map tables;
+	void detach_tables();
+};
+
+//typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
+typedef std::map<uint16_t, dvbpsi_class> map_dvbpsi;
 typedef std::map<uint16_t, decode> map_decoder;
 typedef std::map<uint16_t, uint16_t> map_pidtype;
 
@@ -125,7 +169,8 @@ private:
 	static void take_stt(void*, dvbpsi_atsc_stt_t*);
 	static void take_mgt(void*, dvbpsi_atsc_mgt_t*);
 
-	static void attach_table(void*, dvbpsi_handle, uint8_t, uint16_t);
+	static void attach_table(dvbpsi_t*, uint8_t, uint16_t, void *);
+	static void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c, void *d) { attach_table(a->get_handle(), b, c, d); };
 
 	bool take_pat(dvbpsi_pat_t*, bool);
 	bool take_pmt(dvbpsi_pmt_t*, bool);
@@ -141,7 +186,8 @@ private:
 	bool take_stt(dvbpsi_atsc_stt_t*, bool);
 	bool take_mgt(dvbpsi_atsc_mgt_t*, bool);
 
-	void attach_table(dvbpsi_handle, uint8_t, uint16_t);
+	void attach_table(dvbpsi_t*, uint8_t, uint16_t);
+	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); };
 
 	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
 	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); };
@@ -156,7 +202,7 @@ private:
 
 	unsigned int fed_pkt_count;
 
-	dvbpsi_handle h_pat;
+	dvbpsi_class  h_pat;
 	map_dvbpsi    h_pmt;
 	map_dvbpsi    h_demux;
 
@@ -198,6 +244,7 @@ private:
 	void rewrite_pat();
 	void process_pat(const decoded_pat_t *);
 	void process_pmt(const decoded_pmt_t *);
+	void process_mgt(bool attach);
 };
 
 #endif //__PARSE_H__

@@ -33,6 +33,7 @@
 #define DBG_TIME	64
 #define DBG_DESC	128
 #define DBG_ATSCTEXT	256
+#define DBG_DVBPSI	512
 
 extern unsigned int dbg;
 
