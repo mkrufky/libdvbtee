@@ -7,7 +7,7 @@ INSTALL_DIR = ../usr/bin
 
 DEBUG = -g -ggdb
 INCLUDES = -I../usr/lib -I../libdvbtee -I../libdvbtee_server -I../usr/include
-CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -fPIC $(DEBUG)
+CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -fPIC $(DEBUG) -D_GNU_SOURCE -D__USE_LARGEFILE64
 LDADD = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi
 LIBS = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi
 
