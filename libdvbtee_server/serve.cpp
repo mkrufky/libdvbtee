@@ -897,10 +897,20 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 			parsed_channel_info_t c;
 			char *save, *temp, *chan, *name = strtok_r(line, ":", &save);
 
+			if (!name) {
+				memset(line, 0, sizeof(line));
+				continue;
+			}
+
 			temp = strtok_r(NULL, ":", &save);
 			c.freq = ((temp) && strlen(temp)) ? strtoul(temp, NULL, 0) : 0;
 			temp = strtok_r(NULL, ":", &save);
 			c.modulation = ((temp) && strlen(temp)) ? temp : "";
+
+			if (!temp) {
+				memset(line, 0, sizeof(line));
+				continue;
+			}
 
 			if (strstr(temp, "INVERSION")) {
 				//quick hack for DVB-T
@@ -925,8 +935,10 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 			c.physical_channel = derive_physical_channel(c.freq, c.modulation);
 
 			uint16_t ts_id = tuner->feeder.parser.get_ts_id(c.physical_channel);
-			if (ts_id) /* dont load data for channels we already know about */
+			if (ts_id) { /* dont load data for channels we already know about */
+				memset(line, 0, sizeof(line));
 				continue;
+			}
 
 			temp = strtok_r(NULL, ":", &save);
 			c.vpid = ((temp) && strlen(temp)) ? strtoul(temp, NULL, 0) : 0;
@@ -951,6 +963,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 			c.lcn = c.major;
 
 			if (chandump_cb) chandump_cb(chandump_context, &c);
+			memset(line, 0, sizeof(line));
 		}
 		fclose(channels_conf);
 		return true;
