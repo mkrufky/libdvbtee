@@ -575,7 +575,10 @@ parse::parse()
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
 {
-	if (!hello) fprintf(stderr, "dvbtee v" LIBDVBTEE_VERSION ", built " __DATE__ " " __TIME__ "\n\n"); hello = true;
+	if (!hello)
+		fprintf(stderr, "dvbtee v" LIBDVBTEE_VERSION ", built " __DATE__ " " __TIME__
+			"\nMichael Krufky - http://github.com/mkrufky\n\n");
+	hello = true;
 	dprintf("()");
 
 	memset(&new_channel_info, 0, sizeof(channel_info_t));
