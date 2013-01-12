@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2012 Michael Krufky
+ * Copyright (C) 2011-2013 Michael Krufky
  *
  * Author: Michael Krufky <mkrufky@linuxtv.org>
  *
