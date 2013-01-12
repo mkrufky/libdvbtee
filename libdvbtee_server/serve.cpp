@@ -387,7 +387,7 @@ void* serve_client::client_thread()
 
 serve::serve()
   : f_kill_thread(false)
-  , f_reclaim_resources(true)
+  , f_reclaim_resources(false)
 {
 	dprintf("()");
 	tuners.clear();
