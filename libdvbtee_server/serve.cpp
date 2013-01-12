@@ -464,7 +464,8 @@ void* serve::monitor_thread()
 				/* if the tuner is feeding, check to see if it is streaming to any output.
 				   if not streaming, stop this tuner */
 				if (((f_reclaim_resources) && (!any_cli)) &&
-				    ((iter->second->is_feed()) && (!iter->second->feeder.parser.check()))) {
+				    (((iter->second->is_feed()) && (iter->second->last_touched() > 15)) &&
+				     (!iter->second->feeder.parser.check()))) {
 					dprintf("reclaiming idle resource:");
 					dprintf("stopping data feed...");
 					iter->second->stop_feed();

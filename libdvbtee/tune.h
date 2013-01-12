@@ -26,6 +26,7 @@
 #include <sys/ioctl.h>
 #include <linux/dvb/frontend.h>
 #include <linux/dvb/dmx.h>
+#include <time.h>
 
 #include "channels.h"
 #include "feed.h"
@@ -61,6 +62,7 @@ public:
 
 	bool tune_channel(fe_modulation_t, unsigned int);
 	unsigned int get_channel() { return cur_chan; };
+	time_t last_touched();
 
 	bool check();
 
@@ -109,6 +111,8 @@ private:
 	int   dvr_id;
 
 	unsigned int cur_chan;
+	time_t time_touched;
+	time_t last_query;
 
 	int          scan_mode;
 	channel_map  scan_channel_list;

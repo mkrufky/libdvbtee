@@ -152,6 +152,7 @@ bool tune::check()
 			fe_status_t status = fe_status();
 			uint16_t snr = get_snr();
 			dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
+			last_touched();
 		}
 	}
 
@@ -344,9 +345,22 @@ bool tune::tune_channel(fe_modulation_t modulation, unsigned int channel)
 		fprintf(stderr, "unsupported FE TYPE\n");
 		ret = false;
 	}
-	if (ret)
+	if (ret) {
 		cur_chan = channel;
+		time(&time_touched);
+	}
 
+	return ret;
+}
+
+time_t tune::last_touched() // sec_ago
+{
+	time_t timenow;
+	time(&timenow);
+	time_t ret = timenow - time_touched;
+	if (timenow - last_query)
+		dprintf("last touched %ld seconds ago", ret);
+	time(&last_query);
 	return ret;
 }
 
