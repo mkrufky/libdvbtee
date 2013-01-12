@@ -104,6 +104,28 @@ bool serve::get_channels(chandump_callback chandump_cb, void *chandump_context, 
 	return true;
 }
 
+bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
+		    dump_epg_event_callback epg_event_cb, void *epgdump_context)
+{
+	unsigned int tuner_id = 0; // FIXME
+	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+	if (!tuner) {
+		dprintf("NO TUNER!\n");
+		return false;
+	}
+
+	decode_report *reporter = new decode_report;
+
+	reporter->set_dump_epg_cb(epgdump_context, epg_signal_cb, epg_event_cb);
+
+	tuner->feeder.parser.epg_dump(reporter);
+
+	delete reporter;
+	reporter = NULL;
+
+	return true;
+}
+
 bool serve::scan(unsigned int flags, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;

@@ -123,6 +123,8 @@ public:
 	bool add_feeder(feed *new_feeder) /*{ feeders[feeders.size()] = new_feeder; }*/;
 	static bool add_feeder(void*, feed*);
 
+	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
+		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
 	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
 		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL, unsigned int tuner_id = 0);
