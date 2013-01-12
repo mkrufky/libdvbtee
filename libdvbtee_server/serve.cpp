@@ -44,6 +44,8 @@ unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 	tuner_map  tuners;
 	feeder_map feeders;
 
+	bool any_cli = false;
+
 //static
 bool serve::add_feeder(void *p_this, feed *new_feeder)
 {
@@ -384,10 +386,13 @@ void* serve_client::client_thread()
 }
 
 serve::serve()
+  : f_kill_thread(false)
+  , f_reclaim_resources(true)
 {
 	dprintf("()");
 	tuners.clear();
 	feed_servers.clear();
+	start_monitor();
 }
 
 serve::~serve()
@@ -396,6 +401,7 @@ serve::~serve()
 	tuners.clear();
 	feed_servers.clear();
 
+	stop_monitor();
 	stop();
 }
 
@@ -415,6 +421,62 @@ serve& serve::operator= (const serve& cSource)
 	return *this;
 }
 #endif
+
+int serve::start_monitor()
+{
+	dprintf("()");
+
+	f_kill_thread = false;
+
+	int ret = pthread_create(&h_thread, NULL, monitor_thread, this);
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
+//static
+void* serve::monitor_thread(void *p_this)
+{
+	return static_cast<serve*>(p_this)->monitor_thread();
+}
+
+void* serve::monitor_thread()
+{
+	while (!f_kill_thread) {
+#if 0
+		for (feeder_map::iterator iter = feeders.begin(); iter != feeders.end(); ++iter)
+			if (iter->second->check())
+				cli_print("feeder %d:\t%s\n", iter->first, iter->second->get_filename());
+#endif
+		for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+			if (iter->second->check()) {
+				unsigned int cur_chan = iter->second->get_channel();
+#if 0
+				cli_print("tuner %d:\tchannel %d, state:%s%s%s%s%s\n",
+					  iter->first, cur_chan,
+					  iter->second->is_idle() ? " idle" : "",
+					  iter->second->is_open() ? " open" : "",
+					  iter->second->is_lock() ? " lock" : "",
+					  iter->second->is_scan() ? " scan" : "",
+					  iter->second->is_feed() ? " feed" : "");
+#endif
+				/* if the tuner is locked, check to see if it is streaming to any output.
+				   if not streaming, stop this tuner */
+				if (((f_reclaim_resources) && (!any_cli)) &&
+				    ((iter->second->is_lock()) && (!iter->second->feeder.parser.check()))) {
+					dprintf("reclaiming idle resource:");
+					dprintf("stopping data feed...");
+					iter->second->stop_feed();
+					dprintf("closing frontend...");
+					iter->second->close_fe();
+				}
+			}
+		sleep(1*15); // sleep for 15 seconds between monitor iterations
+	}
+	pthread_exit(NULL);
+}
+
 
 //static
 void serve_client::streamback(void *p_this, const char *str)
@@ -632,6 +694,7 @@ bool serve_client::check()
 			break;
 		case SERVE_DATA_FMT_CLI:
 			fmt = "CLI";
+			any_cli = true;
 			break;
 		case SERVE_DATA_FMT_XML:
 			fmt = "XML";
@@ -645,6 +708,8 @@ bool serve_client::check()
 bool serve::check()
 {
 	dprintf("()");
+
+	any_cli = false;
 
 	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
 		if (!iter->second.check())

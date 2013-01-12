@@ -136,6 +136,8 @@ public:
 
 	bool check();
 
+	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; };
+
 	/* FIXME: move to private */
 	bool cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
 			    chandump_callback chandump_cb, void *chandump_context);
@@ -146,10 +148,21 @@ private:
 	socket_listen listener;
 	serve_client_map client_map;
 
+	pthread_t h_thread;
+	bool f_kill_thread;
+
+	void *monitor_thread();
+	static void *monitor_thread(void*);
+
+	int start_monitor();
+	void stop_monitor() { f_kill_thread = true; };
+
 	void add_client(int);
 	static void add_client(void*, int);
 
 	unsigned int scan_flags;
+
+	bool f_reclaim_resources;
 };
 
 #endif /*__SERVE_H__ */
