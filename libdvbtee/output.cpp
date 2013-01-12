@@ -682,9 +682,12 @@ bool output::check()
 {
 	dprintf("()");
 	unsigned int dead = 0;
+	bool ret = false;
 
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
-		if (!iter->second.check()) {
+		bool streaming = iter->second.check();
+		ret |= streaming;
+		if (!streaming) {
 #if 0
 			dprintf("erasing idle output stream...");
 			output_streams.erase(iter->first);
@@ -698,7 +701,7 @@ bool output::check()
 
 	ringbuffer.check();
 
-	return true;
+	return ret;
 }
 
 int output::start()
