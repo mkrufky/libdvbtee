@@ -451,16 +451,6 @@ void* serve::monitor_thread()
 #endif
 		for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 			if (iter->second->check()) {
-				unsigned int cur_chan = iter->second->get_channel();
-#if 0
-				cli_print("tuner %d:\tchannel %d, state:%s%s%s%s%s\n",
-					  iter->first, cur_chan,
-					  iter->second->is_idle() ? " idle" : "",
-					  iter->second->is_open() ? " open" : "",
-					  iter->second->is_lock() ? " lock" : "",
-					  iter->second->is_scan() ? " scan" : "",
-					  iter->second->is_feed() ? " feed" : "");
-#endif
 				/* if the tuner is feeding, check to see if it is streaming to any output.
 				   if not streaming, stop this tuner */
 				if (((f_reclaim_resources) && (!any_cli)) &&
