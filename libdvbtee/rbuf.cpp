@@ -166,8 +166,10 @@ bool rbuf::write(const void* p, int size)
 {
 	pthread_mutex_lock(&mutex);
 
-	if (__get_size() + size > capacity)
+	if (__get_size() + size > capacity) {
+		pthread_mutex_unlock(&mutex);
 		return false;
+	}
 
         if (idx_write + size > capacity) {
 		int split = capacity - idx_write;
@@ -187,8 +189,10 @@ bool rbuf::write(const void* p, int size)
 bool rbuf::write(const void* p, int size)
 {
 	pthread_mutex_lock(&mutex);
-	if (__get_size() + size > capacity)
+	if (__get_size() + size > capacity) {
+		pthread_mutex_unlock(&mutex);
 		return false;
+	}
 
 	void *q = NULL;
 	char *r = (char*)p;
