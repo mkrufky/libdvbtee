@@ -106,7 +106,7 @@ private:
 #define OUTPUT_STREAM_HTTP 4
 	unsigned int stream_method;
 
-	unsigned int count_in, count_out;
+	unsigned long int count_in, count_out;
 
 	stream_callback stream_cb;
 	void *stream_cb_priv;
@@ -159,7 +159,7 @@ private:
 
 	enum output_options options;
 
-	unsigned int count_in, count_out;
+	unsigned long int count_in, count_out;
 
 	socket_listen listener;
 };
