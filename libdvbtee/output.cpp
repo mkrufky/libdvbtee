@@ -388,8 +388,10 @@ int output_stream::stream(uint8_t* p_data, int size)
 {
 	int ret = -1;
 
+	if ((!p_data) || (!size))
+		dprintf("no data to stream!!!");
 	/* stream data to target */
-	switch (stream_method) {
+	else switch (stream_method) {
 	case OUTPUT_STREAM_UDP:
 		ret = socket_send(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
 		break;
