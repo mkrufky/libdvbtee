@@ -633,7 +633,7 @@ void* output::output_thread()
 			uint8_t data[buf_size];
 			buf_size = ringbuffer.read(data, buf_size);
 #endif
-
+			if (buf_size)
 			for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 				if (iter->second.is_streaming())
 					iter->second.push(data, buf_size);
