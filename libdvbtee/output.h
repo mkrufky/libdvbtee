@@ -69,7 +69,7 @@ public:
 	output_stream(const output_stream&);
 	output_stream& operator= (const output_stream&);
 #endif
-	bool is_streaming() { return f_streaming; };
+	bool is_streaming() { return ((!f_kill_thread) && (f_streaming)); };
 	void stop_without_wait() { f_kill_thread = true; };
 
 	int start();
