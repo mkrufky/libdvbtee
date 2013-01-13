@@ -110,12 +110,18 @@ private:
 
 typedef std::map<int, serve_client> serve_client_map;
 
+struct libdvbtee_server_config {
+	uint16_t port_requested;
+	bool cli_disabled;
+};
+
 class serve
 {
 public:
 	serve();
 	~serve();
 
+	int start(struct libdvbtee_server_config *cfg);
 	int start(uint16_t port_requested = SERVE_DEFAULT_PORT);
 	void stop();
 
@@ -133,6 +139,7 @@ public:
 	unsigned int get_scan_flags(unsigned int tuner_id) { return scan_flags; };
 
 	bool is_running() { return listener.is_running(); };
+	bool is_cli_enabled() { return f_cli_enabled; };
 
 	bool check();
 
@@ -163,6 +170,7 @@ private:
 	unsigned int scan_flags;
 
 	bool f_reclaim_resources;
+	bool f_cli_enabled;
 };
 
 #endif /*__SERVE_H__ */

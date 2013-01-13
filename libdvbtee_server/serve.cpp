@@ -347,9 +347,13 @@ void* serve_client::client_thread()
 						cmdbuf = buf;
 				} else
 					cmdbuf = buf;
-			} else {
+			} else if (server->is_cli_enabled()) {
 				data_fmt = SERVE_DATA_FMT_CLI;
 				cmdbuf = buf;
+			} else {
+				/* terminate thread if CLI isn't enabled */
+				stop_without_wait();
+				break;
 			}
 
 			if (httphead) {
@@ -388,6 +392,7 @@ void* serve_client::client_thread()
 serve::serve()
   : f_kill_thread(false)
   , f_reclaim_resources(true)
+  , f_cli_enabled(true)
 {
 	dprintf("()");
 	tuners.clear();
@@ -642,6 +647,12 @@ void serve::add_client(int socket)
 
 	client_map[socket].setup(this, socket);
 	client_map[socket].start();
+}
+
+int serve::start(struct libdvbtee_server_config *cfg)
+{
+	f_cli_enabled = !cfg->cli_disabled;
+	return (cfg->port_requested > 0) ? start(cfg->port_requested) : start();
 }
 
 int serve::start(uint16_t port_requested)
