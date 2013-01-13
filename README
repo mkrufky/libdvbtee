@@ -6,7 +6,7 @@ Introduction
 
 libdvbtee is a stream parser and service information aggregator library for
 MPEG2 transport streams. The library includes a program service information
-(PSIP) parser and support for various network streaming methods and is aware
+(PSI) parser and support for various network streaming methods and is aware
 of the linux-dvb kernel API.
 
 The library contains enough functionality to power a full featured television
