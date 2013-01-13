@@ -4,17 +4,21 @@ dvbtee & libdvbtee
 Introduction
 ============
 
-libdvbtee is a stream parser and service information aggregator library for MPEG2 transport streams.
-The library contains parsing and streaming engines and is aware of the linux-dvb kernel API.
+libdvbtee is a stream parser and service information aggregator library for
+MPEG2 transport streams. The library includes a program service information
+(PSIP) parser and support for various network streaming methods and is aware
+of the linux-dvb kernel API.
 
-The library contains enough functionality to power a full featured middleware application,
-including the ability to acquire and stream data through UDP, TCP, HTTP, DMA and various other mechanisms.
+The library contains enough functionality to power a full featured television
+middleware application, including the ability to acquire and stream data
+through UDP, TCP, HTTP, DMA and various other mechanisms.
 
-libdvbtee_server allows for these features to be controlled from a http session or command line interface,
-and can be used to control multiple tuners.
+libdvbtee_server allows for these features to be controlled from an http
+session or command line interface, and can be used to control multiple tuners.
 
-The dvbtee executable application provides a variety of features, including: scanning, tuning, EPG browsing,
-receive incoming network streams, stream out network streams, manage multiple tuners, and more...
+The dvbtee executable application provides a variety of features, including:
+scanning, tuning, EPG browsing, receive incoming network streams,
+stream out network streams, manage multiple tuners, and more...
 
 This README file is a work-in-progress... I'll expand on this more soon.
 
