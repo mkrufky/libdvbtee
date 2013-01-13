@@ -343,7 +343,7 @@ void output_stream::stop()
 
 bool output_stream::check()
 {
-	bool ret = is_streaming();
+	bool ret = f_streaming;
 	if (!ret)
 		dprintf("(%d: %s) not streaming!", sock, name);
 	else {
@@ -689,21 +689,36 @@ bool output::check()
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 		bool streaming = iter->second.check();
 		ret |= streaming;
-		if (!streaming) {
-#if 0
-			dprintf("erasing idle output stream...");
-			output_streams.erase(iter->first);
-			dprintf("garbage collection complete");
-#endif
+		if (!streaming)
 			dead++;
-		}
 	}
-	if (dead)
+	if (dead) {
 		dprintf("%d dead streams found", dead);
+		reclaim_resources();
+	}
 
 	ringbuffer.check();
 
 	return ret;
+}
+
+void output::reclaim_resources()
+{
+	dprintf("()");
+	bool erased = false;
+
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
+		if (!iter->second.check()) {
+			dprintf("erasing idle output stream...");
+			output_streams.erase(iter->first);
+			/* stop the loop if we erased any targets */
+			erased = true;
+			break;
+		}
+	}
+	/* if we erased a target, restart the above by re-calling this function recursively */
+	if (erased)
+		reclaim_resources();
 }
 
 int output::start()

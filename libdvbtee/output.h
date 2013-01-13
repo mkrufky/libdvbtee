@@ -153,6 +153,8 @@ private:
 
 	void stop_without_wait() { f_kill_thread = true; };
 
+	void reclaim_resources();
+
 	int __add(char*);
 
 	unsigned int num_targets;
