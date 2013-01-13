@@ -17,3 +17,6 @@ The dvbtee executable application provides a variety of features, including: sca
 receive incoming network streams, stream out network streams, manage multiple tuners, and more...
 
 This README file is a work-in-progress... I'll expand on this more soon.
+
+Michael Krufky
+mkrufky at linuxtv dot org
