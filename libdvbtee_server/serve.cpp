@@ -46,6 +46,17 @@ unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 
 	bool any_cli = false;
 
+static tune *find_idle_tuner()
+{
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
+			dprintf("tuner %d is available", iter->first);
+			return iter->second;
+		}
+	dprintf("falling back to default tuner");
+	return (tuners.count(0)) ? tuners[0] : NULL;
+}
+
 //static
 bool serve::add_feeder(void *p_this, feed *new_feeder)
 {
@@ -1103,17 +1114,6 @@ bool serve_client::cmd_tuner_scan_channels_save()
 	close(channels_fd);
 	cli_print("done\n");
 	return true;
-}
-
-tune *find_idle_tuner()
-{
-	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
-		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
-			dprintf("tuner %d is available", iter->first);
-			return iter->second;
-		}
-	dprintf("falling back to default tuner");
-	return (tuners.count(0)) ? tuners[0] : NULL;
 }
 
 bool serve_client::__command(char* cmdline)
