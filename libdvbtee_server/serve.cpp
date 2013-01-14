@@ -1158,7 +1158,12 @@ bool serve_client::__command(char* cmdline)
 		feeder = &tuner->feeder;
 
 	if ((!feeder) && (tuners.size())) {
+#if 0
 		tuner = find_idle_tuner();
+#else
+		tuner_id = 0;
+		tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+#endif
 		if (tuner) feeder = &tuner->feeder;
 	}
 
