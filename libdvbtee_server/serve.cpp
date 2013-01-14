@@ -1105,6 +1105,17 @@ bool serve_client::cmd_tuner_scan_channels_save()
 	return true;
 }
 
+tune *find_idle_tuner()
+{
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
+			dprintf("tuner %d is available", iter->first);
+			return iter->second;
+		}
+	dprintf("falling back to default tuner");
+	return (tuners.count(0)) ? tuners[0] : NULL;
+}
+
 bool serve_client::__command(char* cmdline)
 {
 	unsigned int scan_flags = 0;
@@ -1147,8 +1158,7 @@ bool serve_client::__command(char* cmdline)
 		feeder = &tuner->feeder;
 
 	if ((!feeder) && (tuners.size())) {
-		tuner_id = 0;
-		tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
+		tuner = find_idle_tuner();
 		if (tuner) feeder = &tuner->feeder;
 	}
 
