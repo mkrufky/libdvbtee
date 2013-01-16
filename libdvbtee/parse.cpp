@@ -576,8 +576,11 @@ parse::parse()
   , rewritten_pat_cont_ctr(0)
 {
 	if (!hello)
-		fprintf(stderr, "dvbtee v" LIBDVBTEE_VERSION ", built " __DATE__ " " __TIME__
-			"\nMichael Krufky - http://github.com/mkrufky\n\n");
+		fprintf(stdout, "# dvbtee v" LIBDVBTEE_VERSION
+#if 0
+			", built " __DATE__ " " __TIME__
+#endif
+			" - http://github.com/mkrufky/libdvbtee\n\n");
 	hello = true;
 	dprintf("()");
 
