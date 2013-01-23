@@ -73,3 +73,29 @@ To scan for ClearQAM services using 5 tuners optimized for speed and partial red
 
 To start a server using adapter 0:
   ./dvbtee -a0 -S
+
+Server commands
+===============
+
+tuner		specify tuner id
+feeder		specify feeder id
+scan		scan for services, optional arg comma (,) separated list of channels to scan
+scanepg		same as 'scan' with EPG data collection enabled during scan
+startscan	same as 'scan' but asynchronous
+startscanepg	combo of 'scanepg' and 'startscan'
+tune		tune to a channel or service, ie:
+		tune=33 (full mux) / tune=44~3 (svc id 3)
+channels	list channels
+channel		tune physical channel (unsafe - use tune instead)
+service		select service (unsafe - use tune instead)
+stream		add output file / tcp / udp / http stream
+epg		dump collected EPG data
+xmltv		dump collected EPG data in XMLTV format
+stop		stop the tuner
+stopoutput	stop the tuner and output
+check		display debug info if debug is enabled
+debug		enable debug
+parser		enable / disable the parser for data shovel
+listen		listen for TS on a TCP or UDP port
+save		save scanned channels
+quit		stop the server and exit
