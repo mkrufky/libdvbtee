@@ -253,6 +253,28 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 	fprintf(stderr, "found %d services in total\n", count);
 }
 
+void usage()
+{
+	fprintf(stderr, "  "
+		"-a\tadapter id\n  "
+		"-A\t(1 for ATSC, 2 for ClearQAM)\n  "
+		"-c\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan minimum channel\n  "
+		"-C\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan maximum channel\n  "
+		"-f\tfrontend id\n  "
+		"-F\tfilename to use as input\n  "
+		"-t\ttimeout\n  "
+		"-T\tnumber of tuners (dvb adapters) allowed to use, 0 for all\n  "
+		"-s\tscan, optional arg when using multiple tuners: \n\t1 for speed, 2 for redundancy, \n\t3 for speed AND redundancy, \n\t4 for optimized speed / partial redundancy\n  "
+		"-S\tserver mode, optional arg 1 for command server, \n\t2 for http stream server, 3 for both\n  "
+		"-i\tpull local/remote tcp/udp port for data\n  "
+		"-I\trequest a service and its associated PES streams by its service id\n  "
+		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
+		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
+		"-O\toutput options\n  "
+		"-d\tdebug level\n  "
+	);
+}
+
 int main(int argc, char **argv)
 {
 	dvbtee_context context;
@@ -302,7 +324,7 @@ int main(int argc, char **argv)
 	char channel_list[256];
 	memset(&channel_list, 0, sizeof(channel_list));
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::S::E::o::O:d::")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::S::E::o::O:d::hH?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -361,7 +383,7 @@ int main(int argc, char **argv)
 		case 'I': /* request a service by its service id */
 			strcpy(service_ids, optarg);
 			break;
-		case 'E': /* enable EPG scan */
+		case 'E': /* enable EPG scan, optional arg to limit the number of EITs to parse */
 #if 0
 			b_scan = true; // FIXME
 #endif
@@ -387,7 +409,11 @@ int main(int argc, char **argv)
 			else
 				libdvbtee_set_debug_level(255);
 			break;
+		case '?':
+		case 'h':
+		case 'H':
 		default:  /* bad cmd line option */
+			usage();
 			return -1;
 		}
 	}
