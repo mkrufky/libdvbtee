@@ -46,10 +46,12 @@
 #define CONN_CLOSE   "Connection: close"
 #define CRLF         "\r\n"
 
+#if 0
 static char http_conn_close[] =
 	CONN_CLOSE
 	CRLF
 	CRLF;
+#endif
 
 static const char * __http_response(const char *mimetype)
 {
