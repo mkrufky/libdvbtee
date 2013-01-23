@@ -253,7 +253,7 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 	fprintf(stderr, "found %d services in total\n", count);
 }
 
-void usage()
+void usage(bool help, char *myname)
 {
 	fprintf(stderr, "  "
 		"-a\tadapter id\n  "
@@ -270,8 +270,24 @@ void usage()
 		"-I\trequest a service and its associated PES streams by its service id\n  "
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
-		"-O\toutput options\n  "
+		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
 		"-d\tdebug level\n  "
+		"-h\tdisplay additional help\n\n");
+	if (help)
+		fprintf(stderr,
+		"To tune to service id 1 of physical channel 33 and stream it to a udp port:\n  "
+		"%s -c33 -I1 -oudp://192.168.1.100:1234\n\n"
+		"To tune the second frontend of adapter 1 and stream the full TS of physical channel 44 to a tcp listener:\n  "
+		"%s -c44 -otcp://192.168.1.200:5555\n\n"
+		"To listen to a TCP port and stream to a UDP port:\n  "
+		"%s -itcp://5555 -oudp://192.168.1.100:1234\n\n"
+		"To parse a captured file and filter out the PSIP data, saving the PAT/PMT and PES streams to a file:\n  "
+		"%s -Finput.ts -O3 -ofile://output.ts\n\n"
+		"To parse a UDP stream for ten seconds:\n  "
+		"%s -iudp://127.0.0.1:1234 -t10\n\n"
+		"To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:\n  "
+		"%s -A2 -T5 -s4\n\n"
+		, myname, myname, myname, myname, myname, myname
 	);
 }
 
@@ -286,6 +302,7 @@ int main(int argc, char **argv)
 	bool b_output_stdout = false;
 	bool b_serve    = false;
 	bool b_kernel_pid_filters = false;
+	bool b_help     = false;
 
 	context.server = NULL;
 
@@ -409,11 +426,12 @@ int main(int argc, char **argv)
 			else
 				libdvbtee_set_debug_level(255);
 			break;
-		case '?':
 		case 'h':
 		case 'H':
-		default:  /* bad cmd line option */
-			usage();
+			b_help = true;
+			/* fall - thru  */
+		default:
+			usage(b_help, argv[0]);
 			return -1;
 		}
 	}
