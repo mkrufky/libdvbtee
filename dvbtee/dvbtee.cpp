@@ -287,7 +287,9 @@ void usage(bool help, char *myname)
 		"%s -iudp://127.0.0.1:1234 -t10\n\n"
 		"To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:\n  "
 		"%s -A2 -T5 -s4\n\n"
-		, myname, myname, myname, myname, myname, myname
+		"To start a server using adapter 0:\n  "
+		"%s -a0 -S\n\n"
+		, myname, myname, myname, myname, myname, myname, myname
 	);
 }
 

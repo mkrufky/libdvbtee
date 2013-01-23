@@ -70,3 +70,6 @@ To parse a UDP stream for ten seconds:
 
 To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:
   ./dvbtee -A2 -T5 -s4
+
+To start a server using adapter 0:
+  ./dvbtee -a0 -S
