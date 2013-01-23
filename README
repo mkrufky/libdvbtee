@@ -20,6 +20,13 @@ The dvbtee executable application provides a variety of features, including:
 scanning, tuning, EPG browsing, receive incoming network streams,
 stream out network streams, manage multiple tuners, and more...
 
+The server can be accessed either by telnet or http. The default port number
+is 64080, but this is configurable. The server_example uses port number 62080.
+
+When accessing the server via http, precede commands by / and arguments by =.
+When accessing the server via telnet, enter in the form 'command=argument'
+and press enter.
+
 This README file is a work-in-progress... I'll expand on this more soon.
 
 Michael Krufky
