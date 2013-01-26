@@ -985,22 +985,22 @@ int parse::feed(int count, uint8_t* p_data)
 		output_options out_type = OUTPUT_NONE;
 		pkt_stats_t pkt_stats;
 
-		statistics.push(p, &pkt_stats);
+		statistics.parse(p, &pkt_stats);
 
-		uint16_t pid = pkt_stats.pid;
-
-		while (((i > 0) && (pid == (uint16_t) - 1)) || ((i > 1) && (tp_pkt_pid(p+188) == (uint16_t) - 1))) {
+		while (((i > 0) && (pkt_stats.pid == (uint16_t) - 1)) || ((i > 1) && (tp_pkt_pid(p+188) == (uint16_t) - 1))) {
 			p++;
 			sync_offset++;
 			if (sync_offset == 188) {
 				sync_offset = 0;
 				i--;
 			}
-			pid = tp_pkt_pid(p);
+			statistics.parse(p, &pkt_stats);
 			fprintf(stderr, ".\t");
 		}
 
-		if (p[1] & 0x80) {
+		statistics.push(p, &pkt_stats);
+
+		if (pkt_stats.tei) {
 			if (!tei_count)
 				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
 			else if (tei_count % 100 == 0)
@@ -1009,7 +1009,7 @@ int parse::feed(int count, uint8_t* p_data)
 			if (!process_err_pkts) continue;
 		}
 
-		switch (pid) {
+		switch (pkt_stats.pid) {
 		case PID_PAT:
 			dvbpsi_PushPacket(h_pat, p);
 			send_pkt = (service_ids.size()) ? false : true;
@@ -1030,7 +1030,7 @@ int parse::feed(int count, uint8_t* p_data)
 		default:
 			map_dvbpsi::const_iterator iter;
 
-			iter = h_pmt.find(pid);
+			iter = h_pmt.find(pkt_stats.pid);
 			if (iter != h_pmt.end()) {
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
@@ -1039,7 +1039,7 @@ int parse::feed(int count, uint8_t* p_data)
 			}
 
 			map_eit_pids::const_iterator iter_eit;
-			iter_eit = eit_pids.find(pid);
+			iter_eit = eit_pids.find(pkt_stats.pid);
 			if (iter_eit != eit_pids.end()) {
 
 				if (decoders[ts_id].eit_x_complete(iter_eit->second)) {
@@ -1055,7 +1055,7 @@ int parse::feed(int count, uint8_t* p_data)
 				out_type = OUTPUT_PSIP;
 			}
 
-			iter = h_demux.find(pid);
+			iter = h_demux.find(pkt_stats.pid);
 			if (iter != h_demux.end()) {
 				dvbpsi_PushPacket(iter->second, p);
 				send_pkt = true;
@@ -1065,10 +1065,10 @@ int parse::feed(int count, uint8_t* p_data)
 
 #if 0
 			map_pidtype::const_iterator iter_payload;
-			iter_payload = payload_pids.find(pid);
+			iter_payload = payload_pids.find(pkt_stats.pid);
 			if (iter_payload != payload_pids.end()) {
 #else
-			if (payload_pids.count(pid)) {
+			if (payload_pids.count(pkt_stats.pid)) {
 #endif
 				send_pkt = true;
 				out_type = OUTPUT_PES;
