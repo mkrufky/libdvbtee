@@ -81,22 +81,13 @@ void stats::show(const uint16_t pid/*, time_t timenow*/)
 
 void stats::show()
 {
-//	dprintf("pid\tp/s\tkb/s\t\tkbit");
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
-//		dprintf("%04x %lu p/s, %lu.%lu kb/s, %lu.%lu kbit",
-#if 0
-		dprintf("%04x\t%lu\t%lu.%lu\t\t%lu.%lu",
-			iter->first,
-			iter->second / 188, iter->second / 1000, iter->second % 1000,
-			(iter->second * 8) / 1000, (iter->second * 8) % 1000);
-#else
 		char a[16];
 		char b[16];
 		dprintf("pid %04x\t%lu p/s\t%sb/s\t%sbit",
 			iter->first, iter->second / 188,
 			scale_unit(a, sizeof(a), iter->second),
 			scale_unit(b, sizeof(b), iter->second * 8));
-#endif
 	}
 }
 

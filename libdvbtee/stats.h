@@ -60,9 +60,6 @@ public:
 	void push(const uint8_t *p, pkt_stats_t *pkt_stats = NULL);
 
 	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats);
-#if 0
-	bool check();
-#endif
 private:
 	stats_map statistics;
 	time_t __timenow;
