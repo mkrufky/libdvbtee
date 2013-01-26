@@ -62,6 +62,7 @@ public:
 	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats);
 private:
 	stats_map statistics;
+	uint64_t tei_count;
 	time_t __timenow;
 
 	streamtime_callback streamtime;
@@ -74,6 +75,9 @@ private:
 
 	void show(const uint16_t pid/*, time_t timenow*/);
 	void show();
+
+	void push_stats(pkt_stats_t *pkt_stats);
+	void clear_stats();
 };
 
 #endif /*__STATS_H__ */

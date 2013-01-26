@@ -30,7 +30,8 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_STATS, fmt, ##arg)
 
 stats::stats()
-  : __timenow(0)
+  : tei_count(0)
+  , __timenow(0)
   , streamtime(NULL)
   , streamtime_priv(NULL)
 {
@@ -89,6 +90,7 @@ void stats::show()
 			scale_unit(a, sizeof(a), iter->second),
 			scale_unit(b, sizeof(b), iter->second * 8));
 	}
+	if (tei_count) dprintf("tei count: %lu", tei_count);
 }
 
 void stats::push_pid(int c, const uint16_t pid)
@@ -102,7 +104,7 @@ void stats::push_pid(int c, const uint16_t pid)
 	if (timenow > __timenow) {
 #endif
 		show();
-		statistics.clear();
+		clear_stats();
 		__timenow = timenow;
 	}
 
@@ -124,6 +126,18 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
 	return pkt_stats;
 }
 
+void stats::clear_stats()
+{
+	statistics.clear();
+	tei_count = 0;
+}
+
+void stats::push_stats(pkt_stats_t *pkt_stats)
+{
+	push_pid(pkt_stats->pid);
+	if (pkt_stats->tei) tei_count++;
+}
+
 void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 {
 	if (!pkt_stats) {
@@ -135,5 +149,5 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 
 	parse(p, pkt_stats);
 
-	push_pid(pkt_stats->pid);
+	push_stats(pkt_stats);
 }
