@@ -58,6 +58,8 @@ public:
 
 	void push(int c, const uint8_t *p, pkt_stats_t *pkt_stats = NULL) { for(int i = 0; i < c; i++) push(p+i*188, pkt_stats); };
 	void push(const uint8_t *p, pkt_stats_t *pkt_stats = NULL);
+
+	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats);
 #if 0
 	bool check();
 #endif

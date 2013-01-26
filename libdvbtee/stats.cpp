@@ -118,6 +118,21 @@ void stats::push_pid(int c, const uint16_t pid)
 	__push_pid(c, pid/*, timenow*/);
 }
 
+pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
+{
+	if (pkt_stats) {
+		memset(pkt_stats, 0, sizeof(pkt_stats));
+
+		pkt_stats->sync_loss = (p[0] != 0x47) ? true : false;
+		if (!pkt_stats->sync_loss) {
+			pkt_stats->tei = (p[1] & 0x80) ? true : false;
+			pkt_stats->pid = ((uint16_t) (p[1] & 0x1f) << 8) + p[2];
+		} else
+			pkt_stats->pid = (uint16_t) - 1;
+	}
+	return pkt_stats;
+}
+
 void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 {
 	if (!pkt_stats) {
@@ -127,12 +142,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 
 	memset(pkt_stats, 0, sizeof(pkt_stats));
 
-	pkt_stats->sync_loss = (p[0] != 0x47) ? true : false;
-	if (!pkt_stats->sync_loss) {
-		pkt_stats->tei = (p[1] & 0x80) ? true : false;
-		pkt_stats->pid = ((uint16_t) (p[1] & 0x1f) << 8) + p[2];
-	} else
-		pkt_stats->pid = (uint16_t) - 1;
+	parse(p, pkt_stats);
 
 	push_pid(pkt_stats->pid);
-};
+}
