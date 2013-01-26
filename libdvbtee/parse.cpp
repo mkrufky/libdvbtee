@@ -1005,6 +1005,8 @@ int parse::feed(int count, uint8_t* p_data)
 			if (!process_err_pkts) continue;
 		}
 
+		statistics.push_pid(pid);
+
 		switch (pid) {
 		case PID_PAT:
 			dvbpsi_PushPacket(h_pat, p);

@@ -27,6 +27,7 @@
 
 #include "decode.h"
 #include "output.h"
+#include "stats.h"
 
 #define LIBDVBTEE_VERSION "0.1.5"
 
@@ -198,6 +199,8 @@ private:
 	void rewrite_pat();
 	void process_pat(const decoded_pat_t *);
 	void process_pmt(const decoded_pmt_t *);
+
+	stats statistics;
 };
 
 #endif //__PARSE_H__
