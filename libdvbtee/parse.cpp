@@ -1000,7 +1000,7 @@ int parse::feed(int count, uint8_t* p_data)
 			fprintf(stderr, ".\t");
 		}
 
-		if (pkt_stats.tei) {
+		if (p[1] & 0x80) {
 			if (!tei_count)
 				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
 			else if (tei_count % 100 == 0)
