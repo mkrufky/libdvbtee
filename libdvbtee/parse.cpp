@@ -980,10 +980,14 @@ int parse::feed(int count, uint8_t* p_data)
 	else
 	/* one TS packet at a time */
         for (int i = count / 188; i > 0; --i) {
-		uint16_t pid = tp_pkt_pid(p);
 		bool send_pkt = false;
 		unsigned int sync_offset = 0;
 		output_options out_type = OUTPUT_NONE;
+		pkt_stats_t pkt_stats;
+
+		statistics.push(p, &pkt_stats);
+
+		uint16_t pid = pkt_stats.pid;
 
 		while (((i > 0) && (pid == (uint16_t) - 1)) || ((i > 1) && (tp_pkt_pid(p+188) == (uint16_t) - 1))) {
 			p++;
@@ -996,7 +1000,7 @@ int parse::feed(int count, uint8_t* p_data)
 			fprintf(stderr, ".\t");
 		}
 
-		if (p[1] & 0x80) {
+		if (pkt_stats.tei) {
 			if (!tei_count)
 				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
 			else if (tei_count % 100 == 0)
@@ -1004,8 +1008,6 @@ int parse::feed(int count, uint8_t* p_data)
 			tei_count++;
 			if (!process_err_pkts) continue;
 		}
-
-		statistics.push_pid(pid);
 
 		switch (pid) {
 		case PID_PAT:
