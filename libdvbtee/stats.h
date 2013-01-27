@@ -32,6 +32,7 @@ typedef std::map<time_t, uint64_t> pid_stats_map;
 typedef std::map<uint16_t, pid_stats_map> stats_map;
 #else
 typedef std::map<uint16_t, uint64_t> stats_map;
+typedef std::map<uint16_t, uint8_t> continuity_map; // 4bits
 #endif
 
 typedef struct
@@ -40,6 +41,18 @@ typedef struct
 	bool sync_loss;
 	uint16_t pid;
 } pkt_stats_t;
+
+typedef struct
+{
+	unsigned int sync_byte:8;
+	unsigned int tei:1;
+	unsigned int payload_unit_start:1;
+	unsigned int transport_priority:1;
+	unsigned int pid:13;
+	unsigned int scrambling:2;
+	unsigned int adaptation_flags:2;
+	unsigned int continuity_ctr:4;
+} pkt_hdr_t;
 
 typedef time_t (*streamtime_callback)(void*);
 
@@ -62,8 +75,12 @@ public:
 	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats);
 private:
 	stats_map statistics;
+	stats_map discontinuities;
+	continuity_map continuity;
 	uint64_t tei_count;
 	time_t __timenow;
+
+	pkt_hdr_t hdr;
 
 	streamtime_callback streamtime;
 	void *streamtime_priv;
@@ -77,6 +94,7 @@ private:
 	void show();
 
 	void push_stats(pkt_stats_t *pkt_stats);
+	void push_discontinuity(const uint16_t pid) { discontinuities[pid]++; discontinuities[0x2000]++; };
 	void clear_stats();
 };
 
