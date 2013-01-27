@@ -90,7 +90,7 @@ void stats::show()
 			scale_unit(a, sizeof(a), iter->second),
 			scale_unit(b, sizeof(b), iter->second * 8));
 	}
-	if (tei_count) dprintf("tei count: %lu (%d%%)", tei_count, 18800 * tei_count / statistics[0x2000]);
+	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, 18800 * tei_count / statistics[0x2000]);
 }
 
 void stats::push_pid(int c, const uint16_t pid)
@@ -134,8 +134,11 @@ void stats::clear_stats()
 
 void stats::push_stats(pkt_stats_t *pkt_stats)
 {
-	push_pid(pkt_stats->pid);
-	if (pkt_stats->tei) tei_count++;
+	if (pkt_stats->tei) {
+		tei_count++;
+		push_pid((uint16_t) - 1);
+	} else
+		push_pid(pkt_stats->pid);
 }
 
 void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
