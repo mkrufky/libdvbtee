@@ -90,7 +90,7 @@ void stats::show()
 			scale_unit(a, sizeof(a), iter->second),
 			scale_unit(b, sizeof(b), iter->second * 8));
 	}
-	if (tei_count) dprintf("tei count: %lu", tei_count);
+	if (tei_count) dprintf("tei count: %lu (%d%%)", tei_count, 18800 * tei_count / statistics[0x2000]);
 }
 
 void stats::push_pid(int c, const uint16_t pid)
