@@ -97,7 +97,7 @@ void stats::show()
 			scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		dprintf("pid %04x\t%lu discontinuities", iter->first, iter->second);
+		dprintf("pid %04x\t%lu discontinuities (%lu%%)", iter->first, iter->second, (!statistics.count(iter->first)) ? 0 : 100 * iter->second / (statistics[iter->first] / 188));
 
 	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, 18800 * tei_count / statistics[0x2000]);
 }
