@@ -993,11 +993,13 @@ int parse::feed(int count, uint8_t* p_data)
 			if (sync_offset == 188) {
 				sync_offset = 0;
 				i--;
+				fprintf(stderr, "\nSYNC LOSS\n\n");
 			}
 			statistics.parse(p, &pkt_stats);
 			fprintf(stderr, ".\t");
 		}
 
+		if (sync_offset) fprintf(stderr, "\nSYNC LOSS\n\n");
 		statistics.push(p, &pkt_stats);
 
 		if (pkt_stats.tei) {
