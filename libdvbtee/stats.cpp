@@ -41,6 +41,7 @@ stats::stats()
 stats::~stats()
 {
 	dprintf("()");
+	show(false);
 }
 
 #if 0
@@ -86,14 +87,14 @@ void stats::show(const uint16_t pid/*, time_t timenow*/)
 	dprintf("%04x %lu.%lu kbps", pid, statistics[pid]/*[timenow]*/ / 1000, statistics[pid]/*[timenow]*/ % 1000);
 }
 
-void stats::show()
+void stats::show(bool per_sec)
 {
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
 		char a[16];
 		char b[16];
-		dprintf("pid %04x %5lu p/s  %sb/s  %sbit",
-			iter->first, iter->second / 188,
-			scale_unit(a, sizeof(a), iter->second),
+		dprintf("pid %04x %5lu p%s  %sb%s  %sbit",
+			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
+			scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
 			scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)

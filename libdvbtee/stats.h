@@ -91,7 +91,7 @@ private:
 	void __push(const uint8_t *p) { push_pid( (p[0] == 0x47) ? ((uint16_t) (p[1] & 0x1f) << 8) + p[2] : (uint16_t) - 1 ); };
 
 	void show(const uint16_t pid/*, time_t timenow*/);
-	void show();
+	void show(bool per_sec = true);
 
 	void push_stats(pkt_stats_t *pkt_stats);
 	void push_discontinuity(const uint16_t pid) { discontinuities[pid]++; discontinuities[0x2000]++; };
