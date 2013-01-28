@@ -54,6 +54,22 @@ typedef struct
 	unsigned int continuity_ctr:4;
 } pkt_hdr_t;
 
+typedef struct
+{
+	unsigned int field_length:8;
+	unsigned int discontinuity:1;
+	unsigned int random_access:1; /* set to 1 if the PES pkt in this TS pkt starts an a/v sequence */
+	unsigned int es_priority:1;
+	unsigned int pcr:1;
+	unsigned int opcr:1;
+	unsigned int splicing_point:1;
+	unsigned int tp_priv_data:1;
+	unsigned int field_ext:1;
+	unsigned long long PCR:48;
+	unsigned long long OPCR:48;
+	signed int splicing_countdown:8;
+} adaptation_field_t;
+
 typedef time_t (*streamtime_callback)(void*);
 
 class stats
@@ -81,6 +97,7 @@ private:
 	time_t __timenow;
 
 	pkt_hdr_t hdr;
+	adaptation_field_t adapt;
 
 	streamtime_callback streamtime;
 	void *streamtime_priv;

@@ -126,14 +126,54 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
 	if (pkt_stats) {
 		memset(pkt_stats, 0, sizeof(pkt_stats));
 
-		hdr.sync_byte          = p[0];
-		hdr.tei                = (p[1] & 0x80) >> 7;
-		hdr.payload_unit_start = (p[1] & 0x40) >> 6;
-		hdr.transport_priority = (p[1] & 0x20) >> 5;
-		hdr.pid                = ((p[1] & 0x1f) << 8) | p[2];
-		hdr.scrambling         = (p[3] & 0xc0) >> 6;
-		hdr.adaptation_flags   = (p[3] & 0x30) >> 4;
-		hdr.continuity_ctr     = (p[3] & 0x0f);
+		const uint8_t *q = p;
+
+		hdr.sync_byte          = q[0];
+		hdr.tei                = (q[1] & 0x80) >> 7;
+		hdr.payload_unit_start = (q[1] & 0x40) >> 6;
+		hdr.transport_priority = (q[1] & 0x20) >> 5;
+		hdr.pid                = ((q[1] & 0x1f) << 8) | q[2];
+		hdr.scrambling         = (q[3] & 0xc0) >> 6;
+		hdr.adaptation_flags   = (q[3] & 0x30) >> 4;
+		hdr.continuity_ctr     = (q[3] & 0x0f);
+
+		if (hdr.adaptation_flags & 0x10) {
+			q += 4;
+			adapt.field_length   = q[0];
+			adapt.discontinuity  = (q[1] & 0x80) >> 7;
+			adapt.random_access  = (q[1] & 0x40) >> 6; /* set to 1 if the PES pkt in this TS pkt starts an a/v sequence */
+			adapt.es_priority    = (q[1] & 0x20) >> 5;
+			adapt.pcr            = (q[1] & 0x10) >> 4;
+			adapt.opcr           = (q[1] & 0x08) >> 3;
+			adapt.splicing_point = (q[1] & 0x04) >> 2;
+			adapt.tp_priv_data   = (q[1] & 0x02) >> 1;
+			adapt.field_ext      = (q[1] & 0x01) >> 0;
+
+			if (adapt.pcr) {
+				adapt.PCR =
+					((unsigned long long) (0xff & q[2]) << 40) |
+					((unsigned long long) (0xff & q[3]) << 32) |
+					((unsigned long long) (0xff & q[4]) << 24) |
+					((unsigned long long) (0xff & q[5]) << 16) |
+					((unsigned long long) (0xff & q[6]) << 8)  |
+					((unsigned long long) (0xff & q[7]) << 0);
+				q += 6;
+			}
+			if (adapt.opcr) {
+				adapt.OPCR =
+					((unsigned long long) (0xff & q[2]) << 40) |
+					((unsigned long long) (0xff & q[3]) << 32) |
+					((unsigned long long) (0xff & q[4]) << 24) |
+					((unsigned long long) (0xff & q[5]) << 16) |
+					((unsigned long long) (0xff & q[6]) << 8)  |
+					((unsigned long long) (0xff & q[7]) << 0);
+				q += 6;
+			}
+			if (adapt.splicing_point) {
+				adapt.splicing_countdown = q[2];
+				q ++;
+			}
+		}
 
 		pkt_stats->sync_loss = (hdr.sync_byte != 0x47) ? true : false;
 		if (!pkt_stats->sync_loss) {
@@ -175,14 +215,26 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 	if (hdr.adaptation_flags & 0x01) {// payload present
 		if (continuity.count(hdr.pid)) {
 			uint8_t next = (continuity[hdr.pid] + 1) & 0x0f;
-			if ((next != (hdr.continuity_ctr & 0x0f)) && (hdr.continuity_ctr + continuity[hdr.pid] > 0))
+			if ((next != (hdr.continuity_ctr & 0x0f)) && (hdr.continuity_ctr + continuity[hdr.pid] > 0)) {
+				if (!(hdr.adaptation_flags & 0x10) && (adapt.discontinuity)) {
 #if 1
-				push_discontinuity(hdr.pid);
+					push_discontinuity(hdr.pid);
 #else
-				dprintf("DISCONTINUITY %d cur: 0x%x prev 0x%x", hdr.pid, hdr.continuity_ctr, continuity[hdr.pid]);
+					dprintf("DISCONTINUITY %d cur: 0x%x prev 0x%x", hdr.pid, hdr.continuity_ctr, continuity[hdr.pid]);
 #endif
+				}
+			}
 		}
 		continuity[hdr.pid] = hdr.continuity_ctr;
+	}
+	if (hdr.adaptation_flags & 0x10) {
+		dprintf("ADAPTATION FIELD: %02x %02x", p[4], p[5]);
+		if (adapt.pcr)
+			dprintf("PCR: 0x%12llx", adapt.PCR);
+		if (adapt.opcr)
+			dprintf("OPCR: 0x%12llx", adapt.OPCR);
+		if (adapt.splicing_point)
+			dprintf("splicing countdown: %d", adapt.splicing_countdown);
 	}
 
 	push_stats(pkt_stats);
