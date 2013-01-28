@@ -98,9 +98,9 @@ void stats::show(bool per_sec)
 			scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		dprintf("pid %04x\t%lu discontinuities (%lu%%)", iter->first, iter->second, (!statistics.count(iter->first)) ? 0 : 100 * iter->second / (statistics[iter->first] / 188));
+		dprintf("pid %04x\t%lu discontinuities (%lu%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
 
-	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, 18800 * tei_count / statistics[0x2000]);
+	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
 }
 
 void stats::push_pid(int c, const uint16_t pid)
