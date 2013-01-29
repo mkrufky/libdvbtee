@@ -137,7 +137,7 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
 		hdr.adaptation_flags   = (q[3] & 0x30) >> 4;
 		hdr.continuity_ctr     = (q[3] & 0x0f);
 
-		if (hdr.adaptation_flags & 0x10) {
+		if (hdr.adaptation_flags & 0x02) {
 			q += 4;
 			adapt.field_length   = q[0];
 			adapt.discontinuity  = (q[1] & 0x80) >> 7;
@@ -216,7 +216,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 		if (continuity.count(hdr.pid)) {
 			uint8_t next = (continuity[hdr.pid] + 1) & 0x0f;
 			if ((next != (hdr.continuity_ctr & 0x0f)) && (hdr.continuity_ctr + continuity[hdr.pid] > 0)) {
-				if (!(hdr.adaptation_flags & 0x10) && (adapt.discontinuity)) {
+				if (!(hdr.adaptation_flags & 0x02) && (adapt.discontinuity)) {
 #if 1
 					push_discontinuity(hdr.pid);
 #else
@@ -227,7 +227,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 		}
 		continuity[hdr.pid] = hdr.continuity_ctr;
 	}
-	if (hdr.adaptation_flags & 0x10) {
+	if (hdr.adaptation_flags & 0x02) {
 		dprintf("ADAPTATION FIELD: %02x %02x", p[4], p[5]);
 		if (adapt.pcr)
 			dprintf("PCR: 0x%12llx", adapt.PCR);
