@@ -32,7 +32,8 @@
 #define DBG_SERVE	32
 #define DBG_TIME	64
 #define DBG_DESC	128
-#define DBG_ATSCTEXT	256
+#define DBG_STATS	256
+#define DBG_ATSCTEXT	512
 
 extern unsigned int dbg;
 

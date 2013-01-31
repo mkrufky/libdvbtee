@@ -25,8 +25,6 @@
 #include "log.h"
 #define CLASS_MODULE "stats"
 
-#define DBG_STATS DBG_PARSE
-
 #define dprintf(fmt, arg...) __dprintf(DBG_STATS, fmt, ##arg)
 
 stats::stats()
