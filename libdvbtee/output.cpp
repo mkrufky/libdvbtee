@@ -588,6 +588,14 @@ output::output(const output&)
 {
 	dprintf("(copy)");
 
+	f_kill_thread = false;
+	f_streaming = false;
+	num_targets = 0;
+	options = OUTPUT_NONE;
+	count_in = 0;
+	count_out = 0;
+
+	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
@@ -600,6 +608,14 @@ output& output::operator= (const output& cSource)
 	if (this == &cSource)
 		return *this;
 
+	f_kill_thread = false;
+	f_streaming = false;
+	num_targets = 0;
+	options = OUTPUT_NONE;
+	count_in = 0;
+	count_out = 0;
+
+	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
