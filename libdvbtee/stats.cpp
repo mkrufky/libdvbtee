@@ -234,7 +234,9 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 		continuity[hdr.pid] = hdr.continuity_ctr;
 	}
 	if (hdr.adaptation_flags & 0x02) {
+#if 0
 		dprintf("ADAPTATION FIELD: %02x %02x", p[4], p[5]);
+#endif
 		if (adapt.pcr)
 			dprintf("PCR: 0x%12llx", adapt.PCR);
 		if (adapt.opcr)
