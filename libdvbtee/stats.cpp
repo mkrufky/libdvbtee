@@ -30,8 +30,10 @@
 stats::stats()
   : tei_count(0)
   , __timenow(0)
-  , streamtime(NULL)
+  , streamtime_cb(NULL)
   , streamtime_priv(NULL)
+  , statistics_cb(NULL)
+  , statistics_priv(NULL)
 {
 	dprintf("()");
 }
@@ -61,6 +63,7 @@ stats& stats::operator= (const stats& cSource)
 
 static time_t walltime(void *p) { return time(NULL); }
 
+#if 0
 static char *scale_unit(char *b, size_t n, uint64_t x)
 {
 	memset(b, 0, n);
@@ -84,9 +87,11 @@ void stats::show(const uint16_t pid/*, time_t timenow*/)
 {
 	dprintf("%04x %lu.%lu kbps", pid, statistics[pid]/*[timenow]*/ / 1000, statistics[pid]/*[timenow]*/ % 1000);
 }
+#endif
 
 void stats::show(bool per_sec)
 {
+#if 0
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
 		char a[16];
 		char b[16];
@@ -99,11 +104,14 @@ void stats::show(bool per_sec)
 		dprintf("pid %04x\t%lu discontinuities (%lu%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
 
 	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
+#else
+	if (statistics_cb) statistics_cb(statistics_priv, statistics, discontinuities, tei_count, per_sec);
+#endif
 }
 
 void stats::push_pid(int c, const uint16_t pid)
 {
-	streamtime_callback cb = (streamtime) ? streamtime : &walltime;
+	streamtime_callback cb = (streamtime_cb) ? streamtime_cb : &walltime;
 	time_t timenow = cb(streamtime_priv);
 
 #if 0

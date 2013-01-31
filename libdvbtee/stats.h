@@ -72,6 +72,8 @@ typedef struct
 
 typedef time_t (*streamtime_callback)(void*);
 
+typedef void (*statistics_callback)(void *priv, stats_map &bitrates, stats_map &discontinuities, uint64_t tei_count, bool per_sec);
+
 class stats
 {
 public:
@@ -81,7 +83,8 @@ public:
 	stats(const stats&);
 	stats& operator= (const stats&);
 #endif
-	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime = cb; streamtime_priv = priv; };
+	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; };
+	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; };
 
 	void push_pid(const uint16_t pid) { push_pid(188, pid); };
 
@@ -99,8 +102,11 @@ private:
 	pkt_hdr_t hdr;
 	adaptation_field_t adapt;
 
-	streamtime_callback streamtime;
+	streamtime_callback streamtime_cb;
 	void *streamtime_priv;
+
+	statistics_callback statistics_cb;
+	void *statistics_priv;
 
 	void __push_pid(int c, const uint16_t pid/*, time_t timenow*/) { statistics[pid]/*[timenow]*/ += c; statistics[0x2000] += c; };
 	void push_pid(int c, const uint16_t pid);

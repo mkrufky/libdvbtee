@@ -35,6 +35,7 @@ mkrufky at linuxtv dot org
 Command line arguments:
 
   -a	adapter id
+  -b	display bitrates & statistics
   -A	(1 for ATSC, 2 for ClearQAM)
   -c	channel to tune /
 	comma (,) separated list of channels to scan /

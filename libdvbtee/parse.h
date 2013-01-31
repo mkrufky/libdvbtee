@@ -108,6 +108,8 @@ public:
 
 	bool check();
 	bool is_enabled() { return enabled; }
+
+	stats statistics;
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
@@ -199,8 +201,6 @@ private:
 	void rewrite_pat();
 	void process_pat(const decoded_pat_t *);
 	void process_pmt(const decoded_pmt_t *);
-
-	stats statistics;
 };
 
 #endif //__PARSE_H__

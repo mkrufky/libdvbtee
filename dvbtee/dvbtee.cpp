@@ -118,6 +118,45 @@ void signal_callback_handler(int signum)
 }
 
 
+static char *scale_unit(char *b, size_t n, uint64_t x)
+{
+	memset(b, 0, n);
+
+	if (x >= 1000000) {
+		if ((x % 1000000) < 100)
+			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
+		else
+			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
+	} else if (x >= 1000) {
+		if ((x % 1000) < 100)
+			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
+		else
+			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
+	} else
+		snprintf(b, n, "    %3lu  ", x);
+	return b;
+}
+
+static void bitrate_stats(void *priv, stats_map &bitrates, stats_map &discontinuities, uint64_t tei_count, bool per_sec)
+{
+	for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
+		char a[16];
+		char b[16];
+		fprintf(stderr, "pid %04x %5lu p%s  %sb%s  %sbit\n",
+			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
+			scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
+			scale_unit(b, sizeof(b), iter->second * 8));
+	}
+	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
+		fprintf(stderr, "pid %04x\t%lu discontinuities (%lu%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
+
+	if (tei_count)
+		fprintf(stderr, "tei count: %lu (%lu%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
+
+	fprintf(stderr,"\n");
+}
+
+
 void stop_server(struct dvbtee_context* context)
 {
 	if (!context->server)
@@ -258,6 +297,7 @@ void usage(bool help, char *myname)
 	fprintf(stderr, "  "
 		"-a\tadapter id\n  "
 		"-A\t(1 for ATSC, 2 for ClearQAM)\n  "
+		"-b\tdisplay bitrates & statistics\n  "
 		"-c\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan minimum channel\n  "
 		"-C\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan maximum channel\n  "
 		"-f\tfrontend id\n  "
@@ -305,6 +345,7 @@ int main(int argc, char **argv)
 	bool b_serve    = false;
 	bool b_kernel_pid_filters = false;
 	bool b_help     = false;
+	bool b_bitrate_stats = false;
 
 	context.server = NULL;
 
@@ -343,7 +384,7 @@ int main(int argc, char **argv)
 	char channel_list[256];
 	memset(&channel_list, 0, sizeof(channel_list));
 
-        while ((opt = getopt(argc, argv, "a:A:c:C:f:F:t:T:i:I:s::S::E::o::O:d::hH?")) != -1) {
+        while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:d::hH?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -352,6 +393,9 @@ int main(int argc, char **argv)
 		case 'A': /* ATSC / QAM */
 			scan_flags = strtoul(optarg, NULL, 0);
 			b_read_dvr = true;
+			break;
+		case 'b': /* bitrates & statistics */
+			b_bitrate_stats = true;
 			break;
 		case 'c': /* channel list | channel / scan min */
 			if (strstr(optarg, ","))
@@ -455,6 +499,12 @@ int main(int argc, char **argv)
 	if (out_opt > 0)
 		context.tuner.feeder.parser.out.set_options(out_opt);
 
+	if (b_bitrate_stats) {
+		if (b_read_dvr)
+			context.tuner.feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
+		else
+			context._file_feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
+	}
 	if (b_output_file) {
 		if (b_read_dvr)
 			context.tuner.feeder.parser.add_output(outfilename);
