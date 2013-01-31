@@ -69,14 +69,14 @@ static char *scale_unit(char *b, size_t n, uint64_t x)
 
 	if (x >= 1000000) {
 		if ((x % 1000000) < 100)
-			snprintf(b, n, "%3lu.%lu m", x / 1000000, x % 1000000 * (((x % 1000000) < 10) ? 100 : 10));
+			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
 		else
-			snprintf(b, n, "%3lu.%lu m", x / 1000000, x % 1000000 / (((x % 1000000) >= 1000) ? 1000 : 1));
+			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
 	} else if (x >= 1000) {
 		if ((x % 1000) < 100)
-			snprintf(b, n, "%3lu.%lu k", x / 1000, x % 1000 * (((x % 1000) < 10) ? 100 : 10));
+			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
 		else
-			snprintf(b, n, "%3lu.%lu k", x / 1000, x % 1000 / (((x % 1000) >= 1000) ? 1000 : 1));
+			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
 	} else
 		snprintf(b, n, "    %3lu  ", x);
 	return b;
