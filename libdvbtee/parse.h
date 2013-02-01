@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "decode.h"
+#include "demux.h"
 #include "output.h"
 #include "stats.h"
 
@@ -201,6 +202,8 @@ private:
 	void rewrite_pat();
 	void process_pat(const decoded_pat_t *);
 	void process_pmt(const decoded_pmt_t *);
+
+	demux demuxer;
 };
 
 #endif //__PARSE_H__

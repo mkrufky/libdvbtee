@@ -1001,6 +1001,7 @@ int parse::feed(int count, uint8_t* p_data)
 
 		if (sync_offset) fprintf(stderr, "\nSYNC LOSS\n\n");
 		statistics.push(p, &pkt_stats);
+		demuxer.push(pkt_stats.pid, p);
 
 		if (pkt_stats.tei) {
 			if (!tei_count)
