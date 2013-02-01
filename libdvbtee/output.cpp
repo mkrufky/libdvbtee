@@ -331,6 +331,21 @@ int output_stream::start()
 	return ret;
 }
 
+bool output_stream::drain()
+{
+	dprintf("(%d)", sock);
+
+	if (!f_streaming)
+		return false;
+
+	while ((f_streaming) && (ringbuffer.get_capacity()))
+		usleep(20*1000);
+
+	fsync(sock);
+
+	return (!f_streaming);
+}
+
 void output_stream::stop()
 {
 	dprintf("(%d)", sock);
