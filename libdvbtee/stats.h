@@ -83,6 +83,9 @@ public:
 	stats(const stats&);
 	stats& operator= (const stats&);
 #endif
+#if 0
+	void set_parent(char *caller) { parent = caller; };
+#endif
 	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; };
 	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; };
 
@@ -101,7 +104,9 @@ private:
 
 	pkt_hdr_t hdr;
 	adaptation_field_t adapt;
-
+#if 0
+	char *parent;
+#endif
 	streamtime_callback streamtime_cb;
 	void *streamtime_priv;
 

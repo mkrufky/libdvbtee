@@ -30,6 +30,9 @@
 stats::stats()
   : tei_count(0)
   , __timenow(0)
+#if 0
+  , parent(NULL)
+#endif
   , streamtime_cb(NULL)
   , streamtime_priv(NULL)
   , statistics_cb(NULL)
