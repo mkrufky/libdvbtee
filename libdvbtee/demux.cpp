@@ -42,7 +42,7 @@ demux::~demux()
 	dprintf("()");
 	sleep(2);
 	for (map_output::const_iterator iter = out.begin(); iter != out.end(); ++iter)
-		((output_stream)(iter->second)).stop();
+		((output_stream)(iter->second)).stop_after_drain();
 	out.clear();
 }
 
