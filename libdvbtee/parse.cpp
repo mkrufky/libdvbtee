@@ -1088,7 +1088,9 @@ int parse::feed(int count, uint8_t* p_data)
 #if 1
 			/* demux & statistics for selected PIDs */
 			statistics.push(p, &pkt_stats);
+#ifdef DVBTEE_DEMUXER
 			demuxer.push(pkt_stats.pid, p);
+#endif
 #endif
 		}
 #if DBG

@@ -202,8 +202,9 @@ private:
 	void rewrite_pat();
 	void process_pat(const decoded_pat_t *);
 	void process_pmt(const decoded_pmt_t *);
-
+#ifdef DVBTEE_DEMUXER
 	demux demuxer;
+#endif
 };
 
 #endif //__PARSE_H__
