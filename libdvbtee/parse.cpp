@@ -1000,8 +1000,11 @@ int parse::feed(int count, uint8_t* p_data)
 		}
 
 		if (sync_offset) fprintf(stderr, "\nSYNC LOSS\n\n");
+#if 0
+		/* demux & statistics for entire read TS */
 		statistics.push(p, &pkt_stats);
-
+		demuxer.push(pkt_stats.pid, p);
+#endif
 		if (pkt_stats.tei) {
 			if (!tei_count)
 				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
@@ -1082,6 +1085,13 @@ int parse::feed(int count, uint8_t* p_data)
 		}
 		if (send_pkt) {
 			out.push(p, out_type);
+#if 1
+			/* demux & statistics for selected PIDs */
+			statistics.push(p, &pkt_stats);
+#ifdef DVBTEE_DEMUXER
+			demuxer.push(pkt_stats.pid, p);
+#endif
+#endif
 		}
 #if DBG
 		addpid(pid);

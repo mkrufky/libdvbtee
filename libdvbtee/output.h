@@ -73,7 +73,9 @@ public:
 	void stop_without_wait() { f_kill_thread = true; };
 
 	int start();
+	bool drain();
 	void stop();
+	inline void stop_after_drain() { if (drain()) stop(); };
 	void close_file();
 
 	bool push(uint8_t*, int);
