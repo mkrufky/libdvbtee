@@ -35,6 +35,8 @@ typedef std::map<uint16_t, uint64_t> stats_map;
 typedef std::map<uint16_t, uint8_t> continuity_map; // 4bits
 #endif
 
+char *stats_scale_unit(char *b, size_t n, uint64_t x);
+
 typedef struct
 {
 	bool tei;
@@ -77,14 +79,11 @@ typedef void (*statistics_callback)(void *priv, stats_map &bitrates, stats_map &
 class stats
 {
 public:
-	stats();
+	stats(const char*);
 	~stats();
 #if 0
 	stats(const stats&);
 	stats& operator= (const stats&);
-#endif
-#if 0
-	void set_parent(char *caller) { parent = caller; };
 #endif
 	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; };
 	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; };
@@ -104,9 +103,9 @@ private:
 
 	pkt_hdr_t hdr;
 	adaptation_field_t adapt;
-#if 0
-	char *parent;
-#endif
+
+	const char *parent;
+
 	streamtime_callback streamtime_cb;
 	void *streamtime_priv;
 

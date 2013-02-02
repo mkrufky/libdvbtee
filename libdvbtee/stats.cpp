@@ -25,37 +25,35 @@
 #include "log.h"
 #define CLASS_MODULE "stats"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_STATS, fmt, ##arg)
+#define dprintf(fmt, arg...) __dprintf(DBG_STATS, "(%s) "fmt, parent, ##arg)
 
-stats::stats()
+stats::stats(const char *caller)
   : tei_count(0)
   , __timenow(0)
-#if 0
-  , parent(NULL)
-#endif
+  , parent(caller)
   , streamtime_cb(NULL)
   , streamtime_priv(NULL)
   , statistics_cb(NULL)
   , statistics_priv(NULL)
 {
-	dprintf("()");
+	dprintf("(%s)", parent);
 }
 
 stats::~stats()
 {
-	dprintf("()");
+	dprintf("(%s)", parent);
 	show(false);
 }
 
 #if 0
 stats::stats(const stats&)
 {
-	dprintf("(copy)");
+	dprintf("(%s, copy)", parent);
 }
 
 stats& stats::operator= (const stats& cSource)
 {
-	dprintf("(operator=)");
+	dprintf("(%s, operator=)", parent);
 
 	if (this == &cSource)
 		return *this;
@@ -66,8 +64,7 @@ stats& stats::operator= (const stats& cSource)
 
 static time_t walltime(void *p) { return time(NULL); }
 
-#if 0
-static char *scale_unit(char *b, size_t n, uint64_t x)
+char *stats_scale_unit(char *b, size_t n, uint64_t x)
 {
 	memset(b, 0, n);
 
@@ -86,6 +83,7 @@ static char *scale_unit(char *b, size_t n, uint64_t x)
 	return b;
 }
 
+#if 0
 void stats::show(const uint16_t pid/*, time_t timenow*/)
 {
 	dprintf("%04x %lu.%lu kbps", pid, statistics[pid]/*[timenow]*/ / 1000, statistics[pid]/*[timenow]*/ % 1000);
@@ -94,22 +92,22 @@ void stats::show(const uint16_t pid/*, time_t timenow*/)
 
 void stats::show(bool per_sec)
 {
-#if 0
+	if (statistics_cb) {
+		statistics_cb(statistics_priv, statistics, discontinuities, tei_count, per_sec);
+		return;
+	}
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
 		char a[16];
 		char b[16];
 		dprintf("pid %04x %5lu p%s  %sb%s  %sbit",
 			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
-			scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
-			scale_unit(b, sizeof(b), iter->second * 8));
+			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
+			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
 		dprintf("pid %04x\t%lu discontinuities (%lu%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
 
 	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
-#else
-	if (statistics_cb) statistics_cb(statistics_priv, statistics, discontinuities, tei_count, per_sec);
-#endif
 }
 
 void stats::push_pid(int c, const uint16_t pid)

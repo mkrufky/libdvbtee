@@ -554,7 +554,8 @@ eit_complete:
 static bool hello = false;
 
 parse::parse()
-  : fed_pkt_count(0)
+  : statistics(CLASS_MODULE)
+  , fed_pkt_count(0)
   , ts_id(0)
   , epg_mode(false)
   , scan_mode(false)
