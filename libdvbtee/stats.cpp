@@ -105,7 +105,7 @@ void stats::show(bool per_sec)
 			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		dprintf("pid %04x\t%lu discontinuities (%lu%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
+		dprintf("pid %04x\t%lu continuity errors (%lu%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
 
 	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
 }
@@ -224,11 +224,8 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			uint8_t next = (continuity[hdr.pid] + 1) & 0x0f;
 			if ((next != (hdr.continuity_ctr & 0x0f)) && (hdr.continuity_ctr + continuity[hdr.pid] > 0)) {
 				if (!(hdr.adaptation_flags & 0x02) && (adapt.discontinuity)) {
-#if 1
 					push_discontinuity(hdr.pid);
-#else
-					dprintf("DISCONTINUITY %d cur: 0x%x prev 0x%x", hdr.pid, hdr.continuity_ctr, continuity[hdr.pid]);
-#endif
+					dprintf("CONTINUITY ERROR pid: %04x cur: 0x%x prev 0x%x", hdr.pid, hdr.continuity_ctr, continuity[hdr.pid]);
 				}
 			}
 		}
