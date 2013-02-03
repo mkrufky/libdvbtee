@@ -118,34 +118,16 @@ void signal_callback_handler(int signum)
 }
 
 
-static char *scale_unit(char *b, size_t n, uint64_t x)
-{
-	memset(b, 0, n);
-
-	if (x >= 1000000) {
-		if ((x % 1000000) < 100)
-			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
-		else
-			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
-	} else if (x >= 1000) {
-		if ((x % 1000) < 100)
-			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
-		else
-			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
-	} else
-		snprintf(b, n, "    %3lu  ", x);
-	return b;
-}
-
 static void bitrate_stats(void *priv, stats_map &bitrates, stats_map &discontinuities, uint64_t tei_count, bool per_sec)
 {
+	/* display the bitrates for each pid, followed by special pid 0x2000 for the full TS */
 	for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
 		char a[16];
 		char b[16];
 		fprintf(stderr, "pid %04x %5lu p%s  %sb%s  %sbit\n",
 			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
-			scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
-			scale_unit(b, sizeof(b), iter->second * 8));
+			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
+			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
 		fprintf(stderr, "pid %04x\t%lu discontinuities (%lu%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
