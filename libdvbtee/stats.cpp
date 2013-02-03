@@ -25,6 +25,8 @@
 #include "log.h"
 #define CLASS_MODULE "stats"
 
+#define DBG 0
+
 #define dprintf(fmt, arg...) __dprintf(DBG_STATS, "(%s) "fmt, parent, ##arg)
 
 stats::stats(const char *caller)
@@ -225,16 +227,16 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			if ((next != (hdr.continuity_ctr & 0x0f)) && (hdr.continuity_ctr + continuity[hdr.pid] > 0)) {
 				if (!(hdr.adaptation_flags & 0x02) && (adapt.discontinuity)) {
 					push_discontinuity(hdr.pid);
+#if DBG
 					dprintf("CONTINUITY ERROR pid: %04x cur: 0x%x prev 0x%x", hdr.pid, hdr.continuity_ctr, continuity[hdr.pid]);
+#endif
 				}
 			}
 		}
 		continuity[hdr.pid] = hdr.continuity_ctr;
 	}
+#if DBG
 	if (hdr.adaptation_flags & 0x02) {
-#if 0
-		dprintf("ADAPTATION FIELD: %02x %02x", p[4], p[5]);
-#endif
 		if (adapt.pcr)
 			dprintf("PCR: 0x%12llx", adapt.PCR);
 		if (adapt.opcr)
@@ -242,6 +244,6 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 		if (adapt.splicing_point)
 			dprintf("splicing countdown: %d", adapt.splicing_countdown);
 	}
-
+#endif
 	push_stats(pkt_stats);
 }
