@@ -85,13 +85,6 @@ char *stats_scale_unit(char *b, size_t n, uint64_t x)
 	return b;
 }
 
-#if 0
-void stats::show(const uint16_t pid/*, time_t timenow*/)
-{
-	dprintf("%04x %lu.%lu kbps", pid, statistics[pid]/*[timenow]*/ / 1000, statistics[pid]/*[timenow]*/ % 1000);
-}
-#endif
-
 void stats::show(bool per_sec)
 {
 	if (statistics_cb) {
@@ -117,17 +110,13 @@ void stats::push_pid(int c, const uint16_t pid)
 	streamtime_callback cb = (streamtime_cb) ? streamtime_cb : &walltime;
 	time_t timenow = cb(streamtime_priv);
 
-#if 0
-	if ((!statistics[pid][timenow]) && (statistics[pid][timenow-1]))
-#else
 	if (timenow > __timenow) {
-#endif
 		show();
 		clear_stats();
 		__timenow = timenow;
 	}
 
-	__push_pid(c, pid/*, timenow*/);
+	__push_pid(c, pid);
 }
 
 pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)

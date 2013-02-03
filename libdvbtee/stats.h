@@ -27,13 +27,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#if 0
-typedef std::map<time_t, uint64_t> pid_stats_map;
-typedef std::map<uint16_t, pid_stats_map> stats_map;
-#else
 typedef std::map<uint16_t, uint64_t> stats_map;
 typedef std::map<uint16_t, uint8_t> continuity_map; // 4bits
-#endif
 
 char *stats_scale_unit(char *b, size_t n, uint64_t x);
 
@@ -112,12 +107,11 @@ private:
 	statistics_callback statistics_cb;
 	void *statistics_priv;
 
-	void __push_pid(int c, const uint16_t pid/*, time_t timenow*/) { statistics[pid]/*[timenow]*/ += c; statistics[0x2000] += c; };
+	void __push_pid(int c, const uint16_t pid) { statistics[pid] += c; statistics[0x2000] += c; };
 	void push_pid(int c, const uint16_t pid);
 
 	void __push(const uint8_t *p) { push_pid( (p[0] == 0x47) ? ((uint16_t) (p[1] & 0x1f) << 8) + p[2] : (uint16_t) - 1 ); };
 
-	void show(const uint16_t pid/*, time_t timenow*/);
 	void show(bool per_sec = true);
 
 	void push_stats(pkt_stats_t *pkt_stats);
