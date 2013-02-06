@@ -884,6 +884,24 @@ int parse::add_output(char* target)
 
 #define CHAR_CMD_COMMA ","
 
+void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
+{
+	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
+	map_decoded_pat_programs::const_iterator iter_pat = decoded_pat->programs.find(service_id);
+	if (iter_pat != decoded_pat->programs.end())
+		pids[iter_pat->second] = 0;//FIXME
+
+	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service_id);
+	if (iter_pmt != decoded_pmt->end()) {
+
+		for (map_ts_elementary_streams::const_iterator iter_pmt_es = iter_pmt->second.es_streams.begin();
+		     iter_pmt_es != iter_pmt->second.es_streams.end(); ++iter_pmt_es) {
+				pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+		}
+	}
+}
+
 void parse::set_service_ids(char *ids)
 {
 	char *save, *id = (ids) ? strtok_r(ids, CHAR_CMD_COMMA, &save) : NULL;

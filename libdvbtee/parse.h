@@ -74,6 +74,9 @@ public:
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; };
 	uint16_t get_ts_id() const { return ts_id; };
 	uint16_t get_ts_id(unsigned int channel);
+
+	void add_service_pids(uint16_t service_id, map_pidtype &pids);
+
 	void set_service_ids(char *ids);
 
 	int feed(int, uint8_t*);
