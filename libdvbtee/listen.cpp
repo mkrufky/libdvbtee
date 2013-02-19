@@ -141,6 +141,51 @@ int socket_listen::start(uint16_t port_requested)
 	return ret;
 }
 
+int socket_listen::start_udp(uint16_t port_requested)
+{
+	struct sockaddr_in udp_sock;
+
+	dprintf("()");
+
+	memset(&udp_sock, 0, sizeof(udp_sock));
+
+	f_kill_thread = false;
+
+	sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sock_fd < 0) {
+		perror("open socket failed");
+		return sock_fd;
+	}
+
+	int reuse = 1;
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+		perror("setting reuse failed");
+		return -1;
+	}
+
+	udp_sock.sin_family = AF_INET;
+	udp_sock.sin_port = htons(port_requested);
+	udp_sock.sin_addr.s_addr = INADDR_ANY;
+
+	if (bind(sock_fd, (struct sockaddr*)&udp_sock, sizeof(udp_sock)) < 0) {
+		perror("bind to local interface failed");
+		return -1;
+	}
+
+	int fl = fcntl(sock_fd, F_GETFL, 0);
+	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
+		perror("set non-blocking failed");
+		return -1;
+	}
+
+	int ret = pthread_create(&h_thread, NULL, udp_listen_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
 void* socket_listen::listen_thread(void *p_this)
 {
 	return static_cast<socket_listen*>(p_this)->listen_thread();
@@ -158,6 +203,29 @@ void* socket_listen::listen_thread()
 		if (accepted_sock_fd != -1) {
 			if (accept_socket_cb)
 				accept_socket_cb(accept_socket_data, accepted_sock_fd);
+			else
+				dprintf("(accept_socket callback not defined!)");
+		}
+		usleep(20*1000);
+	}
+
+	close_socket();
+	pthread_exit(NULL);
+}
+
+void* socket_listen::udp_listen_thread(void *p_this)
+{
+	return static_cast<socket_listen*>(p_this)->udp_listen_thread();
+}
+
+void* socket_listen::udp_listen_thread()
+{
+	dprintf("(%d)", sock_fd);
+
+	while (!f_kill_thread) {
+		if (sock_fd != -1) {
+			if (accept_socket_cb)
+				accept_socket_cb(accept_socket_data, sock_fd);
 			else
 				dprintf("(accept_socket callback not defined!)");
 		}
