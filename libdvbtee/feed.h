@@ -27,6 +27,8 @@
 #include "parse.h"
 #include "rbuf.h"
 
+typedef int (*pull_callback)(void *, int, const uint8_t*);
+
 void libdvbtee_set_debug_level(unsigned int debug);
 
 class feed
@@ -52,6 +54,7 @@ public:
 	/* initialize for feed via functional interface */
 	int setup_feed(int prio);
 	int push(int, const uint8_t*);
+	int pull(void *priv, pull_callback cb);
 
 	void close_file();
 
@@ -87,11 +90,13 @@ private:
 	void      *stdin_feed_thread();
 	void *tcp_client_feed_thread();
 	void *udp_listen_feed_thread();
+	void            *pull_thread();
 	static void            *feed_thread(void*);
 	static void       *file_feed_thread(void*);
 	static void      *stdin_feed_thread(void*);
 	static void *tcp_client_feed_thread(void*);
 	static void *udp_listen_feed_thread(void*);
+	static void            *pull_thread(void*);
 
 	void set_filename(char*);
 	int  open_file();
@@ -99,6 +104,9 @@ private:
 
 	socket_listen listener;
 	static void add_tcp_feed(void*, int);
+
+	pull_callback pull_cb;
+	void *pull_priv;
 };
 
 typedef std::map<int, feed> feed_map;

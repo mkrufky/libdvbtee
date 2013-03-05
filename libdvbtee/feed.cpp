@@ -54,6 +54,8 @@ feed::feed()
   , fd(-1)
   , feed_thread_prio(100)
   , ringbuffer()
+  , pull_cb(NULL)
+  , pull_priv(NULL)
 {
 	dprintf("()");
 
@@ -157,6 +159,12 @@ void* feed::udp_listen_feed_thread(void *p_this)
 	return static_cast<feed*>(p_this)->udp_listen_feed_thread();
 }
 
+//static
+void* feed::pull_thread(void *p_this)
+{
+	return static_cast<feed*>(p_this)->pull_thread();
+}
+
 int feed::start_feed()
 {
 #if 0
@@ -189,6 +197,25 @@ int feed::push(int size, const uint8_t* data)
 	return parser.feed(size, (uint8_t*)data);
 #endif
 }
+
+int feed::pull(void *priv, pull_callback cb)
+{
+	f_kill_thread = false;
+
+	pull_priv = priv;
+	pull_cb = cb;
+
+	int ret = pthread_create(&h_thread, NULL, pull_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+#if FEED_BUFFER
+	else
+		start_feed();
+#endif
+	return ret;
+}
+
 
 int feed::start()
 {
@@ -357,6 +384,43 @@ void *feed::stdin_feed_thread()
 		ringbuffer.put_write_ptr(r * 188);
 #else
 		parser.feed(r * 188, q);
+#endif
+	}
+	pthread_exit(NULL);
+}
+
+void *feed::pull_thread()
+{
+	int rxlen = 0;
+#if FEED_BUFFER
+	void *q = NULL;
+#else
+	unsigned char q[BUFSIZE];
+#endif
+	int available;
+
+	dprintf("()");
+
+	while (!f_kill_thread) {
+#if FEED_BUFFER
+		available = ringbuffer.get_write_ptr(&q);
+#else
+		available = sizeof(q);
+#endif
+		available = (available < (BUFSIZE)) ? available : (BUFSIZE);
+		rxlen = pull_cb(pull_priv, available, q);
+		if (rxlen > 0) {
+			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
+#if !FEED_BUFFER
+			parser.feed(rxlen, q);
+#endif
+		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
+			stop_without_wait();
+		} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
+			usleep(50*1000);
+		}
+#if FEED_BUFFER
+		ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
 #endif
 	}
 	pthread_exit(NULL);
