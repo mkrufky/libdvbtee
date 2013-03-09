@@ -58,8 +58,8 @@ private:
 
 	filtered_pid_map filtered_pids;
 
-	int hdhr_pull_callback(int, const uint8_t*);
-	static int hdhr_pull_callback(void *, int, const uint8_t*);
+	int hdhr_pull_callback();
+	static int hdhr_pull_callback(void*);
 
 	struct hdhomerun_device_t *hdhr_dev;
 	struct hdhomerun_debug_t *hdhr_dbg;

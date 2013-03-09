@@ -168,19 +168,17 @@ void hdhr_tuner::stop_feed()
 	hdhomerun_device_stream_stop(hdhr_dev);
 }
 
-int hdhr_tuner::hdhr_pull_callback(void *p_this, int len, const uint8_t *p)
+int hdhr_tuner::hdhr_pull_callback(void *p_this)
 {
-	return static_cast<hdhr_tuner*>(p_this)->hdhr_pull_callback(len, p);
+	return static_cast<hdhr_tuner*>(p_this)->hdhr_pull_callback();
 }
 
-int hdhr_tuner::hdhr_pull_callback(int len, const uint8_t *p)
+int hdhr_tuner::hdhr_pull_callback()
 {
 	size_t actual;
-	const uint8_t *q = hdhomerun_device_stream_recv(hdhr_dev, (p) ? len : ((4096/188)*188), &actual);
-	if (p)
-		memcpy((uint8_t*)p, q, actual);
-	else
-		feeder.push(actual, q);
+	const uint8_t *q = hdhomerun_device_stream_recv(hdhr_dev, ((4096/188)*188), &actual);
+
+	if (actual > 0) feeder.push(actual, q);
 
 	return actual;
 }

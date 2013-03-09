@@ -27,7 +27,7 @@
 #include "parse.h"
 #include "rbuf.h"
 
-typedef int (*pull_callback)(void *, int, const uint8_t*);
+typedef int (*pull_callback)(void*);
 
 void libdvbtee_set_debug_level(unsigned int debug);
 

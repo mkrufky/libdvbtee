@@ -391,7 +391,7 @@ void *feed::pull_thread()
 	dprintf("()");
 
 	while (!f_kill_thread)
-		if (0 >= pull_cb(pull_priv, -1, NULL))
+		if (0 >= pull_cb(pull_priv))
 			usleep(50*1000);
 
 	pthread_exit(NULL);
