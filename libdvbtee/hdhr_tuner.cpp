@@ -110,11 +110,12 @@ bool hdhr_tuner::check()
 	if (!hdhr_dev)
 		dprintf("tuner not configured!");
 	else {
-		dprintf("(name: %s, id: %04x, tuner: %d, ip: %04x) state:%s%s%s%s%s",
+		uint32_t device_ip = hdhomerun_device_get_device_ip(hdhr_dev);
+		dprintf("(name: %s, id: %d, tuner: %d, ip: %d.%d.%d.%d) state:%s%s%s%s%s",
 			hdhomerun_device_get_name(hdhr_dev),
 			hdhomerun_device_get_device_id(hdhr_dev),
 			hdhomerun_device_get_tuner(hdhr_dev),
-			hdhomerun_device_get_device_ip(hdhr_dev),
+			(device_ip >> 24) & 0xff, (device_ip >> 16) & 0xff, (device_ip >> 8) & 0xff, (device_ip >> 0) & 0xff,
 			is_idle() ? " idle" : "",
 			is_open() ? " open" : "",
 			is_lock() ? " lock" : "",
