@@ -348,10 +348,10 @@ int main(int argc, char **argv)
 	context.server = NULL;
 
 	/* LinuxDVB context: */
-	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
+	int dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
+	int fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
 	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
 	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
-	int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
@@ -511,7 +511,13 @@ int main(int argc, char **argv)
 	}
 	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
 #ifdef USE_LINUXTV_TUNER
-		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
+		if ((dvb_adap >= 0) || (fe_id >= 0)) {
+			if (dvb_adap < 0)
+				dvb_adap = 0;
+			if (fe_id < 0)
+				fe_id = 0;
+			context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
+		}
 #endif
 		context.tuner.feeder.parser.limit_eit(eit_limit);
 	}

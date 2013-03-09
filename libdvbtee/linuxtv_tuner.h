@@ -79,6 +79,8 @@ private:
 	bool tune_dvbt(unsigned int);
 
 	filtered_pid_map filtered_pids;
+
+	int open_available_tuner(unsigned int max_adap = 8, unsigned int max_fe = 3);
 };
 
 #endif /*__LINUXTV_TUNER_H__ */

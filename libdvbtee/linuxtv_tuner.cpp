@@ -111,7 +111,8 @@ int linuxtv_tuner::close_fe() {
 	close_demux();
 	if (fe_fd >= 0) close(fe_fd);
 	fe_fd = -1;
-	return tune::close_fe();
+	tune::close_fe();
+	return fe_fd;
 }
 
 int linuxtv_tuner::close_demux() {
@@ -144,9 +145,33 @@ bool linuxtv_tuner::check()
 	return ret;
 }
 
+int linuxtv_tuner::open_available_tuner(unsigned int max_adap, unsigned int max_fe)
+{
+	adap_id = 0;
+	fe_id = 0;
+	demux_id = 0;
+	dvr_id = 0;
+
+	while ((unsigned int)adap_id < max_adap) {
+		while ((unsigned int)fe_id < max_fe) {
+			int ret = open_fe();
+			if (ret >= 0) {
+				feeder.parser.set_addfilter_callback(add_filter, this);
+				return ret;
+			}
+			fe_id++;
+		}
+		adap_id++;
+		fe_id = 0;
+	}
+	return -1;
+}
 
 int linuxtv_tuner::open_fe()
 {
+	if ((adap_id < 0) || (fe_id < 0) || (demux_id < 0) || (dvr_id < 0))
+		return open_available_tuner();
+
 	struct dvb_frontend_info fe_info;
 	char filename[32];
 
