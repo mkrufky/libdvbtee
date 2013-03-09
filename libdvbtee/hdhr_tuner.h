@@ -43,6 +43,7 @@ public:
 	bool set_hdhr_id(const char *device_str/*, bool kernel_pid_filter = true*/);
 
 	int open_fe();
+	int close_fe();
 
 	void stop_feed();
 	int start_feed();

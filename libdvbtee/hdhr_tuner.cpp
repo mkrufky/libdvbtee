@@ -132,8 +132,31 @@ bool hdhr_tuner::check()
 
 int hdhr_tuner::open_fe()
 {
-	state |= TUNE_STATE_OPEN;
-	return 0;
+	int ret = 0;
+	char errmsg[256];
+	switch (hdhomerun_device_tuner_lockkey_request(hdhr_dev, (char**)&errmsg)) {
+	case 1:
+		dprintf("lock obtained!");
+		state |= TUNE_STATE_OPEN;
+		break;
+	case 0:
+		dprintf("lockkey request rejected!");
+		state &= ~TUNE_STATE_OPEN;
+		ret = -1;
+		break;
+	default:
+	case -1:
+		dprintf("%s", errmsg);
+		ret = -1;
+		break;
+	}
+	return ret;
+}
+
+int hdhr_tuner::close_fe() {
+	hdhomerun_device_tuner_lockkey_release(hdhr_dev);
+
+	return tune::close_fe();
 }
 
 struct hdhomerun_tuner_status_t *hdhr_tuner::hdhr_status()
