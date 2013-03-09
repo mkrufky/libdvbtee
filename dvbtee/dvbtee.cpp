@@ -211,7 +211,7 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 {
 	int count = 0;
 	int partial_redundancy = 0;
-#if USE_LINUXTV_TUNER
+#ifdef USE_LINUXTV_TUNER
 	linuxtv_tuner tuners[num_tuners];
 #else
 	hdhr_tuner tuners[num_tuners];
@@ -224,7 +224,7 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 		int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 		int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
-#if USE_LINUXTV_TUNER
+#ifdef USE_LINUXTV_TUNER
 		tuners[i].set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
 #else
 		tuners[i].set_hdhr_id(0, 0, 0);
