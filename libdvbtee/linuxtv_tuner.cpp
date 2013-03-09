@@ -303,6 +303,8 @@ bool linuxtv_tuner::tune_channel(fe_modulation_t modulation, unsigned int channe
 {
 	bool ret;
 
+	state &= ~TUNE_STATE_LOCK;
+
 	switch (fe_type) {
 	case FE_ATSC:
 		ret = tune_atsc(modulation, channel);
