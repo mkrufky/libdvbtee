@@ -84,24 +84,76 @@ hdhr_tuner& hdhr_tuner::operator= (const hdhr_tuner& cSource)
 	return *this;
 }
 
-#if 0
-	if (kernel_pid_filter)
-		feeder.parser.set_addfilter_callback(add_filter, this);
-#endif
+//static
+void hdhr_tuner::clear_filters(void *p_this)
+{
+	return static_cast<hdhr_tuner*>(p_this)->clear_filters();
+}
 
-bool hdhr_tuner::set_hdhr_id(uint32_t device_id, uint32_t device_ip, unsigned int tuner/*, bool kernel_pid_filter = true*/)
+void hdhr_tuner::clear_filters()
+{
+	dprintf("()");
+	filtered_pids.clear();
+
+	hdhomerun_device_set_tuner_filter(hdhr_dev, "0x0000-0x1fff");
+}
+
+//static
+void hdhr_tuner::add_filter(void *p_this, uint16_t pid)
+{
+	if (pid == 0xffff)
+		return static_cast<hdhr_tuner*>(p_this)->clear_filters();
+	else
+		return static_cast<hdhr_tuner*>(p_this)->add_filter(pid);
+}
+
+void hdhr_tuner::add_filter(uint16_t pid)
+{
+	unsigned char filter_array[0x2000] = { 0 };
+
+	dprintf("pid = %04x", pid);
+
+	if ((pid >= 0x2000) || (filtered_pids.count(pid)))
+		return;
+
+	for (filtered_pid_map::const_iterator iter = filtered_pids.begin(); iter != filtered_pids.end(); ++iter)
+		filter_array[iter->first] = 1;
+	filter_array[pid] = 1;
+
+	switch (hdhomerun_device_set_tuner_filter_by_array(hdhr_dev, filter_array)) {
+	case 1:
+		dprintf("success!");
+		filtered_pids[pid] = 1;
+		break;
+	default:
+	case -1:
+		dprintf("ERROR!!!");
+	case 0:
+		dprintf("FAILED!!");
+		break;
+	}
+	return;
+}
+
+bool hdhr_tuner::set_hdhr_id(uint32_t device_id, uint32_t device_ip, unsigned int tuner, bool use_pid_filter)
 {
 	hdhr_dbg = hdhomerun_debug_create();
 	hdhomerun_debug_enable(hdhr_dbg);
 	hdhr_dev = hdhomerun_device_create((device_id) ? device_id : HDHOMERUN_DEVICE_ID_WILDCARD, device_ip, tuner, hdhr_dbg);
+	if (use_pid_filter)
+		feeder.parser.set_addfilter_callback(add_filter, this);
+
 	return (hdhr_dev) ? true : false;
 }
 
-bool hdhr_tuner::set_hdhr_id(const char *device_str/*, bool kernel_pid_filter = true*/)
+bool hdhr_tuner::set_hdhr_id(const char *device_str, bool use_pid_filter)
 {
 	hdhr_dbg = hdhomerun_debug_create();
 	hdhomerun_debug_enable(hdhr_dbg);
 	hdhr_dev = hdhomerun_device_create_from_str(device_str, hdhr_dbg);
+	if (use_pid_filter)
+		feeder.parser.set_addfilter_callback(add_filter, this);
+
 	return (hdhr_dev) ? true : false;
 }
 
@@ -111,16 +163,21 @@ bool hdhr_tuner::check()
 		dprintf("tuner not configured!");
 	else {
 		uint32_t device_ip = hdhomerun_device_get_device_ip(hdhr_dev);
-		dprintf("(name: %s, id: %d, tuner: %d, ip: %d.%d.%d.%d) state:%s%s%s%s%s",
+		char *device_filter, *device_streaminfo;
+		hdhomerun_device_get_tuner_filter(hdhr_dev, &device_filter);
+		hdhomerun_device_get_tuner_streaminfo(hdhr_dev, &device_streaminfo);
+		dprintf("(name: %s, id: %d, tuner: %d, ip: %d.%d.%d.%d, filter: %s) state:%s%s%s%s%s\nstreaminfo:\n%s",
 			hdhomerun_device_get_name(hdhr_dev),
 			hdhomerun_device_get_device_id(hdhr_dev),
 			hdhomerun_device_get_tuner(hdhr_dev),
 			(device_ip >> 24) & 0xff, (device_ip >> 16) & 0xff, (device_ip >> 8) & 0xff, (device_ip >> 0) & 0xff,
+			device_filter,
 			is_idle() ? " idle" : "",
 			is_open() ? " open" : "",
 			is_lock() ? " lock" : "",
 			is_scan() ? " scan" : "",
-			is_feed() ? " feed" : "");
+			is_feed() ? " feed" : "",
+			device_streaminfo);
 		if (cur_chan) {
 			hdhr_status();
 			//dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
@@ -162,15 +219,25 @@ int hdhr_tuner::close_fe() {
 
 struct hdhomerun_tuner_status_t *hdhr_tuner::hdhr_status()
 {
-	hdhomerun_device_wait_for_lock(hdhr_dev, &_hdhr_status);
-
-	dprintf("%s\n%s\n%s\n%s\n%s\nsignal strength: %d\nsnq: %d\nseq: %d\nrbps: %d\npps: %d\n",
+	char *tuner_status;
+	if (!state & TUNE_STATE_LOCK)
+		hdhomerun_device_wait_for_lock(hdhr_dev, &_hdhr_status);
+	hdhomerun_device_get_tuner_status(hdhr_dev, &tuner_status, &_hdhr_status);
+#if 0
+	dprintf("%s\n%s\n%s\n%s\n%s\n%s\nsignal strength: %d\nsnq: %d\nseq: %d\nrbps: %d\npps: %d\n", tuner_status,
 		_hdhr_status.channel, _hdhr_status.lock_str,
 		(_hdhr_status.signal_present) ? "signal present" : "",
 		(_hdhr_status.lock_supported) ? "lock supported" : "",
 		(_hdhr_status.lock_unsupported) ? "lock unsupported" : "",
 		_hdhr_status.signal_strength, _hdhr_status.signal_to_noise_quality, _hdhr_status.symbol_error_quality,
 		_hdhr_status.raw_bits_per_second, _hdhr_status.packets_per_second);
+#else
+	dprintf("%s%s%s%s",
+		(_hdhr_status.signal_present) ? "signal present, " : "",
+		(_hdhr_status.lock_supported) ? "lock supported, " : "",
+		(_hdhr_status.lock_unsupported) ? "lock unsupported, " : "",
+		tuner_status);
+#endif
 
 	state &= ~TUNE_STATE_LOCK;
 	if (_hdhr_status.lock_supported)
@@ -188,8 +255,8 @@ fe_status_t hdhr_tuner::fe_status()
 void hdhr_tuner::stop_feed()
 {
 	tune::stop_feed();
-	hdhomerun_device_stream_flush(hdhr_dev);
 	hdhomerun_device_stream_stop(hdhr_dev);
+	hdhomerun_device_stream_flush(hdhr_dev);
 }
 
 int hdhr_tuner::hdhr_pull_callback(void *p_this)
@@ -210,13 +277,24 @@ int hdhr_tuner::hdhr_pull_callback()
 int hdhr_tuner::start_feed()
 {
 	hdhomerun_device_stream_start(hdhr_dev);
-	return feeder.pull(this, hdhr_pull_callback);
+	if (0 == feeder.pull(this, hdhr_pull_callback)) {
+		state |= TUNE_STATE_FEED;
+		return 0;
+	}
+	return -1;
 }
 
 bool hdhr_tuner::tune_channel(fe_modulation_t modulation, unsigned int channel)
 {
+	state &= ~TUNE_STATE_LOCK;
+
 	char channelno[4] = { 0 };
 	snprintf(channelno, sizeof(channelno), "%d", channel);
 
-	return (1 == hdhomerun_device_set_tuner_channel(hdhr_dev, &channelno[0]));
+	if (1 == hdhomerun_device_set_tuner_channel(hdhr_dev, &channelno[0])) {
+		cur_chan = channel;
+		time(&time_touched);
+		return true;
+	}
+	return false;
 }

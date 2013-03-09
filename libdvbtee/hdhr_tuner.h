@@ -38,9 +38,9 @@ public:
 	hdhr_tuner(const hdhr_tuner&);
 	hdhr_tuner& operator= (const hdhr_tuner&);
 
-	bool set_hdhr_id(uint32_t device_id = 0, uint32_t device_ip = 0, unsigned int tuner = 0/*, bool kernel_pid_filter = true*/);
-	bool set_hdhr_id(unsigned int tuner/*, bool kernel_pid_filter = true*/) { return set_hdhr_id(0, 0, tuner); }
-	bool set_hdhr_id(const char *device_str/*, bool kernel_pid_filter = true*/);
+	bool set_hdhr_id(uint32_t device_id = 0, uint32_t device_ip = 0, unsigned int tuner = 0, bool use_pid_filter = true);
+	bool set_hdhr_id(unsigned int tuner, bool use_pid_filter = true) { return set_hdhr_id(0, 0, tuner, use_pid_filter); }
+	bool set_hdhr_id(const char *device_str, bool use_pid_filter = true);
 
 	int open_fe();
 	int close_fe();
@@ -52,6 +52,11 @@ public:
 
 	bool check();
 private:
+	void add_filter(uint16_t);
+	static void add_filter(void *, uint16_t);
+	void clear_filters();
+	static void clear_filters(void *);
+
 	fe_status_t fe_status();
 
 	struct hdhomerun_tuner_status_t _hdhr_status;
