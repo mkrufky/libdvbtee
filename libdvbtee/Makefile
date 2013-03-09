@@ -14,7 +14,7 @@ LDADD= -L../usr/lib -ldvbpsi -lhdhomerun
 LIBS= -L../usr/lib -ldvbpsi -lhdhomerun
 
 objects = parse.o functions.o decode.o channels.o feed.o tune.o atsctext.o \
-	  output.o desc.o rbuf.o listen.o stats.o demux.o linuxtv_tuner.o
+	  output.o desc.o rbuf.o listen.o stats.o demux.o linuxtv_tuner.o hdhr_tuner.o
 
 lib_name = libdvbtee
 
