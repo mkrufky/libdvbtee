@@ -70,9 +70,6 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 
 		context->tuner.feeder.stop_without_wait();
 		context->tuner.feeder.close_file();
-#ifdef USE_LINUXTV_TUNER
-		context->tuner.close_demux();
-#endif
 	} else {
 		context->_file_feeder.stop();
 

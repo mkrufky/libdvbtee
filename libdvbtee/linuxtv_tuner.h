@@ -46,7 +46,6 @@ public:
 
 	int open_fe();
 	int close_fe();
-	int close_demux();
 
 	void stop_feed();
 	int start_feed();
@@ -71,6 +70,8 @@ private:
 
 	fe_status_t fe_status();
 	uint16_t get_snr();
+
+	int close_demux();
 #if 0
 	fe_type_t fe_type;
 #endif

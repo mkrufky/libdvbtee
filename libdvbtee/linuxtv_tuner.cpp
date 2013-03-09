@@ -108,6 +108,7 @@ bool linuxtv_tuner::set_device_ids(int adap, int fe, int demux, int dvr, bool ke
 }
 
 int linuxtv_tuner::close_fe() {
+	close_demux();
 	if (fe_fd >= 0) close(fe_fd);
 	fe_fd = -1;
 	return tune::close_fe();
@@ -116,7 +117,7 @@ int linuxtv_tuner::close_fe() {
 int linuxtv_tuner::close_demux() {
 	if (demux_fd >= 0) close(demux_fd);
 	demux_fd = -1;
-	cur_chan = 0; // FIXME???
+	cur_chan = 0;
 	return demux_fd;
 }
 
