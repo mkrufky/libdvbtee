@@ -410,13 +410,10 @@ void *feed::pull_thread()
 		available = (available < (BUFSIZE)) ? available : (BUFSIZE);
 		rxlen = pull_cb(pull_priv, available, q);
 		if (rxlen > 0) {
-			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
 #if !FEED_BUFFER
 			parser.feed(rxlen, q);
 #endif
-		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
-			stop_without_wait();
-		} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
+		} else {
 			usleep(50*1000);
 		}
 #if FEED_BUFFER
