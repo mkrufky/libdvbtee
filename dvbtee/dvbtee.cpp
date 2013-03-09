@@ -512,8 +512,6 @@ int main(int argc, char **argv)
 	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
 #ifdef USE_LINUXTV_TUNER
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
-#else
-		context.tuner.set_hdhr_id(0, 0, 0);
 #endif
 		context.tuner.feeder.parser.limit_eit(eit_limit);
 	}

@@ -38,6 +38,7 @@ public:
 	hdhr_tuner(const hdhr_tuner&);
 	hdhr_tuner& operator= (const hdhr_tuner&);
 
+	/* use set_hdhr_id to use a specific hdhomerun device, this is optional, the fallback is auto-discovery */
 	bool set_hdhr_id(uint32_t device_id = 0, uint32_t device_ip = 0, unsigned int tuner = 0, bool use_pid_filter = true);
 	bool set_hdhr_id(unsigned int tuner, bool use_pid_filter = true) { return set_hdhr_id(0, 0, tuner, use_pid_filter); }
 	bool set_hdhr_id(const char *device_str, bool use_pid_filter = true);
@@ -69,6 +70,8 @@ private:
 
 	struct hdhomerun_device_t *hdhr_dev;
 	struct hdhomerun_debug_t *hdhr_dbg;
+#define HDHR_TUNER_MAX_TUNERS 2
+	int open_available_tuner(unsigned int max_tuners = HDHR_TUNER_MAX_TUNERS);
 };
 
 #endif /*__HDHR_TUNER_H__ */

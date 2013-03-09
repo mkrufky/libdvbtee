@@ -43,6 +43,8 @@ hdhr_tuner::hdhr_tuner()
 	dprintf("()");
 	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
+	hdhr_dbg = hdhomerun_debug_create();
+	hdhomerun_debug_enable(hdhr_dbg);
 }
 
 hdhr_tuner::~hdhr_tuner()
@@ -137,24 +139,24 @@ void hdhr_tuner::add_filter(uint16_t pid)
 
 bool hdhr_tuner::set_hdhr_id(uint32_t device_id, uint32_t device_ip, unsigned int tuner, bool use_pid_filter)
 {
-	hdhr_dbg = hdhomerun_debug_create();
-	hdhomerun_debug_enable(hdhr_dbg);
 	hdhr_dev = hdhomerun_device_create((device_id) ? device_id : HDHOMERUN_DEVICE_ID_WILDCARD, device_ip, tuner, hdhr_dbg);
-	if (use_pid_filter)
-		feeder.parser.set_addfilter_callback(add_filter, this);
-
-	return (hdhr_dev) ? true : false;
+	if (hdhr_dev) {
+		if (use_pid_filter)
+			feeder.parser.set_addfilter_callback(add_filter, this);
+		return true;
+	}
+	return false;
 }
 
 bool hdhr_tuner::set_hdhr_id(const char *device_str, bool use_pid_filter)
 {
-	hdhr_dbg = hdhomerun_debug_create();
-	hdhomerun_debug_enable(hdhr_dbg);
 	hdhr_dev = hdhomerun_device_create_from_str(device_str, hdhr_dbg);
-	if (use_pid_filter)
-		feeder.parser.set_addfilter_callback(add_filter, this);
-
-	return (hdhr_dev) ? true : false;
+	if (hdhr_dev) {
+		if (use_pid_filter)
+			feeder.parser.set_addfilter_callback(add_filter, this);
+		return true;
+	}
+	return false;
 }
 
 bool hdhr_tuner::check()
@@ -188,8 +190,20 @@ bool hdhr_tuner::check()
 	return true;
 }
 
+int hdhr_tuner::open_available_tuner(unsigned int max_tuners)
+{
+	unsigned int tuner_id = 0;
+	while (tuner_id < max_tuners) {
+		if ((set_hdhr_id(0, 0, tuner_id)) && (0 == open_fe()))
+			return 0;
+		tuner_id++;
+	}
+	return -1;
+}
+
 int hdhr_tuner::open_fe()
 {
+	if (!hdhr_dev) return open_available_tuner();
 	int ret = 0;
 	char errmsg[256];
 	switch (hdhomerun_device_tuner_lockkey_request(hdhr_dev, (char**)&errmsg)) {
