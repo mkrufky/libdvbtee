@@ -27,7 +27,16 @@
 #include <unistd.h>
 
 #include "feed.h"
+#ifdef USE_HDHOMERUN
+#undef USE_LINUXTV_TUNER
+#else
+#define USE_LINUXTV_TUNER
+#endif
+#ifdef USE_LINUXTV_TUNER
 #include "linuxtv_tuner.h"
+#else
+#include "hdhr_tuner.h"
+#endif
 #include "serve.h"
 
 #include "atsctext.h"
@@ -37,7 +46,11 @@ typedef std::map<uint8_t, tune> map_tuners;
 struct dvbtee_context
 {
 	feed _file_feeder;
+#ifdef USE_LINUXTV_TUNER
 	linuxtv_tuner tuner;
+#else
+	hdhr_tuner tuner;
+#endif
 	serve *server;
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
@@ -57,7 +70,9 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 
 		context->tuner.feeder.stop_without_wait();
 		context->tuner.feeder.close_file();
+#ifdef USE_LINUXTV_TUNER
 		context->tuner.close_demux();
+#endif
 	} else {
 		context->_file_feeder.stop();
 
@@ -199,10 +214,10 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 {
 	int count = 0;
 	int partial_redundancy = 0;
-#if 0
-	map_tuners tuners;
-#else
+#if USE_LINUXTV_TUNER
 	linuxtv_tuner tuners[num_tuners];
+#else
+	hdhr_tuner tuners[num_tuners];
 #endif
 	int channels_to_scan = scan_max - scan_min + 1;
 
@@ -212,7 +227,11 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 		int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 		int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
+#if USE_LINUXTV_TUNER
 		tuners[i].set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
+#else
+		tuners[i].set_hdhr_id(0, 0, 0);
+#endif
 		tuners[i].feeder.parser.limit_eit(eit_limit);
 	}
 	switch (scan_method) {
@@ -494,7 +513,11 @@ int main(int argc, char **argv)
 			context._file_feeder.parser.add_output(outfilename);
 	}
 	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
+#ifdef USE_LINUXTV_TUNER
 		context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
+#else
+		context.tuner.set_hdhr_id(0, 0, 0);
+#endif
 		context.tuner.feeder.parser.limit_eit(eit_limit);
 	}
 	if (b_serve)
