@@ -209,10 +209,7 @@ int feed::pull(void *priv, pull_callback cb)
 
 	if (0 != ret)
 		perror("pthread_create() failed");
-#if FEED_BUFFER
-	else
-		start_feed();
-#endif
+
 	return ret;
 }
 
@@ -391,35 +388,12 @@ void *feed::stdin_feed_thread()
 
 void *feed::pull_thread()
 {
-	int rxlen = 0;
-#if FEED_BUFFER
-	void *q = NULL;
-#else
-	unsigned char q[BUFSIZE];
-#endif
-	int available;
-
 	dprintf("()");
 
-	while (!f_kill_thread) {
-#if FEED_BUFFER
-		available = ringbuffer.get_write_ptr(&q);
-#else
-		available = sizeof(q);
-#endif
-		available = (available < (BUFSIZE)) ? available : (BUFSIZE);
-		rxlen = pull_cb(pull_priv, available, q);
-		if (rxlen > 0) {
-#if !FEED_BUFFER
-			parser.feed(rxlen, q);
-#endif
-		} else {
+	while (!f_kill_thread)
+		if (0 >= pull_cb(pull_priv, -1, NULL))
 			usleep(50*1000);
-		}
-#if FEED_BUFFER
-		ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
-#endif
-	}
+
 	pthread_exit(NULL);
 }
 

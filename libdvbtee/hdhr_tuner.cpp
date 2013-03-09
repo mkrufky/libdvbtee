@@ -176,8 +176,12 @@ int hdhr_tuner::hdhr_pull_callback(void *p_this, int len, const uint8_t *p)
 int hdhr_tuner::hdhr_pull_callback(int len, const uint8_t *p)
 {
 	size_t actual;
-	const uint8_t *q = hdhomerun_device_stream_recv(hdhr_dev, len, &actual);
-	memcpy((uint8_t*)p, q, actual);
+	const uint8_t *q = hdhomerun_device_stream_recv(hdhr_dev, (p) ? len : ((4096/188)*188), &actual);
+	if (p)
+		memcpy((uint8_t*)p, q, actual);
+	else
+		feeder.push(actual, q);
+
 	return actual;
 }
 
