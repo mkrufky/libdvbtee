@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 #include "feed.h"
-#include "tune.h"
+#include "linuxtv_tuner.h"
 #include "serve.h"
 
 #include "atsctext.h"
@@ -37,7 +37,7 @@ typedef std::map<uint8_t, tune> map_tuners;
 struct dvbtee_context
 {
 	feed _file_feeder;
-	tune tuner;
+	linuxtv_tuner tuner;
 	serve *server;
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
@@ -202,7 +202,7 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 #if 0
 	map_tuners tuners;
 #else
-	tune tuners[num_tuners];
+	linuxtv_tuner tuners[num_tuners];
 #endif
 	int channels_to_scan = scan_max - scan_min + 1;
 
@@ -221,14 +221,14 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 			int scan_start = scan_min + ((0 + i) * (unsigned int)channels_to_scan/num_tuners);
 			int scan_end   = scan_min + ((1 + i) * (unsigned int)channels_to_scan/num_tuners);
 			fprintf(stderr, "speed scan: tuner %d scanning from %d to %d\n", i, scan_start, scan_end);
-			tuners[i].start_scan(scan_flags, scan_start, scan_end, scan_epg);
+			tuners[i].tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
 			sleep(1); // FIXME
 		}
 		break;
 	case 2: /* redundancy */
 		for (int i = 0; i < num_tuners; i++) {
 			fprintf(stderr, "redundancy scan: tuner %d scanning from %d to %d\n", i, scan_min, scan_max);
-			tuners[i].start_scan(scan_flags, scan_min, scan_max, scan_epg);
+			tuners[i].tune::start_scan(scan_flags, scan_min, scan_max, scan_epg);
 			sleep(5); // FIXME
 		}
 		break;
@@ -254,7 +254,7 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 					(partial_redundancy) ? "partial " : "",
 					j + 1, num_tuners - partial_redundancy,
 					i, scan_start, scan_end);
-				tuners[i].start_scan(scan_flags, scan_start, scan_end, scan_epg);
+				tuners[i].tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
 				sleep(1); // FIXME
 			}
 		}

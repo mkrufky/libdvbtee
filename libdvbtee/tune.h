@@ -40,6 +40,8 @@ static map_chan_to_ts_id channels;
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
 typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 
+#define vrtdbg fprintf(stderr, "%s: virtual function undefined!\n", __func__)
+
 class tune
 {
 public:
@@ -49,22 +51,19 @@ public:
 	tune(const tune&);
 	tune& operator= (const tune&);
 
-	bool set_device_ids(int adap, int fe, int demux, int dvr, bool kernel_pid_filter = true);
+	virtual int open_fe() { vrtdbg; return -1; };
+	virtual int close_fe();
 
-	int open_fe();
-	int close_fe();
-	int close_demux();
-
-	void stop_feed();
-	int start_feed();
+	virtual void stop_feed();
+	virtual int start_feed() { vrtdbg; return -1; };
 
 	bool wait_for_lock_or_timeout(unsigned int);
 
-	bool tune_channel(fe_modulation_t, unsigned int);
+	virtual bool tune_channel(fe_modulation_t, unsigned int) { vrtdbg; return false; };
 	unsigned int get_channel() { return cur_chan; };
 	time_t last_touched();
 
-	bool check();
+	virtual bool check() { vrtdbg; return false; };
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
@@ -87,50 +86,33 @@ public:
 	inline bool is_lock() { return (state & TUNE_STATE_LOCK); };
 	inline bool is_scan() { return (state & TUNE_STATE_SCAN); };
 	inline bool is_feed() { return (state & TUNE_STATE_FEED); };
-private:
+protected:
+	static void *scan_thread(void*);
+
 	pthread_t h_thread;
 	bool f_kill_thread;
 
 	unsigned int state;
-
-	void *scan_thread();
-	static void *scan_thread(void*);
-
-	void add_filter(uint16_t);
-	static void add_filter(void *, uint16_t);
-	void clear_filters();
-	static void clear_filters(void *);
-
-	int  adap_id;
-
-	int    fe_fd;
-	int demux_fd;
-
-	int    fe_id;
-	int demux_id;
-	int   dvr_id;
-
 	unsigned int cur_chan;
 	time_t time_touched;
-	time_t last_query;
 
 	int          scan_mode;
 	channel_map  scan_channel_list;
 	bool         scan_epg;
 	bool         scan_complete;
 
+	fe_type_t fe_type;
+private:
+	void *scan_thread();
+
+	time_t last_query;
+
 	//map_chan_to_ts_id channels;
 
-	fe_status_t fe_status();
+	virtual fe_status_t fe_status() { vrtdbg; return (fe_status_t)0; }; // FIXME
+#if 0
 	uint16_t get_snr();
-
-	fe_type_t fe_type;
-
-	bool tune_atsc(fe_modulation_t, unsigned int);
-	bool tune_dvbt(unsigned int);
-
-	filtered_pid_map filtered_pids;
-
+#endif
 	int start_scan(unsigned int, bool epg = false);
 };
 

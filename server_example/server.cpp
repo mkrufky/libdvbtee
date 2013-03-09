@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 #include "feed.h"
-#include "tune.h"
+#include "linuxtv_tuner.h"
 #include "serve.h"
 
 #include "atsctext.h"
@@ -36,7 +36,7 @@ typedef std::map<uint8_t, tune> map_tuners;
 
 struct dvbtee_context
 {
-	tune tuner;
+	linuxtv_tuner tuner;
 	serve *server;
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
