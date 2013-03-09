@@ -147,11 +147,11 @@ struct hdhomerun_tuner_status_t *hdhr_tuner::hdhr_status()
 		(_hdhr_status.lock_unsupported) ? "lock unsupported" : "",
 		_hdhr_status.signal_strength, _hdhr_status.signal_to_noise_quality, _hdhr_status.symbol_error_quality,
 		_hdhr_status.raw_bits_per_second, _hdhr_status.packets_per_second);
-#if 0
+
 	state &= ~TUNE_STATE_LOCK;
-	if ()
+	if (_hdhr_status.lock_supported)
 		state |= TUNE_STATE_LOCK;
-#endif
+
 	return &_hdhr_status;
 }
 
