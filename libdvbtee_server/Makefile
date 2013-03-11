@@ -7,11 +7,11 @@ STRIP     = $(CROSS_COMPILE)strip
 INSTALL_DIR = $(DVBTEE_ROOT)/usr/lib
 
 DEBUG = -g -ggdb
-INCLUDES= -I../libdvbtee -I../usr/include -I/usr/lib/libhdhomerun
+INCLUDES= -I../libdvbtee -I../usr/include
 GPPFLAGS= $(INCLUDES) -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -D_GNU_SOURCE -D__USE_LARGEFILE64
 CPPFLAGS= $(INCLUDES) -g -Os -Wall -Wno-deprecated -fpermissive -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread $(DEBUG) -D_GNU_SOURCE -D__USE_LARGEFILE64
-LDADD= -L../libdvbtee -ldvbtee -lhdhomerun
-LIBS= -L../libdvbtee -ldvbtee -lhdhomerun
+LDADD= -L../libdvbtee -ldvbtee
+LIBS= -L../libdvbtee -ldvbtee
 
 objects = serve.o text.o
 

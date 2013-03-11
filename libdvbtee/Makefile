@@ -7,14 +7,14 @@ STRIP     = $(CROSS_COMPILE)strip
 INSTALL_DIR = $(DVBTEE_ROOT)/usr/lib
 
 DEBUG = -g -ggdb
-INCLUDES= -I../usr/include -I/usr/lib/libhdhomerun
+INCLUDES= -I../usr/include
 GPPFLAGS= $(INCLUDES) -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -D_GNU_SOURCE -D__USE_LARGEFILE64
 CPPFLAGS= $(INCLUDES) -g -Os -Wall -Wno-deprecated -fpermissive -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread $(DEBUG)  -D_GNU_SOURCE -D__USE_LARGEFILE64
-LDADD= -L../usr/lib -ldvbpsi -lhdhomerun
-LIBS= -L../usr/lib -ldvbpsi -lhdhomerun
+LDADD= -L../usr/lib -ldvbpsi
+LIBS= -L../usr/lib -ldvbpsi
 
 objects = parse.o functions.o decode.o channels.o feed.o tune.o atsctext.o \
-	  output.o desc.o rbuf.o listen.o stats.o demux.o linuxtv_tuner.o hdhr_tuner.o
+	  output.o desc.o rbuf.o listen.o stats.o demux.o linuxtv_tuner.o
 
 lib_name = libdvbtee
 
