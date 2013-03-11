@@ -175,14 +175,12 @@ int start_server(struct dvbtee_context* context, int num_tuners, unsigned int fl
 			context->tuner.feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1);
 #if 0
 	} else {
-		tune tuners[num_tuners];
+#ifdef USE_LINUXTV_TUNER
+		linuxtv_tuner tuners[num_tuners];
+#else
+		hdhr_tuner tuners[num_tuners];
+#endif
 		for (int i = 0; i < num_tuners; i++) {
-			int dvb_adap = i; /* ID X, /dev/dvb/adapterX/ */
-			int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
-			int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
-			int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
-
-			tuners[i].set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
 			context->server->add_tuner(&tuners[i]);
 			if (flags & 2)
 				tuners[i].feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+i);
@@ -219,16 +217,6 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 	int channels_to_scan = scan_max - scan_min + 1;
 
 	for (int i = 0; i < num_tuners; i++) {
-		int dvb_adap = i; /* ID X, /dev/dvb/adapterX/ */
-		int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
-		int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
-		int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
-
-#ifdef USE_LINUXTV_TUNER
-		tuners[i].set_device_ids(dvb_adap, fe_id, demux_id, dvr_id);
-#else
-		tuners[i].set_hdhr_id(0, 0, 0);
-#endif
 		tuners[i].feeder.parser.limit_eit(eit_limit);
 	}
 	switch (scan_method) {
