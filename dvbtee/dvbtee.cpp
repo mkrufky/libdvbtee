@@ -27,36 +27,49 @@
 #include <unistd.h>
 
 #include "feed.h"
-#ifdef USE_HDHOMERUN
-#undef USE_LINUXTV_TUNER
-#else
-#define USE_LINUXTV_TUNER
-#endif
-#ifdef USE_LINUXTV_TUNER
+#define USE_LINUXTV
+#ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
-#else
+#endif
+#ifdef USE_HDHOMERUN
 #include "hdhr_tuner.h"
 #endif
 #include "serve.h"
 
 #include "atsctext.h"
 
-typedef std::map<uint8_t, tune> map_tuners;
+typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
 {
 	feed _file_feeder;
-#ifdef USE_LINUXTV_TUNER
-	linuxtv_tuner tuner;
-#else
-	hdhr_tuner tuner;
-#endif
+	map_tuners tuners;
 	serve *server;
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
 map_pid_to_context context_map;
 
+void cleanup_tuners(struct dvbtee_context* context, bool quick = false)
+{
+	bool erased = false;
+	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
+
+		if (quick) {
+			iter->second->feeder.stop_without_wait();
+			iter->second->feeder.close_file();
+		} else
+			iter->second->stop_feed();
+
+		iter->second->close_fe();
+		iter->second->feeder.parser.cleanup();
+#if 0
+		/* this causes a bad crash when enabled */
+		delete iter->second;
+#endif
+	}
+	context->tuners.clear();
+}
 
 void stop_server(struct dvbtee_context* context);
 
@@ -65,20 +78,16 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	if (context->server)
 		stop_server(context);
 
-	if (quick) {
+	if (quick)
 		context->_file_feeder.stop_without_wait();
-
-		context->tuner.feeder.stop_without_wait();
-		context->tuner.feeder.close_file();
-	} else {
+	else
 		context->_file_feeder.stop();
 
-		context->tuner.stop_feed();
-	}
-
 	context->_file_feeder.close_file();
+	context->_file_feeder.parser.cleanup();
 
-	context->tuner.close_fe();
+	cleanup_tuners(context, quick);
+
 #if 1 /* FIXME */
 	ATSCMultipleStringsDeInit();
 #endif
@@ -123,9 +132,6 @@ void signal_callback_handler(int signum)
 
 	cleanup(context, true);
 
-	context->_file_feeder.parser.cleanup();
-	context->tuner.feeder.parser.cleanup();
-
 	exit(signum);
 }
 
@@ -164,29 +170,16 @@ void stop_server(struct dvbtee_context* context)
 	return;
 }
 
-int start_server(struct dvbtee_context* context, int num_tuners, unsigned int flags)
+int start_server(struct dvbtee_context* context, unsigned int flags)
 {
 	context->server = new serve;
-#if 0
-	if (num_tuners < 0) {
-#endif
-		context->server->add_tuner(&context->tuner);
+
+	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
+		context->server->add_tuner(iter->second);
+
 		if (flags & 2)
-			context->tuner.feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1);
-#if 0
-	} else {
-#ifdef USE_LINUXTV_TUNER
-		linuxtv_tuner tuners[num_tuners];
-#else
-		hdhr_tuner tuners[num_tuners];
-#endif
-		for (int i = 0; i < num_tuners; i++) {
-			context->server->add_tuner(&tuners[i]);
-			if (flags & 2)
-				tuners[i].feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+i);
-		}
+			iter->second->feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+iter->first);
 	}
-#endif
 	context->server->set_scan_flags(0, flags >> 2);
 
 	return context->server->start();
@@ -204,35 +197,30 @@ void listen_for_data(struct dvbtee_context* context, char* tcpipfeedurl)
 }
 #endif
 
-void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan_method,
+void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg, int eit_limit)
 {
 	int count = 0;
 	int partial_redundancy = 0;
-#ifdef USE_LINUXTV_TUNER
-	linuxtv_tuner tuners[num_tuners];
-#else
-	hdhr_tuner tuners[num_tuners];
-#endif
 	int channels_to_scan = scan_max - scan_min + 1;
+	size_t num_tuners = context->tuners.size();
 
-	for (int i = 0; i < num_tuners; i++) {
-		tuners[i].feeder.parser.limit_eit(eit_limit);
-	}
 	switch (scan_method) {
 	case 1: /* speed */
-		for (int i = 0; i < num_tuners; i++) {
+		for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
+			int i = iter->first;
 			int scan_start = scan_min + ((0 + i) * (unsigned int)channels_to_scan/num_tuners);
 			int scan_end   = scan_min + ((1 + i) * (unsigned int)channels_to_scan/num_tuners);
 			fprintf(stderr, "speed scan: tuner %d scanning from %d to %d\n", i, scan_start, scan_end);
-			tuners[i].tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
+			iter->second->tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
 			sleep(1); // FIXME
 		}
 		break;
 	case 2: /* redundancy */
-		for (int i = 0; i < num_tuners; i++) {
+		for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
+			int i = iter->first;
 			fprintf(stderr, "redundancy scan: tuner %d scanning from %d to %d\n", i, scan_min, scan_max);
-			tuners[i].tune::start_scan(scan_flags, scan_min, scan_max, scan_epg);
+			iter->second->tune::start_scan(scan_flags, scan_min, scan_max, scan_epg);
 			sleep(5); // FIXME
 		}
 		break;
@@ -242,9 +230,10 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 	default:
 	case 3: /* speed AND redundancy */
 		for (int j = 0; j < num_tuners - partial_redundancy; j++) {
-			for (int i = 0; i < num_tuners; i++) {
+			for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
+				int i = iter->first;
 				if (j) {
-					tuners[i].wait_for_scan_complete();
+					iter->second->wait_for_scan_complete();
 				}
 				int scan_start, scan_end;
 				if (i + j < num_tuners) {
@@ -254,23 +243,23 @@ void multiscan(struct dvbtee_context* context, int num_tuners, unsigned int scan
 					scan_start = scan_min + ((0 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 					scan_end   = scan_min + ((1 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 				}
-				fprintf(stderr, "speed & %sredundancy scan: pass %d of %d, tuner %d scanning from %d to %d\n",
+				fprintf(stderr, "speed & %sredundancy scan: pass %d of %lu, tuner %d scanning from %d to %d\n",
 					(partial_redundancy) ? "partial " : "",
 					j + 1, num_tuners - partial_redundancy,
 					i, scan_start, scan_end);
-				tuners[i].tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
+				iter->second->tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
 				sleep(1); // FIXME
 			}
 		}
 		break;
 	}
-	for (int i = 0; i < num_tuners; i++)
-		tuners[i].wait_for_scan_complete();
+	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter)
+		iter->second->wait_for_scan_complete();
 #if 1
-	for (int i = 0; i < num_tuners; i++) {
-		int _count = tuners[i].feeder.parser.xine_dump();
+	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
+		int _count = iter->second->feeder.parser.xine_dump();
 		count += _count;
-		fprintf(stderr, "tuner %d found %d services\n", i, _count);
+		fprintf(stderr, "tuner %d found %d services\n", iter->first, _count);
 	}
 #else
 	count += tuners[0].feeder.parser.xine_dump();
@@ -332,6 +321,7 @@ int main(int argc, char **argv)
 	bool b_kernel_pid_filters = false;
 	bool b_help     = false;
 	bool b_bitrate_stats = false;
+	bool b_hdhr     = false;
 
 	context.server = NULL;
 
@@ -353,6 +343,8 @@ int main(int argc, char **argv)
 	unsigned int wait_event  = 0;
 	int eit_limit            = -1;
 
+	tune *tuner = NULL;
+
 	enum output_options out_opt = (enum output_options)-1;
 
 	char filename[256];
@@ -370,7 +362,10 @@ int main(int argc, char **argv)
 	char channel_list[256];
 	memset(&channel_list, 0, sizeof(channel_list));
 
-        while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:d::hH?")) != -1) {
+	char hdhrname[256];
+	memset(&hdhrname, 0, sizeof(hdhrname));
+
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
@@ -458,8 +453,12 @@ int main(int argc, char **argv)
 			else
 				libdvbtee_set_debug_level(255);
 			break;
-		case 'h':
 		case 'H':
+			if (optarg)
+				strcpy(hdhrname, optarg);
+			b_hdhr = true;
+			break;
+		case 'h':
 			b_help = true;
 			/* fall - thru  */
 		default:
@@ -482,35 +481,64 @@ int main(int argc, char **argv)
 #endif
 	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
 
+	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
+#ifdef USE_HDHOMERUN
+		if (b_hdhr) {
+			tuner = new hdhr_tuner;
+
+			if (strlen(hdhrname)) {
+				// FIXME: get HDHR by name etc...
+			}
+		} else {
+#else
+		{
+#endif
+#ifdef USE_LINUXTV
+			tuner = new linuxtv_tuner;
+
+			if ((dvb_adap >= 0) || (fe_id >= 0)) {
+				if (dvb_adap < 0)
+					dvb_adap = 0;
+				if (fe_id < 0)
+					fe_id = 0;
+				((linuxtv_tuner*)(tuner))->set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
+			}
+#endif
+		}
+		context.tuners[context.tuners.size()] = tuner;
+		tuner->feeder.parser.limit_eit(eit_limit);
+	}
+	if (num_tuners > 0) while (context.tuners.size() < num_tuners)
+#ifdef USE_HDHOMERUN
+		if (b_hdhr)
+			context.tuners[context.tuners.size()] = new hdhr_tuner;
+		else
+#endif
+#ifdef USE_LINUXTV
+			context.tuners[context.tuners.size()] = new linuxtv_tuner;
+#else
+			{}
+#endif
 	if (out_opt > 0)
-		context.tuner.feeder.parser.out.set_options(out_opt);
+		for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+			iter->second->feeder.parser.out.set_options(out_opt);
 
 	if (b_bitrate_stats) {
-		if (b_read_dvr)
-			context.tuner.feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
+		if (b_read_dvr) // FIXME
+			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 		else
 			context._file_feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 	}
 	if (b_output_file) {
-		if (b_read_dvr)
-			context.tuner.feeder.parser.add_output(outfilename);
+		if (b_read_dvr) // FIXME
+			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+				iter->second->feeder.parser.add_output(outfilename);
 		else
 			context._file_feeder.parser.add_output(outfilename);
 	}
-	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
-#ifdef USE_LINUXTV_TUNER
-		if ((dvb_adap >= 0) || (fe_id >= 0)) {
-			if (dvb_adap < 0)
-				dvb_adap = 0;
-			if (fe_id < 0)
-				fe_id = 0;
-			context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
-		}
-#endif
-		context.tuner.feeder.parser.limit_eit(eit_limit);
-	}
 	if (b_serve)
-		start_server(&context, num_tuners, serv_flags | (scan_flags << 2));
+		start_server(&context, serv_flags | (scan_flags << 2));
 
 	if ((scan_min) && (!scan_max))
 		scan_max = scan_min;
@@ -520,12 +548,12 @@ int main(int argc, char **argv)
 
 	if ((b_scan) && ((b_read_dvr) || (num_tuners >= 0))) {
 		if (num_tuners >= 0)
-			multiscan(&context, num_tuners, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
+			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
 		else {
 			if (strlen(channel_list))
-				context.tuner.scan_for_services(scan_flags, channel_list, scan_epg);
+				if (tuner) tuner->scan_for_services(scan_flags, channel_list, scan_epg);
 			else
-				context.tuner.scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
+				if (tuner) tuner->scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
 		}
 		goto exit;
 	}
@@ -558,9 +586,9 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
-	if (channel) {
+	if ((tuner) && (channel)) {
 		fprintf(stderr, "TUNE to channel %d...\n", channel);
-		int fe_fd = context.tuner.open_fe();
+		int fe_fd = tuner->open_fe();
 		if (fe_fd < 0)
 			return fe_fd;
 
@@ -568,35 +596,35 @@ int main(int argc, char **argv)
 			scan_flags = SCAN_VSB;
 
 		if (strlen(service_ids) > 0) {
-			context.tuner.feeder.parser.set_service_ids(service_ids);
+			tuner->feeder.parser.set_service_ids(service_ids);
 			if (out_opt < 0)
-				context.tuner.feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
+				tuner->feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
 		}
 
-		if (context.tuner.tune_channel(
+		if (tuner->tune_channel(
 				(scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
-			if (!context.tuner.wait_for_lock_or_timeout(2000)) {
-				context.tuner.close_fe();
+			if (!tuner->wait_for_lock_or_timeout(2000)) {
+				tuner->close_fe();
 				goto exit; /* NO LOCK! */
 			}
-			context.tuner.feeder.parser.set_channel_info(channel,
+			tuner->feeder.parser.set_channel_info(channel,
 				(scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 				(scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 		}
 	}
 
-	if (b_read_dvr) {
+	if ((tuner) && (b_read_dvr)) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
 		if (b_serve) /* if we're running in server mode, we dont wait, stop or close */
-			context.tuner.start_feed();
+			tuner->start_feed();
 		else {
-			if (0 == context.tuner.start_feed()) {
-				context.tuner.feeder.wait_for_event_or_timeout(timeout, wait_event);
-				context.tuner.stop_feed();
+			if (0 == tuner->start_feed()) {
+				tuner->feeder.wait_for_event_or_timeout(timeout, wait_event);
+				tuner->stop_feed();
 			}
 			if (channel) /* if we tuned the frontend ourselves then close it */
-				context.tuner.close_fe();
+				tuner->close_fe();
 		}
 	}
 	else
@@ -607,10 +635,10 @@ int main(int argc, char **argv)
 			context._file_feeder.stop();
 		}
 	}
-	if (b_scan) // scan channel mode, normal scan would have goto'd to exit
-		context.tuner.feeder.parser.xine_dump();
-	if (scan_epg)
-		context.tuner.feeder.parser.epg_dump();
+	if ((tuner) && (b_scan)) // scan channel mode, normal scan would have goto'd to exit
+		tuner->feeder.parser.xine_dump();
+	if ((tuner) && (scan_epg))
+		tuner->feeder.parser.epg_dump();
 exit:
 	if (context.server) {
 		while (context.server->is_running()) sleep(1);
