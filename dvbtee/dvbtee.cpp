@@ -487,7 +487,7 @@ int main(int argc, char **argv)
 			tuner = new hdhr_tuner;
 
 			if (strlen(hdhrname)) {
-				// FIXME: get HDHR by name etc...
+				((hdhr_tuner*)(tuner))->set_hdhr_id(hdhrname);
 			}
 		} else {
 #else
