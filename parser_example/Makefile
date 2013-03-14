@@ -6,10 +6,10 @@ STRIP     = $(CROSS_COMPILE)strip
 INSTALL_DIR = ../usr/bin
 
 DEBUG = -g -ggdb
-INCLUDES = -I../usr/lib -I../libdvbtee -I../libdvbtee_server -I../usr/include
+INCLUDES = -I../usr/lib -I../libdvbtee -I../libdvbtee_server -I../usr/include -I/usr/lib/libhdhomerun
 CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -fPIC $(DEBUG)
-LDADD = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi
-LIBS = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi
+LDADD = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi -lhdhomerun
+LIBS = -L../libdvbtee_server -L../libdvbtee -L../usr/lib -ldvbtee_server -ldvbtee -ldvbpsi -lhdhomerun
 
 shared: libdvbtee libdvbtee_server
 	$(GPP) $(INCLUDES) $(CPPFLAGS) parser.cpp -o parser $(LIBS)
