@@ -286,6 +286,7 @@ void usage(bool help, char *myname)
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
 		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
+		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
 		"-d\tdebug level\n  "
 		"-h\tdisplay additional help\n\n");
 	if (help)
@@ -302,9 +303,11 @@ void usage(bool help, char *myname)
 		"%s -iudp://127.0.0.1:1234 -t10\n\n"
 		"To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:\n  "
 		"%s -A2 -T5 -s4\n\n"
+		"To scan for ATSC services using 2 HdHomeRun tuners optimized for speed and redundancy:\n  "
+		"%s -A1 -H -T2 -s3\n\n"
 		"To start a server using adapter 0:\n  "
 		"%s -a0 -S\n\n"
-		, myname, myname, myname, myname, myname, myname, myname
+		, myname, myname, myname, myname, myname, myname, myname, myname
 	);
 }
 

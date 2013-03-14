@@ -35,8 +35,8 @@ mkrufky at linuxtv dot org
 Command line arguments:
 
   -a	adapter id
-  -b	display bitrates & statistics
   -A	(1 for ATSC, 2 for ClearQAM)
+  -b	display bitrates & statistics
   -c	channel to tune /
 	comma (,) separated list of channels to scan /
 	scan minimum channel
@@ -58,6 +58,7 @@ Command line arguments:
   -E	enable EPG scan, optional arg to limit the number of EITs to parse
   -o	output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
   -O	output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
+  -H	use a HdHomeRun device, optional arg to specify the device string
   -d	debug level
   -h	display additional help
 
@@ -78,6 +79,9 @@ To parse a UDP stream for ten seconds:
 
 To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:
   ./dvbtee -A2 -T5 -s4
+
+To scan for ATSC services using 2 HdHomeRun tuners optimized for speed and redundancy:
+  ./dvbtee -A1 -H -T2 -s3
 
 To start a server using adapter 0:
   ./dvbtee -a0 -S
