@@ -307,7 +307,9 @@ void usage(bool help, char *myname)
 		"%s -A1 -H -T2 -s3\n\n"
 		"To start a server using adapter 0:\n  "
 		"%s -a0 -S\n\n"
-		, myname, myname, myname, myname, myname, myname, myname, myname
+		"To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):\n  "
+		"%s -H ABCDABCD-1 -S\n\n"
+		, myname, myname, myname, myname, myname, myname, myname, myname, myname
 	);
 }
 

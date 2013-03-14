@@ -86,6 +86,9 @@ To scan for ATSC services using 2 HdHomeRun tuners optimized for speed and redun
 To start a server using adapter 0:
   ./dvbtee -a0 -S
 
+To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):
+  ./dvbtee -H ABCDABCD-1 -S
+
 Server commands
 ===============
 
