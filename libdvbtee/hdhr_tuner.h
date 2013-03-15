@@ -22,12 +22,12 @@
 #ifndef __HDHR_TUNER_H__
 #define __HDHR_TUNER_H__
 
-#include "hdhomerun.h"
-
 #include "tune.h"
 
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
 typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
+
+class hdhr_tuner_device;
 
 class hdhr_tuner: public tune
 {
@@ -60,16 +60,15 @@ private:
 
 	fe_status_t fe_status();
 
-	struct hdhomerun_tuner_status_t _hdhr_status;
-	struct hdhomerun_tuner_status_t *hdhr_status();
+	void hdhr_status();
 
 	filtered_pid_map filtered_pids;
 
 	int hdhr_pull_callback();
 	static int hdhr_pull_callback(void*);
 
-	struct hdhomerun_device_t *hdhr_dev;
-	struct hdhomerun_debug_t *hdhr_dbg;
+	class hdhr_tuner_device *dev;
+
 #define HDHR_TUNER_MAX_TUNERS 2
 	int open_available_tuner(unsigned int max_tuners = HDHR_TUNER_MAX_TUNERS);
 };
