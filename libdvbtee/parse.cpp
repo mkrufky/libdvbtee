@@ -857,7 +857,7 @@ bool parse::is_epg_ready()
 
 int parse::add_output(void* priv, stream_callback callback)
 {
-  int ret = out.add(priv, callback);
+	int ret = out.add(priv, callback);
 	if (ret < 0)
 		return ret;
 	else
