@@ -56,6 +56,16 @@ static tune *find_idle_tuner()
 	return NULL;
 }
 
+static tune *find_tuned_tuner(unsigned int phy)
+{
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if ((iter->second->is_lock()) && (phy == iter->second->get_channel())) {
+			dprintf("tuner %d is locked to physical channel %d", iter->first, phy);
+			return iter->second;
+		}
+	return NULL;
+}
+
 //static
 bool serve::add_feeder(void *p_this, feed *new_feeder)
 {
@@ -1215,7 +1225,10 @@ bool serve_client::__command(char* cmdline)
 #else
 		{
 			tune *old_tuner = tuner;
-			tuner = find_idle_tuner();
+
+			tuner = find_tuned_tuner(phy);
+			if (!tuner)
+				tuner = find_idle_tuner();
 			if (tuner) {
 				feeder = &tuner->feeder;
 				cur = tuner->get_channel();
