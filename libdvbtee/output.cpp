@@ -888,16 +888,17 @@ int output::add(void* priv, stream_callback callback, map_pidtype &pids)
 {
 	if ((callback) && (priv)) {
 
+		int target_id = num_targets;
 		/* push data into output buffer */
-		int ret = output_streams[num_targets].add(priv, callback, pids);
+		int ret = output_streams[target_id].add(priv, callback, pids);
 		if (ret == 0)
 			num_targets++;
 		else
-			dprintf("failed to add target #%d", num_targets);
+			dprintf("failed to add target #%d", target_id);
 
-		dprintf("~(%d->FUNC)", (ret == 0) ? num_targets - 1 : num_targets);
+		dprintf("~(%d->FUNC)", target_id);
 
-		return ret;
+		return (ret == 0) ? target_id : ret;
 	}
 	return -1;
 }
@@ -906,16 +907,17 @@ int output::add(int socket, unsigned int method, map_pidtype &pids)
 {
 	if (socket >= 0) {
 
+		int target_id = num_targets;
 		/* push data into output buffer */
 		int ret = output_streams[num_targets].add(socket, method, pids);
 		if (ret == 0)
 			num_targets++;
 		else
-			dprintf("failed to add target #%d", num_targets);
+			dprintf("failed to add target #%d", target_id);
 
-		dprintf("~(%d->SOCKET[%d])", (ret == 0) ? num_targets - 1 : num_targets, socket);
+		dprintf("~(%d->SOCKET[%d])", target_id, socket);
 
-		return ret;
+		return (ret == 0) ? target_id : ret;
 	}
 	return -1;
 }
@@ -944,16 +946,18 @@ int output::add(char* target, map_pidtype &pids)
 
 int output::__add(char* target, map_pidtype &pids)
 {
-	dprintf("(%d->%s)", num_targets, target);
+	int target_id = num_targets;
+
+	dprintf("(%d->%s)", target_id, target);
 
 	/* push data into output buffer */
-	int ret = output_streams[num_targets].add(target, pids);
+	int ret = output_streams[target_id].add(target, pids);
 	if (ret == 0)
 		num_targets++;
 	else
-		dprintf("failed to add target #%d: %s", num_targets, target);
+		dprintf("failed to add target #%d: %s", target_id, target);
 
-	dprintf("~(%d->%s)", (ret == 0) ? num_targets - 1 : num_targets, target);
+	dprintf("~(%d->%s)", target_id, target);
 
-	return ret;
+	return (ret == 0) ? target_id : ret;
 }

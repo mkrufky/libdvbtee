@@ -941,32 +941,50 @@ int parse::add_output(char* target, char* services)
 
 int parse::add_output(void* priv, stream_callback callback, map_pidtype &pids)
 {
-	int ret = out.add(priv, callback, pids);
-	out.get_pids(out_pids);
+	int ret, target_id = out.add(priv, callback, pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
 	if (ret < 0)
 		return ret;
-	else
-		return out.start();
+
+	out.get_pids(out_pids);
+	dprintf("success adding callback target id:%4d", target_id);
+fail:
+	return target_id;
 }
 
 int parse::add_output(int socket, unsigned int method, map_pidtype &pids)
 {
-	int ret = out.add(socket, method, pids);
-	out.get_pids(out_pids);
+	int ret, target_id = out.add(socket, method, pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
 	if (ret < 0)
 		return ret;
-	else
-		return out.start();
+
+	out.get_pids(out_pids);
+	dprintf("success adding socket target id:%4d", target_id);
+fail:
+	return target_id;
 }
 
 int parse::add_output(char* target, map_pidtype &pids)
 {
-	int ret = out.add(target, pids);
-	out.get_pids(out_pids);
+	int ret, target_id = out.add(target, pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
 	if (ret < 0)
 		return ret;
-	else
-		return out.start();
+
+	out.get_pids(out_pids);
+	dprintf("success adding url target id:%4d", target_id);
+fail:
+	return target_id;
 }
 
 #define CHAR_CMD_COMMA ","
