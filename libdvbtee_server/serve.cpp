@@ -1210,7 +1210,21 @@ bool serve_client::__command(char* cmdline)
 		/* see if tuner has the right physical channel, if not then change it */
 		cur = tuner->get_channel();
 		if ((cur) && (cur != phy))
+#if 0
 			cmd_tuner_stop();
+#else
+		{
+			tune *old_tuner = tuner;
+			tuner = find_idle_tuner();
+			if (tuner) {
+				feeder = &tuner->feeder;
+				cur = tuner->get_channel();
+			} else {
+				tuner = old_tuner;
+				cmd_tuner_stop();
+			}
+		}
+#endif
 		if (cur == phy) /* (cur) */ {
 			cli_print("already tuned to physical channel %d.\n", phy);
 			tuned = true;
