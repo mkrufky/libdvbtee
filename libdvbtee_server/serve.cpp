@@ -1297,11 +1297,10 @@ bool serve_client::__command(char* cmdline)
 			feeder->parser.set_service_ids(NULL);
 
 	} else if (strstr(cmd, "stream")) {
-		cli_print("adding stream target...\n");
-		if ((arg) && strlen(arg))
-			feeder->parser.add_output(arg);
-		else
-			feeder->parser.add_output(sock_fd, OUTPUT_STREAM_HTTP);
+		cli_print("adding stream target id#%4d...\n",
+			  ((arg) && strlen(arg)) ?
+			  feeder->parser.add_output(arg) :
+			  feeder->parser.add_output(sock_fd, OUTPUT_STREAM_HTTP));
 
 	} else if (strstr(cmd, "video")) {
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
