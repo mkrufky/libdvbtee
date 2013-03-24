@@ -1217,13 +1217,11 @@ bool serve_client::__command(char* cmdline)
 
 		cli_print("preparing to tune to physical channel %d...\n", phy, ser);
 
-		/* see if tuner has the right physical channel, if not then change it */
+		/* see if tuner has the right physical channel, if not
+		 * then find another tuner that does or change it */
 		cur = tuner->get_channel();
-		if ((cur) && (cur != phy))
-#if 0
-			cmd_tuner_stop();
-#else
-		{
+		if ((cur) && (cur != phy)) {
+
 			tune *old_tuner = tuner;
 
 			tuner = find_tuned_tuner(phy);
@@ -1236,8 +1234,9 @@ bool serve_client::__command(char* cmdline)
 				tuner = old_tuner;
 				cmd_tuner_stop();
 			}
+			if (tuner != old_tuner)
+				cli_print("found another tuner more suitable for physical channel %d.\n", phy);
 		}
-#endif
 		if (cur == phy) /* (cur) */ {
 			cli_print("already tuned to physical channel %d.\n", phy);
 			tuned = true;
