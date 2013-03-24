@@ -37,7 +37,9 @@
 #include <map>
 typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
 typedef std::map<uint16_t, decode> map_decoder;
+#if 0 // moved to output.h
 typedef std::map<uint16_t, uint16_t> map_pidtype;
+#endif
 
 typedef struct {
 	unsigned int channel;
@@ -76,6 +78,8 @@ public:
 	uint16_t get_ts_id(unsigned int channel);
 
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
+	void add_service_pids(char* service_ids, map_pidtype &pids);
+	void add_service_pids(map_pidtype &pids);
 
 	void set_service_ids(char *ids);
 
@@ -86,6 +90,18 @@ public:
 	int add_output(char*);
 	int add_output(int, unsigned int);
 	int add_output(void* priv, stream_callback);
+
+	int add_output(char*, map_pidtype&);
+	int add_output(int, unsigned int, map_pidtype&);
+	int add_output(void* priv, stream_callback, map_pidtype&);
+
+	int add_output(char*, uint16_t);
+	int add_output(int, unsigned int, uint16_t);
+	int add_output(void* priv, stream_callback, uint16_t);
+
+	int add_output(char*, char*);
+	int add_output(int, unsigned int, char*);
+	int add_output(void* priv, stream_callback, char*);
 
 	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
 	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
@@ -208,6 +224,7 @@ private:
 #ifdef DVBTEE_DEMUXER
 	demux demuxer;
 #endif
+	map_pidtype out_pids;
 };
 
 #endif //__PARSE_H__

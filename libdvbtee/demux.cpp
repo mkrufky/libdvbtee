@@ -50,10 +50,17 @@ int demux::push(uint16_t pid, uint8_t *p)
 {
 	if (!out.count(pid)) {
 
+		map_pidtype pids;
+#if 0
+		/* we pass in an empty map to reduce unnecessary CPU -
+		 * no need to demux AGAIN, but for documentation's sake,
+		 * we could subscribe to this and only this pid like so: */
+		pids[pid] = 0;
+#endif
 		char newfile[16] = { 0 };
 		snprintf(newfile, sizeof(newfile), "file://%04x.ts", pid);
 
-		int ret = out[pid].add(newfile);
+		int ret = out[pid].add(newfile, pids);
 		if (ret < 0)
 			return ret;
 		out[pid].start();

@@ -187,6 +187,7 @@ output_stream::output_stream()
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	memset(&name, 0, sizeof(name));
+	pids.clear();
 }
 
 output_stream::~output_stream()
@@ -212,6 +213,7 @@ output_stream::output_stream(const output_stream&)
 	sock = -1;
 	mimetype = MIMETYPE_OCTET_STREAM;
 	memset(&name, 0, sizeof(name));
+	pids.clear();
 }
 
 output_stream& output_stream::operator= (const output_stream& cSource)
@@ -231,6 +233,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	sock = -1;
 	mimetype = MIMETYPE_OCTET_STREAM;
 	memset(&name, 0, sizeof(name));
+	pids.clear();
 
 	return *this;
 }
@@ -372,6 +375,14 @@ bool output_stream::check()
 			(stream_method == OUTPUT_STREAM_FILE) ? "FILE" :
 			(stream_method == OUTPUT_STREAM_FUNC) ? "FUNC" : "UNKNOWN",
 			count_in / 188, count_out / 188);
+#if 1//DBG
+		if (pids.size()) {
+			dprintf("(%d: %s) subscribed to the following pids:", sock, name);
+			for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
+				fprintf(stderr, "%d, ", iter->first);
+			fprintf(stderr, "\n");
+		}
+#endif
 	}
 	ringbuffer.check();
 
@@ -380,6 +391,7 @@ bool output_stream::check()
 
 bool output_stream::push(uint8_t* p_data, int size)
 {
+	if (want_pkt(p_data)) {
 	/* push data into output_stream buffer */
 	if (!ringbuffer.write(p_data, size))
 		while (size >= 188)
@@ -398,6 +410,7 @@ bool output_stream::push(uint8_t* p_data, int size)
 #if 0
 	dprintf("(push-true-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 #endif
+	}
 	return true;
 }
 
@@ -455,7 +468,7 @@ void output_stream::close_file()
 	}
 }
 
-int output_stream::add(void* priv, stream_callback callback)
+int output_stream::add(void* priv, stream_callback callback, map_pidtype &pids)
 {
 	stream_cb = callback;
 	stream_cb_priv = priv;
@@ -463,10 +476,10 @@ int output_stream::add(void* priv, stream_callback callback)
 	ringbuffer.reset();
 	stream_method = OUTPUT_STREAM_FUNC;
 	strcpy(name, "FUNC");
-	return 0;
+	return set_pids(pids);
 }
 
-int output_stream::add(int socket, unsigned int method)
+int output_stream::add(int socket, unsigned int method, map_pidtype &pids)
 {
 	sock = socket;
 	stream_method = method;
@@ -478,10 +491,10 @@ int output_stream::add(int socket, unsigned int method)
 		perror("set non-blocking failed");
 #endif
 	ringbuffer.reset();
-	return 0;
+	return set_pids(pids);
 }
 
-int output_stream::add(char* target)
+int output_stream::add(char* target, map_pidtype &pids)
 {
 	char *save;
 	char *ip;
@@ -530,7 +543,7 @@ int output_stream::add(char* target)
 		} else {
 			ringbuffer.reset();
 			stream_method = OUTPUT_STREAM_FILE;
-			return 0;
+			return set_pids(pids);;
 		}
 	}
 
@@ -566,6 +579,20 @@ int output_stream::add(char* target)
 	}
 	dprintf("~(-->%s)", target);
 
+	return set_pids(pids);
+}
+
+int output_stream::set_pids(map_pidtype &new_pids)
+{
+	for (map_pidtype::const_iterator iter = new_pids.begin(); iter != new_pids.end(); ++iter)
+		pids[iter->first] = iter->second;
+	return 0;
+}
+
+int output_stream::get_pids(map_pidtype &result)
+{
+	for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
+		result[iter->first] = iter->second;
 	return 0;
 }
 
@@ -713,6 +740,13 @@ int output::add_http_server(int port)
 	return listener.start(port);
 }
 
+int output::get_pids(map_pidtype &result)
+{
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		iter->second.get_pids(result);
+	return 0;
+}
+
 bool output::check()
 {
 	dprintf("()");
@@ -730,6 +764,16 @@ bool output::check()
 		reclaim_resources();
 	}
 
+#if 1//DBG
+	map_pidtype pids;
+	get_pids(pids);
+	if (pids.size()) {
+		dprintf("subscribed to the following pids:");
+		for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
+			fprintf(stderr, "%d, ", iter->first);
+		fprintf(stderr, "\n");
+	}
+#endif
 	ringbuffer.check();
 
 	return ret;
@@ -840,12 +884,12 @@ bool output::push(uint8_t* p_data, enum output_options opt)
 	return (((!options) || (!opt)) || (opt & options)) ? push(p_data, 188) : false;
 }
 
-int output::add(void* priv, stream_callback callback)
+int output::add(void* priv, stream_callback callback, map_pidtype &pids)
 {
 	if ((callback) && (priv)) {
 
 		/* push data into output buffer */
-		int ret = output_streams[num_targets].add(priv, callback);
+		int ret = output_streams[num_targets].add(priv, callback, pids);
 		if (ret == 0)
 			num_targets++;
 		else
@@ -858,12 +902,12 @@ int output::add(void* priv, stream_callback callback)
 	return -1;
 }
 
-int output::add(int socket, unsigned int method)
+int output::add(int socket, unsigned int method, map_pidtype &pids)
 {
 	if (socket >= 0) {
 
 		/* push data into output buffer */
-		int ret = output_streams[num_targets].add(socket, method);
+		int ret = output_streams[num_targets].add(socket, method, pids);
 		if (ret == 0)
 			num_targets++;
 		else
@@ -878,7 +922,7 @@ int output::add(int socket, unsigned int method)
 
 #define CHAR_CMD_COMMA ","
 
-int output::add(char* target)
+int output::add(char* target, map_pidtype &pids)
 {
 	char *save;
 	int ret = -1;
@@ -887,23 +931,23 @@ int output::add(char* target)
 		if (!item)
 			item = target;
 
-		ret = __add(item);
+		ret = __add(item, pids);
 		if (ret < 0)
 			return ret;
 
 		item = strtok_r(NULL, CHAR_CMD_COMMA, &save);
 	} else
-		ret = __add(target);
+		ret = __add(target, pids);
 
 	return ret;
 }
 
-int output::__add(char* target)
+int output::__add(char* target, map_pidtype &pids)
 {
 	dprintf("(%d->%s)", num_targets, target);
 
 	/* push data into output buffer */
-	int ret = output_streams[num_targets].add(target);
+	int ret = output_streams[num_targets].add(target, pids);
 	if (ret == 0)
 		num_targets++;
 	else
