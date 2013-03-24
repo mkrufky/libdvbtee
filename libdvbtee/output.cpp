@@ -961,3 +961,12 @@ int output::__add(char* target, map_pidtype &pids)
 
 	return (ret == 0) ? target_id : ret;
 }
+
+void output::reset_pids(int target_id)
+{
+	if (output_streams.count(target_id))
+		output_streams[target_id].reset_pids();
+	else if (-1 == target_id)
+		for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+			iter->second.reset_pids();
+}

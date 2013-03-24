@@ -1233,9 +1233,14 @@ bool serve_client::__command(char* cmdline)
 			} else {
 				tuner = old_tuner;
 				cmd_tuner_stop();
+				tuner->feeder.parser.reset_output_pids();
 			}
 			if (tuner != old_tuner)
 				cli_print("found another tuner more suitable for physical channel %d.\n", phy);
+		}
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
 		}
 		if (cur == phy) /* (cur) */ {
 			cli_print("already tuned to physical channel %d.\n", phy);

@@ -81,6 +81,8 @@ public:
 	void add_service_pids(char* service_ids, map_pidtype &pids);
 	void add_service_pids(map_pidtype &pids);
 
+	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); };
+
 	void set_service_ids(char *ids);
 
 	int feed(int, uint8_t*);

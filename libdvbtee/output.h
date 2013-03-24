@@ -90,6 +90,7 @@ public:
 	bool check();
 
 	int get_pids(map_pidtype&);
+	void reset_pids() { pids.clear(); };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -159,6 +160,7 @@ public:
 	bool check();
 
 	int get_pids(map_pidtype&);
+	void reset_pids(int target_id);
 private:
 	output_stream_map output_streams;
 
