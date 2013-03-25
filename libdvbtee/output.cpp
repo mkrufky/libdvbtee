@@ -888,6 +888,11 @@ int output::add(void* priv, stream_callback callback, map_pidtype &pids)
 {
 	if ((callback) && (priv)) {
 
+		int search_id = search(priv, callback);
+		if (search_id >= 0) {
+			dprintf("target callback already exists #%d", search_id);
+			return search_id;
+		}
 		int target_id = num_targets;
 		/* push data into output buffer */
 		int ret = output_streams[target_id].add(priv, callback, pids);
@@ -907,6 +912,11 @@ int output::add(int socket, unsigned int method, map_pidtype &pids)
 {
 	if (socket >= 0) {
 
+		int search_id = search(socket, method);
+		if (search_id >= 0) {
+			dprintf("target socket already exists #%d", search_id);
+			return search_id;
+		}
 		int target_id = num_targets;
 		/* push data into output buffer */
 		int ret = output_streams[num_targets].add(socket, method, pids);
@@ -946,6 +956,11 @@ int output::add(char* target, map_pidtype &pids)
 
 int output::__add(char* target, map_pidtype &pids)
 {
+	int search_id = search(target);
+	if (search_id >= 0) {
+		dprintf("target already exists #%d: %s", search_id, target);
+		return search_id;
+	}
 	int target_id = num_targets;
 
 	dprintf("(%d->%s)", target_id, target);
@@ -969,4 +984,25 @@ void output::reset_pids(int target_id)
 	else if (-1 == target_id)
 		for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 			iter->second.reset_pids();
+}
+
+int output::search(void* priv, stream_callback callback)
+{
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		if (iter->second.verify(priv, callback)) return iter->first;
+	return -1;
+}
+
+int output::search(int socket, unsigned int method)
+{
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		if (iter->second.verify(socket, method)) return iter->first;
+	return -1;
+}
+
+int output::search(char* target)
+{
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		if (iter->second.verify(target)) return iter->first;
+	return -1;
 }

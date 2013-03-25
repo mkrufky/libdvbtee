@@ -91,6 +91,11 @@ public:
 
 	int get_pids(map_pidtype&);
 	void reset_pids() { pids.clear(); };
+
+	bool verify(void* priv, stream_callback callback) { return ((priv == stream_cb_priv) && (callback == stream_cb)); }
+	bool verify(int socket, unsigned int method) { return ((socket == sock) && (method == stream_method)); }
+	bool verify(char* target) { return (strcmp(target, name) == 0); }
+
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -189,6 +194,10 @@ private:
 	unsigned long int count_in, count_out;
 
 	socket_listen listener;
+
+	int search(void* priv, stream_callback callback);
+	int search(int socket, unsigned int method);
+	int search(char* target);
 };
 
 #endif /*__OUTPUT_H__ */
