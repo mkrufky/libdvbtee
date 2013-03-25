@@ -1221,22 +1221,26 @@ bool serve_client::__command(char* cmdline)
 		 * then find another tuner that does or change it */
 		cur = tuner->get_channel();
 		if ((cur) && (cur != phy)) {
+#if 1
+			tune *new_tuner = tuner;
 
-			tune *old_tuner = tuner;
-
-			tuner = find_tuned_tuner(phy);
-			if (!tuner)
-				tuner = find_idle_tuner();
-			if (tuner) {
+			new_tuner = find_tuned_tuner(phy);
+			if (!new_tuner)
+				new_tuner = find_idle_tuner();
+			if (new_tuner) {
+				tuner = new_tuner;
 				feeder = &tuner->feeder;
 				cur = tuner->get_channel();
 			} else {
-				tuner = old_tuner;
 				cmd_tuner_stop();
 				tuner->feeder.parser.reset_output_pids();
 			}
-			if (tuner != old_tuner)
+			if (tuner == new_tuner)
 				cli_print("found another tuner more suitable for physical channel %d.\n", phy);
+#else
+			cmd_tuner_stop();
+			tuner->feeder.parser.reset_output_pids();
+#endif
 		}
 		if (!tuner) {
 			cli_print("NO TUNER!\n");
