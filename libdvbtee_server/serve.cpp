@@ -53,8 +53,7 @@ static tune *find_idle_tuner()
 			dprintf("tuner %d is available", iter->first);
 			return iter->second;
 		}
-	dprintf("falling back to default tuner");
-	return (tuners.count(0)) ? tuners[0] : NULL;
+	return NULL;
 }
 
 //static
