@@ -346,7 +346,7 @@ int hdhr_tuner::hdhr_pull_callback()
 	size_t actual;
 	const uint8_t *q = hdhomerun_device_stream_recv(hdhr_dev, ((4096/188)*188), &actual);
 
-	if (actual > 0) feeder.push(actual, q);
+	if ((actual > 0) && (q)) feeder.push(actual, q);
 
 	return actual;
 }
