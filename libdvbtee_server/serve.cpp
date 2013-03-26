@@ -509,25 +509,12 @@ void* serve::monitor_thread(void *p_this)
 void* serve::monitor_thread()
 {
 	while (!f_kill_thread) {
+		check();
 #if 0
 		for (feeder_map::iterator iter = feeders.begin(); iter != feeders.end(); ++iter)
 			if (iter->second->check())
 				cli_print("feeder %d:\t%s\n", iter->first, iter->second->get_filename());
 #endif
-		for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
-			if (iter->second->check()) {
-				/* if the tuner is feeding, check to see if it is streaming to any output.
-				   if not streaming, stop this tuner */
-				if (((f_reclaim_resources) && (!any_cli)) &&
-				    (((iter->second->is_feed()) && (iter->second->last_touched() > 15)) &&
-				     (!iter->second->feeder.parser.check()))) {
-					dprintf("reclaiming idle resource:");
-					dprintf("stopping data feed...");
-					iter->second->stop_feed();
-					dprintf("closing frontend...");
-					iter->second->close_fe();
-				}
-			}
 		sleep(1*15); // sleep for 15 seconds between monitor iterations
 	}
 	pthread_exit(NULL);
@@ -746,15 +733,54 @@ bool serve_client::check()
 	return ret;
 }
 
+void serve::reclaim_server_resources()
+{
+	dprintf("()");
+
+	bool erased = false;
+
+	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
+		if (!iter->second.check()) {
+			dprintf("erasing idle client...");
+			client_map.erase(iter->first);
+			/* stop the loop if we erased any targets */
+			erased = true;
+			break;
+		}
+
+	/* if we erased a target, restart the above by re-calling this function recursively */
+	if (erased)
+		reclaim_server_resources();
+}
+
+void serve::reclaim_tuner_resources()
+{
+	dprintf("()");
+
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if (iter->second->check()) {
+			/* if the tuner is feeding, check to see if it is streaming to any output.
+			   if not streaming, stop this tuner */
+			if (((f_reclaim_resources) && (!any_cli)) &&
+			    (((iter->second->is_feed()) && (iter->second->last_touched() > 15)) &&
+			     (!iter->second->feeder.parser.check()))) {
+				dprintf("reclaiming idle resource:");
+				dprintf("stopping data feed...");
+				iter->second->stop_feed();
+				dprintf("closing frontend...");
+				iter->second->close_fe();
+			}
+		}
+}
+
 bool serve::check()
 {
 	dprintf("()");
 
 	any_cli = false;
 
-	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
-		if (!iter->second.check())
-			client_map.erase(iter->first); //XXX
+	reclaim_server_resources();
+	reclaim_tuner_resources();
 
 	return true;
 }

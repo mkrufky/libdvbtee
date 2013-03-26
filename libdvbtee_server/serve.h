@@ -146,6 +146,8 @@ public:
 	bool is_running() { return listener.is_running(); };
 	bool is_cli_enabled() { return f_cli_enabled; };
 
+	void reclaim_server_resources();
+	void reclaim_tuner_resources();
 	bool check();
 
 	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; };
