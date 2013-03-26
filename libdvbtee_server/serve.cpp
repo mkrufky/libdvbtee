@@ -724,11 +724,11 @@ bool serve_client::check()
 {
 	bool ret = socket_active();
 	if (!ret)
-		cli_print("(%d) socket idle!\n", sock_fd);
+		dprintf("(%d) socket idle!", sock_fd);
 	else {
 		if (data_fmt == SERVE_DATA_FMT_CLI) any_cli = true;
 
-		cli_print("(%d) format = %s\n", sock_fd, data_fmt_str(data_fmt));
+		dprintf("(%d) format = %s", sock_fd, data_fmt_str(data_fmt));
 	}
 	return ret;
 }
