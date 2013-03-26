@@ -106,6 +106,8 @@ private:
 
 	void cli_print(const char *, ...);
 	static void cli_print(void *, const char *, ...);
+
+	std::string services;
 };
 
 typedef std::map<int, serve_client> serve_client_map;

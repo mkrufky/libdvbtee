@@ -242,6 +242,7 @@ serve_client::serve_client()
   , reporter(NULL)
 {
 	dprintf("()");
+	services.clear();
 }
 
 serve_client::~serve_client()
@@ -260,6 +261,7 @@ serve_client::serve_client(const serve_client&)
 	feeder = NULL;
 	sock_fd = -1;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	services.clear();
 }
 
 serve_client& serve_client::operator= (const serve_client& cSource)
@@ -275,6 +277,7 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 	feeder = NULL;
 	sock_fd = -1;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	services.clear();
 
 	return *this;
 }
@@ -1253,9 +1256,11 @@ bool serve_client::__command(char* cmdline)
 
 		if (tuned) {
 			/* set service, if any */
+			services.clear();
 			if ((ser) && strlen(ser)) {
 				cli_print("selecting service id (%s)...\n", ser);
 				tuner->feeder.parser.set_service_ids(ser);
+				services.append(ser);
 			}
 #if 0
 			else
@@ -1299,16 +1304,22 @@ bool serve_client::__command(char* cmdline)
 
 	} else if (strstr(cmd, "service")) {
 		cli_print("selecting service id...\n");
-		if ((arg) && strlen(arg))
+		services.clear();
+		if ((arg) && strlen(arg)) {
 			feeder->parser.set_service_ids(arg);
-		else
+			services.append(arg);
+		} else
 			feeder->parser.set_service_ids(NULL);
 
 	} else if (strstr(cmd, "stream")) {
+#if 0
+		cli_print("wait for psip...\n");
+		feeder->wait_for_psip(5000);
+#endif
 		cli_print("adding stream target id#%4d...\n",
 			  ((arg) && strlen(arg)) ?
-			  feeder->parser.add_output(arg) :
-			  feeder->parser.add_output(sock_fd, OUTPUT_STREAM_HTTP));
+			  feeder->parser.add_output(arg, (char*)services.c_str()) :
+			  feeder->parser.add_output(sock_fd, OUTPUT_STREAM_HTTP, (char*)services.c_str()));
 
 	} else if (strstr(cmd, "video")) {
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
