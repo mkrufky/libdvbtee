@@ -1381,8 +1381,10 @@ bool serve_client::__command(char* cmdline)
 			cli_print("checking tuner status...\n");
 			tuner->check();
 		}
+		list_tuners();
 		cli_print("checking feeder status...\n");
 		feeder->check();
+		list_feeders();
 		cli_print("checking parser / output status...\n");
 		feeder->parser.check();
 	} else if (strstr(cmd, "debug")) {
