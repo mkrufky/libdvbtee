@@ -51,6 +51,8 @@ public:
 
 	bool socket_active() { return (sock_fd >= 0); };
 	bool check();
+
+	unsigned int get_data_fmt() { return data_fmt; };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -85,6 +87,7 @@ private:
 
 	bool list_feeders();
 	bool list_tuners();
+	bool list_clients();
 
 	decode_report *reporter;
 
@@ -153,6 +156,8 @@ public:
 	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
 
 	feed_server_map feed_servers;
+
+	serve_client_map* get_client_map() { return &client_map; };
 private:
 	socket_listen listener;
 	serve_client_map client_map;

@@ -66,6 +66,33 @@ static tune *find_tuned_tuner(unsigned int phy)
 	return NULL;
 }
 
+static inline const char *data_fmt_str(unsigned int data_fmt)
+{
+	const char *fmt;
+	switch (data_fmt) {
+	default:
+	case SERVE_DATA_FMT_NONE:
+		fmt = "NONE";
+		break;
+	case SERVE_DATA_FMT_HTML:
+		fmt = "HTML";
+		break;
+	case SERVE_DATA_FMT_BIN:
+		fmt = "BIN";
+		break;
+	case SERVE_DATA_FMT_JSON:
+		fmt = "JSON";
+		break;
+	case SERVE_DATA_FMT_CLI:
+		fmt = "CLI";
+		break;
+	case SERVE_DATA_FMT_XML:
+		fmt = "XML";
+		break;
+	}
+	return fmt;
+}
+
 //static
 bool serve::add_feeder(void *p_this, feed *new_feeder)
 {
@@ -107,6 +134,16 @@ bool serve_client::list_tuners()
 				  iter->second->is_scan() ? " scan" : "",
 				  iter->second->is_feed() ? " feed" : "");
 		}
+	return true;
+}
+
+bool serve_client::list_clients()
+{
+	serve_client_map *client_map = server->get_client_map();
+	cli_print("%d clients.\n", client_map->size());
+	for (serve_client_map::iterator iter = client_map->begin(); iter != client_map->end(); ++iter)
+		if (iter->second.check())
+			cli_print("client %d:\tformat = %s\n", iter->first, data_fmt_str(iter->second.get_data_fmt()));
 	return true;
 }
 
@@ -702,30 +739,9 @@ bool serve_client::check()
 	if (!ret)
 		cli_print("(%d) socket idle!\n", sock_fd);
 	else {
-		const char *fmt;
-		switch (data_fmt) {
-		default:
-		case SERVE_DATA_FMT_NONE:
-			fmt = "NONE";
-			break;
-		case SERVE_DATA_FMT_HTML:
-			fmt = "HTML";
-			break;
-		case SERVE_DATA_FMT_BIN:
-			fmt = "BIN";
-			break;
-		case SERVE_DATA_FMT_JSON:
-			fmt = "JSON";
-			break;
-		case SERVE_DATA_FMT_CLI:
-			fmt = "CLI";
-			any_cli = true;
-			break;
-		case SERVE_DATA_FMT_XML:
-			fmt = "XML";
-			break;
-		}
-		cli_print("(%d) format = %s\n", sock_fd, fmt);
+		if (data_fmt == SERVE_DATA_FMT_CLI) any_cli = true;
+
+		cli_print("(%d) format = %s\n", sock_fd, data_fmt_str(data_fmt));
 	}
 	return ret;
 }
@@ -738,7 +754,7 @@ bool serve::check()
 
 	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
 		if (!iter->second.check())
-			client_map.erase(iter->first);
+			client_map.erase(iter->first); //XXX
 
 	return true;
 }
@@ -1377,6 +1393,7 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "check")) {
 		cli_print("checking server status...\n");
 		server->check();
+		list_clients();
 		if (tuner) {
 			cli_print("checking tuner status...\n");
 			tuner->check();
