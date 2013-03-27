@@ -129,8 +129,14 @@ private:
 
 	int set_pids(map_pidtype&);
 
+#define TUNER_RESOURCE_SHARING 0
+#if TUNER_RESOURCE_SHARING
 	bool want_pid(uint16_t pid) { return ((!pids.size()) || (pids.count(pid))) ? true : false; }
 	bool want_pkt(uint8_t *p) { return ((p) && (want_pid(((p[1] & 0x1f) << 8) | p[2]))); }
+#else
+	bool want_pid(uint16_t pid) { return true; }
+	bool want_pkt(uint8_t *p) { return true; }
+#endif
 };
 
 typedef std::map<int, output_stream> output_stream_map;

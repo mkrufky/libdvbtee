@@ -1266,7 +1266,7 @@ bool serve_client::__command(char* cmdline)
 		 * then find another tuner that does or change it */
 		cur = tuner->get_channel();
 		if ((cur) && (cur != phy)) {
-#if 1
+#if TUNER_RESOURCE_SHARING
 			tune *old_tuner = tuner;
 			tune *new_tuner = find_tuned_tuner(phy);
 			if (!new_tuner) new_tuner = find_idle_tuner();
