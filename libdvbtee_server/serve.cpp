@@ -1354,7 +1354,7 @@ bool serve_client::__command(char* cmdline)
 			feeder->parser.set_service_ids(NULL);
 
 	} else if (strstr(cmd, "stream")) {
-#if 0
+#if TUNER_RESOURCE_SHARING
 		cli_print("wait for psip...\n");
 		feeder->wait_for_psip(5000);
 #endif
