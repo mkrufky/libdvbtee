@@ -1213,22 +1213,14 @@ int parse::feed(int count, uint8_t* p_data)
 				break;
 			}
 
-#if 0
-			map_pidtype::const_iterator iter_payload;
-			iter_payload = payload_pids.find(pkt_stats.pid);
-			if (iter_payload != payload_pids.end()) {
-#else
-			if (payload_pids.count(pkt_stats.pid)) {
-#endif
+			if ((payload_pids.count(pkt_stats.pid)) ||
+			    (out_pids.count(pkt_stats.pid))) {
 				send_pkt = true;
 				out_type = OUTPUT_PES;
 				break;
 			}
-#if 0
-			break;
-#endif
 		}
-		if ((send_pkt) || (out_pids.count(pkt_stats.pid))) {
+		if (send_pkt) {
 			out.push(p, out_type);
 #if 1
 			/* demux & statistics for selected PIDs */
