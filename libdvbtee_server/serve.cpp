@@ -1354,7 +1354,7 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "stream")) {
 #if TUNER_RESOURCE_SHARING
 		cli_print("wait for psip...\n");
-		feeder->wait_for_psip(5000);
+		feeder->wait_for_psip(1000);
 #endif
 		cli_print("adding stream target id#%4d...\n",
 			  ((arg) && strlen(arg)) ?
