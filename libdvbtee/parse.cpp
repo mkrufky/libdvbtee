@@ -146,7 +146,7 @@ void parse::rewrite_pat()
 
 	dvbpsi_InitPAT(&pat, ts_id, 0x1f & (++rewritten_pat_ver_offset + decoded_pat->version), 1);
 
-	for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
+	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
 		dvbpsi_PATAddProgram(&pat, iter->first, ((decoded_pat_t *) decoded_pat)->programs[iter->first]);
 
 	p_section = dvbpsi_GenPATSections(&pat, 0);
@@ -598,6 +598,7 @@ parse::parse()
 
 	memset(&service_ids, 0, sizeof(service_ids));
 	service_ids.clear();
+	out_pids.clear();
 }
 
 parse::~parse()
@@ -615,6 +616,7 @@ parse::~parse()
 		fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
 	service_ids.clear();
+	out_pids.clear();
 }
 
 void parse::detach_demux()
@@ -634,6 +636,7 @@ void parse::detach_demux()
 	clear_filters();
 	service_ids.clear();
 	payload_pids.clear();
+	out_pids.clear();
 }
 
 void parse::stop()
@@ -857,29 +860,131 @@ bool parse::is_epg_ready()
 
 int parse::add_output(void* priv, stream_callback callback)
 {
-	int ret = out.add(priv, callback);
-	if (ret < 0)
-		return ret;
-	else
-		return out.start();
+	map_pidtype pids;
+	add_service_pids(pids);
+	return add_output(priv, callback, pids);
 }
 
 int parse::add_output(int socket, unsigned int method)
 {
-	int ret = out.add(socket, method);
-	if (ret < 0)
-		return ret;
-	else
-		return out.start();
+	map_pidtype pids;
+	add_service_pids(pids);
+	return add_output(socket, method, pids);
 }
 
 int parse::add_output(char* target)
 {
-	int ret = out.add(target);
+	map_pidtype pids;
+	add_service_pids(pids);
+	return add_output(target, pids);
+}
+
+int parse::add_output(void* priv, stream_callback callback, uint16_t service)
+{
+	map_pidtype pids;
+	if (service) {
+		add_service_pids(service, pids);
+		pids[0] = 0; /* be sure to include the PAT */
+	}
+	return add_output(priv, callback, pids);
+}
+
+int parse::add_output(int socket, unsigned int method, uint16_t service)
+{
+	map_pidtype pids;
+	if (service) {
+		add_service_pids(service, pids);
+		pids[0] = 0; /* be sure to include the PAT */
+	}
+	return add_output(socket, method, pids);
+}
+
+int parse::add_output(char* target, uint16_t service)
+{
+	map_pidtype pids;
+	if (service) {
+		add_service_pids(service, pids);
+		pids[0] = 0; /* be sure to include the PAT */
+	}
+	return add_output(target, pids);
+}
+
+int parse::add_output(void* priv, stream_callback callback, char* services)
+{
+	map_pidtype pids;
+	if (services) {
+		add_service_pids(services, pids);
+		pids[0] = 0; /* be sure to include the PAT */
+	}
+	return add_output(priv, callback, pids);
+}
+
+int parse::add_output(int socket, unsigned int method, char* services)
+{
+	map_pidtype pids;
+	if (services) {
+		add_service_pids(services, pids);
+		pids[0] = 0; /* be sure to include the PAT */
+	}
+	return add_output(socket, method, pids);
+}
+
+int parse::add_output(char* target, char* services)
+{
+	map_pidtype pids;
+	if (services) {
+		add_service_pids(services, pids);
+		pids[0] = 0; /* be sure to include the PAT */
+	}
+	return add_output(target, pids);
+}
+
+int parse::add_output(void* priv, stream_callback callback, map_pidtype &pids)
+{
+	int ret, target_id = out.add(priv, callback, pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
 	if (ret < 0)
 		return ret;
-	else
-		return out.start();
+
+	out.get_pids(out_pids);
+	dprintf("success adding callback target id:%4d", target_id);
+fail:
+	return target_id;
+}
+
+int parse::add_output(int socket, unsigned int method, map_pidtype &pids)
+{
+	int ret, target_id = out.add(socket, method, pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
+	if (ret < 0)
+		return ret;
+
+	out.get_pids(out_pids);
+	dprintf("success adding socket target id:%4d", target_id);
+fail:
+	return target_id;
+}
+
+int parse::add_output(char* target, map_pidtype &pids)
+{
+	int ret, target_id = out.add(target, pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
+	if (ret < 0)
+		return ret;
+
+	out.get_pids(out_pids);
+	dprintf("success adding url target id:%4d", target_id);
+fail:
+	return target_id;
 }
 
 #define CHAR_CMD_COMMA ","
@@ -900,6 +1005,27 @@ void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
 				pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
 		}
 	}
+}
+
+void parse::add_service_pids(char* service_ids, map_pidtype &pids)
+{
+	char *save, *id = (service_ids) ? strtok_r(service_ids, CHAR_CMD_COMMA, &save) : NULL;
+
+	if (id) while (id) {
+		if (!id)
+			id = service_ids;
+		if (id) add_service_pids(strtoul(id, NULL, 0), pids);
+		id = strtok_r(NULL, CHAR_CMD_COMMA, &save);
+	} else
+		if (service_ids) add_service_pids(strtoul(service_ids, NULL, 0), pids);
+}
+
+void parse::add_service_pids(map_pidtype &pids)
+{
+	if (!service_ids.size()) return;
+	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
+		add_service_pids(iter->first, pids);
+	pids[0] = 0; /* be sure to include the PAT */
 }
 
 void parse::set_service_ids(char *ids)
@@ -925,7 +1051,7 @@ void parse::set_service_ids(char *ids)
 
 		process_pat(decoded_pat);
 
-		for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter) {
+		for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter) {
 			map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(iter->first);
 			if (iter_pmt != decoded_pmt->end())
 				process_pmt(&iter_pmt->second);
@@ -1062,7 +1188,7 @@ int parse::feed(int count, uint8_t* p_data)
 				break;
 			}
 
-			map_eit_pids::const_iterator iter_eit;
+			map_pidtype::const_iterator iter_eit;
 			iter_eit = eit_pids.find(pkt_stats.pid);
 			if (iter_eit != eit_pids.end()) {
 
@@ -1087,20 +1213,12 @@ int parse::feed(int count, uint8_t* p_data)
 				break;
 			}
 
-#if 0
-			map_pidtype::const_iterator iter_payload;
-			iter_payload = payload_pids.find(pkt_stats.pid);
-			if (iter_payload != payload_pids.end()) {
-#else
-			if (payload_pids.count(pkt_stats.pid)) {
-#endif
+			if ((payload_pids.count(pkt_stats.pid)) ||
+			    (out_pids.count(pkt_stats.pid))) {
 				send_pkt = true;
 				out_type = OUTPUT_PES;
 				break;
 			}
-#if 0
-			break;
-#endif
 		}
 		if (send_pkt) {
 			out.push(p, out_type);

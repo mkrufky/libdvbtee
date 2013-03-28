@@ -51,6 +51,8 @@ public:
 
 	bool socket_active() { return (sock_fd >= 0); };
 	bool check();
+
+	unsigned int get_data_fmt() { return data_fmt; };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -85,6 +87,7 @@ private:
 
 	bool list_feeders();
 	bool list_tuners();
+	bool list_clients();
 
 	decode_report *reporter;
 
@@ -106,6 +109,8 @@ private:
 
 	void cli_print(const char *, ...);
 	static void cli_print(void *, const char *, ...);
+
+	std::string services;
 };
 
 typedef std::map<int, serve_client> serve_client_map;
@@ -141,6 +146,8 @@ public:
 	bool is_running() { return listener.is_running(); };
 	bool is_cli_enabled() { return f_cli_enabled; };
 
+	void reclaim_server_resources();
+	void reclaim_tuner_resources();
 	bool check();
 
 	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; };
@@ -151,6 +158,8 @@ public:
 	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
 
 	feed_server_map feed_servers;
+
+	serve_client_map* get_client_map() { return &client_map; };
 private:
 	socket_listen listener;
 	serve_client_map client_map;
