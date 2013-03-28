@@ -48,8 +48,6 @@ typedef struct {
 } channel_info_t;
 typedef std::map<uint16_t, channel_info_t> map_channel_info;
 
-typedef std::map<uint16_t, uint16_t> map_eit_pids; /* pid, eit-x */
-
 typedef void (*addfilter_callback)(void *, uint16_t);
 
 typedef struct {
@@ -187,7 +185,7 @@ private:
 
 	time_t stream_time;
 	uint16_t ts_id;
-	map_eit_pids service_ids; // ignore the type name used here
+	map_pidtype service_ids; // ignore the type name used here
 
 	bool epg_mode;
 	bool scan_mode;
@@ -200,7 +198,7 @@ private:
 	bool expect_vct;
 
 //	uint8_t grab_next_eit(uint8_t current_eit_x);
-	map_eit_pids eit_pids;
+	map_pidtype eit_pids; /* pid, eit-x */
 
 	int dumped_eit;
 	int eit_collection_limit;

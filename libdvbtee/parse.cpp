@@ -146,7 +146,7 @@ void parse::rewrite_pat()
 
 	dvbpsi_InitPAT(&pat, ts_id, 0x1f & (++rewritten_pat_ver_offset + decoded_pat->version), 1);
 
-	for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
+	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
 		dvbpsi_PATAddProgram(&pat, iter->first, ((decoded_pat_t *) decoded_pat)->programs[iter->first]);
 
 	p_section = dvbpsi_GenPATSections(&pat, 0);
@@ -1023,7 +1023,7 @@ void parse::add_service_pids(char* service_ids, map_pidtype &pids)
 void parse::add_service_pids(map_pidtype &pids)
 {
 	if (!service_ids.size()) return;
-	for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
+	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
 		add_service_pids(iter->first, pids);
 	pids[0] = 0; /* be sure to include the PAT */
 }
@@ -1051,7 +1051,7 @@ void parse::set_service_ids(char *ids)
 
 		process_pat(decoded_pat);
 
-		for (map_eit_pids::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter) {
+		for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter) {
 			map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(iter->first);
 			if (iter_pmt != decoded_pmt->end())
 				process_pmt(&iter_pmt->second);
@@ -1188,7 +1188,7 @@ int parse::feed(int count, uint8_t* p_data)
 				break;
 			}
 
-			map_eit_pids::const_iterator iter_eit;
+			map_pidtype::const_iterator iter_eit;
 			iter_eit = eit_pids.find(pkt_stats.pid);
 			if (iter_eit != eit_pids.end()) {
 
