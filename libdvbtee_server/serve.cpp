@@ -688,9 +688,7 @@ void serve::add_client(int socket)
 	}
 
 	/* check for old clients & clean them up */
-	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
-		if (!iter->second.socket_active())
-			client_map.erase(iter->first);
+	reclaim_server_resources();
 
 	client_map[socket].setup(this, socket);
 	client_map[socket].start();
