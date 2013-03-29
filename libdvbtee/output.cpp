@@ -853,6 +853,16 @@ void output::stop()
 	return;
 }
 
+void output::stop(int id)
+{
+	dprintf("(%d)", id);
+
+	if (output_streams.count(id))
+		output_streams[id].stop();
+
+	return;
+}
+
 bool output::push(uint8_t* p_data, int size)
 {
 	bool ret = true;

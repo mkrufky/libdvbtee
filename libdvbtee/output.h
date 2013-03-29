@@ -152,6 +152,7 @@ public:
 #endif
 	int start();
 	void stop();
+	void stop(int);
 
 	bool push(uint8_t* p_data, int size);
 	bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);

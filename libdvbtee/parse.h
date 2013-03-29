@@ -86,6 +86,7 @@ public:
 	int feed(int, uint8_t*);
 	void reset();
 	void stop();
+	void stop(int);
 
 	int add_output(char*);
 	int add_output(int, unsigned int);

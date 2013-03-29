@@ -646,6 +646,13 @@ void parse::stop()
 	out.stop();
 }
 
+void parse::stop(int id)
+{
+	dprintf("(%d)", id);
+
+	out.stop(id);
+}
+
 void parse::cleanup()
 {
 	dprintf("()");

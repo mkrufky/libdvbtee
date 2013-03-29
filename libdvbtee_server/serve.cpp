@@ -1406,13 +1406,23 @@ bool serve_client::__command(char* cmdline)
 		streamback((const uint8_t*)str, strlen(str));
 
 	} else if (strstr(cmd, "stop")) {
-		if (tuner)
-			cmd_tuner_stop();
-		else
-			feeder->stop();
-		if (strstr(cmd, "stopoutput")) {
-			cli_print("stopping output...\n");
-			feeder->parser.stop();
+		bool stop_output = (strstr(cmd, "stopoutput")) ? true : false;
+		int output_id = ((arg) && strlen(arg)) ? strtoul(arg, NULL, 0) : -1;
+
+		if ((!stop_output) || (output_id == -1)) {
+			if (tuner)
+				cmd_tuner_stop();
+			else
+				feeder->stop();
+		}
+		if (stop_output) {
+			if (output_id == -1) {
+				cli_print("stopping output...\n");
+				feeder->parser.stop();
+			} else {
+				cli_print("stopping output #%d...\n", output_id);
+				feeder->parser.stop(output_id);
+			}
 		}
 	} else if (strstr(cmd, "check")) {
 		cli_print("checking server status...\n");
