@@ -1026,7 +1026,6 @@ void parse::add_service_pids(map_pidtype &pids)
 	if (!service_ids.size()) return;
 	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
 		add_service_pids(iter->first, pids);
-	pids[0] = 0; /* be sure to include the PAT */
 }
 
 void parse::set_service_ids(char *ids)
