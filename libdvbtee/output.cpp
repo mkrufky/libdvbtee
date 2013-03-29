@@ -183,6 +183,7 @@ output_stream::output_stream()
   , count_out(0)
   , stream_cb(NULL)
   , stream_cb_priv(NULL)
+  , have_pat(false)
 {
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
@@ -214,6 +215,7 @@ output_stream::output_stream(const output_stream&)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	memset(&name, 0, sizeof(name));
 	pids.clear();
+	have_pat = false;
 }
 
 output_stream& output_stream::operator= (const output_stream& cSource)
@@ -234,6 +236,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	memset(&name, 0, sizeof(name));
 	pids.clear();
+	have_pat = false;
 
 	return *this;
 }
@@ -391,7 +394,22 @@ bool output_stream::check()
 
 bool output_stream::push(uint8_t* p_data, int size)
 {
-	if (want_pkt(p_data)) {
+#if TUNER_RESOURCE_SHARING
+	if ((0 == (((p_data[1] & 0x1f) << 8) | p_data[2])) && (188 == size)) {
+		if (!have_pat) {
+			memcpy(pat_pkt, p_data, 188);
+			have_pat = true;
+		}
+		if (ringbuffer.write(pat_pkt, 188)) {
+			count_in += 188;
+			return true;
+		} else {
+			fprintf(stderr, "%s> FAILED: PAT Table (%d bytes) dropped\n", __func__, 188);
+		}
+	} else if (want_pkt(p_data)) {
+#else
+	if ((0 == (((p_data[1] & 0x1f) << 8) | p_data[2])) || (want_pkt(p_data))) {
+#endif
 	/* push data into output_stream buffer */
 	if (!ringbuffer.write(p_data, size))
 		while (size >= 188)

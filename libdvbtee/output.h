@@ -33,6 +33,8 @@
 #include "listen.h"
 #include "rbuf.h"
 
+#define TUNER_RESOURCE_SHARING 0
+
 #if 1 // moved from parse.h
 typedef std::map<uint16_t, uint16_t> map_pidtype;
 #endif
@@ -129,8 +131,10 @@ private:
 
 	int set_pids(map_pidtype&);
 
-#define TUNER_RESOURCE_SHARING 0
+	bool have_pat;
 #if TUNER_RESOURCE_SHARING
+	uint8_t pat_pkt[188];
+
 	bool want_pid(uint16_t pid) { return ((!pids.size()) || (pids.count(pid))) ? true : false; }
 	bool want_pkt(uint8_t *p) { return ((p) && (want_pid(((p[1] & 0x1f) << 8) | p[2]))); }
 #else

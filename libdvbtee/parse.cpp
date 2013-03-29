@@ -889,60 +889,54 @@ int parse::add_output(char* target)
 int parse::add_output(void* priv, stream_callback callback, uint16_t service)
 {
 	map_pidtype pids;
-	if (service) {
+	if (service)
 		add_service_pids(service, pids);
-		pids[0] = 0; /* be sure to include the PAT */
-	}
+
 	return add_output(priv, callback, pids);
 }
 
 int parse::add_output(int socket, unsigned int method, uint16_t service)
 {
 	map_pidtype pids;
-	if (service) {
+	if (service)
 		add_service_pids(service, pids);
-		pids[0] = 0; /* be sure to include the PAT */
-	}
+
 	return add_output(socket, method, pids);
 }
 
 int parse::add_output(char* target, uint16_t service)
 {
 	map_pidtype pids;
-	if (service) {
+	if (service)
 		add_service_pids(service, pids);
-		pids[0] = 0; /* be sure to include the PAT */
-	}
+
 	return add_output(target, pids);
 }
 
 int parse::add_output(void* priv, stream_callback callback, char* services)
 {
 	map_pidtype pids;
-	if (services) {
+	if (services)
 		add_service_pids(services, pids);
-		pids[0] = 0; /* be sure to include the PAT */
-	}
+
 	return add_output(priv, callback, pids);
 }
 
 int parse::add_output(int socket, unsigned int method, char* services)
 {
 	map_pidtype pids;
-	if (services) {
+	if (services)
 		add_service_pids(services, pids);
-		pids[0] = 0; /* be sure to include the PAT */
-	}
+
 	return add_output(socket, method, pids);
 }
 
 int parse::add_output(char* target, char* services)
 {
 	map_pidtype pids;
-	if (services) {
+	if (services)
 		add_service_pids(services, pids);
-		pids[0] = 0; /* be sure to include the PAT */
-	}
+
 	return add_output(target, pids);
 }
 
