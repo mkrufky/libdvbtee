@@ -366,7 +366,7 @@ void output_stream::stop()
 
 bool output_stream::check()
 {
-	bool ret = f_streaming;
+	bool ret = (f_streaming | ((0 == count_in + count_out)));
 	if (!ret)
 		dprintf("(%d: %s) not streaming!", sock, name);
 	else {
