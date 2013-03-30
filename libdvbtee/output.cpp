@@ -877,6 +877,8 @@ void output::stop(int id)
 
 	if (output_streams.count(id))
 		output_streams[id].stop();
+	else
+		dprintf("no such stream id: %d", id);
 
 	return;
 }
