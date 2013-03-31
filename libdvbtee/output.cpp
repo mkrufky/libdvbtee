@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string>
+#include <netdb.h>
 
 #include "output.h"
 #include "log.h"
@@ -52,6 +53,32 @@ static char http_conn_close[] =
 	CRLF
 	CRLF;
 #endif
+
+int hostname_to_ip(char *hostname, char *ip)
+{
+	struct addrinfo hints, *servinfo, *p;
+	struct sockaddr_in *h;
+	int rv;
+
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	if ((rv = getaddrinfo(hostname, NULL, &hints, &servinfo)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		return -1;
+	}
+
+	/* loop through all the results and connect to the first we can */
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		h = (struct sockaddr_in*) p->ai_addr;
+		strcpy(ip, inet_ntoa(h->sin_addr));
+	}
+
+	freeaddrinfo(servinfo);
+	return 0;
+}
+
 
 static const char * __http_response(const char *mimetype)
 {
@@ -571,6 +598,10 @@ int output_stream::add(char* target, map_pidtype &pids)
 		int fl = fcntl(sock, F_GETFL, 0);
 		if (fcntl(sock, F_SETFL, fl | O_NONBLOCK) < 0)
 			perror("set non-blocking failed");
+
+		char resolved_ip[16] = { 0 };
+		if (0 == hostname_to_ip(ip, resolved_ip))
+			ip = &resolved_ip[0];
 
 		memset(&ip_addr, 0, sizeof(ip_addr));
 		ip_addr.sin_family = AF_INET;
