@@ -103,7 +103,9 @@ hdhr_tuner::~hdhr_tuner()
 		delete dev;
 }
 
-hdhr_tuner::hdhr_tuner(const hdhr_tuner&)
+hdhr_tuner::hdhr_tuner(const hdhr_tuner& hdhr)
+  : tune(hdhr)
+  , dev(NULL)
 {
 	dprintf("(copy)");
 
