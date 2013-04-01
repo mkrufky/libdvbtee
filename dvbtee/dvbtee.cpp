@@ -229,14 +229,14 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 		/* FALL-THRU */
 	default:
 	case 3: /* speed AND redundancy */
-		for (int j = 0; j < num_tuners - partial_redundancy; j++) {
+		for (int j = 0; j < ((int) num_tuners) - partial_redundancy; j++) {
 			for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 				int i = iter->first;
 				if (j) {
 					iter->second->wait_for_scan_complete();
 				}
 				int scan_start, scan_end;
-				if (i + j < num_tuners) {
+				if (i + j < ((int) num_tuners)) {
 					scan_start = scan_min + ((0 + (i + j)) * (unsigned int)channels_to_scan/num_tuners);
 					scan_end   = scan_min + ((1 + (i + j)) * (unsigned int)channels_to_scan/num_tuners);
 				} else {
@@ -513,7 +513,7 @@ int main(int argc, char **argv)
 		context.tuners[context.tuners.size()] = tuner;
 		tuner->feeder.parser.limit_eit(eit_limit);
 	}
-	if (num_tuners > 0) while (context.tuners.size() < num_tuners)
+	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners))
 #ifdef USE_HDHOMERUN
 		if (b_hdhr)
 			context.tuners[context.tuners.size()] = new hdhr_tuner;
