@@ -447,7 +447,7 @@ int main(int argc, char **argv)
 				strcpy(outfilename, optarg);
 				b_output_file = true;
 			} else
-				b_output_stdout = true;
+				b_output_stdout = true; /* FIXME: not yet supported */
 			break;
 		case 'O': /* output options */
 			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
