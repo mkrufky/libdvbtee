@@ -52,7 +52,9 @@ map_pid_to_context context_map;
 
 void cleanup_tuners(struct dvbtee_context* context, bool quick = false)
 {
-	bool erased = false;
+#if 0
+	bool erased = false; /* FIXME: fix this function to call itself recoursively until all tuners are destroyed  */
+#endif
 	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 
 		if (quick) {

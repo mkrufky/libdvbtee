@@ -216,7 +216,6 @@ int main(int argc, char **argv)
 	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 	int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
-	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
 
         while ((opt = getopt(argc, argv, "a:A:f:d::")) != -1) {
