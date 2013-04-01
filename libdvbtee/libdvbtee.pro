@@ -80,3 +80,5 @@ else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
 
 INCLUDEPATH += /usr/lib/libhdhomerun
 DEPENDPATH += /usr/lib/libhdhomerun
+
+QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64

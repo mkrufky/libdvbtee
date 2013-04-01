@@ -59,3 +59,4 @@ else:unix: LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
 INCLUDEPATH += $$PWD/../libdvbtee
 DEPENDPATH += $$PWD/../libdvbtee
 
+QMAKE_CXXFLAGS += -Wno-unused-function -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64
