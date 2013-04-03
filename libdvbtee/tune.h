@@ -40,6 +40,14 @@ static map_chan_to_ts_id channels;
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
 typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 
+typedef struct {
+	unsigned int total;
+	unsigned int current;
+	unsigned int physical_channel;
+} scan_progress_t;
+
+typedef void (*scan_progress_callback)(void *context, scan_progress_t *p);
+
 #define vrtdbg fprintf(stderr, "%s: virtual function undefined!\n", __func__)
 
 class tune
@@ -67,11 +75,11 @@ public:
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
-	int scan_for_services(unsigned int, char *, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
-	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
+	int scan_for_services(unsigned int, char *, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
+	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
 	/* FIXME: deprecate start_scan & move to private */
-	int start_scan(unsigned int, char *, bool epg = false);
-	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false);
+	int start_scan(unsigned int, char *, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL);
+	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); };
 	unsigned int get_scan_results(bool wait = true, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
 
@@ -113,7 +121,10 @@ private:
 #if 0
 	uint16_t get_snr();
 #endif
-	int start_scan(unsigned int, bool epg = false);
+	int start_scan(unsigned int, bool epg, scan_progress_callback, void*);
+
+	scan_progress_callback scan_progress_cb;
+	void* scan_progress_context;
 };
 
 #endif /*__TUNE_H__ */

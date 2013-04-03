@@ -40,6 +40,8 @@ tune::tune()
   : f_kill_thread(false)
   , state(TUNE_STATE_IDLE)
   , cur_chan(0)
+  , scan_progress_cb(NULL)
+  , scan_progress_context(NULL)
 {
 	dprintf("()");
 //	channels.clear();
@@ -62,6 +64,8 @@ tune::tune(const tune&)
 	f_kill_thread = false;
 	cur_chan = 0;
 	state = TUNE_STATE_IDLE;
+	scan_progress_cb = NULL;
+	scan_progress_context = NULL;
 }
 
 tune& tune::operator= (const tune& cSource)
@@ -76,6 +80,8 @@ tune& tune::operator= (const tune& cSource)
 	f_kill_thread = false;
 	cur_chan = 0;
 	state = TUNE_STATE_IDLE;
+	scan_progress_cb = NULL;
+	scan_progress_context = NULL;
 
 	return *this;
 }
@@ -129,6 +135,11 @@ void* tune::scan_thread()
 {
 	if (!is_scan()) {
 
+	scan_progress_t progress = {
+		.total = (unsigned int)scan_channel_list.size(),
+		.current = 0,
+		.physical_channel = 0,
+	};
 	state |= TUNE_STATE_SCAN;
 
 	feeder.parser.set_scan_mode(true);
@@ -136,6 +147,8 @@ void* tune::scan_thread()
 
 	for (channel_map::const_iterator iter = scan_channel_list.begin(); iter != scan_channel_list.end(); ++iter) {
 		unsigned int channel = iter->first;
+		progress.current++;
+		progress.physical_channel = channel;
 
 		if (f_kill_thread)
 			break;
@@ -150,6 +163,9 @@ void* tune::scan_thread()
 		}
 
 		fprintf(stderr, "scan channel %d...\n", channel);
+
+		if (scan_progress_cb)
+			scan_progress_cb(scan_progress_context, &progress);
 
 		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? VSB_8 : QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
 
@@ -194,7 +210,7 @@ void* tune::scan_thread()
 
 #define CHAR_CMD_COMMA ","
 
-int tune::start_scan(unsigned int mode, char *channel_list, bool epg)
+int tune::start_scan(unsigned int mode, char *channel_list, bool epg, scan_progress_callback progress_cb, void *progress_context)
 {
 	char *save;
 	char *item = strtok_r(channel_list, CHAR_CMD_COMMA, &save);
@@ -212,10 +228,10 @@ int tune::start_scan(unsigned int mode, char *channel_list, bool epg)
 	} else
 		scan_channel_list[atoi(channel_list)] = false;
 
-	return start_scan(mode, epg);
+	return start_scan(mode, epg, progress_cb, progress_context);
 }
 
-int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool epg)
+int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool epg, scan_progress_callback progress_cb, void *progress_context)
 {
 	//channels.clear();
 	scan_channel_list.clear();
@@ -243,11 +259,14 @@ int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool
 	for (unsigned int channel = scan_min; channel <= scan_max; channel++)
 		scan_channel_list[channel] = false; // TODO: set true if channel found
 
-	return start_scan(mode, epg);
+	return start_scan(mode, epg, progress_cb, progress_context);
 }
 
-int tune::start_scan(unsigned int mode, bool epg)
+int tune::start_scan(unsigned int mode, bool epg, scan_progress_callback progress_cb, void *progress_context)
 {
+	scan_progress_cb = progress_cb;
+	scan_progress_context = progress_context;
+
 	if (mode != SCAN_QAM)
 		mode = SCAN_VSB;
 
@@ -281,14 +300,14 @@ unsigned int tune::get_scan_results(bool wait, chandump_callback chandump_cb, vo
 	return ret;
 };
 
-int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
+int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, scan_progress_callback progress_cb, void* progress_context, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
 	unsigned int count = 0;
 
 	if (!mode)
 		mode = SCAN_VSB;
 
-	if (0 != start_scan(scan_mode, channel_list, epg))
+	if (0 != start_scan(scan_mode, channel_list, epg, progress_cb, progress_context))
 		return -1;
 
 	if (wait_for_results) {
@@ -298,7 +317,7 @@ int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, cha
 	return 0;
 }
 
-int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
+int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, scan_progress_callback progress_cb, void* progress_context, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
 	unsigned int count = 0;
 	unsigned int total_count = 0;
@@ -310,7 +329,7 @@ int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int ma
 
 		count = 0;
 
-		if (0 != start_scan(scan_mode, min, max, epg))
+		if (0 != start_scan(scan_mode, min, max, epg, progress_cb, progress_context))
 			return -1;
 
 		if (wait_for_results) {
