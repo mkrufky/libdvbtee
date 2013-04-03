@@ -557,10 +557,11 @@ int main(int argc, char **argv)
 		if (num_tuners >= 0)
 			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
 		else {
-			if (strlen(channel_list))
+			if (strlen(channel_list)) {
 				if (tuner) tuner->scan_for_services(scan_flags, channel_list, scan_epg);
-			else
+			} else {
 				if (tuner) tuner->scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
+			}
 		}
 		goto exit;
 	}
