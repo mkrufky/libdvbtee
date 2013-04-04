@@ -1119,12 +1119,12 @@ int parse::feed(int count, uint8_t* p_data)
 		return -1;
 	}
 
-        uint8_t* p = p_data;
+	uint8_t* p = p_data;
 	if (!enabled)
 		out.push(p, count);
 	else
 	/* one TS packet at a time */
-        for (int i = count / 188; i > 0; --i) {
+	for (int i = count / 188; i > 0; --i) {
 		bool send_pkt = false;
 		unsigned int sync_offset = 0;
 		output_options out_type = OUTPUT_NONE;
