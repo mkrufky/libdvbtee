@@ -86,6 +86,7 @@ public:
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); };
 	unsigned int get_scan_results(bool wait = true, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
+	void stop_scan() { f_kill_thread = true; };
 
 	feed feeder;
 #define TUNE_STATE_IDLE 0
