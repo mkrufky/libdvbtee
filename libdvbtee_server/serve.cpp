@@ -974,7 +974,7 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 				cli_print("LOCK!\n");
 			tuner->feeder.parser.set_channel_info(channel,
 							     (flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) :
-							                           atsc_qam_chan_to_freq(channel),
+										   atsc_qam_chan_to_freq(channel),
 							     (flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 			tuner->start_feed();
 
