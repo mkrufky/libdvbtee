@@ -48,7 +48,11 @@ typedef struct {
 
 typedef void (*scan_progress_callback)(void *context, scan_progress_t *p);
 
+#if 0
 #define vrtdbg fprintf(stderr, "%s: virtual function undefined!\n", __func__)
+#else
+#define vrtdbg {}
+#endif
 
 class tune
 {
