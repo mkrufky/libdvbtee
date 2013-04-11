@@ -1,0 +1,56 @@
+/*****************************************************************************
+ * Copyright (C) 2013 Michael Krufky
+ *
+ * Author: Michael Krufky <mkrufky@linuxtv.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
+
+#include "curlhttpget.h"
+
+curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_callback, void *data_context)
+  : curl_handle(curl_easy_init())
+  , data_cb(data_callback)
+  , data_ctxt(data_context)
+{
+  curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+//curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1L);
+  curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "hlswalker");
+
+  if (data_cb) {
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, this);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
+  }
+
+  CURLcode res = curl_easy_perform(curl_handle);
+  if(res != CURLE_OK) fprintf(stderr, "%s: curl_easy_perform() failed: %s\n", __func__, curl_easy_strerror(res));
+
+  curl_easy_cleanup(curl_handle);
+}
+
+//static
+size_t curlhttpget::write_data(void *buffer, size_t size, size_t nmemb, void *userp)
+{
+  return static_cast<curlhttpget*>(userp)->__write_data(buffer, size, nmemb);
+}
+
+size_t curlhttpget::__write_data(void *buffer, size_t size, size_t nmemb)
+{
+  if (data_cb) data_cb(data_ctxt, buffer, size, nmemb);
+  return size * nmemb;
+}

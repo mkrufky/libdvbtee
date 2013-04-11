@@ -25,7 +25,9 @@ SOURCES += channels.cpp \
     tune.cpp \
     hdhr_tuner.cpp \
     linuxtv_tuner.cpp \
-    atsctext.cpp
+    atsctext.cpp \
+    hlsfeed.cpp \
+    curlhttpget.cpp
 
 HEADERS += atsctext.h \
     channels.h \
@@ -42,12 +44,14 @@ HEADERS += atsctext.h \
     stats.h \
     tune.h \
     linuxtv_tuner.h \
-    hdhr_tuner.h
+    hdhr_tuner.h \
+    hlsfeed.h \
+    curlhttpget.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
     TARGET.UID3 = 0xE1EA1848
-    TARGET.CAPABILITY = 
+    TARGET.CAPABILITY =
     TARGET.EPOCALLOWDLLDATA = 1
     addFiles.sources = dvbtee.dll
     addFiles.path = !:/sys/bin
@@ -56,12 +60,14 @@ symbian {
 
 unix:!symbian {
     maemo5 {
-        target.path = /opt/usr/lib
+	target.path = /opt/usr/lib
     } else {
-        target.path = /usr/lib
+	target.path = /usr/lib
     }
     INSTALLS += target
 }
+
+unix|win32: LIBS += -lcurl
 
 LIBS += -L../usr/include/
 
