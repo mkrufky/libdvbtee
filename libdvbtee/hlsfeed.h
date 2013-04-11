@@ -39,8 +39,6 @@ private:
   void push(void *buffer, size_t size, size_t nmemb);
   void walk(void *buffer);
 
-  feed feeder;
-
   static void curl_push_callback(void *context, void *buffer, size_t size, size_t nmemb);
   static void curl_walk_callback(void *context, void *buffer, size_t size, size_t nmemb);
 };

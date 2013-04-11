@@ -21,6 +21,8 @@
 #ifndef HLSINPUT_H
 #define HLSINPUT_H
 
+#include "feed.h"
+
 class hlsinput
 {
 public:
@@ -28,6 +30,9 @@ public:
   bool get(const char *url);
 private:
   bool b_stdout;
+  feed feeder;
+
+  static void write_feed(void *context, void *buffer, size_t size, size_t nmemb);
 };
 
 #endif // HLSINPUT_H

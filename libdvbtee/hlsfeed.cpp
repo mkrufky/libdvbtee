@@ -51,8 +51,6 @@ void hlsfeed::push(void *buffer, size_t size, size_t nmemb)
 {
   if (datapump_cb)
     datapump_cb(datapump_ctxt, buffer, size, nmemb);
-  else
-    feeder.push(size * nmemb, (const uint8_t*)buffer);
 }
 
 void hlsfeed::curl_push_callback(void *context, void *buffer, size_t size, size_t nmemb)
