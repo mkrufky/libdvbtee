@@ -514,10 +514,12 @@ int main(int argc, char **argv)
 #else
 			{}
 #endif
-	if (out_opt > 0)
-		for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+	if (out_opt > 0) {
+		if ((strlen(tcpipfeedurl)) || (strlen(filename)))
+			context._file_feeder.parser.out.set_options(out_opt);
+		else for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 			iter->second->feeder.parser.out.set_options(out_opt);
-
+	}
 	if (b_bitrate_stats) {
 		if (b_read_dvr) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
