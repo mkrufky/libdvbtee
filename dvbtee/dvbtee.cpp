@@ -187,18 +187,6 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 	return context->server->start();
 }
 
-#if 0
-void listen_for_data(struct dvbtee_context* context, char* tcpipfeedurl)
-{
-	// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
-	if (0 <= context->_file_feeder.start_socket(tcpipfeedurl)) {
-		context->_file_feeder.wait_for_streaming_or_timeout(timeout);
-		context->_file_feeder.stop();
-		context->_file_feeder.close_file();
-	}
-}
-#endif
-
 void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg, int eit_limit)
 {
@@ -581,16 +569,11 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(tcpipfeedurl)) {
-#if 0
-		listen_for_data(&context, tcpipfeedurl);
-#else
-		// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
 		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);
 			context._file_feeder.stop();
 			context._file_feeder.close_file();
 		}
-#endif
 		goto exit;
 	}
 
