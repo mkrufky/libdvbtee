@@ -18,6 +18,8 @@ TEMPLATE = app
 SOURCES += \
     dvbtee.cpp
 
+unix|win32: LIBS += -lcurl
+
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee/release/ -ldvbtee
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ldvbtee
 else:symbian: LIBS += -ldvbtee

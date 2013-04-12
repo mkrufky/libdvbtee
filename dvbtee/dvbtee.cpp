@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "feed.h"
+#include "hlsfeed.h"
 #define USE_LINUXTV
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
@@ -49,6 +50,12 @@ struct dvbtee_context
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
 map_pid_to_context context_map;
+
+static void write_feed(void *context, void *buffer, size_t size, size_t nmemb)
+{
+	static_cast<dvbtee_context*>(context)->_file_feeder.push(size * nmemb, (const uint8_t*)buffer);
+}
+
 
 void cleanup_tuners(struct dvbtee_context* context, bool quick = false)
 {
@@ -348,7 +355,7 @@ int main(int argc, char **argv)
 	char outfilename[256];
 	memset(&outfilename, 0, sizeof(outfilename));
 
-	char tcpipfeedurl[32];
+	char tcpipfeedurl[2048];
 	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
 
 	char service_ids[64];
@@ -571,6 +578,9 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(tcpipfeedurl)) {
+		if (strstr(tcpipfeedurl, ".m3u8")) {
+			hlsfeed hlsFeeder(tcpipfeedurl, write_feed, &context);
+		} else
 		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);
 			context._file_feeder.stop();
