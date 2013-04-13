@@ -578,7 +578,7 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(tcpipfeedurl)) {
-		if (strstr(tcpipfeedurl, ".m3u8")) {
+		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
 			hlsfeed hlsFeeder(tcpipfeedurl, write_feed, &context);
 		} else
 		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
