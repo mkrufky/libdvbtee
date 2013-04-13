@@ -588,7 +588,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 		} else {
 			ringbuffer.reset();
 			stream_method = OUTPUT_STREAM_FILE;
-			return set_pids(pids);;
+			return set_pids(pids);
 		}
 	}
 
