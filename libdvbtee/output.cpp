@@ -201,6 +201,9 @@ int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool 
 	return 0;
 }
 
+static inline size_t write_stdout(uint8_t* p_data, int size) {
+	return fwrite(p_data, 188, size / 188, stdout);
+}
 
 output_stream::output_stream()
   : f_kill_thread(false)
@@ -406,7 +409,8 @@ bool output_stream::check()
 			(stream_method == OUTPUT_STREAM_TCP) ? "TCP" :
 			(stream_method == OUTPUT_STREAM_HTTP) ? "HTTP" :
 			(stream_method == OUTPUT_STREAM_FILE) ? "FILE" :
-			(stream_method == OUTPUT_STREAM_FUNC) ? "FUNC" : "UNKNOWN",
+			(stream_method == OUTPUT_STREAM_FUNC) ? "FUNC" :
+			(stream_method == OUTPUT_STREAM_STDOUT) ? "STDOUT" : "UNKNOWN",
 			count_in / 188, count_out / 188);
 #if 1//DBG
 		if (pids.size()) {
@@ -502,6 +506,13 @@ int output_stream::stream(uint8_t* p_data, int size)
 			perror("streaming via callback failed");
 		}
 		break;
+	case OUTPUT_STREAM_STDOUT:
+		ret = write_stdout(p_data, size);
+		if (ret < 0) {
+			stop_without_wait();
+			perror("dump to stdout failed");
+		}
+		break;
 	}
 	return ret;
 }
@@ -542,10 +553,19 @@ int output_stream::add(int socket, unsigned int method, map_pidtype &pids)
 	return set_pids(pids);
 }
 
+int output_stream::add_stdout(map_pidtype &pids)
+{
+	dprintf("dumping to stdout...");
+	ringbuffer.reset();
+	stream_method = OUTPUT_STREAM_STDOUT;
+	strcpy(name, "STDOUT");
+	return set_pids(pids);
+}
+
 int output_stream::add(char* target, map_pidtype &pids)
 {
 	char *save;
-	char *ip;
+	char *ip = NULL;
 	uint16_t port = 0;
 	bool b_tcp = false;
 	bool b_udp = false;
@@ -555,6 +575,11 @@ int output_stream::add(char* target, map_pidtype &pids)
 
 	strncpy(name, target, sizeof(name));
 
+	if ((0 == strcmp(target, "-")) ||
+	    (0 == strcmp(target, "fd://0")) ||
+	    (0 == strcmp(target, "fd:/0")))
+		return add_stdout(pids);
+	else
 	if (strstr(target, ":")) {
 		ip = strtok_r(target, ":", &save);
 		if (strstr(ip, "tcp"))
@@ -946,6 +971,21 @@ bool output::push(uint8_t* p_data, int size)
 bool output::push(uint8_t* p_data, enum output_options opt)
 {
 	return (((!options) || (!opt)) || (opt & options)) ? push(p_data, 188) : false;
+}
+
+int output::add_stdout(map_pidtype &pids)
+{
+	int target_id = num_targets;
+	/* push data into output buffer */
+	int ret = output_streams[target_id].add_stdout(pids);
+	if (ret == 0)
+		num_targets++;
+	else
+		dprintf("failed to add target #%d", target_id);
+
+	dprintf("~(%d->FUNC)", target_id);
+
+	return (ret == 0) ? target_id : ret;
 }
 
 int output::add(void* priv, stream_callback callback, map_pidtype &pids)

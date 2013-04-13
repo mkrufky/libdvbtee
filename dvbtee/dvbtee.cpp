@@ -444,7 +444,7 @@ int main(int argc, char **argv)
 				strcpy(outfilename, optarg);
 				b_output_file = true;
 			} else
-				b_output_stdout = true; /* FIXME: not yet supported */
+				b_output_stdout = true;
 			break;
 		case 'O': /* output options */
 			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
@@ -540,6 +540,13 @@ int main(int argc, char **argv)
 				iter->second->feeder.parser.add_output(outfilename);
 		else
 			context._file_feeder.parser.add_output(outfilename);
+	}
+	if (b_output_stdout) {
+		if (b_read_dvr) // FIXME
+			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+				iter->second->feeder.parser.out.add_stdout();
+		else
+			context._file_feeder.parser.out.add_stdout();
 	}
 	if (b_serve)
 		start_server(&context, serv_flags | (scan_flags << 2));
