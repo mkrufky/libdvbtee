@@ -19,6 +19,7 @@ libdvbtee_server.depends = libdvbtee
 dvbtee.depends = libdvbtee_server
 server_example.depends = libdvbtee_server
 parser_example.depends = libdvbtee_server
+walk_hls.depends = libdvbtee
 
 QMAKE_EXTRA_TARGETS += libdvbtee \
                        libdvbtee_server \
