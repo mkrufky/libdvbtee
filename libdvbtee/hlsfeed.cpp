@@ -69,7 +69,7 @@ void hlsfeed::walk(void *buffer)
       curlhttpget Curl(line, curl_push_callback, this);
     else if (strstr(line, ".m3u8"))
       curlhttpget Curl(line, curl_walk_callback, this);
-    else
+    else if (!strstr(line, "#EXT"))
       fprintf(stderr, "%s: invalid line: '%s'\n", __func__, line);
 
     line = strtok_r(NULL, "\n", &save);
