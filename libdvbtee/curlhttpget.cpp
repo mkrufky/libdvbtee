@@ -38,7 +38,7 @@ curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_c
   }
 
   CURLcode res = curl_easy_perform(curl_handle);
-  if(res != CURLE_OK) fprintf(stderr, "%s: curl_easy_perform() failed: %s\nURL: %s\n\n", __func__, curl_easy_strerror(res), url);
+  if (res != CURLE_OK) fprintf(stderr, "%s: curl_easy_perform() failed: %s\nURL: %s\n\n", __func__, curl_easy_strerror(res), url);
 
   curl_easy_cleanup(curl_handle);
 }
