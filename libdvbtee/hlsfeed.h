@@ -24,6 +24,7 @@
 
 #include "feed.h"
 #include "curlhttpget.h"
+#include "rbuf.h"
 
 class hlsfeed
 {
@@ -36,11 +37,18 @@ private:
   hls_curl_http_get_data_callback datapump_cb;
   void *datapump_ctxt;
 
-  void push(void *buffer, size_t size, size_t nmemb);
-  void walk(void *buffer);
+  void push(uint8_t *buffer, size_t size, size_t nmemb);
+  void walk(uint8_t *buffer);
 
   static void curl_push_callback(void *context, void *buffer, size_t size, size_t nmemb);
   static void curl_walk_callback(void *context, void *buffer, size_t size, size_t nmemb);
+
+  rbuf ringbuffer;
+  bool f_kill_thread;
+  pthread_t h_thread;
+
+  static void* push_thread(void*);
+  void* push_thread();
 };
 
 #endif // HLSFEEDER_H
