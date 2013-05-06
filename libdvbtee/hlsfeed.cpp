@@ -21,6 +21,27 @@
 
 #include "hlsfeed.h"
 
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <stdexcept>
+
+class BadConversion : public std::runtime_error {
+public:
+  BadConversion(std::string const& s)
+    : std::runtime_error(s)
+  { }
+};
+
+inline double convertToDouble(std::string const& s)
+{
+  std::istringstream i(s);
+  double x;
+  if (!(i >> x))
+    throw BadConversion("convertToDouble(\"" + s + "\")");
+  return x;
+}
+
 hlsfeed::hlsfeed(const char *url, hls_curl_http_get_data_callback data_pump_callback, void *data_pump_context)
   : toplevel(url)
   , Url(url)
@@ -36,13 +57,21 @@ void hlsfeed::walk(void *buffer)
   char *save;
   char *playlist = (char *)buffer;
   char *line = strtok_r(playlist, "\n", &save);
+  double duration;
   while (line) {
     //if (line[0] == '#')
-    if (strstr(line, ".ts"))
+    if (strstr(line, "#EXTINF:")) {
+      char *saveToo;
+      char *durationText = strtok_r(line, ":", &saveToo);
+      durationText = strtok_r(NULL, ",", &saveToo);
+      duration = convertToDouble(std::string(durationText));
+    } else if (strstr(line, ".ts"))
       curlhttpget Curl(line, curl_push_callback, this);
     else if (strstr(line, ".m3u8"))
       curlhttpget Curl(line, curl_walk_callback, this);
-    //else error?
+    else
+      fprintf(stderr, "%s: invalid line: '%s'\n", __func__, line);
+
     line = strtok_r(NULL, "\n", &save);
   }
 }
