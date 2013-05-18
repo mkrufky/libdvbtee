@@ -450,11 +450,17 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 
 		decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type = p_es->i_type;
 		decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].pid  = p_es->i_pid;
+		if (descriptors._a1.count(p_es->i_pid)) {
+			memcpy(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].ISO_639_language_code,
+			       descriptors._a1[p_es->i_pid].ISO_639_language_code,
+			       sizeof(descriptors._a1[p_es->i_pid].ISO_639_language_code));
+		}
 #if PMT_DBG
-		fprintf(stderr, "  %6x | 0x%02x (%s)\n",
+		fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
 			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].pid,
 			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type,
-			streamtype_name(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type));
+			streamtype_name(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type),
+			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].ISO_639_language_code);
 #endif
 		p_es = p_es->p_next;
 	}
@@ -518,11 +524,25 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 			service_name);
 #endif
 		//FIXME: descriptors
+		dprintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
 		descriptors.decode(p_channel->p_first_descriptor);
 
+		//for only this:
+		desc local_descriptors;
+		local_descriptors.decode(p_channel->p_first_descriptor);
+#if 1
+		//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
+		if (decoded_pmt.count(p_channel->i_program_number))
+			for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
+				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_PID].ISO_639_language_code,
+				       iter_dra1->second.ISO_639_language_code, sizeof(iter_dra1->second.ISO_639_language_code));
+				dprintf("copied service location descriptor from VCT into PMT");
+			}
+#endif
 		p_channel = p_channel->p_next;
 	}
 	//FIXME: descriptors
+	dprintf("parsing channel descriptors for mux:");
 	descriptors.decode(p_vct->p_first_descriptor);
 
 	return true;
