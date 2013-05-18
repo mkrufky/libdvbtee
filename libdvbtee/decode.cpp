@@ -413,7 +413,7 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 
 		rcvd_pmt[p_program->i_number] = false;
 #if PAT_DBG
-		fprintf(stderr, "  %10d | %d\n",
+		fprintf(stderr, "  %10d | %x\n",
 			p_program->i_number,
 			decoded_pat.programs[p_program->i_number]);
 #endif
@@ -451,7 +451,7 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 		decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type = p_es->i_type;
 		decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].pid  = p_es->i_pid;
 #if PMT_DBG
-		fprintf(stderr, "  %6d | 0x%02x (%s)\n",
+		fprintf(stderr, "  %6x | 0x%02x (%s)\n",
 			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].pid,
 			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type,
 			streamtype_name(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type));
