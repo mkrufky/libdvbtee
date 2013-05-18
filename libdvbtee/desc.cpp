@@ -127,31 +127,6 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
-{
-	if (p_descriptor->i_tag != DT_ServiceLocation)
-		return false;
-
-	dvbpsi_service_location_dr_t* dr = dvbpsi_DecodeServiceLocationDr(p_descriptor);
-	dvbpsi_service_location_element_t *element = dr->p_first_element;
-	for (int i = 0; i < dr->i_number_elements; i ++) {
-		if (!element) {
-			dprintf("error!");
-			break;
-		}
-		_a1[element->i_elementary_PID].elementary_PID = element->i_elementary_PID;
-		_a1[element->i_elementary_PID].stream_type    = element->i_stream_type;
-		memcpy(_a1[element->i_elementary_PID].ISO_639_language_code, element->i_ISO_639_language_code, 3*sizeof(unsigned char));
-		dprintf("%d, %d, %c%c%c", element->i_elementary_PID, element->i_stream_type,
-			element->i_ISO_639_language_code[0],
-			element->i_ISO_639_language_code[1],
-			element->i_ISO_639_language_code[2]);
-		element = element->p_next;
-	}
-
-	return true;
-}
-
 bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 {
 	if (p_descriptor->i_tag != DT_CaptionService)
@@ -181,6 +156,31 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
+bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_ServiceLocation)
+		return false;
+
+	dvbpsi_service_location_dr_t* dr = dvbpsi_DecodeServiceLocationDr(p_descriptor);
+	dvbpsi_service_location_element_t *element = dr->p_first_element;
+	for (int i = 0; i < dr->i_number_elements; i ++) {
+		if (!element) {
+			dprintf("error!");
+			break;
+		}
+		_a1[element->i_elementary_PID].elementary_PID = element->i_elementary_PID;
+		_a1[element->i_elementary_PID].stream_type    = element->i_stream_type;
+		memcpy(_a1[element->i_elementary_PID].ISO_639_language_code, element->i_ISO_639_language_code, 3*sizeof(unsigned char));
+		dprintf("%d, %d, %c%c%c", element->i_elementary_PID, element->i_stream_type,
+			element->i_ISO_639_language_code[0],
+			element->i_ISO_639_language_code[1],
+			element->i_ISO_639_language_code[2]);
+		element = element->p_next;
+	}
+
+	return true;
+}
+
 void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
 	while (p_descriptor) {
@@ -197,11 +197,11 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 		case DT_LogicalChannelNumber:
 			_lcn(p_descriptor);
 			break;
-		case DT_ServiceLocation:
-			service_location(p_descriptor);
-			break;
 		case DT_CaptionService:
 			caption_service(p_descriptor);
+			break;
+		case DT_ServiceLocation:
+			service_location(p_descriptor);
 			break;
 		default:
 			dprintf("unknown descriptor tag: %02x", p_descriptor->i_tag);

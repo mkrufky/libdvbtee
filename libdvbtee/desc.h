@@ -67,8 +67,8 @@ private:
 	bool short_event(dvbpsi_descriptor_t*);
 	bool freq_list(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
-	bool service_location(dvbpsi_descriptor_t*);
 	bool caption_service(dvbpsi_descriptor_t*);
+	bool service_location(dvbpsi_descriptor_t*);
 };
 
 #endif /* __DECODE_H__ */
