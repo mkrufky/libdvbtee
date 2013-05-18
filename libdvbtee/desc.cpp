@@ -33,6 +33,7 @@
 #include "dvbpsi/dr_4d.h" /* short event descriptor */
 #include "dvbpsi/dr_62.h" /* frequency list descriptor */
 #include "dvbpsi/dr_83.h" /* LCN descriptor */
+#include "dvbpsi/dr_86.h" /* caption service descriptor */
 #include "dvbpsi/dr_a1.h" /* service location descriptor */
 
 #include "desc.h"
@@ -44,6 +45,7 @@
 #define DT_Teletext                   0x56
 #define DT_FrequencyList              0x62
 #define DT_LogicalChannelNumber       0x83
+#define DT_CaptionService             0x86
 #define DT_ServiceLocation            0xa1
 
 
@@ -150,6 +152,35 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
+bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_CaptionService)
+		return false;
+
+	dvbpsi_caption_service_dr_t* dr = dvbpsi_DecodeCaptionServiceDr(p_descriptor);
+	dvbpsi_caption_service_t *service = dr->p_first_service;
+	for (int i = 0; i < dr->i_number_of_services; i ++) {
+		if (!service) {
+			dprintf("error!");
+			break;
+		}
+		dprintf("%d / %04x, %s line21 field: %d %d %s%s%c%c%c",
+			service->i_caption_service_number,
+			service->i_caption_service_number,
+			(service->b_digital_cc) ? "708" : "608",
+			service->b_line21_field,
+			(service->b_digital_cc) ? service->i_caption_service_number : 0,
+			(service->b_easy_reader) ? "easy reader " : "",
+			(service->b_wide_aspect_ratio) ? "wide aspect ratio " : "",
+			service->i_ISO_639_language_code[0],
+			service->i_ISO_639_language_code[1],
+			service->i_ISO_639_language_code[2]);
+		service = service->p_next;
+	}
+
+	return true;
+}
+
 void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
 	while (p_descriptor) {
@@ -168,6 +199,9 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 			break;
 		case DT_ServiceLocation:
 			service_location(p_descriptor);
+			break;
+		case DT_CaptionService:
+			caption_service(p_descriptor);
 			break;
 		default:
 			dprintf("unknown descriptor tag: %02x", p_descriptor->i_tag);
