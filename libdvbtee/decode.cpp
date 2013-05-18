@@ -511,33 +511,38 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 		decoded_vct.channels[p_channel->i_program_number].hide_guide        = p_channel->b_hide_guide;
 		decoded_vct.channels[p_channel->i_program_number].service_type      = p_channel->i_service_type;
 		decoded_vct.channels[p_channel->i_program_number].source_id         = p_channel->i_source_id;
+
+		//FIXME: descriptors
+		dprintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
+		descriptors.decode(p_channel->p_first_descriptor);
+
+		desc local_descriptors;
+		local_descriptors.decode(p_channel->p_first_descriptor);
+
+		std::string languages;
+
+		for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
+			//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
+			if (decoded_pmt.count(p_channel->i_program_number)) {
+				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_PID].ISO_639_language_code,
+				       iter_dra1->second.ISO_639_language_code, sizeof(iter_dra1->second.ISO_639_language_code));
+				dprintf("copied service location descriptor from VCT into PMT");
+			}
+			if (!languages.empty()) languages.append(", ");
+			if (iter_dra1->second.ISO_639_language_code[0])
+				for (int i=0; i<3; i++) languages.push_back(iter_dra1->second.ISO_639_language_code[i]);
+		}
 #if VCT_DBG
 		unsigned char service_name[8] = { 0 };
 		for ( int i = 0; i < 7; ++i ) service_name[i] = decoded_vct.channels[p_channel->i_program_number].short_name[i*2+1];
 		service_name[7] = 0;
 
-		fprintf(stderr, "  %5d.%d | %10d | %9d | %s\n",
+		fprintf(stderr, "  %5d.%d | %10d | %9d | %s | %s\n",
 			decoded_vct.channels[p_channel->i_program_number].chan_major,
 			decoded_vct.channels[p_channel->i_program_number].chan_minor,
 			decoded_vct.channels[p_channel->i_program_number].program,
 			decoded_vct.channels[p_channel->i_program_number].source_id,
-			service_name);
-#endif
-		//FIXME: descriptors
-		dprintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
-		descriptors.decode(p_channel->p_first_descriptor);
-
-		//for only this:
-		desc local_descriptors;
-		local_descriptors.decode(p_channel->p_first_descriptor);
-#if 1
-		//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
-		if (decoded_pmt.count(p_channel->i_program_number))
-			for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
-				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_PID].ISO_639_language_code,
-				       iter_dra1->second.ISO_639_language_code, sizeof(iter_dra1->second.ISO_639_language_code));
-				dprintf("copied service location descriptor from VCT into PMT");
-			}
+			service_name, languages.c_str());
 #endif
 		p_channel = p_channel->p_next;
 	}
