@@ -29,6 +29,7 @@
 #include "log.h"
 #define CLASS_MODULE "desc"
 
+#include "dvbpsi/dr_0a.h" /* ISO639 language descriptor */
 #include "dvbpsi/dr_48.h" /* service descriptor */
 #include "dvbpsi/dr_4d.h" /* short event descriptor */
 #include "dvbpsi/dr_62.h" /* frequency list descriptor */
@@ -40,6 +41,7 @@
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 
+#define DT_ISO639Language             0x0a
 #define DT_Service                    0x48
 #define DT_ShortEvent                 0x4d
 #define DT_Teletext                   0x56
@@ -58,6 +60,23 @@ desc::desc()
 desc::~desc()
 {
 	dprintf("()");
+}
+
+bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_ISO639Language)
+		return false;
+
+	dvbpsi_iso639_dr_t* dr = dvbpsi_DecodeISO639Dr(p_descriptor);
+
+	for (int i = 0; i < dr->i_code_count; ++i)
+		dprintf("%c%c%c %x",
+			dr->code[i].iso_639_code[0],
+			dr->code[i].iso_639_code[1],
+			dr->code[i].iso_639_code[2],
+			dr->code[i].i_audio_type);
+
+	return true;
 }
 
 bool desc::service(dvbpsi_descriptor_t* p_descriptor)
@@ -185,6 +204,9 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
 	while (p_descriptor) {
 		switch (p_descriptor->i_tag) {
+		case DT_ISO639Language:
+			iso639language(p_descriptor);
+			break;
 		case DT_Service:
 			service(p_descriptor);
 			break;

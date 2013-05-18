@@ -63,6 +63,7 @@ public:
 	unsigned char provider_name[256];
 	unsigned char service_name[256];
 private:
+	bool iso639language(dvbpsi_descriptor_t*);
 	bool service(dvbpsi_descriptor_t*);
 	bool short_event(dvbpsi_descriptor_t*);
 	bool freq_list(dvbpsi_descriptor_t*);
