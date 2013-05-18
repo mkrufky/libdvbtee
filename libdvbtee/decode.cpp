@@ -450,6 +450,10 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 
 		decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type = p_es->i_type;
 		decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].pid  = p_es->i_pid;
+
+		//FIXME: descriptors
+		descriptors.decode(p_es->p_first_descriptor);
+
 		if (descriptors._a1.count(p_es->i_pid)) {
 			memcpy(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].ISO_639_language_code,
 			       descriptors._a1[p_es->i_pid].ISO_639_language_code,
