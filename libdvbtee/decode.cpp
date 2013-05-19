@@ -528,7 +528,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 		for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
 			//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
 			if (decoded_pmt.count(p_channel->i_program_number)) {
-				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_PID].iso_639_code,
+				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_pid].iso_639_code,
 				       iter_dra1->second.iso_639_code, sizeof(iter_dra1->second.iso_639_code));
 				dprintf("copied service location descriptor from VCT into PMT");
 			}

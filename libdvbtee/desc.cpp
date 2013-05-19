@@ -187,10 +187,10 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 			dprintf("error!");
 			break;
 		}
-		_a1[element->i_elementary_PID].elementary_PID = element->i_elementary_PID;
-		_a1[element->i_elementary_PID].stream_type    = element->i_stream_type;
-		memcpy(_a1[element->i_elementary_PID].iso_639_code, element->i_iso_639_code, 3);
-		dprintf("%d, %d, %c%c%c", element->i_elementary_PID, element->i_stream_type,
+		_a1[element->i_elementary_pid].elementary_pid = element->i_elementary_pid;
+		_a1[element->i_elementary_pid].stream_type    = element->i_stream_type;
+		memcpy(_a1[element->i_elementary_pid].iso_639_code, element->i_iso_639_code, 3);
+		dprintf("%d, %d, %c%c%c", element->i_elementary_pid, element->i_stream_type,
 			element->i_iso_639_code[0],
 			element->i_iso_639_code[1],
 			element->i_iso_639_code[2]);

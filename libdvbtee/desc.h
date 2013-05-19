@@ -39,7 +39,7 @@ typedef struct
 typedef struct
 {
 	uint8_t       stream_type;
-	uint16_t      elementary_PID;
+	uint16_t      elementary_pid;
 	unsigned char iso_639_code[3];
 } dra1_t;
 
