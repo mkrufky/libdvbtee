@@ -166,9 +166,9 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 			(service->b_digital_cc) ? service->i_caption_service_number : 0,
 			(service->b_easy_reader) ? "easy reader " : "",
 			(service->b_wide_aspect_ratio) ? "wide aspect ratio " : "",
-			service->i_ISO_639_language_code[0],
-			service->i_ISO_639_language_code[1],
-			service->i_ISO_639_language_code[2]);
+			service->i_iso_639_code[0],
+			service->i_iso_639_code[1],
+			service->i_iso_639_code[2]);
 		service = service->p_next;
 	}
 
