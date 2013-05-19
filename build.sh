@@ -45,7 +45,7 @@ if [ -e .configured ]; then
 else
     ./bootstrap
     if [ -e ../.x86 ]; then
-	./configure --prefix=${DVBTEE_ROOT}/usr/
+	./configure --prefix=${DVBTEE_ROOT}/usr/  --enable-debug --disable-release
     else
 	./configure --prefix=${DVBTEE_ROOT}/usr/ --host=mipsel-linux --target=mipsel-linux
     fi
