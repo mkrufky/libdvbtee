@@ -27,6 +27,7 @@
 #include <unistd.h>
 
 #include "feed.h"
+#include "hlsfeed.h"
 #define USE_LINUXTV
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
@@ -50,9 +51,17 @@ typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
 map_pid_to_context context_map;
 
+static void write_feed(void *context, void *buffer, size_t size, size_t nmemb)
+{
+	static_cast<dvbtee_context*>(context)->_file_feeder.push(size * nmemb, (const uint8_t*)buffer);
+}
+
+
 void cleanup_tuners(struct dvbtee_context* context, bool quick = false)
 {
-	bool erased = false;
+#if 0
+	bool erased = false; /* FIXME: fix this function to call itself recoursively until all tuners are destroyed  */
+#endif
 	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 
 		if (quick) {
@@ -185,18 +194,6 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 	return context->server->start();
 }
 
-#if 0
-void listen_for_data(struct dvbtee_context* context, char* tcpipfeedurl)
-{
-	// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
-	if (0 <= context->_file_feeder.start_socket(tcpipfeedurl)) {
-		context->_file_feeder.wait_for_streaming_or_timeout(timeout);
-		context->_file_feeder.stop();
-		context->_file_feeder.close_file();
-	}
-}
-#endif
-
 void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg, int eit_limit)
 {
@@ -229,14 +226,14 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 		/* FALL-THRU */
 	default:
 	case 3: /* speed AND redundancy */
-		for (int j = 0; j < num_tuners - partial_redundancy; j++) {
+		for (int j = 0; j < ((int) num_tuners) - partial_redundancy; j++) {
 			for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 				int i = iter->first;
 				if (j) {
 					iter->second->wait_for_scan_complete();
 				}
 				int scan_start, scan_end;
-				if (i + j < num_tuners) {
+				if (i + j < ((int) num_tuners)) {
 					scan_start = scan_min + ((0 + (i + j)) * (unsigned int)channels_to_scan/num_tuners);
 					scan_end   = scan_min + ((1 + (i + j)) * (unsigned int)channels_to_scan/num_tuners);
 				} else {
@@ -286,6 +283,7 @@ void usage(bool help, char *myname)
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
 		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
+		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
 		"-d\tdebug level\n  "
 		"-h\tdisplay additional help\n\n");
 	if (help)
@@ -302,9 +300,13 @@ void usage(bool help, char *myname)
 		"%s -iudp://127.0.0.1:1234 -t10\n\n"
 		"To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:\n  "
 		"%s -A2 -T5 -s4\n\n"
+		"To scan for ATSC services using 2 HdHomeRun tuners optimized for speed and redundancy:\n  "
+		"%s -A1 -H -T2 -s3\n\n"
 		"To start a server using adapter 0:\n  "
 		"%s -a0 -S\n\n"
-		, myname, myname, myname, myname, myname, myname, myname
+		"To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):\n  "
+		"%s -H ABCDABCD-1 -S\n\n"
+		, myname, myname, myname, myname, myname, myname, myname, myname, myname
 	);
 }
 
@@ -353,7 +355,7 @@ int main(int argc, char **argv)
 	char outfilename[256];
 	memset(&outfilename, 0, sizeof(outfilename));
 
-	char tcpipfeedurl[32];
+	char tcpipfeedurl[2048];
 	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
 
 	char service_ids[64];
@@ -442,7 +444,7 @@ int main(int argc, char **argv)
 				strcpy(outfilename, optarg);
 				b_output_file = true;
 			} else
-				b_output_stdout = true;
+				b_output_stdout = true; /* FIXME: not yet supported */
 			break;
 		case 'O': /* output options */
 			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
@@ -508,7 +510,7 @@ int main(int argc, char **argv)
 		context.tuners[context.tuners.size()] = tuner;
 		tuner->feeder.parser.limit_eit(eit_limit);
 	}
-	if (num_tuners > 0) while (context.tuners.size() < num_tuners)
+	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners))
 #ifdef USE_HDHOMERUN
 		if (b_hdhr)
 			context.tuners[context.tuners.size()] = new hdhr_tuner;
@@ -519,10 +521,12 @@ int main(int argc, char **argv)
 #else
 			{}
 #endif
-	if (out_opt > 0)
-		for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+	if (out_opt > 0) {
+		if ((strlen(tcpipfeedurl)) || (strlen(filename)))
+			context._file_feeder.parser.out.set_options(out_opt);
+		else for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 			iter->second->feeder.parser.out.set_options(out_opt);
-
+	}
 	if (b_bitrate_stats) {
 		if (b_read_dvr) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
@@ -550,10 +554,11 @@ int main(int argc, char **argv)
 		if (num_tuners >= 0)
 			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
 		else {
-			if (strlen(channel_list))
+			if (strlen(channel_list)) {
 				if (tuner) tuner->scan_for_services(scan_flags, channel_list, scan_epg);
-			else
+			} else {
 				if (tuner) tuner->scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
+			}
 		}
 		goto exit;
 	}
@@ -573,16 +578,14 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(tcpipfeedurl)) {
-#if 0
-		listen_for_data(&context, tcpipfeedurl);
-#else
-		// FIXME: right now we just pass a port number, in the future, we'll pass protocol://ip_address:port
+		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
+			hlsfeed hlsFeeder(tcpipfeedurl, write_feed, &context);
+		} else
 		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);
 			context._file_feeder.stop();
 			context._file_feeder.close_file();
 		}
-#endif
 		goto exit;
 	}
 

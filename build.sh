@@ -2,15 +2,21 @@
 
 export DVBTEE_ROOT="`pwd`"
 
-if [ -e .x86 ]; then
-    echo building for x86...
-else
+if [ -e .mipsel ]; then
     export ARCH="mipsel-linux"
     export CROSS_COMPILE="mipsel-linux-"
     export CC="mipsel-linux-gcc"
     export GPP="mipsel-linux-g++"
     export LD="mipsel-linux-ld"
     export STRIP="mipsel-linux-strip"
+else
+    echo using default build environment...
+fi
+
+if [ -e Makefile ]; then
+    echo Makefile already exists...
+else
+    qmake -r
 fi
 
 mkdir -p usr/bin
@@ -62,7 +68,7 @@ fi
 
 make -C libdvbpsi install
 
-make -C dvbtee -I${DVBTEE_ROOT}/usr/include/dvbpsi/
+make -C . -I${DVBTEE_ROOT}/usr/include/dvbpsi/
 if [ $? != 0 ]; then
     echo "make (dvbtee) failed"
     exit 1

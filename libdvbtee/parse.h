@@ -22,6 +22,9 @@
 #ifndef __PARSE_H__
 #define __PARSE_H__
 
+//FIXME: for dvbpsi_class - move to .cpp file
+#include <stdio.h>
+
 #include <stdint.h>
 #include <string.h>
 
@@ -30,7 +33,7 @@
 #include "output.h"
 #include "stats.h"
 
-#define LIBDVBTEE_VERSION "0.1.7"
+#define LIBDVBTEE_VERSION "0.1.9"
 
 #define USE_STATIC_DECODE_MAP 1
 
@@ -81,7 +84,9 @@ private:
 //typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
 typedef std::map<uint16_t, dvbpsi_class> map_dvbpsi;
 typedef std::map<uint16_t, decode> map_decoder;
+#if 0 // moved to output.h
 typedef std::map<uint16_t, uint16_t> map_pidtype;
+#endif
 
 typedef struct {
 	unsigned int channel;
@@ -89,8 +94,6 @@ typedef struct {
 	const char *modulation;
 } channel_info_t;
 typedef std::map<uint16_t, channel_info_t> map_channel_info;
-
-typedef std::map<uint16_t, uint16_t> map_eit_pids; /* pid, eit-x */
 
 typedef void (*addfilter_callback)(void *, uint16_t);
 
@@ -120,16 +123,33 @@ public:
 	uint16_t get_ts_id(unsigned int channel);
 
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
+	void add_service_pids(char* service_ids, map_pidtype &pids);
+	void add_service_pids(map_pidtype &pids);
+
+	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); };
 
 	void set_service_ids(char *ids);
 
 	int feed(int, uint8_t*);
 	void reset();
 	void stop();
+	void stop(int);
 
 	int add_output(char*);
 	int add_output(int, unsigned int);
 	int add_output(void* priv, stream_callback);
+
+	int add_output(char*, map_pidtype&);
+	int add_output(int, unsigned int, map_pidtype&);
+	int add_output(void* priv, stream_callback, map_pidtype&);
+
+	int add_output(char*, uint16_t);
+	int add_output(int, unsigned int, uint16_t);
+	int add_output(void* priv, stream_callback, uint16_t);
+
+	int add_output(char*, char*);
+	int add_output(int, unsigned int, char*);
+	int add_output(void* priv, stream_callback, char*);
 
 	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
 	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
@@ -215,7 +235,7 @@ private:
 
 	time_t stream_time;
 	uint16_t ts_id;
-	map_eit_pids service_ids; // ignore the type name used here
+	map_pidtype service_ids; // ignore the type name used here
 
 	bool epg_mode;
 	bool scan_mode;
@@ -228,7 +248,7 @@ private:
 	bool expect_vct;
 
 //	uint8_t grab_next_eit(uint8_t current_eit_x);
-	map_eit_pids eit_pids;
+	map_pidtype eit_pids; /* pid, eit-x */
 
 	int dumped_eit;
 	int eit_collection_limit;
@@ -255,6 +275,7 @@ private:
 #ifdef DVBTEE_DEMUXER
 	demux demuxer;
 #endif
+	map_pidtype out_pids;
 };
 
 #endif //__PARSE_H__

@@ -51,6 +51,8 @@ public:
 
 	bool socket_active() { return (sock_fd >= 0); };
 	bool check();
+
+	unsigned int get_data_fmt() { return data_fmt; };
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -85,6 +87,7 @@ private:
 
 	bool list_feeders();
 	bool list_tuners();
+	bool list_clients();
 
 	decode_report *reporter;
 
@@ -106,6 +109,8 @@ private:
 
 	void cli_print(const char *, ...);
 	static void cli_print(void *, const char *, ...);
+
+	std::string services;
 };
 
 typedef std::map<int, serve_client> serve_client_map;
@@ -133,7 +138,17 @@ public:
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
 	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
-		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL, unsigned int tuner_id = 0);
+		  scan_progress_callback progress_cb = NULL, void* progress_context = NULL,
+		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL,
+		  unsigned int tuner_id = 0);
+	bool scan(unsigned int flags,
+		  chandump_callback chandump_cb, void *chandump_context,
+		  unsigned int tuner_id = 0)
+		{ return scan(flags, NULL, NULL, chandump_cb, chandump_context, tuner_id); };
+	bool scan(unsigned int flags,
+		  scan_progress_callback progress_cb, void *progress_context,
+		  unsigned int tuner_id = 0)
+		{ return scan(flags, progress_cb, progress_context, NULL, NULL, tuner_id); };
 
 	void set_scan_flags(unsigned int tuner_id, unsigned int flags) { scan_flags = flags; };
 	unsigned int get_scan_flags(unsigned int tuner_id) { return scan_flags; };
@@ -141,16 +156,21 @@ public:
 	bool is_running() { return listener.is_running(); };
 	bool is_cli_enabled() { return f_cli_enabled; };
 
+	void reclaim_server_resources();
+	void reclaim_tuner_resources();
 	bool check();
 
 	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; };
 
 	/* FIXME: move to private */
 	bool cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
+			    scan_progress_callback progress_cb, void *progress_context,
 			    chandump_callback chandump_cb, void *chandump_context);
 	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
 
 	feed_server_map feed_servers;
+
+	serve_client_map* get_client_map() { return &client_map; };
 private:
 	socket_listen listener;
 	serve_client_map client_map;

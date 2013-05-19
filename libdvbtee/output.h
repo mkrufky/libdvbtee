@@ -33,6 +33,11 @@
 #include "listen.h"
 #include "rbuf.h"
 
+#define TUNER_RESOURCE_SHARING 0
+
+#if 1 // moved from parse.h
+typedef std::map<uint16_t, uint16_t> map_pidtype;
+#endif
 ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 		    const struct sockaddr *dest_addr = NULL, socklen_t addrlen = 0);
 
@@ -79,11 +84,20 @@ public:
 	void close_file();
 
 	bool push(uint8_t*, int);
-	int add(char*);
-	int add(int, unsigned int);
-	int add(void*, stream_callback);
+
+	int add(char*, map_pidtype&);
+	int add(int, unsigned int, map_pidtype&);
+	int add(void*, stream_callback, map_pidtype&);
 
 	bool check();
+
+	int get_pids(map_pidtype&);
+	void reset_pids() { pids.clear(); };
+
+	bool verify(void* priv, stream_callback callback) { return ((priv == stream_cb_priv) && (callback == stream_cb)); }
+	bool verify(int socket, unsigned int method) { return ((socket == sock) && (method == stream_method)); }
+	bool verify(char* target) { return (strcmp(target, name) == 0); }
+
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -112,6 +126,21 @@ private:
 
 	stream_callback stream_cb;
 	void *stream_cb_priv;
+
+	map_pidtype pids;
+
+	int set_pids(map_pidtype&);
+
+	bool have_pat;
+#if TUNER_RESOURCE_SHARING
+	uint8_t pat_pkt[188];
+
+	bool want_pid(uint16_t pid) { return ((!pids.size()) || (pids.count(pid))) ? true : false; }
+	bool want_pkt(uint8_t *p) { return ((p) && (want_pid(((p[1] & 0x1f) << 8) | p[2]))); }
+#else
+	bool want_pid(uint16_t pid) { return true; }
+	bool want_pkt(uint8_t *p) { return true; }
+#endif
 };
 
 typedef std::map<int, output_stream> output_stream_map;
@@ -127,17 +156,27 @@ public:
 #endif
 	int start();
 	void stop();
+	void stop(int);
 
 	bool push(uint8_t* p_data, int size);
 	bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
-	int add(char*);
-	int add(int, unsigned int);
-	int add(void*, stream_callback);
+
+	int add(char* target) { map_pidtype pids; return add(target, pids); };
+	int add(int socket, unsigned int method) { map_pidtype pids; return add(socket, method, pids); };
+	int add(void* priv, stream_callback callback) { map_pidtype pids; return add(priv, callback, pids); };
+
+	int add(char* target, map_pidtype &pids);
+	int add(int socket, unsigned int method, map_pidtype &pids);
+	int add(void* priv, stream_callback callback, map_pidtype &pids);
+
 	int add_http_server(int);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
 
 	bool check();
+
+	int get_pids(map_pidtype&);
+	void reset_pids(int target_id);
 private:
 	output_stream_map output_streams;
 
@@ -157,7 +196,7 @@ private:
 
 	void reclaim_resources();
 
-	int __add(char*);
+	int __add(char* target, map_pidtype &pids);
 
 	unsigned int num_targets;
 
@@ -166,6 +205,10 @@ private:
 	unsigned long int count_in, count_out;
 
 	socket_listen listener;
+
+	int search(void* priv, stream_callback callback);
+	int search(int socket, unsigned int method);
+	int search(char* target);
 };
 
 #endif /*__OUTPUT_H__ */

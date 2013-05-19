@@ -1226,14 +1226,22 @@ bool decode_network_service::eit_x_complete_dvb_pf()
 {
 	uint8_t current_eit_x = 0;
 	return ((decoded_sdt.services.size()) &&
-		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_pf)) &&
+		(((decoded_eit[current_eit_x].size())
+#if 0
+		  || (!services_w_eit_pf)
+#endif
+		  ) &&
 		 (decoded_eit[current_eit_x].size() == services_w_eit_pf)));
 }
 
 bool decode_network_service::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 {
 	return ((decoded_sdt.services.size()) &&
-		(((decoded_eit[current_eit_x].size()) || (!services_w_eit_sched)) &&
+		(((decoded_eit[current_eit_x].size())
+#if 0
+		  || (!services_w_eit_sched)
+#endif
+		  ) &&
 		 (decoded_eit[current_eit_x].size() == services_w_eit_sched)));
 }
 

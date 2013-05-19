@@ -53,8 +53,44 @@ static tune *find_idle_tuner()
 			dprintf("tuner %d is available", iter->first);
 			return iter->second;
 		}
-	dprintf("falling back to default tuner");
-	return (tuners.count(0)) ? tuners[0] : NULL;
+	return NULL;
+}
+
+static tune *find_tuned_tuner(unsigned int phy)
+{
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if ((iter->second->is_lock()) && (phy == iter->second->get_channel())) {
+			dprintf("tuner %d is locked to physical channel %d", iter->first, phy);
+			return iter->second;
+		}
+	return NULL;
+}
+
+static inline const char *data_fmt_str(unsigned int data_fmt)
+{
+	const char *fmt;
+	switch (data_fmt) {
+	default:
+	case SERVE_DATA_FMT_NONE:
+		fmt = "NONE";
+		break;
+	case SERVE_DATA_FMT_HTML:
+		fmt = "HTML";
+		break;
+	case SERVE_DATA_FMT_BIN:
+		fmt = "BIN";
+		break;
+	case SERVE_DATA_FMT_JSON:
+		fmt = "JSON";
+		break;
+	case SERVE_DATA_FMT_CLI:
+		fmt = "CLI";
+		break;
+	case SERVE_DATA_FMT_XML:
+		fmt = "XML";
+		break;
+	}
+	return fmt;
 }
 
 //static
@@ -101,6 +137,16 @@ bool serve_client::list_tuners()
 	return true;
 }
 
+bool serve_client::list_clients()
+{
+	serve_client_map *client_map = server->get_client_map();
+	cli_print("%d clients.\n", client_map->size());
+	for (serve_client_map::iterator iter = client_map->begin(); iter != client_map->end(); ++iter)
+		if (iter->second.check())
+			cli_print("client %d:\tformat = %s\n", iter->first, data_fmt_str(iter->second.get_data_fmt()));
+	return true;
+}
+
 bool serve::get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
@@ -139,7 +185,7 @@ bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
 	return true;
 }
 
-bool serve::scan(unsigned int flags, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+bool serve::scan(unsigned int flags, scan_progress_callback progress_cb, void *progress_context, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
@@ -151,7 +197,7 @@ bool serve::scan(unsigned int flags, chandump_callback chandump_cb, void *chandu
 
 	dprintf("scanning for services...");
 
-	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, chandump_cb, chandump_context);
+	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, progress_cb, progress_context, chandump_cb, chandump_context);
 }
 
 /*****************************************************************************/
@@ -233,6 +279,7 @@ serve_client::serve_client()
   , reporter(NULL)
 {
 	dprintf("()");
+	services.clear();
 }
 
 serve_client::~serve_client()
@@ -251,6 +298,7 @@ serve_client::serve_client(const serve_client&)
 	feeder = NULL;
 	sock_fd = -1;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	services.clear();
 }
 
 serve_client& serve_client::operator= (const serve_client& cSource)
@@ -266,6 +314,7 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 	feeder = NULL;
 	sock_fd = -1;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	services.clear();
 
 	return *this;
 }
@@ -460,25 +509,12 @@ void* serve::monitor_thread(void *p_this)
 void* serve::monitor_thread()
 {
 	while (!f_kill_thread) {
+		check();
 #if 0
 		for (feeder_map::iterator iter = feeders.begin(); iter != feeders.end(); ++iter)
 			if (iter->second->check())
 				cli_print("feeder %d:\t%s\n", iter->first, iter->second->get_filename());
 #endif
-		for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
-			if (iter->second->check()) {
-				/* if the tuner is feeding, check to see if it is streaming to any output.
-				   if not streaming, stop this tuner */
-				if (((f_reclaim_resources) && (!any_cli)) &&
-				    (((iter->second->is_feed()) && (iter->second->last_touched() > 15)) &&
-				     (!iter->second->feeder.parser.check()))) {
-					dprintf("reclaiming idle resource:");
-					dprintf("stopping data feed...");
-					iter->second->stop_feed();
-					dprintf("closing frontend...");
-					iter->second->close_fe();
-				}
-			}
 		sleep(1*15); // sleep for 15 seconds between monitor iterations
 	}
 	pthread_exit(NULL);
@@ -583,7 +619,8 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 		if (data_fmt == SERVE_DATA_FMT_CLI)
 			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name);
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
-			decoded_event_t ee = { 0 };
+			decoded_event_t ee;
+			memset(&ee, 0, sizeof(ee));
 			ee.channel_name  = e->channel_name;
 			ee.chan_major    = e->chan_major;
 			ee.chan_minor    = e->chan_minor;
@@ -612,7 +649,8 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 		cli_print("%s\t %s\n", time_str, e->name);
 	}
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
-		decoded_event_t ee = { 0 };
+		decoded_event_t ee;
+		memset(&ee, 0, sizeof(ee));
 		ee.event_id = e->event_id;
 		ee.start_time = e->start_time;
 		ee.length_sec = e->length_sec;
@@ -652,9 +690,7 @@ void serve::add_client(int socket)
 	}
 
 	/* check for old clients & clean them up */
-	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
-		if (!iter->second.socket_active())
-			client_map.erase(iter->first);
+	reclaim_server_resources();
 
 	client_map[socket].setup(this, socket);
 	client_map[socket].start();
@@ -688,34 +724,53 @@ bool serve_client::check()
 {
 	bool ret = socket_active();
 	if (!ret)
-		cli_print("(%d) socket idle!\n", sock_fd);
+		dprintf("(%d) socket idle!", sock_fd);
 	else {
-		const char *fmt;
-		switch (data_fmt) {
-		default:
-		case SERVE_DATA_FMT_NONE:
-			fmt = "NONE";
-			break;
-		case SERVE_DATA_FMT_HTML:
-			fmt = "HTML";
-			break;
-		case SERVE_DATA_FMT_BIN:
-			fmt = "BIN";
-			break;
-		case SERVE_DATA_FMT_JSON:
-			fmt = "JSON";
-			break;
-		case SERVE_DATA_FMT_CLI:
-			fmt = "CLI";
-			any_cli = true;
-			break;
-		case SERVE_DATA_FMT_XML:
-			fmt = "XML";
-			break;
-		}
-		cli_print("(%d) format = %s\n", sock_fd, fmt);
+		if (data_fmt == SERVE_DATA_FMT_CLI) any_cli = true;
+
+		dprintf("(%d) format = %s", sock_fd, data_fmt_str(data_fmt));
 	}
 	return ret;
+}
+
+void serve::reclaim_server_resources()
+{
+	dprintf("()");
+
+	bool erased = false;
+
+	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
+		if (!iter->second.check()) {
+			dprintf("erasing idle client...");
+			client_map.erase(iter->first);
+			/* stop the loop if we erased any targets */
+			erased = true;
+			break;
+		}
+
+	/* if we erased a target, restart the above by re-calling this function recursively */
+	if (erased)
+		reclaim_server_resources();
+}
+
+void serve::reclaim_tuner_resources()
+{
+	dprintf("()");
+
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if (iter->second->check()) {
+			/* if the tuner is feeding, check to see if it is streaming to any output.
+			   if not streaming, stop this tuner */
+			if ((!iter->second->feeder.parser.check()) &&
+			    ((f_reclaim_resources) && (!any_cli)) &&
+			    ((iter->second->is_feed()) && (iter->second->last_touched() > 15)) ) {
+				dprintf("reclaiming idle resource:");
+				dprintf("stopping data feed...");
+				iter->second->stop_feed();
+				dprintf("closing frontend...");
+				iter->second->close_fe();
+			}
+		}
 }
 
 bool serve::check()
@@ -724,9 +779,8 @@ bool serve::check()
 
 	any_cli = false;
 
-	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
-		if (!iter->second.check())
-			client_map.erase(iter->first);
+	reclaim_server_resources();
+	reclaim_tuner_resources();
 
 	return true;
 }
@@ -920,7 +974,7 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 				cli_print("LOCK!\n");
 			tuner->feeder.parser.set_channel_info(channel,
 							     (flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) :
-							                           atsc_qam_chan_to_freq(channel),
+										   atsc_qam_chan_to_freq(channel),
 							     (flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 			tuner->start_feed();
 
@@ -934,15 +988,16 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 }
 
 bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
+			   scan_progress_callback progress_cb, void *progress_context,
 			   chandump_callback chandump_cb, void *chandump_context)
 {
 	if (!flags)
 		flags = SCAN_VSB;
 
 	if ((arg) && strlen(arg))
-		tuner->scan_for_services(flags, arg, scanepg, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(flags, arg, scanepg, progress_cb, progress_context, chandump_cb, chandump_context, wait_for_results);
 	else
-		tuner->scan_for_services(flags, 0, 0, scanepg, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(flags, 0, 0, scanepg, progress_cb, progress_context, chandump_cb, chandump_context, wait_for_results);
 
 	return true;
 }
@@ -1189,7 +1244,7 @@ bool serve_client::__command(char* cmdline)
 		server->cmd_tuner_scan(tuner, arg,
 				      (strstr(cmd, "scanepg")) ? true : false,
 				      (strstr(cmd, "startscan")) ? false : true,
-				      scan_flags, chandump, this);
+				      scan_flags, NULL, NULL, chandump, this);
 
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;
@@ -1208,10 +1263,34 @@ bool serve_client::__command(char* cmdline)
 
 		cli_print("preparing to tune to physical channel %d...\n", phy, ser);
 
-		/* see if tuner has the right physical channel, if not then change it */
+		/* see if tuner has the right physical channel, if not
+		 * then find another tuner that does or change it */
 		cur = tuner->get_channel();
-		if ((cur) && (cur != phy))
+		if ((cur) && (cur != phy)) {
+#if TUNER_RESOURCE_SHARING
+			tune *old_tuner = tuner;
+			tune *new_tuner = find_tuned_tuner(phy);
+			if (!new_tuner) new_tuner = find_idle_tuner();
+
+			if (new_tuner) {
+				tuner = new_tuner;
+				feeder = &tuner->feeder;
+				cur = tuner->get_channel();
+			} else {
+				cmd_tuner_stop();
+				tuner->feeder.parser.reset_output_pids();
+			}
+			if ((tuner == new_tuner) && (tuner != old_tuner))
+				cli_print("found another tuner more suitable for physical channel %d.\n", phy);
+#else
 			cmd_tuner_stop();
+			tuner->feeder.parser.reset_output_pids();
+#endif
+		}
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
 		if (cur == phy) /* (cur) */ {
 			cli_print("already tuned to physical channel %d.\n", phy);
 			tuned = true;
@@ -1220,9 +1299,11 @@ bool serve_client::__command(char* cmdline)
 
 		if (tuned) {
 			/* set service, if any */
+			services.clear();
 			if ((ser) && strlen(ser)) {
 				cli_print("selecting service id (%s)...\n", ser);
 				tuner->feeder.parser.set_service_ids(ser);
+				services.append(ser);
 			}
 #if 0
 			else
@@ -1266,17 +1347,22 @@ bool serve_client::__command(char* cmdline)
 
 	} else if (strstr(cmd, "service")) {
 		cli_print("selecting service id...\n");
-		if ((arg) && strlen(arg))
+		services.clear();
+		if ((arg) && strlen(arg)) {
 			feeder->parser.set_service_ids(arg);
-		else
+			services.append(arg);
+		} else
 			feeder->parser.set_service_ids(NULL);
 
 	} else if (strstr(cmd, "stream")) {
-		cli_print("adding stream target...\n");
-		if ((arg) && strlen(arg))
-			feeder->parser.add_output(arg);
-		else
-			feeder->parser.add_output(sock_fd, OUTPUT_STREAM_HTTP);
+#if TUNER_RESOURCE_SHARING
+		cli_print("wait for psip...\n");
+		feeder->wait_for_psip(1000); /* FIXME */
+#endif
+		cli_print("adding stream target id#%4d...\n",
+			  ((arg) && strlen(arg)) ?
+			  feeder->parser.add_output(arg, (char*)services.c_str()) :
+			  feeder->parser.add_output(sock_fd, OUTPUT_STREAM_HTTP, (char*)services.c_str()));
 
 	} else if (strstr(cmd, "video")) {
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
@@ -1323,23 +1409,36 @@ bool serve_client::__command(char* cmdline)
 		streamback((const uint8_t*)str, strlen(str));
 
 	} else if (strstr(cmd, "stop")) {
-		if (tuner)
-			cmd_tuner_stop();
-		else
-			feeder->stop();
-		if (strstr(cmd, "stopoutput")) {
-			cli_print("stopping output...\n");
-			feeder->parser.stop();
+		bool stop_output = (strstr(cmd, "stopoutput")) ? true : false;
+		int output_id = ((arg) && strlen(arg)) ? strtoul(arg, NULL, 0) : -1;
+
+		if ((!stop_output) || (output_id == -1)) {
+			if (tuner)
+				cmd_tuner_stop();
+			else
+				feeder->stop();
+		}
+		if (stop_output) {
+			if (output_id == -1) {
+				cli_print("stopping output...\n");
+				feeder->parser.stop();
+			} else {
+				cli_print("stopping output #%d...\n", output_id);
+				feeder->parser.stop(output_id);
+			}
 		}
 	} else if (strstr(cmd, "check")) {
 		cli_print("checking server status...\n");
 		server->check();
+		list_clients();
 		if (tuner) {
 			cli_print("checking tuner status...\n");
 			tuner->check();
 		}
+		list_tuners();
 		cli_print("checking feeder status...\n");
 		feeder->check();
+		list_feeders();
 		cli_print("checking parser / output status...\n");
 		feeder->parser.check();
 	} else if (strstr(cmd, "debug")) {

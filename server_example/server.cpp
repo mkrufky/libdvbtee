@@ -172,12 +172,12 @@ bool list_channels(serve *server)
 
 bool start_async_channel_scan(serve *server, unsigned int flags = 0)
 {
-	server->scan(flags);
+	return server->scan(flags);
 }
 
 bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 {
-	server->scan(flags, chandump, NULL);
+	return server->scan(flags, chandump, NULL);
 }
 
 
@@ -216,7 +216,6 @@ int main(int argc, char **argv)
 	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 	int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
 
-	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
 
         while ((opt = getopt(argc, argv, "a:A:f:d::")) != -1) {
