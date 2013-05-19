@@ -455,16 +455,16 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 		descriptors.decode(p_es->p_first_descriptor);
 
 		if (descriptors._a1.count(p_es->i_pid)) {
-			memcpy(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].ISO_639_language_code,
-			       descriptors._a1[p_es->i_pid].ISO_639_language_code,
-			       sizeof(descriptors._a1[p_es->i_pid].ISO_639_language_code));
+			memcpy(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].iso_639_code,
+			       descriptors._a1[p_es->i_pid].iso_639_code,
+			       sizeof(descriptors._a1[p_es->i_pid].iso_639_code));
 		}
 #if PMT_DBG
 		fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
 			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].pid,
 			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type,
 			streamtype_name(decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].type),
-			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].ISO_639_language_code);
+			decoded_pmt[p_pmt->i_program_number].es_streams[p_es->i_pid].iso_639_code);
 #endif
 		p_es = p_es->p_next;
 	}
@@ -528,13 +528,13 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 		for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
 			//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
 			if (decoded_pmt.count(p_channel->i_program_number)) {
-				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_PID].ISO_639_language_code,
-				       iter_dra1->second.ISO_639_language_code, sizeof(iter_dra1->second.ISO_639_language_code));
+				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_PID].iso_639_code,
+				       iter_dra1->second.iso_639_code, sizeof(iter_dra1->second.iso_639_code));
 				dprintf("copied service location descriptor from VCT into PMT");
 			}
 			if (!languages.empty()) languages.append(", ");
-			if (iter_dra1->second.ISO_639_language_code[0])
-				for (int i=0; i<3; i++) languages.push_back(iter_dra1->second.ISO_639_language_code[i]);
+			if (iter_dra1->second.iso_639_code[0])
+				for (int i=0; i<3; i++) languages.push_back(iter_dra1->second.iso_639_code[i]);
 		}
 #if VCT_DBG
 		unsigned char service_name[8] = { 0 };

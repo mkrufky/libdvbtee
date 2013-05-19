@@ -65,9 +65,9 @@ typedef struct ts_elementary_stream_s
 	uint16_t	pid;
 	// FIXME: descriptors...
 	// from service location descriptor A1:
-	unsigned char ISO_639_language_code[4];
+	unsigned char iso_639_code[4];
 
-	ts_elementary_stream_s() { memset(ISO_639_language_code, 0, sizeof(ISO_639_language_code)); }
+	ts_elementary_stream_s() { memset(iso_639_code, 0, sizeof(iso_639_code)); }
 } ts_elementary_stream_t; // FIXME: rename this later
 
 typedef std::map<uint16_t, ts_elementary_stream_t> map_ts_elementary_streams; /* arbitrary idx(pid), ts_elementary_stream_t */

@@ -189,11 +189,11 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 		}
 		_a1[element->i_elementary_PID].elementary_PID = element->i_elementary_PID;
 		_a1[element->i_elementary_PID].stream_type    = element->i_stream_type;
-		memcpy(_a1[element->i_elementary_PID].ISO_639_language_code, element->i_ISO_639_language_code, 3*sizeof(unsigned char));
+		memcpy(_a1[element->i_elementary_PID].iso_639_code, element->i_iso_639_code, 3);
 		dprintf("%d, %d, %c%c%c", element->i_elementary_PID, element->i_stream_type,
-			element->i_ISO_639_language_code[0],
-			element->i_ISO_639_language_code[1],
-			element->i_ISO_639_language_code[2]);
+			element->i_iso_639_code[0],
+			element->i_iso_639_code[1],
+			element->i_iso_639_code[2]);
 		element = element->p_next;
 	}
 

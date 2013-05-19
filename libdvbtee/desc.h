@@ -40,7 +40,7 @@ typedef struct
 {
 	uint8_t       stream_type;
 	uint16_t      elementary_PID;
-	unsigned char ISO_639_language_code[3];
+	unsigned char iso_639_code[3];
 } dra1_t;
 
 typedef std::map<uint16_t, dra1_t> map_dra1;
