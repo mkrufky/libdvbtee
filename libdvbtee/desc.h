@@ -69,6 +69,7 @@ private:
 	bool freq_list(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
 	bool caption_service(dvbpsi_descriptor_t*);
+	bool extended_channel_name(dvbpsi_descriptor_t*);
 	bool service_location(dvbpsi_descriptor_t*);
 };
 

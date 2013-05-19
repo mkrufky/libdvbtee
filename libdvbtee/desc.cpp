@@ -35,6 +35,7 @@
 #include "dvbpsi/dr_62.h" /* frequency list descriptor */
 #include "dvbpsi/dr_83.h" /* LCN descriptor */
 #include "dvbpsi/dr_86.h" /* caption service descriptor */
+#include "dvbpsi/dr_a0.h" /* extended channel name descriptor */
 #include "dvbpsi/dr_a1.h" /* service location descriptor */
 
 #include "desc.h"
@@ -48,6 +49,7 @@
 #define DT_FrequencyList              0x62
 #define DT_LogicalChannelNumber       0x83
 #define DT_CaptionService             0x86
+#define DT_ExtendedChannelName        0xa0
 #define DT_ServiceLocation            0xa1
 
 
@@ -175,6 +177,20 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
+bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_ExtendedChannelName)
+		return false;
+
+	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_ExtendedChannelNameeDr(p_descriptor);
+
+	unsigned char name[256];
+	memset(name, 0, sizeof(name));
+	decode_multiple_string(dr->i_long_channel_name, dr->i_long_channel_name_length, name);
+
+	dprintf("%s", name);
+}
+
 bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 {
 	if (p_descriptor->i_tag != DT_ServiceLocation)
@@ -221,6 +237,9 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 			break;
 		case DT_CaptionService:
 			caption_service(p_descriptor);
+			break;
+		case DT_ExtendedChannelName:
+			extended_channel_name(p_descriptor);
 			break;
 		case DT_ServiceLocation:
 			service_location(p_descriptor);
