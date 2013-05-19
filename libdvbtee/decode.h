@@ -287,7 +287,7 @@ public:
 
 	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); };
 	bool take_nit(dvbpsi_nit_t*);
-	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); };
+	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_extension].take_sdt(p_sdt); };
 
 	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL; };
 	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };

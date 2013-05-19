@@ -667,14 +667,14 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 	    (decoded_sdt->network_id == p_sdt->i_network_id)) {
 
 		dprintf("v%d | ts_id %d | network_id %d: ALREADY DECODED",
-			p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
+			p_sdt->i_version, p_sdt->i_extension, p_sdt->i_network_id);
 		return false;
 	}
 	dprintf("v%02d | ts_id %05d | network_id %05d\n"
 		/*"------------------------------------"*/,
-		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
+		p_sdt->i_version, p_sdt->i_extension, p_sdt->i_network_id);
 
-	decoded_sdt->ts_id      = p_sdt->i_ts_id;
+	decoded_sdt->ts_id      = p_sdt->i_extension;
 	decoded_sdt->version    = p_sdt->i_version;
 	decoded_sdt->network_id = p_sdt->i_network_id;
 
