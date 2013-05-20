@@ -5,9 +5,7 @@ SUBDIRS += libdvbtee \
            libdvbtee_server \
            dvbtee \
            server_example \
-           parser_example
-
-DISABLED_SUBDIRS = \
+           parser_example \
            walk_hls
 
 libdvbtee.target = libdvbtee
@@ -27,7 +25,5 @@ QMAKE_EXTRA_TARGETS += libdvbtee \
                        libdvbtee_server \
                        dvbtee \
                        server_example \
-                       parser_example
-
-DISABLED_QMAKE_EXTRA_TARGETS = \
+                       parser_example \
                        walk_hls
