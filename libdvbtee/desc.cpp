@@ -189,6 +189,8 @@ bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 	decode_multiple_string(dr->i_long_channel_name, dr->i_long_channel_name_length, name);
 
 	dprintf("%s", name);
+
+	return true;
 }
 
 bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
