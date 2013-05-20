@@ -52,6 +52,12 @@
 #define DT_ExtendedChannelName        0xa0
 #define DT_ServiceLocation            0xa1
 
+#define desc_dr_failed(dr)			\
+  ({						\
+    bool __ret = !dr;				\
+    if (__ret) dprintf("decoder failed!");	\
+    __ret;					\
+  })
 
 desc::desc()
 //  : f_kill_thread(false)
@@ -70,7 +76,7 @@ bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_iso639_dr_t* dr = dvbpsi_DecodeISO639Dr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	for (int i = 0; i < dr->i_code_count; ++i)
 		dprintf("%c%c%c %x",
@@ -88,7 +94,7 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_service_dr_t* dr = dvbpsi_DecodeServiceDr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	get_descriptor_text(dr->i_service_provider_name, dr->i_service_provider_name_length, provider_name);
 	get_descriptor_text(dr->i_service_name,          dr->i_service_name_length,          service_name);
@@ -104,7 +110,7 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	memcpy(_4d.lang, dr->i_iso_639_code, 3);
 	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, _4d.name);
@@ -122,7 +128,7 @@ bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_frequency_list_dr_t* dr = dvbpsi_DecodeFrequencyListDr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	for (int i = 0; i < dr->i_number_of_frequencies; ++i) {
 #if 0
@@ -140,7 +146,7 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_lcn_dr_t* dr = dvbpsi_DecodeLCNDr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	for (int i = 0; i < dr->i_number_of_entries; i ++) {
 #if 0
@@ -161,7 +167,7 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_caption_service_dr_t* dr = dvbpsi_DecodeCaptionServiceDr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	dvbpsi_caption_service_t *service = dr->p_first_service;
 	for (int i = 0; i < dr->i_number_of_services; i ++) {
@@ -192,7 +198,7 @@ bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_ExtendedChannelNameeDr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	unsigned char name[256];
 	memset(name, 0, sizeof(name));
@@ -209,7 +215,7 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	dvbpsi_service_location_dr_t* dr = dvbpsi_DecodeServiceLocationDr(p_descriptor);
-	if (!dr) return false;
+	if (desc_dr_failed(dr)) return false;
 
 	dvbpsi_service_location_element_t *element = dr->p_first_element;
 	for (int i = 0; i < dr->i_number_elements; i ++) {
