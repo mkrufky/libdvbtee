@@ -98,7 +98,7 @@ void feed::set_filename(char* new_file)
 {
 	dprintf("(%s)", new_file);
 
-	strcpy(filename, new_file);
+	strncpy(filename, new_file, sizeof(filename));
 };
 
 int feed::open_file()
@@ -493,7 +493,7 @@ int feed::start_stdin()
 		return -1;
 	}
 	fprintf(stderr, "%s: using STDIN\n", __func__);
-	strcpy(filename, "STDIN");
+	strncpy(filename, "STDIN", sizeof(filename));
 
 	f_kill_thread = false;
 
@@ -521,7 +521,7 @@ int feed::start_socket(char* source)
 	int ret;
 
 	dprintf("(<--%s)", source);
-	strcpy(filename, source);
+	strncpy(filename, source, sizeof(filename));
 
 	if (strstr(source, ":")) {
 		ip = strtok_r(source, ":", &save);
