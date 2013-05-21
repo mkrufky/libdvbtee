@@ -67,6 +67,7 @@ private:
 	bool service(dvbpsi_descriptor_t*);
 	bool short_event(dvbpsi_descriptor_t*);
 	bool freq_list(dvbpsi_descriptor_t*);
+	bool ac3_audio(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
 	bool caption_service(dvbpsi_descriptor_t*);
 	bool extended_channel_name(dvbpsi_descriptor_t*);
