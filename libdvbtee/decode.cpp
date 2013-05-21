@@ -698,8 +698,12 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 
 		/* service descriptors contain service provider name & service name */
 		descriptors->decode(p_service->p_first_descriptor);
-		strcpy((char*)decoded_sdt->services[p_service->i_service_id].provider_name, (const char*)descriptors->provider_name);
-		strcpy((char*)decoded_sdt->services[p_service->i_service_id].service_name, (const char*)descriptors->service_name);
+		strncpy((char*)decoded_sdt->services[p_service->i_service_id].provider_name,
+			(const char*)descriptors->provider_name,
+			sizeof(decoded_sdt->services[p_service->i_service_id].provider_name));
+		strncpy((char*)decoded_sdt->services[p_service->i_service_id].service_name,
+			(const char*)descriptors->service_name,
+			sizeof(decoded_sdt->services[p_service->i_service_id].service_name));
 
 		dprintf("%05d | %s %s | %s - %s",
 			decoded_sdt->services[p_service->i_service_id].service_id,
