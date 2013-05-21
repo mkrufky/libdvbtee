@@ -882,7 +882,9 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 
 			unsigned char name[256];
 			memset(name, 0, sizeof(char) * 256);
-			decode_multiple_string(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title, decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes, name);
+			decode_multiple_string(decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title,
+					       decoded_atsc_eit[eit_x][p_eit->i_source_id].events[p_event->i_event_id].title_bytes,
+					       name, sizeof(name));
 			//p_epg->text[0] = 0;
 
 			struct tm tms = *localtime( &start );
@@ -946,7 +948,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 
 	unsigned char name[256];
 	memset(name, 0, sizeof(char) * 256);
-	decode_multiple_string(event->title, event->title_bytes, name);
+	decode_multiple_string(event->title, event->title_bytes, name, sizeof(name));
 
 	//FIXME: descriptors
 
@@ -963,7 +965,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 					 start,
 					 event->length_sec,
 					 (const char *)name,
-					 (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message));
+					 (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
 	}
 	return;
 }
@@ -1027,7 +1029,7 @@ void decode::dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t so
 
 			unsigned char name[256];
 			memset(name, 0, sizeof(char) * 256);
-			decode_multiple_string(iter_eit->second.title, iter_eit->second.title_bytes, name);
+			decode_multiple_string(iter_eit->second.title, iter_eit->second.title_bytes, name, sizeof(name));
 
 			//FIXME: descriptors
 
@@ -1143,7 +1145,7 @@ void decode::dump_epg(decode_report *reporter)
 	return;
 }
 
-unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message)
+unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message)
 {
 	// we're assuming that message is an array of 256 unsigned char's
 	memset(message, 0, sizeof(char) * 256);
@@ -1151,7 +1153,7 @@ unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message)
 	if (decoded_ett.count(etm_id))
 		decode_multiple_string(decoded_ett[etm_id].etm,
 				       decoded_ett[etm_id].etm_length,
-				       message);
+				       message, sizeof_message);
 
 	return message;
 }
@@ -1174,7 +1176,7 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 	unsigned char message[256];
 	memset(message, 0, sizeof(char) * 256);
 
-	decode_multiple_string(p_ett->p_etm, p_ett->i_etm_length, message);
+	decode_multiple_string(p_ett->p_etm, p_ett->i_etm_length, message, sizeof(message));
 
 	fprintf(stderr, "%s: v%d, ID: %d: %s\n", __func__,
 		p_ett->i_version, p_ett->i_etm_id, message);

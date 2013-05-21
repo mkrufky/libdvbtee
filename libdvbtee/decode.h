@@ -405,7 +405,7 @@ public:
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
 	const map_decoded_eit*      get_decoded_eit();
 
-	unsigned char* get_decoded_ett(uint16_t etm_id, unsigned char *message); /* message must be an array of 256 unsigned char's */
+	unsigned char* get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message); /* message must be an array of 256 unsigned char's */
 
 	const uint8_t get_current_eit_x() { return eit_x; };
 	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; };
