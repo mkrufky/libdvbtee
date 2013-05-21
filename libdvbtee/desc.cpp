@@ -169,8 +169,8 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 	dvbpsi_caption_service_dr_t* dr = dvbpsi_DecodeCaptionServiceDr(p_descriptor);
 	if (desc_dr_failed(dr)) return false;
 
-	dvbpsi_caption_service_t *service = dr->p_first_service;
 	for (int i = 0; i < dr->i_number_of_services; i ++) {
+		dvbpsi_caption_service_t *service = &dr->services[0];
 		if (!service) {
 			dprintf("error!");
 			break;
@@ -186,7 +186,6 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 			service->i_iso_639_code[0],
 			service->i_iso_639_code[1],
 			service->i_iso_639_code[2]);
-		service = service->p_next;
 	}
 
 	return true;
@@ -217,8 +216,8 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 	dvbpsi_service_location_dr_t* dr = dvbpsi_DecodeServiceLocationDr(p_descriptor);
 	if (desc_dr_failed(dr)) return false;
 
-	dvbpsi_service_location_element_t *element = dr->p_first_element;
 	for (int i = 0; i < dr->i_number_elements; i ++) {
+		dvbpsi_service_location_element_t *element = &dr->elements[i];
 		if (!element) {
 			dprintf("error!");
 			break;
@@ -230,7 +229,6 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 			element->i_iso_639_code[0],
 			element->i_iso_639_code[1],
 			element->i_iso_639_code[2]);
-		element = element->p_next;
 	}
 
 	return true;
