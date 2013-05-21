@@ -83,7 +83,7 @@ unsigned char* get_descriptor_text(unsigned char* desc, uint8_t len, unsigned ch
 time_t      datetime_utc(uint64_t time);
 time_t atsc_datetime_utc(uint32_t in_time);
 
-int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text, size_t sizeof_text = 0);
+int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text, size_t sizeof_text);
 
 char *url_encode(char *str);
 
