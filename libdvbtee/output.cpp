@@ -174,7 +174,7 @@ int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool 
 #endif
 	if ((length) || (send_zero_length)) {
 		int ret = 0;
-		char sz[7] = { 0 };
+		char sz[8] = { 0 };
 		sprintf(sz, "%x\r\n", (unsigned int)length);
 
 		ret = socket_send(socket, sz, strlen(sz), 0);
