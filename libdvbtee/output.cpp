@@ -54,7 +54,7 @@ static char http_conn_close[] =
 	CRLF;
 #endif
 
-int hostname_to_ip(char *hostname, char *ip)
+int hostname_to_ip(char *hostname, char *ip, size_t sizeof_ip = 0)
 {
 	struct addrinfo hints, *servinfo, *p;
 	struct sockaddr_in *h;
@@ -72,7 +72,10 @@ int hostname_to_ip(char *hostname, char *ip)
 	/* loop through all the results and connect to the first we can */
 	for (p = servinfo; p != NULL; p = p->ai_next) {
 		h = (struct sockaddr_in*) p->ai_addr;
-		strcpy(ip, inet_ntoa(h->sin_addr));
+		if (sizeof_ip)
+			strncpy(ip, inet_ntoa(h->sin_addr), sizeof_ip);
+		else
+			strcpy(ip, inet_ntoa(h->sin_addr));
 	}
 
 	freeaddrinfo(servinfo);
@@ -520,7 +523,7 @@ int output_stream::add(void* priv, stream_callback callback, map_pidtype &pids)
 
 	ringbuffer.reset();
 	stream_method = OUTPUT_STREAM_FUNC;
-	strcpy(name, "FUNC");
+	strncpy(name, "FUNC", sizeof(name));
 	return set_pids(pids);
 }
 
@@ -528,7 +531,7 @@ int output_stream::add(int socket, unsigned int method, map_pidtype &pids)
 {
 	sock = socket;
 	stream_method = method;
-	strcpy(name, "SOCKET");
+	strncpy(name, "SOCKET", sizeof(name));
 
 #if NON_BLOCKING_TCP_SEND
 	int fl = fcntl(sock, F_GETFL, 0);
@@ -550,7 +553,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 
 	dprintf("(-->%s)", target);
 
-	strcpy(name, target);
+	strncpy(name, target, sizeof(name));
 
 	if (strstr(target, ":")) {
 		ip = strtok_r(target, ":", &save);
@@ -600,7 +603,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 			perror("set non-blocking failed");
 
 		char resolved_ip[16] = { 0 };
-		if (0 == hostname_to_ip(ip, resolved_ip))
+		if (0 == hostname_to_ip(ip, resolved_ip, sizeof(resolved_ip)))
 			ip = &resolved_ip[0];
 
 		memset(&ip_addr, 0, sizeof(ip_addr));
