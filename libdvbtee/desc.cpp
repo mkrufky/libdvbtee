@@ -344,7 +344,7 @@ bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 
 	unsigned char name[256];
 	memset(name, 0, sizeof(name));
-	decode_multiple_string(dr->i_long_channel_name, dr->i_long_channel_name_length, name);
+	decode_multiple_string(dr->i_long_channel_name, dr->i_long_channel_name_length, name, sizeof(name));
 
 	dprintf("%s", name);
 
