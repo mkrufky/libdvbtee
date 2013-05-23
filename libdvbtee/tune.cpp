@@ -135,11 +135,12 @@ void* tune::scan_thread()
 {
 	if (!is_scan()) {
 
-	scan_progress_t progress = {
-		.total = (unsigned int)scan_channel_list.size(),
-		.current = 0,
-		.physical_channel = 0,
-	};
+	scan_progress_t progress;
+
+	progress.total = (unsigned int)scan_channel_list.size(),
+	progress.current = 0,
+	progress.physical_channel = 0,
+
 	state |= TUNE_STATE_SCAN;
 
 	feeder.parser.set_scan_mode(true);
