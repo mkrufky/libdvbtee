@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
+QT       -= core
 
 TARGET = dvbtee
 TEMPLATE = lib
