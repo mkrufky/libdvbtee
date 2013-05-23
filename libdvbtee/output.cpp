@@ -356,7 +356,9 @@ int output_stream::start()
 		dprintf("(%d) already streaming", sock);
 		return 0;
 	}
-	if ((sock < 0) && (stream_method != OUTPUT_STREAM_FUNC))
+	if ((sock < 0) &&
+	    ((stream_method != OUTPUT_STREAM_FUNC) &&
+	     (stream_method != OUTPUT_STREAM_STDOUT)))
 		return sock;
 
 	dprintf("(%d)", sock);
@@ -508,7 +510,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 		break;
 	case OUTPUT_STREAM_STDOUT:
 		ret = write_stdout(p_data, size);
-		if (ret < 0) {
+		if (ret != size) {
 			stop_without_wait();
 			perror("dump to stdout failed");
 		}
@@ -558,7 +560,7 @@ int output_stream::add_stdout(map_pidtype &pids)
 	dprintf("dumping to stdout...");
 	ringbuffer.reset();
 	stream_method = OUTPUT_STREAM_STDOUT;
-	strcpy(name, "STDOUT");
+	strncpy(name, "STDOUT", sizeof(name));
 	return set_pids(pids);
 }
 
@@ -983,7 +985,7 @@ int output::add_stdout(map_pidtype &pids)
 	else
 		dprintf("failed to add target #%d", target_id);
 
-	dprintf("~(%d->FUNC)", target_id);
+	dprintf("~(%d->STDOUT)", target_id);
 
 	return (ret == 0) ? target_id : ret;
 }
