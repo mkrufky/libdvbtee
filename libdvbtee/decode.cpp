@@ -1094,8 +1094,10 @@ void decode::dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_
 		dump_eit_x_dvb(reporter, eit_x, source_id); /* service_id */
 	}
 
+#if 0
 	fprintf(stdout, "\n");
 	fflush(stdout);
+#endif
 }
 
 void decode::dump_epg_atsc(decode_report *reporter, uint16_t source_id)
