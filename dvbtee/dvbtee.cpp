@@ -544,9 +544,9 @@ int main(int argc, char **argv)
 	if (b_output_stdout) {
 		if (b_read_dvr) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
-				iter->second->feeder.parser.out.add_stdout();
+				iter->second->feeder.parser.add_stdout();
 		else
-			context._file_feeder.parser.out.add_stdout();
+			context._file_feeder.parser.add_stdout();
 	}
 	if (b_serve)
 		start_server(&context, serv_flags | (scan_flags << 2));
