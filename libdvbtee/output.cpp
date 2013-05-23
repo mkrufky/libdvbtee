@@ -202,7 +202,7 @@ int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool 
 }
 
 static inline size_t write_stdout(uint8_t* p_data, int size) {
-	return fwrite(p_data, 188, size / 188, stdout);
+	return 188 * fwrite(p_data, 188, size / 188, stdout);
 }
 
 output_stream::output_stream()
