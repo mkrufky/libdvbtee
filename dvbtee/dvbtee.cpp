@@ -241,7 +241,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 					scan_start = scan_min + ((0 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 					scan_end   = scan_min + ((1 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 				}
-				fprintf(stderr, "speed & %sredundancy scan: pass %d of %lu, tuner %d scanning from %d to %d\n",
+				fprintf(stderr, "speed & %sredundancy scan: pass %d of %zu, tuner %d scanning from %d to %d\n",
 					(partial_redundancy) ? "partial " : "",
 					j + 1, num_tuners - partial_redundancy,
 					i, scan_start, scan_end);
