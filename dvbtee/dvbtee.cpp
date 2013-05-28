@@ -18,6 +18,7 @@
  *
  *****************************************************************************/
 
+#include <inttypes.h>
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -151,16 +152,16 @@ static void bitrate_stats(void *priv, stats_map &bitrates, stats_map &discontinu
 	for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
 		char a[16];
 		char b[16];
-		fprintf(stderr, "pid %04x %5lu p%s  %sb%s  %sbit\n",
+		fprintf(stderr, "pid %04x %5" PRIu64 " p%s  %sb%s  %sbit\n",
 			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
 			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
 			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		fprintf(stderr, "pid %04x\t%lu discontinuities (%lu%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
+		fprintf(stderr, "pid %04x\t%" PRIu64 " discontinuities (%" PRIu64 "%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
 
 	if (tei_count)
-		fprintf(stderr, "tei count: %lu (%lu%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
+		fprintf(stderr, "tei count: %" PRIu64 " (%" PRIu64 "%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
 
 	fprintf(stderr,"\n");
 }
