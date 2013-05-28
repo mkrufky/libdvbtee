@@ -18,6 +18,7 @@
  *
  *****************************************************************************/
 
+#include <inttypes.h>
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -151,16 +152,16 @@ static void bitrate_stats(void *priv, stats_map &bitrates, stats_map &discontinu
 	for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
 		char a[16];
 		char b[16];
-		fprintf(stderr, "pid %04x %5lu p%s  %sb%s  %sbit\n",
+		fprintf(stderr, "pid %04x %5" PRIu64 " p%s  %sb%s  %sbit\n",
 			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
 			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
 			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		fprintf(stderr, "pid %04x\t%lu discontinuities (%lu%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
+		fprintf(stderr, "pid %04x\t%" PRIu64 " discontinuities (%" PRIu64 "%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
 
 	if (tei_count)
-		fprintf(stderr, "tei count: %lu (%lu%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
+		fprintf(stderr, "tei count: %" PRIu64 " (%" PRIu64 "%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
 
 	fprintf(stderr,"\n");
 }
@@ -240,7 +241,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 					scan_start = scan_min + ((0 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 					scan_end   = scan_min + ((1 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 				}
-				fprintf(stderr, "speed & %sredundancy scan: pass %d of %lu, tuner %d scanning from %d to %d\n",
+				fprintf(stderr, "speed & %sredundancy scan: pass %d of %zu, tuner %d scanning from %d to %d\n",
 					(partial_redundancy) ? "partial " : "",
 					j + 1, num_tuners - partial_redundancy,
 					i, scan_start, scan_end);
@@ -444,7 +445,7 @@ int main(int argc, char **argv)
 				strcpy(outfilename, optarg);
 				b_output_file = true;
 			} else
-				b_output_stdout = true; /* FIXME: not yet supported */
+				b_output_stdout = true;
 			break;
 		case 'O': /* output options */
 			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
@@ -540,6 +541,13 @@ int main(int argc, char **argv)
 				iter->second->feeder.parser.add_output(outfilename);
 		else
 			context._file_feeder.parser.add_output(outfilename);
+	}
+	if (b_output_stdout) {
+		if (b_read_dvr) // FIXME
+			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+				iter->second->feeder.parser.add_stdout();
+		else
+			context._file_feeder.parser.add_stdout();
 	}
 	if (b_serve)
 		start_server(&context, serv_flags | (scan_flags << 2));

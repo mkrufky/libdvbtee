@@ -88,6 +88,7 @@ public:
 	int add(char*, map_pidtype&);
 	int add(int, unsigned int, map_pidtype&);
 	int add(void*, stream_callback, map_pidtype&);
+	int add_stdout(map_pidtype &);
 
 	bool check();
 
@@ -115,11 +116,12 @@ private:
 	struct sockaddr_in  ip_addr;
 
 	int stream(uint8_t*, int);
-#define OUTPUT_STREAM_UDP  0
-#define OUTPUT_STREAM_TCP  1
-#define OUTPUT_STREAM_FILE 2
-#define OUTPUT_STREAM_FUNC 3
-#define OUTPUT_STREAM_HTTP 4
+#define OUTPUT_STREAM_UDP    0
+#define OUTPUT_STREAM_TCP    1
+#define OUTPUT_STREAM_FILE   2
+#define OUTPUT_STREAM_FUNC   3
+#define OUTPUT_STREAM_HTTP   4
+#define OUTPUT_STREAM_STDOUT 5
 	unsigned int stream_method;
 
 	unsigned long int count_in, count_out;
@@ -164,10 +166,12 @@ public:
 	int add(char* target) { map_pidtype pids; return add(target, pids); };
 	int add(int socket, unsigned int method) { map_pidtype pids; return add(socket, method, pids); };
 	int add(void* priv, stream_callback callback) { map_pidtype pids; return add(priv, callback, pids); };
+	int add_stdout() { map_pidtype pids; return add_stdout(pids); };
 
 	int add(char* target, map_pidtype &pids);
 	int add(int socket, unsigned int method, map_pidtype &pids);
 	int add(void* priv, stream_callback callback, map_pidtype &pids);
+	int add_stdout(map_pidtype &pids);
 
 	int add_http_server(int);
 

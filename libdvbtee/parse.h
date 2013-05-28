@@ -30,7 +30,7 @@
 #include "output.h"
 #include "stats.h"
 
-#define LIBDVBTEE_VERSION "0.1.9"
+#define LIBDVBTEE_VERSION "0.2.0"
 
 #define USE_STATIC_DECODE_MAP 1
 
@@ -103,6 +103,11 @@ public:
 	int add_output(char*, char*);
 	int add_output(int, unsigned int, char*);
 	int add_output(void* priv, stream_callback, char*);
+
+	int add_stdout();
+	int add_stdout(map_pidtype&);
+	int add_stdout(uint16_t);
+	int add_stdout(char*);
 
 	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
 	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */

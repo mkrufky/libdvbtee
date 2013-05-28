@@ -988,6 +988,47 @@ fail:
 	return target_id;
 }
 
+int parse::add_stdout()
+{
+	map_pidtype pids;
+	add_service_pids(pids);
+	return add_stdout(pids);
+}
+
+int parse::add_stdout(uint16_t service)
+{
+	map_pidtype pids;
+	if (service)
+		add_service_pids(service, pids);
+
+	return add_stdout(pids);
+}
+
+int parse::add_stdout(char* services)
+{
+	map_pidtype pids;
+	if (services)
+		add_service_pids(services, pids);
+
+	return add_stdout(pids);
+}
+
+int parse::add_stdout(map_pidtype &pids)
+{
+	int ret, target_id = out.add_stdout(pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
+	if (ret < 0)
+		return ret;
+
+	out.get_pids(out_pids);
+	dprintf("success adding stdout target id:%4d", target_id);
+fail:
+	return target_id;
+}
+
 #define CHAR_CMD_COMMA ","
 
 void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)

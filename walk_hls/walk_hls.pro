@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
+QT       -= core
 
 TARGET = walk_hls
 CONFIG   -= app_bundle

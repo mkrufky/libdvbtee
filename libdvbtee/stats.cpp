@@ -19,6 +19,7 @@
  *
  *****************************************************************************/
 
+#include <inttypes.h>
 #include "string.h"
 
 #include "stats.h"
@@ -72,16 +73,16 @@ char *stats_scale_unit(char *b, size_t n, uint64_t x)
 
 	if (x >= 1000000) {
 		if ((x % 1000000) < 100)
-			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
+			snprintf(b, n, "%3" PRIu64 ".%03" PRIu64 " m", x / 1000000, x % 1000000);
 		else
-			snprintf(b, n, "%3lu.%03lu m", x / 1000000, x % 1000000);
+			snprintf(b, n, "%3" PRIu64 ".%03" PRIu64 " m", x / 1000000, x % 1000000);
 	} else if (x >= 1000) {
 		if ((x % 1000) < 100)
-			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
+			snprintf(b, n, "%3" PRIu64 ".%03" PRIu64 " k", x / 1000, x % 1000);
 		else
-			snprintf(b, n, "%3lu.%03lu k", x / 1000, x % 1000);
+			snprintf(b, n, "%3" PRIu64 ".%03" PRIu64 " k", x / 1000, x % 1000);
 	} else
-		snprintf(b, n, "    %3lu  ", x);
+		snprintf(b, n, "    %3" PRIu64 "  ", x);
 	return b;
 }
 
@@ -94,15 +95,15 @@ void stats::show(bool per_sec)
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
 		char a[16];
 		char b[16];
-		dprintf("pid %04x %5lu p%s  %sb%s  %sbit",
+		dprintf("pid %04x %5" PRIu64 " p%s  %sb%s  %sbit",
 			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
 			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
 			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		dprintf("pid %04x\t%lu continuity errors (%lu%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
+		dprintf("pid %04x\t%" PRIu64 " continuity errors (%" PRIu64 "%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
 
-	if (tei_count) dprintf("tei count: %lu (%lu%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
+	if (tei_count) dprintf("tei count: %" PRIu64 " (%" PRIu64 "%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
 }
 
 void stats::push_pid(int c, const uint16_t pid)

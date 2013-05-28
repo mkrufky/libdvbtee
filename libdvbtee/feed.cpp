@@ -686,7 +686,7 @@ int feed::start_udp_listener(uint16_t port_requested)
 bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_event) {
 	time_t start_time = time(NULL);
 	while ((!f_kill_thread) &&
-	       ((timeout == 0) || ((time(NULL) - start_time) < (timeout)) )) {
+	       ((timeout == 0) || ((time(NULL) - start_time) < (time_t)(timeout)) )) {
 
 		switch (wait_event) {
 		case FEED_EVENT_PSIP:
