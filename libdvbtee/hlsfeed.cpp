@@ -135,7 +135,7 @@ void hlsfeed::push(uint8_t *buffer, size_t size, size_t nmemb)
         buffer += size;
         nmemb--;
       } else {
-        fprintf(stderr, "%s: FAILED: %lu packets dropped\n", __func__, nmemb);
+        fprintf(stderr, "%s: FAILED: %zu packets dropped\n", __func__, nmemb);
         return;
       }
 #else
