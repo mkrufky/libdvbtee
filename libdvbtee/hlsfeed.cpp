@@ -52,12 +52,12 @@ hlsfeed::hlsfeed(const char *url, hls_curl_http_get_data_callback data_pump_call
   , Url(url)
   , datapump_cb(data_pump_callback)
   , datapump_ctxt(data_pump_context)
-  , ringbuffer()
+  , push_buffer()
   , f_kill_thread(false)
 {
 //walk((void*)url);
-  ringbuffer.set_capacity(HLS_BUFSIZE);
-  ringbuffer.reset();
+  push_buffer.set_capacity(HLS_BUFSIZE);
+  push_buffer.reset();
 #if PUSH_THREAD
   int ret = pthread_create(&h_thread, NULL, push_thread, this);
   if (0 != ret)
@@ -107,13 +107,13 @@ void* hlsfeed::push_thread()
 	/* push data from hlsfeed buffer */
 	while (!f_kill_thread) {
 
-		buf_size = ringbuffer.get_size();
+		buf_size = push_buffer.get_size();
 		if (!buf_size) {
 			usleep(200);
 			continue;
 		}
 
-		buf_size = ringbuffer.get_read_ptr((void**)&data, buf_size);
+		buf_size = push_buffer.get_read_ptr((void**)&data, buf_size);
 		buf_size /= 188;
 		buf_size *= 188;
 
@@ -121,7 +121,7 @@ void* hlsfeed::push_thread()
 			datapump_cb(datapump_ctxt, data, 188, buf_size / 188);
 
 
-		ringbuffer.put_read_ptr(buf_size);
+		push_buffer.put_read_ptr(buf_size);
 	}
 	pthread_exit(NULL);
 }
@@ -129,9 +129,9 @@ void* hlsfeed::push_thread()
 void hlsfeed::push(uint8_t *buffer, size_t size, size_t nmemb)
 {
 #if PUSH_THREAD
-  if (!ringbuffer.write(buffer, size * nmemb))
+  if (!push_buffer.write(buffer, size * nmemb))
     while (nmemb)
-      if (ringbuffer.write(buffer, nmemb)) {
+      if (push_buffer.write(buffer, nmemb)) {
         buffer += size;
         nmemb--;
       } else {

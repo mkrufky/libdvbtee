@@ -43,7 +43,7 @@ private:
   static void curl_push_callback(void *context, void *buffer, size_t size, size_t nmemb);
   static void curl_walk_callback(void *context, void *buffer, size_t size, size_t nmemb);
 
-  rbuf ringbuffer;
+  rbuf push_buffer;
   bool f_kill_thread;
   pthread_t h_thread;
 
