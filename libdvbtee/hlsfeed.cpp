@@ -59,7 +59,7 @@ hlsfeed::hlsfeed(const char *url, hls_curl_http_get_data_callback data_pump_call
   push_buffer.set_capacity(HLS_BUFSIZE);
   push_buffer.reset();
 #if PUSH_THREAD
-  int ret = pthread_create(&h_thread, NULL, push_thread, this);
+  int ret = pthread_create(&h_push_thread, NULL, push_thread, this);
   if (0 != ret)
     perror("pthread_create() failed");
   else

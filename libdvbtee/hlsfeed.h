@@ -45,7 +45,7 @@ private:
 
   rbuf push_buffer;
   bool f_kill_thread;
-  pthread_t h_thread;
+  pthread_t h_push_thread;
 
   static void* push_thread(void*);
   void* push_thread();
