@@ -62,8 +62,8 @@ typedef struct
 	unsigned int splicing_point:1;
 	unsigned int tp_priv_data:1;
 	unsigned int field_ext:1;
-	unsigned long long PCR:48;
-	unsigned long long OPCR:48;
+	uint8_t PCR[6];
+	uint8_t OPCR[6];
 	signed int splicing_countdown:8;
 } adaptation_field_t;
 
@@ -95,6 +95,8 @@ private:
 	continuity_map continuity;
 	uint64_t tei_count;
 	time_t __timenow;
+
+	stats_map last_pcr_base;
 
 	pkt_hdr_t hdr;
 	adaptation_field_t adapt;
