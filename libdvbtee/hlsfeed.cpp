@@ -30,7 +30,7 @@
 #define HLS_BUFSIZE HLS_BUFSIZE_MB(8)
 
 #define PUSH_THREAD 1
-#define WALK_THREAD 0
+#define WALK_THREAD 1
 
 class BadConversion : public std::runtime_error {
 public:
@@ -54,12 +54,13 @@ hlsfeed::hlsfeed(const char *url, hls_curl_http_get_data_callback data_pump_call
   , datapump_cb(data_pump_callback)
   , datapump_ctxt(data_pump_context)
   , push_buffer()
+  , walk_buffer()
   , f_kill_thread(false)
 {
   int ret;
+#if PUSH_THREAD
   push_buffer.set_capacity(HLS_BUFSIZE);
   push_buffer.reset();
-#if PUSH_THREAD
   ret = pthread_create(&h_push_thread, NULL, push_thread, this);
   if (0 != ret) {
     perror("pthread_create() failed to create push_thread");
@@ -67,13 +68,19 @@ hlsfeed::hlsfeed(const char *url, hls_curl_http_get_data_callback data_pump_call
   }
 #endif
 #if WALK_THREAD
+  walk_buffer.set_capacity(1024 * 1024 * 1);
+  walk_buffer.reset();
+#endif
+  walk((uint8_t*)Url.c_str());
+#if WALK_THREAD
+  sleep(1);
   ret = pthread_create(&h_walk_thread, NULL, walk_thread, this);
   if (0 != ret) {
     perror("pthread_create() failed to create walk_thread");
     return;
   }
+  while (walk_buffer.get_size()) sleep(1);
 #endif
-  walk((uint8_t*)Url.c_str());
 }
 
 void hlsfeed::walk(uint8_t *buffer)
@@ -116,9 +123,7 @@ void* hlsfeed::push_thread()
 {
 	uint8_t *data = NULL;
 	int buf_size;
-#if 0
-	dprintf("(%d)", sock);
-#endif
+
 	/* push data from hlsfeed buffer */
 	while (!f_kill_thread) {
 
@@ -146,28 +151,6 @@ void* hlsfeed::walk_thread()
 	uint8_t *data = NULL;
 	int buf_size;
 
-#if 0
-	char *save;
-	char *playlist = (char *)buffer;
-	char *line = strtok_r(playlist, "\n", &save);
-	double duration;
-	while (line) {
-	  //if (line[0] == '#')
-	  if (strstr(line, "#EXTINF:")) {
-	    char *saveToo;
-	    char *durationText = strtok_r(line, ":", &saveToo);
-	    durationText = strtok_r(NULL, ",", &saveToo);
-	    duration = convertToDouble(std::string(durationText));
-	  } else if (strstr(line, ".ts"))
-	    curlhttpget Curl(line, curl_push_callback, this);
-	  else if (strstr(line, ".m3u8"))
-	    curlhttpget Curl(line, curl_walk_callback, this);
-	  else if (!strstr(line, "#EXT"))
-	    fprintf(stderr, "%s: invalid line: '%s'\n", __func__, line);
-
-	  line = strtok_r(NULL, "\n", &save);
-	}
-#endif
 	/* push data from hlsfeed buffer */
 	while (!f_kill_thread) {
 
@@ -213,7 +196,7 @@ void hlsfeed::walk(uint8_t *buffer, size_t size, size_t nmemb)
         buffer += size;
         nmemb--;
       } else {
-        fprintf(stderr, "%s: FAILED: %zu packets dropped\n", __func__, nmemb);
+        fprintf(stderr, "%s: FAILED: %zu bytes dropped\n", __func__, size * nmemb);
         return;
       }
 #else
