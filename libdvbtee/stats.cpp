@@ -234,11 +234,12 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.PCR, &pcr_base, &pcr_ext);
-			dprintf("PID: 0x%04x, PCR base: %ld, ext: %d", hdr.pid, pcr_base, pcr_ext);
+			dprintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
 
 			stats_map::const_iterator iter = last_pcr_base.find(hdr.pid);
 			if ((iter != last_pcr_base.end()) && (pcr_base < iter->second))
-				fprintf(stderr, "%s: PID: 0x%04x, %ld < %ld !!!\n", __func__, hdr.pid, pcr_base, iter->second);
+				fprintf(stderr, "%s: PID: 0x%04x, %" PRIu64 " < %" PRIu64 " !!!\n",
+					__func__, hdr.pid, pcr_base, iter->second);
 
 			last_pcr_base[hdr.pid] = pcr_base;
 		}
@@ -247,7 +248,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.OPCR, &pcr_base, &pcr_ext);
-			dprintf("PID: 0x%04x, PCR base: %ld, ext: %d", hdr.pid, pcr_base, pcr_ext);
+			dprintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
 		}
 		if (adapt.splicing_point) {
 			dprintf("PID: 0x%04x, splicing countdown: %d", hdr.pid, adapt.splicing_countdown);
