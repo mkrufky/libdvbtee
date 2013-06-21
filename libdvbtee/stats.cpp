@@ -65,6 +65,19 @@ stats& stats::operator= (const stats& cSource)
 }
 #endif
 
+static void parse_pcr(uint8_t *pcr, uint64_t *pcr_base, unsigned int *pcr_ext)
+{
+	*pcr_base = (pcr[0] * 0x2000000) +
+	            (pcr[1] * 0x20000) +
+	            (pcr[2] * 0x200) +
+	            (pcr[3] * 0x02) +
+	            ((pcr[4] & 0x80) >> 7);
+
+	*pcr_ext = ((pcr[4] & 0x01) * 0x100) + pcr[5];
+
+	return;
+}
+
 static time_t walltime(void *p) { return time(NULL); }
 
 char *stats_scale_unit(char *b, size_t n, uint64_t x)
@@ -149,23 +162,11 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
 			adapt.field_ext      = (q[1] & 0x01) >> 0;
 
 			if (adapt.pcr) {
-				adapt.PCR =
-					((unsigned long long) (0xff & q[2]) << 40) |
-					((unsigned long long) (0xff & q[3]) << 32) |
-					((unsigned long long) (0xff & q[4]) << 24) |
-					((unsigned long long) (0xff & q[5]) << 16) |
-					((unsigned long long) (0xff & q[6]) << 8)  |
-					((unsigned long long) (0xff & q[7]) << 0);
+				memcpy(adapt.PCR, &q[2], 6);
 				q += 6;
 			}
 			if (adapt.opcr) {
-				adapt.OPCR =
-					((unsigned long long) (0xff & q[2]) << 40) |
-					((unsigned long long) (0xff & q[3]) << 32) |
-					((unsigned long long) (0xff & q[4]) << 24) |
-					((unsigned long long) (0xff & q[5]) << 16) |
-					((unsigned long long) (0xff & q[6]) << 8)  |
-					((unsigned long long) (0xff & q[7]) << 0);
+				memcpy(adapt.OPCR, &q[2], 6);
 				q += 6;
 			}
 			if (adapt.splicing_point) {
@@ -188,6 +189,7 @@ void stats::clear_stats()
 {
 	statistics.clear();
 	discontinuities.clear();
+	last_pcr_base.clear();
 	tei_count = 0;
 }
 
@@ -225,15 +227,33 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 		}
 		continuity[hdr.pid] = hdr.continuity_ctr;
 	}
-#if DBG
+
 	if (hdr.adaptation_flags & 0x02) {
-		if (adapt.pcr)
-			dprintf("PCR: 0x%12llx", adapt.PCR);
-		if (adapt.opcr)
-			dprintf("OPCR: 0x%12llx", adapt.OPCR);
-		if (adapt.splicing_point)
-			dprintf("splicing countdown: %d", adapt.splicing_countdown);
+		if (adapt.pcr) {
+			uint64_t pcr_base;
+			unsigned int pcr_ext;
+
+			parse_pcr(adapt.PCR, &pcr_base, &pcr_ext);
+			dprintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
+
+			stats_map::const_iterator iter = last_pcr_base.find(hdr.pid);
+			if ((iter != last_pcr_base.end()) && (pcr_base < iter->second))
+				fprintf(stderr, "%s: PID: 0x%04x, %" PRIu64 " < %" PRIu64 " !!!\n",
+					__func__, hdr.pid, pcr_base, iter->second);
+
+			last_pcr_base[hdr.pid] = pcr_base;
+		}
+		if (adapt.opcr) {
+			uint64_t pcr_base;
+			unsigned int pcr_ext;
+
+			parse_pcr(adapt.OPCR, &pcr_base, &pcr_ext);
+			dprintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
+		}
+		if (adapt.splicing_point) {
+			dprintf("PID: 0x%04x, splicing countdown: %d", hdr.pid, adapt.splicing_countdown);
+		}
 	}
-#endif
+
 	push_stats(pkt_stats);
 }
