@@ -89,6 +89,9 @@ To start a server using adapter 0:
 To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):
   ./dvbtee -H ABCDABCD-1 -S
 
+To pull down an HLS stream, dump the packets to stdout & pipe it to mplayer:
+  ./dvbtee -i http://www.server.com/hls_stream.m3u8 -o | mplayer - -cache 65536
+
 Server commands
 ===============
 
