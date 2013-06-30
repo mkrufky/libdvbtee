@@ -484,7 +484,7 @@ int main(int argc, char **argv)
 #endif
 	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
 
-	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
+	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr || b_hdhr)) {
 #ifdef USE_HDHOMERUN
 		if (b_hdhr) {
 			tuner = new hdhr_tuner;
@@ -529,21 +529,21 @@ int main(int argc, char **argv)
 			iter->second->feeder.parser.out.set_options(out_opt);
 	}
 	if (b_bitrate_stats) {
-		if (b_read_dvr) // FIXME
+		if ((b_read_dvr) || (b_hdhr)) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 		else
 			context._file_feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 	}
 	if (b_output_file) {
-		if (b_read_dvr) // FIXME
+		if ((b_read_dvr) || (b_hdhr)) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_output(outfilename);
 		else
 			context._file_feeder.parser.add_output(outfilename);
 	}
 	if (b_output_stdout) {
-		if (b_read_dvr) // FIXME
+		if ((b_read_dvr) || (b_hdhr)) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_stdout();
 		else
