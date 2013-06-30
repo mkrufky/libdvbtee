@@ -216,7 +216,8 @@ bool hdhr_tuner::check()
 		dprintf("tuner not configured!");
 	else {
 		uint32_t device_ip = hdhomerun_device_get_device_ip(hdhr_dev);
-		char *device_filter, *device_streaminfo;
+		char *device_filter = NULL;
+		char *device_streaminfo = NULL;
 		hdhomerun_device_get_tuner_filter(hdhr_dev, &device_filter);
 		hdhomerun_device_get_tuner_streaminfo(hdhr_dev, &device_streaminfo);
 		dprintf("(name: %s, id: %d, tuner: %d, ip: %d.%d.%d.%d, filter: %s) state:%s%s%s%s%s\nstreaminfo:\n%s",
