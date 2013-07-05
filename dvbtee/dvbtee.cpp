@@ -469,6 +469,7 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
+#define b_READ_TUNER (b_read_dvr || b_hdhr)
 
 	context_map[getpid()] = &context;
 
@@ -484,7 +485,7 @@ int main(int argc, char **argv)
 #endif
 	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
 
-	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr || b_hdhr)) {
+	if (((b_scan) && (num_tuners == -1)) || b_READ_TUNER) {
 #ifdef USE_HDHOMERUN
 		if (b_hdhr) {
 			tuner = new hdhr_tuner;
@@ -529,21 +530,21 @@ int main(int argc, char **argv)
 			iter->second->feeder.parser.out.set_options(out_opt);
 	}
 	if (b_bitrate_stats) {
-		if ((b_read_dvr) || (b_hdhr)) // FIXME
+		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 		else
 			context._file_feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 	}
 	if (b_output_file) {
-		if ((b_read_dvr) || (b_hdhr)) // FIXME
+		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_output(outfilename);
 		else
 			context._file_feeder.parser.add_output(outfilename);
 	}
 	if (b_output_stdout) {
-		if ((b_read_dvr) || (b_hdhr)) // FIXME
+		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_stdout();
 		else
@@ -558,7 +559,7 @@ int main(int argc, char **argv)
 	if ((scan_max) && (!scan_min))
 		channel = scan_min = scan_max;
 
-	if ((b_scan) && ((b_read_dvr) || (num_tuners >= 0))) {
+	if ((b_scan) && (b_READ_TUNER || (num_tuners >= 0))) {
 		if (num_tuners >= 0)
 			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
 		else {
@@ -624,7 +625,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ((tuner) && (b_read_dvr)) {
+	if ((tuner) && b_READ_TUNER) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
 		if (b_serve) /* if we're running in server mode, we dont wait, stop or close */
