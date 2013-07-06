@@ -21,7 +21,8 @@
 
 #include "curlhttpget.h"
 
-curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_callback, void *data_context)
+curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_callback, void *data_context,
+                         curlhttpget_info_t *info)
   : curl_handle(curl_easy_init())
   , data_cb(data_callback)
   , data_ctxt(data_context)
@@ -43,18 +44,18 @@ curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_c
     goto fail;
   }
 
-  getinfo();
+  if (info) getinfo(info);
 
 fail:
   curl_easy_cleanup(curl_handle);
 }
 
-void curlhttpget::getinfo()
+void curlhttpget::getinfo(curlhttpget_info_t *info)
 {
-  double total_time = 0.0;
-  CURLcode res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME, &total_time);
+  info->total_time = 0.0;
+  CURLcode res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME, &info->total_time);
   if (res == CURLE_OK)
-    fprintf(stderr, "%s: total time: %f\n", __func__, total_time);
+    fprintf(stderr, "%s: total time: %f\n", __func__, info->total_time);
 }
 
 //static

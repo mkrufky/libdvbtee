@@ -89,6 +89,7 @@ void hlsfeed::walk(uint8_t *buffer)
   char *playlist = (char *)buffer;
   char *line = strtok_r(playlist, "\n", &save);
   double duration;
+  curlhttpget_info_t info = { 0 };
   while (line) {
     //if (line[0] == '#')
     if (strstr(line, "#EXTINF:")) {
@@ -98,7 +99,7 @@ void hlsfeed::walk(uint8_t *buffer)
       duration = convertToDouble(std::string(durationText));
       fprintf(stderr, "%s: playback duration: %f\n", __func__, duration);
     } else if (strstr(line, ".ts"))
-      curlhttpget Curl(line, curl_push_callback, this);
+      curlhttpget Curl(line, curl_push_callback, this, &info);
     else if (strstr(line, ".m3u8"))
       curlhttpget Curl(line, curl_walk_callback, this);
     else if (!strstr(line, "#EXT"))
