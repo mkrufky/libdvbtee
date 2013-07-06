@@ -96,6 +96,7 @@ void hlsfeed::walk(uint8_t *buffer)
       char *durationText = strtok_r(line, ":", &saveToo);
       durationText = strtok_r(NULL, ",", &saveToo);
       duration = convertToDouble(std::string(durationText));
+      fprintf(stderr, "%s: playback duration: %f\n", __func__, duration);
     } else if (strstr(line, ".ts"))
       curlhttpget Curl(line, curl_push_callback, this);
     else if (strstr(line, ".m3u8"))
