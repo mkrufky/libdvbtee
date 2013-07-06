@@ -30,7 +30,7 @@ curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_c
 //curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "hlswalker");
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libdvbtee");
 
   if (data_cb) {
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, this);
