@@ -237,10 +237,11 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			dprintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
 
 			stats_map::const_iterator iter = last_pcr_base.find(hdr.pid);
+#if DBG
 			if ((iter != last_pcr_base.end()) && (pcr_base < iter->second))
 				fprintf(stderr, "%s: PID: 0x%04x, %" PRIu64 " < %" PRIu64 " !!!\n",
 					__func__, hdr.pid, pcr_base, iter->second);
-
+#endif
 			last_pcr_base[hdr.pid] = pcr_base;
 		}
 		if (adapt.opcr) {
