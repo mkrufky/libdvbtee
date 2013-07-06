@@ -37,6 +37,8 @@ private:
   hls_curl_http_get_data_callback data_cb;
   void *data_ctxt;
 
+  void getinfo();
+
   static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
   size_t __write_data(void *buffer, size_t size, size_t nmemb);
 };
