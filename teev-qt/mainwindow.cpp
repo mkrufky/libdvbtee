@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setWindowTitle("Teev");
+    this->setWindowTitle("TeeV");
 
     QUrl url("http://127.0.0.1:64080/tune=44+3/stream/");
 
