@@ -1,22 +1,21 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#ifndef USE_PHONON
-#include <QtMultimedia>
-#include <QMediaPlayer>
-#include <QVideoWidget>
-#else
-#include <phonon/MediaObject>
-#include <phonon/VideoPlayer>
-
-#include <phonon/VideoWidget>
-#include <phonon/AudioOutput>
-#endif
-
-#include <QGridLayout>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+#ifdef USE_PHONON
+#if 0
+    player(new Phonon::VideoPlayer(Phonon::VideoCategory, this)),
+#else
+    mediaObject(new Phonon::MediaObject(this)),
+    videoWidget(new Phonon::VideoWidget(this)),
+#endif
+#else
+    player(new QMediaPlayer(this)),
+    videoWidget(new QVideoWidget),
+#endif
+    layout(new QGridLayout),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -24,23 +23,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QUrl url("http://127.0.0.1:64080/tune=44+3/stream/");
 
-    QGridLayout *layout = new QGridLayout;
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
     layout->setSpacing(0);
 
 #ifdef USE_PHONON
 #if 0
-    Phonon::VideoPlayer *player = new Phonon::VideoPlayer(Phonon::VideoCategory, this);
-
     layout->addWidget(player, 0, 0);
 
     player->play(url);
 #else
-    Phonon::MediaObject *mediaObject = new Phonon::MediaObject(this);
-
-    Phonon::VideoWidget *videoWidget = new Phonon::VideoWidget(this);
-
     layout->addWidget(videoWidget, 0, 0, 3, 3);
 
     // use videoWidget->setFullScreen(true); to toggle fullscreen mode
@@ -57,15 +49,12 @@ MainWindow::MainWindow(QWidget *parent) :
     mediaObject->play();
 #endif
 #else
-    QMediaPlayer *player = new QMediaPlayer(this);
-
     //QMediaPlaylist *playlist = new QMediaPlaylist(player);
     //playlist->addMedia(url);
     //playlist->setCurrentIndex(0);
 
     player->setMedia(url);
 
-    QVideoWidget *videoWidget = new QVideoWidget;
     player->setVideoOutput(videoWidget);
 
     layout->addWidget(videoWidget, 0, 0, 3, 3);
@@ -81,5 +70,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+#ifdef USE_PHONON
+#if 0
+    player->stop();
+    delete player;
+#else
+    mediaObject->stop();
+    delete mediaObject;
+    delete videoWidget;
+#endif
+#else
+    player->stop();
+    delete player;
+    delete videoWidget;
+#endif
+    delete layout;
     delete ui;
 }
