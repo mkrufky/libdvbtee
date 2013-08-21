@@ -1324,6 +1324,10 @@ bool serve_client::__command(char* cmdline)
 			str = xml_dump_epg_header_footer_callback(this, true, false);
 			streamback((const uint8_t*)str, strlen(str));
 		}
+		if (data_fmt == SERVE_DATA_FMT_JSON) {
+			str = json_dump_epg_header_footer_callback(this, true, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
 
 		/* channels verified during this session */
 		tuner->get_scan_results(false, chandump, this);
@@ -1332,6 +1336,12 @@ bool serve_client::__command(char* cmdline)
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, false, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
+		if (data_fmt == SERVE_DATA_FMT_JSON) {
+			str = " {} ";
+			streamback((const uint8_t*)str, strlen(str));
+			str = json_dump_epg_header_footer_callback(this, false, false);
 			streamback((const uint8_t*)str, strlen(str));
 		}
 
