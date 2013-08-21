@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     player->play(url);
 #else
-    layout->addWidget(videoWidget, 0, 0, 3, 3);
+    layout->addWidget(videoWidget, 0, 0);
 
     // use videoWidget->setFullScreen(true); to toggle fullscreen mode
     //videoWidget->setFullScreen(true);
