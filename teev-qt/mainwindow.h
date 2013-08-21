@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include <QListWidget>
+
 #include <QGridLayout>
 
 #ifdef USE_PHONON
@@ -29,6 +31,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     
+public slots:
+    void channel_clicked(QListWidgetItem*);
+
 private:
 #ifdef USE_PHONON
 #if 0
@@ -43,7 +48,14 @@ private:
     QVideoWidget *videoWidget;
 #endif
     QGridLayout *layout;
+    QListWidget *m_listBox;
+    std::string channels_buffer;
+
     Ui::MainWindow *ui;
+
+    void fill_channels_box();
+    void push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb);
+    static void get_channels_callback(void *context, void *buffer, size_t size, size_t nmemb);
 };
 
 #endif // MAINWINDOW_H

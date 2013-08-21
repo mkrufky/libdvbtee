@@ -13,6 +13,18 @@ lessThan(QT_MAJOR_VERSION, 5) {
     QMAKE_CXXFLAGS += -DUSE_PHONON
 }
 
+LIBS += -ljsoncpp
+
+INCLUDEPATH += $$PWD/../libdvbtee
+DEPENDPATH += $$PWD/../libdvbtee
+
+LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libdvbtee/usr/lib/release/ -ldvbpsi
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libdvbtee/usr/lib/debug/ -ldvbpsi
+else:symbian: LIBS += -ldvbpsi
+else:unix: LIBS += -L$$PWD/../../libdvbtee/usr/lib/ -ldvbpsi
+
 TARGET = teev
 TEMPLATE = app
 
