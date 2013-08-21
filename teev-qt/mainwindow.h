@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <stdint.h>
+
 #include <QMainWindow>
 
 #include <QListWidget>
