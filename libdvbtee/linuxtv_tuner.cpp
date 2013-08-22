@@ -26,6 +26,9 @@
 #include <fcntl.h>
 #include <map>
 
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/dmx.h>
+
 #include "linuxtv_tuner.h"
 #include "log.h"
 #define CLASS_MODULE "linuxtv_tuner"
