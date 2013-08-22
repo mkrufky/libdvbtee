@@ -25,7 +25,6 @@ SOURCES += channels.cpp \
     stats.cpp \
     tune.cpp \
     hdhr_tuner.cpp \
-    linuxtv_tuner.cpp \
     atsctext.cpp \
     hlsfeed.cpp \
     curlhttpget.cpp
@@ -44,7 +43,6 @@ HEADERS += atsctext.h \
     rbuf.h \
     stats.h \
     tune.h \
-    linuxtv_tuner.h \
     hdhr_tuner.h \
     hlsfeed.h \
     curlhttpget.h
@@ -57,6 +55,11 @@ symbian {
     addFiles.sources = dvbtee.dll
     addFiles.path = !:/sys/bin
     DEPLOYMENT += addFiles
+}
+
+unix:!macx:!symbian {
+    HEADERS += linuxtv_tuner.h
+    SOURCES += linuxtv_tuner.cpp
 }
 
 unix:!symbian {
