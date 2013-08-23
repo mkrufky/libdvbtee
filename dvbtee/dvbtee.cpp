@@ -29,7 +29,6 @@
 
 #include "feed.h"
 #include "hlsfeed.h"
-#define USE_LINUXTV
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
 #endif
