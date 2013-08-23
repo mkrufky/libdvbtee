@@ -85,6 +85,8 @@ DEPENDPATH += $$PWD/../usr/include
 
 unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/../usr/lib/libdvbpsi.a
 
+macx: LIBS += -liconv
+
 symbian: LIBS += -lhdhomerun
 else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
 
