@@ -27,7 +27,11 @@
 #include <unistd.h>
 
 #include "feed.h"
+#ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
+#else
+#include "hdhr_tuner.h"
+#endif
 #include "serve.h"
 
 #include "atsctext.h"
@@ -36,7 +40,11 @@ typedef std::map<uint8_t, tune> map_tuners;
 
 struct dvbtee_context
 {
+#ifdef USE_LINUXTV
 	linuxtv_tuner tuner;
+#else
+	hdhr_tuner tuner;
+#endif
 	serve *server;
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
@@ -58,7 +66,9 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 		context->tuner.stop_feed();
 	}
 
+#ifdef USE_LINUXTV
 	context->tuner.close_fe();
+#endif
 #if 1 /* FIXME */
 	ATSCMultipleStringsDeInit();
 #endif
@@ -252,7 +262,9 @@ int main(int argc, char **argv)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
+#ifdef USE_LINUXTV
 	context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, false);
+#endif
 	context.tuner.feeder.parser.limit_eit(-1);
 
 	start_server(&context, scan_flags, 62080, 62081);
