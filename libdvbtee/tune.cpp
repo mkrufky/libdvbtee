@@ -175,12 +175,12 @@ void* tune::scan_thread()
 
 			switch (fe_type) {
 			default:
-			case FE_ATSC:
+			case DVBTEE_FE_ATSC:
 				feeder.parser.set_channel_info(channel,
 							       (scan_mode == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 							       (scan_mode == SCAN_VSB) ? "8VSB" : "QAM_256");
 				break;
-			case FE_OFDM:
+			case DVBTEE_FE_OFDM:
 				feeder.parser.set_channel_info(channel, dvbt_chan_to_freq(channel),
 							       ((channel <= 12) ?
 								"INVERSION_AUTO:BANDWIDTH_7_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO" :
@@ -188,7 +188,7 @@ void* tune::scan_thread()
 				break;
 			}
 			if (0 == start_feed()) {
-				int timeout = (scan_epg) ? 16 : (fe_type == FE_ATSC) ? 4 : 12;
+				int timeout = (scan_epg) ? 16 : (fe_type == DVBTEE_FE_ATSC) ? 4 : 12;
 				while ((!f_kill_thread) && (timeout)) {
 					if (scan_epg)
 						feeder.wait_for_epg(1000);

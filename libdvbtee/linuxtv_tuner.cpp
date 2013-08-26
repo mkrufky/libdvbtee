@@ -39,6 +39,17 @@ typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
 static map_chan_to_ts_id channels;
 
+static dvbtee_fe_type_t dvbtee_fe_type(fe_type_t fe_type)
+{
+	switch (fe_type) {
+	case FE_QPSK: return DVBTEE_FE_QPSK;
+	case FE_QAM:  return DVBTEE_FE_QAM;
+	case FE_OFDM: return DVBTEE_FE_OFDM;
+	default:
+	case FE_ATSC: return DVBTEE_FE_ATSC;
+	}
+}
+
 linuxtv_tuner::linuxtv_tuner()
   : adap_id(-1)
   , fe_fd(-1)
@@ -212,7 +223,7 @@ int linuxtv_tuner::open_fe()
 			fprintf(stderr, "open_frontend: FE_GET_FRONTEND failed\n");
 			goto fail;
 		}
-		fe_type = fe_info.type;
+		fe_type = dvbtee_fe_type(fe_info.type);
 		state |= TUNE_STATE_OPEN;
 		return fe_fd;
 	default:

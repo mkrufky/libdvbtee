@@ -46,6 +46,13 @@ typedef struct {
 	unsigned int physical_channel;
 } scan_progress_t;
 
+typedef enum {
+	DVBTEE_FE_QPSK,
+	DVBTEE_FE_QAM,
+	DVBTEE_FE_OFDM,
+	DVBTEE_FE_ATSC
+} dvbtee_fe_type_t;
+
 typedef void (*scan_progress_callback)(void *context, scan_progress_t *p);
 
 #if 0
@@ -114,7 +121,7 @@ protected:
 	bool         scan_epg;
 	bool         scan_complete;
 
-	fe_type_t fe_type;
+	dvbtee_fe_type_t fe_type;
 private:
 	void *scan_thread();
 
