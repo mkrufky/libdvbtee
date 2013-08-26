@@ -68,14 +68,14 @@ private:
 	int demux_id;
 	int   dvr_id;
 
-	fe_status_t fe_status();
+	dvbtee_fe_status_t fe_status();
 	uint16_t get_snr();
 
 	int close_demux();
 #if 0
 	fe_type_t fe_type;
 #endif
-	bool tune_atsc(fe_modulation_t, unsigned int);
+	bool tune_atsc(dvbtee_fe_modulation_t, unsigned int);
 	bool tune_dvbt(unsigned int);
 
 	filtered_pid_map filtered_pids;

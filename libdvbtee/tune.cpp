@@ -95,16 +95,16 @@ int tune::close_fe() {
 
 bool tune::wait_for_lock_or_timeout(unsigned int time_ms)
 {
-	unsigned int status = (fe_status_t)0;
+	unsigned int status = (dvbtee_fe_status_t)0;
 	time_t start_time = time(NULL);
-	while ((0 == ((status |= fe_status()) & FE_HAS_LOCK)) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) ))
+	while ((0 == ((status |= fe_status()) & DVBTEE_FE_HAS_LOCK)) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) ))
 		usleep(200*1000);
-	if ((status & (FE_HAS_LOCK | FE_HAS_SYNC)) == FE_HAS_SYNC) {
+	if ((status & (DVBTEE_FE_HAS_LOCK | DVBTEE_FE_HAS_SYNC)) == DVBTEE_FE_HAS_SYNC) {
 		start_time = time(NULL);
-		while ((0 == ((status |= fe_status()) & FE_HAS_LOCK)) && ( (time(NULL) - start_time) < (2 * (int)time_ms / 1000) ))
+		while ((0 == ((status |= fe_status()) & DVBTEE_FE_HAS_LOCK)) && ( (time(NULL) - start_time) < (2 * (int)time_ms / 1000) ))
 			usleep(200*1000);
 	}
-	return ((status & FE_HAS_LOCK) == FE_HAS_LOCK);
+	return ((status & DVBTEE_FE_HAS_LOCK) == DVBTEE_FE_HAS_LOCK);
 }
 
 void tune::stop_feed()

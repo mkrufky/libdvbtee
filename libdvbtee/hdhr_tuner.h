@@ -58,7 +58,7 @@ private:
 	void clear_filters();
 	static void clear_filters(void *);
 
-	fe_status_t fe_status();
+	dvbtee_fe_status_t fe_status();
 
 	void hdhr_status();
 

@@ -74,6 +74,16 @@ static fe_modulation_t fe_modulation(dvbtee_fe_modulation_t modulation)
 	}
 }
 
+static dvbtee_fe_status_t dvbtee_fe_status(fe_status_t status)
+{
+	int ret = (dvbtee_fe_status_t)0;
+
+	if (status & FE_HAS_SYNC) ret |= (int)DVBTEE_FE_HAS_SYNC;
+	if (status & FE_HAS_LOCK) ret |= (int)DVBTEE_FE_HAS_LOCK;
+
+	return (dvbtee_fe_status_t)ret;
+}
+
 linuxtv_tuner::linuxtv_tuner()
   : adap_id(-1)
   , fe_fd(-1)
@@ -174,9 +184,9 @@ bool linuxtv_tuner::check()
 			is_scan() ? " scan" : "",
 			is_feed() ? " feed" : "");
 		if (cur_chan) {
-			fe_status_t status = fe_status();
+			dvbtee_fe_status_t status = fe_status();
 			uint16_t snr = get_snr();
-			dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
+			dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & DVBTEE_FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
 			last_touched();
 		}
 	}
@@ -257,13 +267,13 @@ fail:
 	return close_fe();
 }
 
-fe_status_t linuxtv_tuner::fe_status()
+dvbtee_fe_status_t linuxtv_tuner::fe_status()
 {
 	fe_status_t status = (fe_status_t)0;
 
 	if (ioctl(fe_fd, FE_READ_STATUS, &status) < 0) {
 		perror("FE_READ_STATUS failed");
-		return (fe_status_t)0;
+		return (dvbtee_fe_status_t)0;
 	}
 
 	fprintf(stderr, "%s%s%s%s%s ",
@@ -277,7 +287,7 @@ fe_status_t linuxtv_tuner::fe_status()
 	if (status & FE_HAS_LOCK)
 		state |= TUNE_STATE_LOCK;
 
-	return status;
+	return dvbtee_fe_status(status);
 }
 
 uint16_t linuxtv_tuner::get_snr()
@@ -371,7 +381,7 @@ bool linuxtv_tuner::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int
 
 	switch (fe_type) {
 	case FE_ATSC:
-		ret = tune_atsc(fe_modulation(modulation), channel);
+		ret = tune_atsc(modulation, channel);
 		break;
 	case FE_OFDM:
 		ret = tune_dvbt(channel);
@@ -388,26 +398,26 @@ bool linuxtv_tuner::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int
 	return ret;
 }
 
-bool linuxtv_tuner::tune_atsc(fe_modulation_t modulation, unsigned int channel)
+bool linuxtv_tuner::tune_atsc(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	struct dvb_frontend_parameters fe_params;
 
 	memset(&fe_params, 0, sizeof(struct dvb_frontend_parameters));
 
 	switch (modulation) {
-	case VSB_8:
-	case VSB_16:
+	case DVBTEE_VSB_8:
+	case DVBTEE_VSB_16:
 		fe_params.frequency = atsc_vsb_chan_to_freq(channel);
 		break;
-	case QAM_64:
-	case QAM_256:
+	case DVBTEE_QAM_64:
+	case DVBTEE_QAM_256:
 		fe_params.frequency = atsc_qam_chan_to_freq(channel);
 		break;
 	default:
 		fprintf(stderr, "modulation not supported!\n");
 		return false;
 	}
-	fe_params.u.vsb.modulation = modulation;
+	fe_params.u.vsb.modulation = fe_modulation(modulation);
 
 	if (ioctl(fe_fd, FE_SET_FRONTEND, &fe_params) < 0) {
 		fprintf(stderr, "linuxtv_tuner: FE_SET_FRONTEND failed\n");

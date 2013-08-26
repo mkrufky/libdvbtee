@@ -24,8 +24,6 @@
 
 #include <pthread.h>
 #include <sys/ioctl.h>
-#include <linux/dvb/frontend.h>
-#include <linux/dvb/dmx.h>
 #include <time.h>
 
 #include "channels.h"
@@ -59,6 +57,13 @@ typedef enum {
 	DVBTEE_VSB_8,
 	DVBTEE_VSB_16
 } dvbtee_fe_modulation_t;
+
+typedef enum {
+	DVBTEE_FE_IS_IDLE    = 0,
+	DVBTEE_FE_HAS_SIGNAL = 1,
+	DVBTEE_FE_HAS_SYNC   = 2,
+	DVBTEE_FE_HAS_LOCK   = 4,
+} dvbtee_fe_status_t;
 
 typedef void (*scan_progress_callback)(void *context, scan_progress_t *p);
 
@@ -136,7 +141,7 @@ private:
 
 	//map_chan_to_ts_id channels;
 
-	virtual fe_status_t fe_status() { vrtdbg; return (fe_status_t)0; }; // FIXME
+	virtual dvbtee_fe_status_t fe_status() { vrtdbg; return (dvbtee_fe_status_t)0; }; // FIXME
 #if 0
 	uint16_t get_snr();
 #endif
