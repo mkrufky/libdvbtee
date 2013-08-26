@@ -53,6 +53,13 @@ typedef enum {
 	DVBTEE_FE_ATSC
 } dvbtee_fe_type_t;
 
+typedef enum {
+	DVBTEE_QAM_64,
+	DVBTEE_QAM_256,
+	DVBTEE_VSB_8,
+	DVBTEE_VSB_16
+} dvbtee_fe_modulation_t;
+
 typedef void (*scan_progress_callback)(void *context, scan_progress_t *p);
 
 #if 0
@@ -78,7 +85,7 @@ public:
 
 	bool wait_for_lock_or_timeout(unsigned int);
 
-	virtual bool tune_channel(fe_modulation_t, unsigned int) { vrtdbg; return false; };
+	virtual bool tune_channel(dvbtee_fe_modulation_t, unsigned int) { vrtdbg; return false; };
 	unsigned int get_channel() { return cur_chan; };
 	time_t last_touched();
 

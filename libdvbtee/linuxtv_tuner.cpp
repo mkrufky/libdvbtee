@@ -50,6 +50,30 @@ static dvbtee_fe_type_t dvbtee_fe_type(fe_type_t fe_type)
 	}
 }
 
+#if 0
+static dvbtee_fe_modulation_t dvbtee_fe_modulation(fe_modulation_t modulation)
+{
+	switch (modulation) {
+	default:
+	case VSB_8:   return DVBTEE_VSB_8;
+	case VSB_16:  return DVBTEE_VSB_16;
+	case QAM_64:  return DVBTEE_QAM_64;
+	case QAM_256: return DVBTEE_QAM_256;
+	}
+}
+#endif
+
+static fe_modulation_t fe_modulation(dvbtee_fe_modulation_t modulation)
+{
+	switch (modulation) {
+	default:
+	case DVBTEE_VSB_8:   return VSB_8;
+	case DVBTEE_VSB_16:  return VSB_16;
+	case DVBTEE_QAM_64:  return QAM_64;
+	case DVBTEE_QAM_256: return QAM_256;
+	}
+}
+
 linuxtv_tuner::linuxtv_tuner()
   : adap_id(-1)
   , fe_fd(-1)
@@ -339,7 +363,7 @@ fail_demux:
 	return -1;
 }
 
-bool linuxtv_tuner::tune_channel(fe_modulation_t modulation, unsigned int channel)
+bool linuxtv_tuner::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	bool ret;
 
@@ -347,7 +371,7 @@ bool linuxtv_tuner::tune_channel(fe_modulation_t modulation, unsigned int channe
 
 	switch (fe_type) {
 	case FE_ATSC:
-		ret = tune_atsc(modulation, channel);
+		ret = tune_atsc(fe_modulation(modulation), channel);
 		break;
 	case FE_OFDM:
 		ret = tune_dvbt(channel);

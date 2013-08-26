@@ -168,7 +168,7 @@ void* tune::scan_thread()
 		if (scan_progress_cb)
 			scan_progress_cb(scan_progress_context, &progress);
 
-		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? VSB_8 : QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
+		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
 
 			if (f_kill_thread)
 				break;

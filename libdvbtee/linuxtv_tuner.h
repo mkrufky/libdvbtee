@@ -50,7 +50,7 @@ public:
 	void stop_feed();
 	int start_feed();
 
-	bool tune_channel(fe_modulation_t, unsigned int);
+	bool tune_channel(dvbtee_fe_modulation_t, unsigned int);
 
 	bool check();
 private:

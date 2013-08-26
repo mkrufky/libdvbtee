@@ -964,7 +964,7 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 		if (!flags)
 			flags = SCAN_VSB;
 
-		if (tuner->tune_channel((flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
+		if (tuner->tune_channel((flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) {
 
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
 				tuner->close_fe();
