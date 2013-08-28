@@ -95,16 +95,16 @@ int tune::close_fe() {
 
 bool tune::wait_for_lock_or_timeout(unsigned int time_ms)
 {
-	unsigned int status = (fe_status_t)0;
+	unsigned int status = (dvbtee_fe_status_t)0;
 	time_t start_time = time(NULL);
-	while ((0 == ((status |= fe_status()) & FE_HAS_LOCK)) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) ))
+	while ((0 == ((status |= fe_status()) & DVBTEE_FE_HAS_LOCK)) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) ))
 		usleep(200*1000);
-	if ((status & (FE_HAS_LOCK | FE_HAS_SYNC)) == FE_HAS_SYNC) {
+	if ((status & (DVBTEE_FE_HAS_LOCK | DVBTEE_FE_HAS_SYNC)) == DVBTEE_FE_HAS_SYNC) {
 		start_time = time(NULL);
-		while ((0 == ((status |= fe_status()) & FE_HAS_LOCK)) && ( (time(NULL) - start_time) < (2 * (int)time_ms / 1000) ))
+		while ((0 == ((status |= fe_status()) & DVBTEE_FE_HAS_LOCK)) && ( (time(NULL) - start_time) < (2 * (int)time_ms / 1000) ))
 			usleep(200*1000);
 	}
-	return ((status & FE_HAS_LOCK) == FE_HAS_LOCK);
+	return ((status & DVBTEE_FE_HAS_LOCK) == DVBTEE_FE_HAS_LOCK);
 }
 
 void tune::stop_feed()
@@ -168,19 +168,19 @@ void* tune::scan_thread()
 		if (scan_progress_cb)
 			scan_progress_cb(scan_progress_context, &progress);
 
-		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? VSB_8 : QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
+		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
 
 			if (f_kill_thread)
 				break;
 
 			switch (fe_type) {
 			default:
-			case FE_ATSC:
+			case DVBTEE_FE_ATSC:
 				feeder.parser.set_channel_info(channel,
 							       (scan_mode == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 							       (scan_mode == SCAN_VSB) ? "8VSB" : "QAM_256");
 				break;
-			case FE_OFDM:
+			case DVBTEE_FE_OFDM:
 				feeder.parser.set_channel_info(channel, dvbt_chan_to_freq(channel),
 							       ((channel <= 12) ?
 								"INVERSION_AUTO:BANDWIDTH_7_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO" :
@@ -188,7 +188,7 @@ void* tune::scan_thread()
 				break;
 			}
 			if (0 == start_feed()) {
-				int timeout = (scan_epg) ? 16 : (fe_type == FE_ATSC) ? 4 : 12;
+				int timeout = (scan_epg) ? 16 : (fe_type == DVBTEE_FE_ATSC) ? 4 : 12;
 				while ((!f_kill_thread) && (timeout)) {
 					if (scan_epg)
 						feeder.wait_for_epg(1000);

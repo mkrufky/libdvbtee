@@ -46,7 +46,7 @@ unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 
 	bool any_cli = false;
 
-static tune *find_idle_tuner()
+static tune *find_first_idle_tuner()
 {
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
@@ -54,6 +54,21 @@ static tune *find_idle_tuner()
 			return iter->second;
 		}
 	return NULL;
+}
+
+static tune *find_idle_tuner()
+{
+	tune *tuner = NULL;
+	time_t last_touched = 0;
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
+			dprintf("tuner %d is available", iter->first);
+			if ((!tuner) || (iter->second->last_touched() > last_touched)) {
+				tuner = iter->second;
+				last_touched = iter->second->last_touched();
+			}
+		}
+	return tuner;
 }
 
 static tune *find_tuned_tuner(unsigned int phy)
@@ -964,7 +979,7 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 		if (!flags)
 			flags = SCAN_VSB;
 
-		if (tuner->tune_channel((flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
+		if (tuner->tune_channel((flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) {
 
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
 				tuner->close_fe();

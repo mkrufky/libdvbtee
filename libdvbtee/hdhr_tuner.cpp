@@ -320,12 +320,12 @@ void hdhr_tuner::hdhr_status()
 	return;
 }
 
-fe_status_t hdhr_tuner::fe_status()
+dvbtee_fe_status_t hdhr_tuner::fe_status()
 {
-	if (!dev) return (fe_status_t)0;
+	if (!dev) return (dvbtee_fe_status_t)0;
 	hdhr_status();
 	struct hdhomerun_tuner_status_t *hdhr_status = dev->get_hdhr_status();
-	return (fe_status_t)((hdhr_status->lock_supported) ? FE_HAS_LOCK : (hdhr_status->signal_present) ? FE_HAS_SIGNAL : 0); // FIXME
+	return (dvbtee_fe_status_t)((hdhr_status->lock_supported) ? DVBTEE_FE_HAS_LOCK : (hdhr_status->signal_present) ? DVBTEE_FE_HAS_SIGNAL : 0); // FIXME
 }
 
 void hdhr_tuner::stop_feed()
@@ -366,7 +366,7 @@ int hdhr_tuner::start_feed()
 	return -1;
 }
 
-bool hdhr_tuner::tune_channel(fe_modulation_t modulation, unsigned int channel)
+bool hdhr_tuner::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	if (!dev) return false;
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();

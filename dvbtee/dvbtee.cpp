@@ -29,7 +29,6 @@
 
 #include "feed.h"
 #include "hlsfeed.h"
-#define USE_LINUXTV
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
 #endif
@@ -614,7 +613,7 @@ int main(int argc, char **argv)
 		}
 
 		if (tuner->tune_channel(
-				(scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
+				(scan_flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) {
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
 				tuner->close_fe();
 				goto exit; /* NO LOCK! */

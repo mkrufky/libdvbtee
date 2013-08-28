@@ -24,8 +24,6 @@
 
 #include <pthread.h>
 #include <sys/ioctl.h>
-#include <linux/dvb/frontend.h>
-#include <linux/dvb/dmx.h>
 #include <time.h>
 
 #include "channels.h"
@@ -45,6 +43,27 @@ typedef struct {
 	unsigned int current;
 	unsigned int physical_channel;
 } scan_progress_t;
+
+typedef enum {
+	DVBTEE_FE_QPSK,
+	DVBTEE_FE_QAM,
+	DVBTEE_FE_OFDM,
+	DVBTEE_FE_ATSC
+} dvbtee_fe_type_t;
+
+typedef enum {
+	DVBTEE_QAM_64,
+	DVBTEE_QAM_256,
+	DVBTEE_VSB_8,
+	DVBTEE_VSB_16
+} dvbtee_fe_modulation_t;
+
+typedef enum {
+	DVBTEE_FE_IS_IDLE    = 0,
+	DVBTEE_FE_HAS_SIGNAL = 1,
+	DVBTEE_FE_HAS_SYNC   = 2,
+	DVBTEE_FE_HAS_LOCK   = 4,
+} dvbtee_fe_status_t;
 
 typedef void (*scan_progress_callback)(void *context, scan_progress_t *p);
 
@@ -71,7 +90,7 @@ public:
 
 	bool wait_for_lock_or_timeout(unsigned int);
 
-	virtual bool tune_channel(fe_modulation_t, unsigned int) { vrtdbg; return false; };
+	virtual bool tune_channel(dvbtee_fe_modulation_t, unsigned int) { vrtdbg; return false; };
 	unsigned int get_channel() { return cur_chan; };
 	time_t last_touched();
 
@@ -114,7 +133,7 @@ protected:
 	bool         scan_epg;
 	bool         scan_complete;
 
-	fe_type_t fe_type;
+	dvbtee_fe_type_t fe_type;
 private:
 	void *scan_thread();
 
@@ -122,7 +141,7 @@ private:
 
 	//map_chan_to_ts_id channels;
 
-	virtual fe_status_t fe_status() { vrtdbg; return (fe_status_t)0; }; // FIXME
+	virtual dvbtee_fe_status_t fe_status() { vrtdbg; return (dvbtee_fe_status_t)0; }; // FIXME
 #if 0
 	uint16_t get_snr();
 #endif
