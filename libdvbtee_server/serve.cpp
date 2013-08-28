@@ -46,7 +46,7 @@ unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 
 	bool any_cli = false;
 
-static tune *find_idle_tuner()
+static tune *find_first_idle_tuner()
 {
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
@@ -54,6 +54,21 @@ static tune *find_idle_tuner()
 			return iter->second;
 		}
 	return NULL;
+}
+
+static tune *find_idle_tuner()
+{
+	tune *tuner = NULL;
+	time_t last_touched = 0;
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
+			dprintf("tuner %d is available", iter->first);
+			if ((!tuner) || (iter->second->last_touched() > last_touched)) {
+				tuner = iter->second;
+				last_touched = iter->second->last_touched();
+			}
+		}
+	return tuner;
 }
 
 static tune *find_tuned_tuner(unsigned int phy)
