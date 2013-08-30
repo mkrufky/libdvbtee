@@ -206,7 +206,6 @@ void* tune::scan_thread()
 				stop_feed();
 				channels[channel] = feeder.parser.get_ts_id();
 			} // else what if we cant start the feed???
-			feeder.parser.reset(); // redundant now?
 		}
 	}
 	close_fe();
