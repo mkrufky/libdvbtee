@@ -90,7 +90,7 @@ public:
 
 	bool wait_for_lock_or_timeout(unsigned int);
 
-	virtual bool tune_channel(dvbtee_fe_modulation_t, unsigned int) { vrtdbg; return false; };
+	bool tune_channel(dvbtee_fe_modulation_t, unsigned int);
 	unsigned int get_channel() { return cur_chan; };
 	time_t last_touched();
 
@@ -141,6 +141,7 @@ private:
 
 	//map_chan_to_ts_id channels;
 
+	virtual bool __tune_channel(dvbtee_fe_modulation_t, unsigned int) { vrtdbg; return false; };
 	virtual dvbtee_fe_status_t fe_status() { vrtdbg; return (dvbtee_fe_status_t)0; }; // FIXME
 #if 0
 	uint16_t get_snr();

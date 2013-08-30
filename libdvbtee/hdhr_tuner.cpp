@@ -366,7 +366,7 @@ int hdhr_tuner::start_feed()
 	return -1;
 }
 
-bool hdhr_tuner::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
+bool hdhr_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	if (!dev) return false;
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();

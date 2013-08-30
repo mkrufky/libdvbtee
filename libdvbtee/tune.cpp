@@ -107,6 +107,13 @@ bool tune::wait_for_lock_or_timeout(unsigned int time_ms)
 	return ((status & DVBTEE_FE_HAS_LOCK) == DVBTEE_FE_HAS_LOCK);
 }
 
+bool tune::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
+{
+	feeder.parser.reset();
+
+	return __tune_channel(modulation, channel);
+}
+
 void tune::stop_feed()
 {
 	feeder.stop();
@@ -199,7 +206,7 @@ void* tune::scan_thread()
 				stop_feed();
 				channels[channel] = feeder.parser.get_ts_id();
 			} // else what if we cant start the feed???
-			feeder.parser.reset();
+			feeder.parser.reset(); // redundant now?
 		}
 	}
 	close_fe();

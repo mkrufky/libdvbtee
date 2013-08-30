@@ -373,7 +373,7 @@ fail_demux:
 	return -1;
 }
 
-bool linuxtv_tuner::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
+bool linuxtv_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	bool ret;
 
