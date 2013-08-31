@@ -285,16 +285,16 @@ public:
 	decode_network(const decode_network&);
 	decode_network& operator= (const decode_network&);
 
-	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); };
+	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); }
 	bool take_nit(dvbpsi_nit_t*);
-	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); };
+	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); }
 
-	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL; };
-	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; };
-	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit: NULL; };
+	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL; }
+	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; }
+	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit: NULL; }
 
-	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x) : false; };
-	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; };
+	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x) : false; }
+	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; }
 
 	desc descriptors;
 
@@ -340,10 +340,10 @@ public:
 	decode_report();
 	~decode_report();
 
-	void set_dump_epg_cb(void* ctxt, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb) { dump_epg_header_footer_cb = hf_cb; dump_epg_event_cb = ev_cb; context = ctxt; };
-	void set_print_cb(void* ctxt, print_callback cb) { print_cb = cb; context = ctxt; };
+	void set_dump_epg_cb(void* ctxt, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb) { dump_epg_header_footer_cb = hf_cb; dump_epg_event_cb = ev_cb; context = ctxt; }
+	void set_print_cb(void* ctxt, print_callback cb) { print_cb = cb; context = ctxt; }
 
-	void dump_epg_header_footer(bool a, bool b) { if (dump_epg_header_footer_cb) dump_epg_header_footer_cb(context, a, b); };
+	void dump_epg_header_footer(bool a, bool b) { if (dump_epg_header_footer_cb) dump_epg_header_footer_cb(context, a, b); }
 	void dump_epg_event(const char * channel_name,
 			    uint16_t chan_major,
 			    uint16_t chan_minor,
@@ -393,22 +393,22 @@ public:
 	bool complete_psip();
 #endif
 
-	const decoded_pat_t*   get_decoded_pat() { return &decoded_pat; };
-	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; };
-	const decoded_vct_t*   get_decoded_vct() { return &decoded_vct; };
-	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; };
+	const decoded_pat_t*   get_decoded_pat() { return &decoded_pat; }
+	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; }
+	const decoded_vct_t*   get_decoded_vct() { return &decoded_vct; }
+	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; }
 	const decoded_sdt_t*   get_decoded_sdt();
 	const decoded_nit_t*   get_decoded_nit();
 
-	const desc*            get_descriptors() { return &descriptors; };
+	const desc*            get_descriptors() { return &descriptors; }
 
-	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; };
+	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; }
 	const map_decoded_eit*      get_decoded_eit();
 
 	unsigned char* get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message); /* message must be an array of 256 unsigned char's */
 
-	const uint8_t get_current_eit_x() { return eit_x; };
-	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; };
+	const uint8_t get_current_eit_x() { return eit_x; }
+	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; }
 
 	const uint16_t get_lcn(uint16_t);
 
@@ -423,7 +423,7 @@ public:
 	void dump_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter);
 	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter);
 
-	void set_physical_channel(unsigned int chan) { physical_channel = chan; };
+	void set_physical_channel(unsigned int chan) { physical_channel = chan; }
 private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
