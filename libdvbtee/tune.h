@@ -82,19 +82,19 @@ public:
 	tune(const tune&);
 	tune& operator= (const tune&);
 
-	virtual int open_fe() { vrtdbg; return -1; };
+	virtual int open_fe() { vrtdbg; return -1; }
 	virtual int close_fe();
 
 	virtual void stop_feed();
-	virtual int start_feed() { vrtdbg; return -1; };
+	virtual int start_feed() { vrtdbg; return -1; }
 
 	bool wait_for_lock_or_timeout(unsigned int);
 
 	bool tune_channel(dvbtee_fe_modulation_t, unsigned int);
-	unsigned int get_channel() { return cur_chan; };
+	unsigned int get_channel() { return cur_chan; }
 	time_t last_touched();
 
-	virtual bool check() { vrtdbg; return false; };
+	virtual bool check() { vrtdbg; return false; }
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
@@ -103,9 +103,9 @@ public:
 	/* FIXME: deprecate start_scan & move to private */
 	int start_scan(unsigned int, char *, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL);
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL);
-	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); };
+	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); }
 	unsigned int get_scan_results(bool wait = true, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
-	void stop_scan() { f_kill_thread = true; };
+	void stop_scan() { f_kill_thread = true; }
 
 	feed feeder;
 #define TUNE_STATE_IDLE 0
@@ -113,11 +113,11 @@ public:
 #define TUNE_STATE_LOCK 2
 #define TUNE_STATE_SCAN 4
 #define TUNE_STATE_FEED 8
-	inline bool is_idle() { return (state ==TUNE_STATE_IDLE); };
-	inline bool is_open() { return (state & TUNE_STATE_OPEN); };
-	inline bool is_lock() { return (state & TUNE_STATE_LOCK); };
-	inline bool is_scan() { return (state & TUNE_STATE_SCAN); };
-	inline bool is_feed() { return (state & TUNE_STATE_FEED); };
+	inline bool is_idle() { return (state ==TUNE_STATE_IDLE); }
+	inline bool is_open() { return (state & TUNE_STATE_OPEN); }
+	inline bool is_lock() { return (state & TUNE_STATE_LOCK); }
+	inline bool is_scan() { return (state & TUNE_STATE_SCAN); }
+	inline bool is_feed() { return (state & TUNE_STATE_FEED); }
 protected:
 	static void *scan_thread(void*);
 
@@ -141,8 +141,8 @@ private:
 
 	//map_chan_to_ts_id channels;
 
-	virtual bool __tune_channel(dvbtee_fe_modulation_t, unsigned int) { vrtdbg; return false; };
-	virtual dvbtee_fe_status_t fe_status() { vrtdbg; return (dvbtee_fe_status_t)0; }; // FIXME
+	virtual bool __tune_channel(dvbtee_fe_modulation_t, unsigned int) { vrtdbg; return false; }
+	virtual dvbtee_fe_status_t fe_status() { vrtdbg; return (dvbtee_fe_status_t)0; } // FIXME
 #if 0
 	uint16_t get_snr();
 #endif
