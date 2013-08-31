@@ -80,12 +80,12 @@ public:
 	stats(const stats&);
 	stats& operator= (const stats&);
 #endif
-	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; };
-	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; };
+	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; }
+	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; }
 
-	void push_pid(const uint16_t pid) { push_pid(188, pid); };
+	void push_pid(const uint16_t pid) { push_pid(188, pid); }
 
-	void push(int c, const uint8_t *p, pkt_stats_t *pkt_stats = NULL) { for(int i = 0; i < c; i++) push(p+i*188, pkt_stats); };
+	void push(int c, const uint8_t *p, pkt_stats_t *pkt_stats = NULL) { for(int i = 0; i < c; i++) push(p+i*188, pkt_stats); }
 	void push(const uint8_t *p, pkt_stats_t *pkt_stats = NULL);
 
 	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats);
@@ -109,15 +109,15 @@ private:
 	statistics_callback statistics_cb;
 	void *statistics_priv;
 
-	void __push_pid(int c, const uint16_t pid) { statistics[pid] += c; statistics[0x2000] += c; };
+	void __push_pid(int c, const uint16_t pid) { statistics[pid] += c; statistics[0x2000] += c; }
 	void push_pid(int c, const uint16_t pid);
 
-	void __push(const uint8_t *p) { push_pid( (p[0] == 0x47) ? ((uint16_t) (p[1] & 0x1f) << 8) + p[2] : (uint16_t) - 1 ); };
+	void __push(const uint8_t *p) { push_pid( (p[0] == 0x47) ? ((uint16_t) (p[1] & 0x1f) << 8) + p[2] : (uint16_t) - 1 ); }
 
 	void show(bool per_sec = true);
 
 	void push_stats(pkt_stats_t *pkt_stats);
-	void push_discontinuity(const uint16_t pid) { discontinuities[pid]++; discontinuities[0x2000]++; };
+	void push_discontinuity(const uint16_t pid) { discontinuities[pid]++; discontinuities[0x2000]++; }
 	void clear_stats();
 };
 
