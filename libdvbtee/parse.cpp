@@ -497,7 +497,7 @@ void parse::a(void* p_this, b* p_table)					\
 #endif /* USE_STATIC_DECODE_MAP */
 
 define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_DeletePAT, has_pat);
-define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT, enabled);
+define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT, is_pmt_ready());
 define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_DeleteEIT, enabled);
 define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_DeleteNIT, has_nit);
 define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_DeleteNIT, enabled);
@@ -855,11 +855,16 @@ void parse::epg_dump(decode_report *reporter)
 	return;
 }
 
+bool parse::is_pmt_ready()
+{
+	return (has_pat && decoders[get_ts_id()].complete_pmt());
+};
+
 bool parse::is_psip_ready()
 {
 	return ((has_pat) &&
 		(((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit))) &&
-		((decoders.count(get_ts_id())) && (decoders[get_ts_id()].complete_pmt())));
+		((decoders.count(get_ts_id())) && (is_pmt_ready())));
 };
 
 bool parse::is_epg_ready()
