@@ -165,6 +165,7 @@ void parse::process_pat(const decoded_pat_t *decoded_pat)
 			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 				add_filter(iter->second);
+				rcvd_pmt[iter->second] = false;
 			}
 		}
 }
@@ -216,6 +217,8 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(p_pmt->i_program_number);
 	if (iter_pmt != decoded_pmt->end())
 		process_pmt(&iter_pmt->second);
+
+	rcvd_pmt[p_pmt->i_program_number] = true;
 
 	return true;
 }
@@ -497,7 +500,7 @@ void parse::a(void* p_this, b* p_table)					\
 #endif /* USE_STATIC_DECODE_MAP */
 
 define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_DeletePAT, has_pat);
-define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT, is_pmt_ready());
+define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT, is_pmt_ready(p_table->i_program_number));
 define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_DeleteEIT, enabled);
 define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_DeleteNIT, has_nit);
 define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_DeleteNIT, enabled);
@@ -599,7 +602,9 @@ parse::parse()
 	h_demux[PID_TOT]  = dvbpsi_AttachDemux(attach_table, this);//if !scan_mode
 
 	memset(&service_ids, 0, sizeof(service_ids));
+	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
 	service_ids.clear();
+	rcvd_pmt.clear();
 	out_pids.clear();
 }
 
@@ -618,6 +623,7 @@ parse::~parse()
 		fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
 	service_ids.clear();
+	rcvd_pmt.clear();
 	out_pids.clear();
 }
 
@@ -637,6 +643,7 @@ void parse::detach_demux()
 
 	clear_filters();
 	service_ids.clear();
+	rcvd_pmt.clear();
 	payload_pids.clear();
 	out_pids.clear();
 }
@@ -855,9 +862,25 @@ void parse::epg_dump(decode_report *reporter)
 	return;
 }
 
-bool parse::is_pmt_ready()
+bool parse::is_pmt_ready(u_int16_t id)
 {
+#if 0
 	return (has_pat && decoders[get_ts_id()].complete_pmt());
+#endif
+	if ((!has_pat) || (!rcvd_pmt.size()))
+		return false;
+
+	if (id) return (rcvd_pmt.count(id) && rcvd_pmt[id]);
+
+	for (map_rcvd::const_iterator iter = rcvd_pmt.begin(); iter != rcvd_pmt.end(); ++iter)
+		if ((iter->first) && (!iter->second)) {
+#if 1//DBG
+			fprintf(stderr, "%s: missing pmt for program %d\n", __func__, iter->first);
+#endif
+			return false;
+		}
+	return true;
+
 };
 
 bool parse::is_psip_ready()

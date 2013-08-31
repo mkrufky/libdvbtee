@@ -119,7 +119,7 @@ public:
 	void set_epg_mode(bool onoff)  { epg_mode = onoff; };
 	void enable(bool onoff)  { enabled = onoff; };
 //got_all_eit()
-	bool is_pmt_ready();
+	bool is_pmt_ready(u_int16_t id = 0);
 	bool is_psip_ready();
 	bool is_epg_ready();
 
@@ -203,6 +203,7 @@ private:
 	bool has_sdt;
 	bool has_nit;
 	bool expect_vct;
+	map_rcvd rcvd_pmt;
 
 //	uint8_t grab_next_eit(uint8_t current_eit_x);
 	map_pidtype eit_pids; /* pid, eit-x */
