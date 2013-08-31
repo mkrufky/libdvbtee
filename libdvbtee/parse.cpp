@@ -862,7 +862,7 @@ void parse::epg_dump(decode_report *reporter)
 	return;
 }
 
-bool parse::is_pmt_ready(u_int16_t id)
+bool parse::is_pmt_ready(uint16_t id)
 {
 #if 0
 	return (has_pat && decoders[get_ts_id()].complete_pmt());

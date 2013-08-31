@@ -119,7 +119,7 @@ public:
 	void set_epg_mode(bool onoff)  { epg_mode = onoff; }
 	void enable(bool onoff)  { enabled = onoff; }
 //got_all_eit()
-	bool is_pmt_ready(u_int16_t id = 0);
+	bool is_pmt_ready(uint16_t id = 0);
 	bool is_psip_ready();
 	bool is_epg_ready();
 
