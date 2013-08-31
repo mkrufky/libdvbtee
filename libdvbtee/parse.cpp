@@ -1173,6 +1173,8 @@ void parse::set_ts_id(uint16_t new_ts_id)
 
 uint16_t parse::get_ts_id(unsigned int channel)
 {
+	if (!channel)
+		return get_ts_id();
 	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		if (channel == iter->second.channel)
 			return iter->first;
