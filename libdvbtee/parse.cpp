@@ -499,19 +499,19 @@ void parse::a(void* p_this, b* p_table)					\
 }
 #endif /* USE_STATIC_DECODE_MAP */
 
-define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_DeletePAT, has_pat);
-define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT, is_pmt_ready(p_table->i_program_number));
-define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_DeleteEIT, enabled);
-define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_DeleteNIT, has_nit);
-define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_DeleteNIT, enabled);
-define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_DeleteSDT, has_sdt);
-define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_DeleteSDT, enabled);
-define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_DeleteTOT, enabled);
-define_table_wrapper(take_vct, dvbpsi_atsc_vct_t, dvbpsi_atsc_DeleteVCT, has_vct);
-define_table_wrapper(take_eit, dvbpsi_atsc_eit_t, dvbpsi_atsc_DeleteEIT, enabled);
-define_table_wrapper(take_ett, dvbpsi_atsc_ett_t, dvbpsi_atsc_DeleteETT, enabled);
-define_table_wrapper(take_stt, dvbpsi_atsc_stt_t, dvbpsi_atsc_DeleteSTT, enabled);
-define_table_wrapper(take_mgt, dvbpsi_atsc_mgt_t, dvbpsi_atsc_DeleteMGT, has_mgt);
+define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_DeletePAT, has_pat)
+define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT, is_pmt_ready(p_table->i_program_number))
+define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_DeleteEIT, enabled)
+define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_DeleteNIT, has_nit)
+define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_DeleteNIT, enabled)
+define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_DeleteSDT, has_sdt)
+define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_DeleteSDT, enabled)
+define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_DeleteTOT, enabled)
+define_table_wrapper(take_vct, dvbpsi_atsc_vct_t, dvbpsi_atsc_DeleteVCT, has_vct)
+define_table_wrapper(take_eit, dvbpsi_atsc_eit_t, dvbpsi_atsc_DeleteEIT, enabled)
+define_table_wrapper(take_ett, dvbpsi_atsc_ett_t, dvbpsi_atsc_DeleteETT, enabled)
+define_table_wrapper(take_stt, dvbpsi_atsc_stt_t, dvbpsi_atsc_DeleteSTT, enabled)
+define_table_wrapper(take_mgt, dvbpsi_atsc_mgt_t, dvbpsi_atsc_DeleteMGT, has_mgt)
 
 void parse::attach_table(void* p_this, dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_extension)
 {
