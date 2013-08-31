@@ -74,13 +74,13 @@ public:
 	output_stream(const output_stream&);
 	output_stream& operator= (const output_stream&);
 #endif
-	bool is_streaming() { return ((!f_kill_thread) && (f_streaming)); };
-	void stop_without_wait() { f_kill_thread = true; };
+	bool is_streaming() { return ((!f_kill_thread) && (f_streaming)); }
+	void stop_without_wait() { f_kill_thread = true; }
 
 	int start();
 	bool drain();
 	void stop();
-	inline void stop_after_drain() { if (drain()) stop(); };
+	inline void stop_after_drain() { if (drain()) stop(); }
 	void close_file();
 
 	bool push(uint8_t*, int);
@@ -93,7 +93,7 @@ public:
 	bool check();
 
 	int get_pids(map_pidtype&);
-	void reset_pids() { pids.clear(); };
+	void reset_pids() { pids.clear(); }
 
 	bool verify(void* priv, stream_callback callback) { return ((priv == stream_cb_priv) && (callback == stream_cb)); }
 	bool verify(int socket, unsigned int method) { return ((socket == sock) && (method == stream_method)); }
@@ -163,10 +163,10 @@ public:
 	bool push(uint8_t* p_data, int size);
 	bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE);
 
-	int add(char* target) { map_pidtype pids; return add(target, pids); };
-	int add(int socket, unsigned int method) { map_pidtype pids; return add(socket, method, pids); };
-	int add(void* priv, stream_callback callback) { map_pidtype pids; return add(priv, callback, pids); };
-	int add_stdout() { map_pidtype pids; return add_stdout(pids); };
+	int add(char* target) { map_pidtype pids; return add(target, pids); }
+	int add(int socket, unsigned int method) { map_pidtype pids; return add(socket, method, pids); }
+	int add(void* priv, stream_callback callback) { map_pidtype pids; return add(priv, callback, pids); }
+	int add_stdout() { map_pidtype pids; return add_stdout(pids); }
 
 	int add(char* target, map_pidtype &pids);
 	int add(int socket, unsigned int method, map_pidtype &pids);
@@ -196,7 +196,7 @@ private:
 	void add_http_client(int);
 	static void add_http_client(void*, int);
 
-	void stop_without_wait() { f_kill_thread = true; };
+	void stop_without_wait() { f_kill_thread = true; }
 
 	void reclaim_resources();
 

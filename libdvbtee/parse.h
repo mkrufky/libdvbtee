@@ -71,15 +71,15 @@ public:
 	parse();
 	~parse();
 
-	unsigned int get_fed_pkt_count() const { return fed_pkt_count; };
-	uint16_t get_ts_id() const { return ts_id; };
+	unsigned int get_fed_pkt_count() const { return fed_pkt_count; }
+	uint16_t get_ts_id() const { return ts_id; }
 	uint16_t get_ts_id(unsigned int channel);
 
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
 	void add_service_pids(char* service_ids, map_pidtype &pids);
 	void add_service_pids(map_pidtype &pids);
 
-	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); };
+	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); }
 
 	void set_service_ids(char *ids);
 
@@ -113,12 +113,13 @@ public:
 	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
-	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; };
+	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; }
 
-	void set_scan_mode(bool onoff) { scan_mode = onoff; };
-	void set_epg_mode(bool onoff)  { epg_mode = onoff; };
-	void enable(bool onoff)  { enabled = onoff; };
+	void set_scan_mode(bool onoff) { scan_mode = onoff; }
+	void set_epg_mode(bool onoff)  { epg_mode = onoff; }
+	void enable(bool onoff)  { enabled = onoff; }
 //got_all_eit()
+	bool is_pmt_ready(u_int16_t id = 0);
 	bool is_psip_ready();
 	bool is_epg_ready();
 
@@ -173,7 +174,7 @@ private:
 	void attach_table(dvbpsi_handle, uint8_t, uint16_t);
 
 	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
-	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); };
+	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); }
 	unsigned int xine_dump(uint16_t, channel_info_t*, chandump_callback, void* chandump_context);
 
 	void set_ts_id(uint16_t);
@@ -202,6 +203,7 @@ private:
 	bool has_sdt;
 	bool has_nit;
 	bool expect_vct;
+	map_rcvd rcvd_pmt;
 
 //	uint8_t grab_next_eit(uint8_t current_eit_x);
 	map_pidtype eit_pids; /* pid, eit-x */

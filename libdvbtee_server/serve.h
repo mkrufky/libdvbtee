@@ -44,15 +44,15 @@ public:
 	serve_client(const serve_client&);
 	serve_client& operator= (const serve_client&);
 #endif
-	void setup(serve *parent, int sock) { server = parent; sock_fd = sock; };
+	void setup(serve *parent, int sock) { server = parent; sock_fd = sock; }
 
 	int start();
 	void stop();
 
-	bool socket_active() { return (sock_fd >= 0); };
+	bool socket_active() { return (sock_fd >= 0); }
 	bool check();
 
-	unsigned int get_data_fmt() { return data_fmt; };
+	unsigned int get_data_fmt() { return data_fmt; }
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -72,7 +72,7 @@ private:
 #define SERVE_DATA_FMT_TEXT (SERVE_DATA_FMT_HTML | SERVE_DATA_FMT_JSON | SERVE_DATA_FMT_XML)
 	unsigned int data_fmt;
 
-	void stop_without_wait() { f_kill_thread = true; };
+	void stop_without_wait() { f_kill_thread = true; }
 	void close_socket();
 
 	void *client_thread();
@@ -144,23 +144,23 @@ public:
 	bool scan(unsigned int flags,
 		  chandump_callback chandump_cb, void *chandump_context,
 		  unsigned int tuner_id = 0)
-		{ return scan(flags, NULL, NULL, chandump_cb, chandump_context, tuner_id); };
+		{ return scan(flags, NULL, NULL, chandump_cb, chandump_context, tuner_id); }
 	bool scan(unsigned int flags,
 		  scan_progress_callback progress_cb, void *progress_context,
 		  unsigned int tuner_id = 0)
-		{ return scan(flags, progress_cb, progress_context, NULL, NULL, tuner_id); };
+		{ return scan(flags, progress_cb, progress_context, NULL, NULL, tuner_id); }
 
-	void set_scan_flags(unsigned int tuner_id, unsigned int flags) { scan_flags = flags; };
-	unsigned int get_scan_flags(unsigned int tuner_id) { return scan_flags; };
+	void set_scan_flags(unsigned int tuner_id, unsigned int flags) { scan_flags = flags; }
+	unsigned int get_scan_flags(unsigned int tuner_id) { return scan_flags; }
 
-	bool is_running() { return listener.is_running(); };
-	bool is_cli_enabled() { return f_cli_enabled; };
+	bool is_running() { return listener.is_running(); }
+	bool is_cli_enabled() { return f_cli_enabled; }
 
 	void reclaim_server_resources();
 	void reclaim_tuner_resources();
 	bool check();
 
-	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; };
+	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; }
 
 	/* FIXME: move to private */
 	bool cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
@@ -170,7 +170,7 @@ public:
 
 	feed_server_map feed_servers;
 
-	serve_client_map* get_client_map() { return &client_map; };
+	serve_client_map* get_client_map() { return &client_map; }
 private:
 	socket_listen listener;
 	serve_client_map client_map;
@@ -182,7 +182,7 @@ private:
 	static void *monitor_thread(void*);
 
 	int start_monitor();
-	void stop_monitor() { f_kill_thread = true; };
+	void stop_monitor() { f_kill_thread = true; }
 
 	void add_client(int);
 	static void add_client(void*, int);
