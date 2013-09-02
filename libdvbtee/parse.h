@@ -75,6 +75,8 @@ public:
 	uint16_t get_ts_id() const { return ts_id; }
 	uint16_t get_ts_id(unsigned int channel);
 
+	bool get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e);
+
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
 	void add_service_pids(char* service_ids, map_pidtype &pids);
 	void add_service_pids(map_pidtype &pids);

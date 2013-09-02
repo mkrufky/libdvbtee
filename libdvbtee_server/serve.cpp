@@ -1433,6 +1433,52 @@ bool serve_client::__command(char* cmdline)
 		str = xml_dump_epg_header_footer_callback(this, false, false);
 		streamback((const uint8_t*)str, strlen(str));
 
+	} else if (strstr(cmd, "info")) {
+		char *cmdinfo;
+		uint16_t ser = 0;
+		unsigned int phy = 0;
+#if 0
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
+#endif
+		if ((arg) && strlen(arg)) {
+			phy = strtoul(strtok_r(arg, ".-+~", &cmdinfo), NULL, 0);
+			ser = strtoul(strtok_r(NULL, ".-+~", &cmdinfo), NULL, 0);
+		}
+
+		cli_print("dumping stream info for physical channel %d, service %d...\n", phy, ser);
+		parsed_channel_info_t c;
+		decoded_event_t e;
+
+		if (feeder->parser.get_stream_info(phy, ser, &c, &e)) {
+
+			const char *str;
+
+			if (data_fmt == SERVE_DATA_FMT_XML) {
+				str = xml_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+			if (data_fmt == SERVE_DATA_FMT_JSON) {
+				str = json_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
+			chandump(false, &c);
+
+			if (data_fmt == SERVE_DATA_FMT_XML) {
+				str = xml_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+			if (data_fmt == SERVE_DATA_FMT_JSON) {
+				str = " {} ";
+				streamback((const uint8_t*)str, strlen(str));
+				str = json_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+		}
+
 	} else if (strstr(cmd, "stop")) {
 		bool stop_output = (strstr(cmd, "stopoutput")) ? true : false;
 		int output_id = ((arg) && strlen(arg)) ? strtoul(arg, NULL, 0) : -1;

@@ -867,6 +867,39 @@ void parse::epg_dump(decode_report *reporter)
 	return;
 }
 
+bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e)
+{
+	if (!service)
+		return false;
+
+	uint16_t requested_ts_id = get_ts_id(channel);
+
+	if (!channel_info.count(requested_ts_id))
+		return false;
+
+	const map_decoded_pmt* decoded_pmt = decoders[requested_ts_id].get_decoded_pmt();
+	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service);
+	if (iter_pmt == decoded_pmt->end())
+		return false;
+
+	const decoded_vct_t* decoded_vct = decoders[requested_ts_id].get_decoded_vct();
+
+	channel_info_t *info = &channel_info[requested_ts_id];
+
+	if (c) {
+		c->physical_channel = info->channel;
+		c->freq             = info->frequency;
+		c->modulation       = info->modulation;
+		//
+		c->program_number   = service;
+		c->apid = 0;
+		c->vpid = 0;
+		//
+		parse_channel_info(requested_ts_id, &iter_pmt->second, decoded_vct, *c);
+	}
+	return true;
+}
+
 bool parse::is_pmt_ready(uint16_t id)
 {
 #if 0
