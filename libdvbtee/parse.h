@@ -60,7 +60,7 @@ typedef struct {
 	uint16_t physical_channel;
 	uint32_t freq;
 	const char *modulation;
-	unsigned char *service_name;
+	unsigned char service_name[256];
 } parsed_channel_info_t;
 
 typedef const char * (*chandump_callback)(void *context, parsed_channel_info_t *c);

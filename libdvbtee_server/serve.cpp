@@ -1119,7 +1119,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 
 			chan = strtok_r(name, "-", &save);
 			temp = strtok_r(NULL, "-", &save);
-			c.service_name = (unsigned char *)(((temp) && strlen(temp)) ? temp : chan);
+			sprintf((char*)c.service_name, "%s", (unsigned char *)(((temp) && strlen(temp)) ? temp : chan));
 
 			temp = strtok_r(chan, ".", &save);
 			if (temp) {
