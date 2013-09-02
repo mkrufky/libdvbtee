@@ -1263,7 +1263,7 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 	bool ret = (eit_x_complete_atsc(current_eit_x) ||
 		    ((current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x)));
 	fprintf(stderr, "%s(%d):%s- eit_x_complete_atsc(current_eit_x)= %s\n",
-                __func__, current_eit_x, (ret) ? "true" : "false", (eit_x_complete_atsc(current_eit_x)) ? "true" : "false");
+		__func__, current_eit_x, (ret) ? "true" : "false", (eit_x_complete_atsc(current_eit_x)) ? "true" : "false");
 	return ret;
 #endif
 }
