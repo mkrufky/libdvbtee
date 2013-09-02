@@ -165,7 +165,7 @@ void parse::process_pat(const decoded_pat_t *decoded_pat)
 			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 				add_filter(iter->second);
-				rcvd_pmt[iter->second] = false;
+				rcvd_pmt[iter->first] = false;
 			}
 		}
 }
