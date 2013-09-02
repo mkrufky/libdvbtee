@@ -264,7 +264,7 @@ const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 const char * html_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
-        str.clear();
+	str.clear();
 	char channelno[8]; /* XXX.XXX */
 	if (c->major + c->minor > 1)
 		sprintf(channelno, "%d.%d", c->major, c->minor);
