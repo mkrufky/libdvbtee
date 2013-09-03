@@ -1481,6 +1481,10 @@ bool serve_client::__command(char* cmdline)
 				str = html_dump_epg_header_footer_callback(this, true, false);
 				streamback((const uint8_t*)str, strlen(str));
 			}
+			if (data_fmt == SERVE_DATA_FMT_JSON) {
+				str = ",";
+				streamback((const uint8_t*)str, strlen(str));
+			}
 
 			epg_event_callback(&e[1]);
 
@@ -1496,8 +1500,8 @@ bool serve_client::__command(char* cmdline)
 				streamback((const uint8_t*)str, strlen(str));
 			}
 			if (data_fmt == SERVE_DATA_FMT_JSON) {
-				str = " {} ";
-				streamback((const uint8_t*)str, strlen(str));
+//				str = " {} ";
+//				streamback((const uint8_t*)str, strlen(str));
 				str = json_dump_epg_header_footer_callback(this, false, false);
 				streamback((const uint8_t*)str, strlen(str));
 			}
