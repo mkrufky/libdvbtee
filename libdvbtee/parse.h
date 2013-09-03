@@ -235,6 +235,8 @@ private:
 	demux demuxer;
 #endif
 	map_pidtype out_pids;
+
+	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&);
 };
 
 #endif //__PARSE_H__

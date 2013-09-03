@@ -736,7 +736,7 @@ static const char * xine_chandump(void *context, parsed_channel_info_t *c)
 	return NULL;
 }
 
-static void parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c)
+void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c)
 {
 	//map_ts_elementary_streams::iterator iter_pmt_es = decoded_pmt->es_streams.find(program_number);
 	for (map_ts_elementary_streams::const_iterator iter_pmt_es = decoded_pmt->es_streams.begin();
