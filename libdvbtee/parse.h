@@ -60,7 +60,7 @@ typedef struct {
 	uint16_t physical_channel;
 	uint32_t freq;
 	const char *modulation;
-	unsigned char *service_name;
+	unsigned char service_name[256];
 } parsed_channel_info_t;
 
 typedef const char * (*chandump_callback)(void *context, parsed_channel_info_t *c);
@@ -74,6 +74,8 @@ public:
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; }
 	uint16_t get_ts_id() const { return ts_id; }
 	uint16_t get_ts_id(unsigned int channel);
+
+	bool get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0 = NULL, decoded_event_t *e1 = NULL);
 
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
 	void add_service_pids(char* service_ids, map_pidtype &pids);
@@ -119,7 +121,7 @@ public:
 	void set_epg_mode(bool onoff)  { epg_mode = onoff; }
 	void enable(bool onoff)  { enabled = onoff; }
 //got_all_eit()
-	bool is_pmt_ready(u_int16_t id = 0);
+	bool is_pmt_ready(uint16_t id = 0);
 	bool is_psip_ready();
 	bool is_epg_ready();
 
@@ -233,6 +235,8 @@ private:
 	demux demuxer;
 #endif
 	map_pidtype out_pids;
+
+	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&);
 };
 
 #endif //__PARSE_H__
