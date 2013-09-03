@@ -1467,8 +1467,28 @@ bool serve_client::__command(char* cmdline)
 
 			streamback_started = true;
 			chandump(false, &c);
+
+			if (data_fmt == SERVE_DATA_FMT_HTML) {
+				str = html_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
 			epg_event_callback(&e[0]);
+
+			if (data_fmt == SERVE_DATA_FMT_HTML) {
+				str = html_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+				str = html_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
 			epg_event_callback(&e[1]);
+
+			if (data_fmt == SERVE_DATA_FMT_HTML) {
+				str = html_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
 			streamback_started = false;
 
 			if (data_fmt == SERVE_DATA_FMT_XML) {
