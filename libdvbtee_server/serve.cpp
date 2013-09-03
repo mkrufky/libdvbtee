@@ -669,7 +669,7 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 		ee.event_id = e->event_id;
 		ee.start_time = e->start_time;
 		ee.length_sec = e->length_sec;
-		ee.name = e->name;
+		strncpy(ee.name, e->name, sizeof(ee.name));
 		ee.text = e->text;
 
 		const char *str;
@@ -1450,9 +1450,9 @@ bool serve_client::__command(char* cmdline)
 
 		cli_print("dumping stream info for physical channel %d, service %d...\n", phy, ser);
 		parsed_channel_info_t c;
-		decoded_event_t e;
+		decoded_event_t e[2];
 
-		if (feeder->parser.get_stream_info(phy, ser, &c, &e)) {
+		if (feeder->parser.get_stream_info(phy, ser, &c, &e[0], &e[1])) {
 
 			const char *str;
 
@@ -1465,7 +1465,11 @@ bool serve_client::__command(char* cmdline)
 				streamback((const uint8_t*)str, strlen(str));
 			}
 
+			streamback_started = true;
 			chandump(false, &c);
+			epg_event_callback(&e[0]);
+			epg_event_callback(&e[1]);
+			streamback_started = false;
 
 			if (data_fmt == SERVE_DATA_FMT_XML) {
 				str = xml_dump_epg_header_footer_callback(this, false, false);

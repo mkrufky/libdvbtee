@@ -899,6 +899,37 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 	return true;
 }
 
+static bool _get_epg_event(decoded_event_t *e,
+			  const char * channel_name,
+			  uint16_t chan_major,
+			  uint16_t chan_minor,
+			  uint16_t chan_physical,
+			  uint16_t chan_svc_id,
+			  //
+			  uint16_t event_id,
+			  time_t start_time,
+			  uint32_t length_sec,
+			  const char * name,
+			  const char * text)
+{
+	if (!e) return false;
+
+	e->channel_name  = channel_name;
+	e->chan_major    = chan_major;
+	e->chan_minor    = chan_minor;
+
+	e->chan_physical = chan_physical;
+	e->chan_svc_id   = chan_svc_id;
+
+	e->event_id      = event_id;
+	e->start_time    = start_time;
+	e->length_sec    = length_sec;
+	strncpy(e->name, name, sizeof(e->name));
+	e->text          = text;
+
+	return true;
+};
+
 void decode_report::dump_epg_event(const char * channel_name,
 				   uint16_t chan_major,
 				   uint16_t chan_minor,
@@ -915,18 +946,11 @@ void decode_report::dump_epg_event(const char * channel_name,
 		return;
 
 	decoded_event_t e;
-	e.channel_name  = channel_name;
-	e.chan_major    = chan_major;
-	e.chan_minor    = chan_minor;
-
-	e.chan_physical = chan_physical;
-	e.chan_svc_id   = chan_svc_id;
-
-	e.event_id      = event_id;
-	e.start_time    = start_time;
-	e.length_sec    = length_sec;
-	e.name          = name;
-	e.text          = text;
+	_get_epg_event(&e, channel_name,
+		      chan_major, chan_minor,
+		      chan_physical, chan_svc_id,
+		      event_id, start_time, length_sec,
+		      name, text);
 
 	dump_epg_event_cb(context, &e);
 };
@@ -996,6 +1020,200 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 					 event->name.c_str(),
 					 event->text.c_str());
 	return;
+}
+
+void decode::get_epg_event(const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decoded_event_t *e)
+{
+#if 1//DBG
+	fprintf(stderr, "%s\n", __func__);
+#endif
+	unsigned char service_name[8] = { 0 };
+	for ( int i = 0; i < 7; ++i ) service_name[i] = channel->short_name[i*2+1];
+	service_name[7] = 0;
+
+	time_t start = atsc_datetime_utc(event->start_time /*+ (60 * tz_offset)*/);
+	time_t end   = atsc_datetime_utc(event->start_time + event->length_sec /*+ (60 * tz_offset)*/);
+
+	unsigned char name[256];
+	memset(name, 0, sizeof(char) * 256);
+	decode_multiple_string(event->title, event->title_bytes, name, sizeof(name));
+#if 1
+	//FIXME: descriptors
+
+	struct tm tms = *localtime( &start );
+	struct tm tme = *localtime( &end  );
+	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+#endif
+	unsigned char message[256];
+	_get_epg_event(e, (const char *)service_name,
+		      channel->chan_major, channel->chan_minor,
+		      physical_channel, channel->program,
+		      event->event_id,
+		      start,
+		      event->length_sec,
+		      (const char *)name,
+		      (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
+	return;
+}
+
+void decode::get_epg_event(const decoded_sdt_service_t *service, const decoded_eit_event_t *event, decoded_event_t *e)
+{
+#if 1//DBG
+	fprintf(stderr, "%s\n", __func__);
+#endif
+	time_t start = datetime_utc(event->start_time /*+ (60 * tz_offset)*/);
+	time_t end   = datetime_utc(event->start_time + event->length_sec /*+ (60 * tz_offset)*/);
+#if 1
+	//FIXME: descriptors
+
+	struct tm tms = *localtime( &start );
+	struct tm tme = *localtime( &end  );
+	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, event->name.c_str()/*, iter_eit->second.text.c_str()*/ );
+#endif
+
+	_get_epg_event(e, (const char *)service->service_name,
+		      get_lcn(service->service_id), 0,
+		      physical_channel, service->service_id,
+		      event->event_id,
+		      start,
+		      event->length_sec,
+		      event->name.c_str(),
+		      event->text.c_str());
+	return;
+}
+
+bool decode::get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_event_t *e)
+{
+#if 1//DBG
+	fprintf(stderr, "%s\n", __func__);
+#endif
+	if (!source_id)
+		return false;
+
+	map_decoded_vct_channels::const_iterator iter_vct;
+	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct)
+		if (source_id == iter_vct->second.source_id) {
+
+	unsigned int eit_num = 0;
+
+	while ((eit_num < 128) && (decoded_atsc_eit[eit_num].count(source_id))) {
+#if 0
+		unsigned char service_name[8] = { 0 };
+		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
+		service_name[7] = 0;
+
+		fprintf(stdout, "%s-%d: id:%d - %d.%d: %s\n", __func__,
+			eit_num, iter_vct->second.source_id,
+			iter_vct->second.chan_major,
+			iter_vct->second.chan_minor,
+			service_name);
+#endif
+		map_decoded_atsc_eit_events::const_iterator iter_eit;
+		for (iter_eit = decoded_atsc_eit[eit_num][iter_vct->second.source_id].events.begin();
+		     iter_eit != decoded_atsc_eit[eit_num][iter_vct->second.source_id].events.end();
+		     ++iter_eit) {
+
+			time_t start = atsc_datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
+			time_t end   = atsc_datetime_utc(iter_eit->second.start_time + iter_eit->second.length_sec /*+ (60 * tz_offset)*/);
+
+			if ((start <= showtime) && (end > showtime)) {
+#if 1
+				unsigned char name[256];
+				memset(name, 0, sizeof(char) * 256);
+				decode_multiple_string(iter_eit->second.title, iter_eit->second.title_bytes, name, sizeof(name));
+
+				//FIXME: descriptors
+
+				struct tm tms = *localtime( &start );
+				struct tm tme = *localtime( &end  );
+				fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+#endif
+				get_epg_event(&iter_vct->second, &iter_eit->second, e);
+				return true;
+			}
+		}
+		eit_num++;
+	}
+	}
+	return false;
+}
+
+bool decode::get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_event_t *e)
+{
+#if 1//DBG
+	fprintf(stderr, "%s\n", __func__);
+#endif
+	if (!service_id)
+		return false;
+
+	const decoded_sdt_t *decoded_sdt = get_decoded_sdt();
+	if (!decoded_sdt)
+		return false;
+
+	map_decoded_sdt_services::const_iterator iter_sdt = decoded_sdt->services.find(service_id);
+	if (iter_sdt == decoded_sdt->services.end())
+		return false;
+
+	if (!iter_sdt->second.f_eit_present)
+		return false;
+
+	unsigned int eit_num = 0;
+
+	if (get_decoded_eit()) while ((eit_num < NUM_EIT) && (get_decoded_eit()[eit_num].count(service_id))) {
+#if 0
+		fprintf(stdout, "%s-%d: id:%d - %d: %s\n", __func__,
+			eit_num, iter_sdt->second.service_id,
+			get_lcn(iter_sdt->second.service_id),
+			iter_sdt->second.service_name);
+#endif
+
+		map_decoded_eit_events::const_iterator iter_eit;
+		if (get_decoded_eit())
+		for (iter_eit = ((map_decoded_eit*)get_decoded_eit())[eit_num][iter_sdt->second.service_id].events.begin();
+		     iter_eit != ((map_decoded_eit*)get_decoded_eit())[eit_num][iter_sdt->second.service_id].events.end();
+		     ++iter_eit) {
+
+			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
+			time_t end   = datetime_utc(iter_eit->second.start_time + iter_eit->second.length_sec /*+ (60 * tz_offset)*/);
+
+			if ((start <= showtime) && (end > showtime)) {
+#if 1
+				//FIXME: descriptors
+
+				struct tm tms = *localtime( &start );
+				struct tm tme = *localtime( &end  );
+				fprintf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, iter_eit->second.name.c_str()/*, iter_eit->second.text.c_str()*/ );
+#endif
+				get_epg_event(&iter_sdt->second, &iter_eit->second, e);
+				return true;
+			}
+		}
+		eit_num++;
+	}
+	return false;
+}
+
+bool decode::get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e)
+{
+#if 1//DBG
+	fprintf(stderr, "%s\n", __func__);
+#endif
+	map_decoded_vct_channels::const_iterator iter_vct = decoded_vct.channels.find(service_id);
+	if (iter_vct != decoded_vct.channels.end()) {
+		get_epg_event_atsc(iter_vct->second.source_id, showtime, e);
+		return true;
+	} else {
+		const decoded_sdt_t *decoded_sdt = get_decoded_sdt();
+		if (decoded_sdt) {
+			map_decoded_sdt_services::const_iterator iter_sdt = decoded_sdt->services.find(service_id);
+			if ((iter_sdt != decoded_sdt->services.end()) && (iter_sdt->second.f_eit_present)) {
+				get_epg_event_dvb(iter_sdt->second.service_id, showtime, e);
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 void decode::dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id)

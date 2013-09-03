@@ -323,7 +323,7 @@ typedef struct
 	uint16_t    event_id;
 	time_t      start_time;
 	uint32_t    length_sec;
-	const char *name;
+	char        name[256];
 	const char *text;
 } decoded_event_t;
 
@@ -424,6 +424,8 @@ public:
 	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter);
 
 	void set_physical_channel(unsigned int chan) { physical_channel = chan; }
+
+	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e);
 private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -457,6 +459,13 @@ private:
 	bool eit_x_complete_atsc(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_pf();
+
+
+	void get_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decoded_event_t *);
+	void get_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decoded_event_t *);
+
+	bool get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_event_t *e);
+	bool get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_event_t *e);
 
 	unsigned int physical_channel;
 };

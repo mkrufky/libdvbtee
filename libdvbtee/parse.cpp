@@ -867,7 +867,7 @@ void parse::epg_dump(decode_report *reporter)
 	return;
 }
 
-bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e)
+bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0, decoded_event_t *e1)
 {
 	if (!service)
 		return false;
@@ -897,6 +897,18 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 		//
 		parse_channel_info(requested_ts_id, &iter_pmt->second, decoded_vct, *c);
 	}
+
+	time_t last;
+
+	time(&last);
+
+	if (e0) {
+		decoders[requested_ts_id].get_epg_event(service, last, e0);
+		last = e0->start_time + e0->length_sec + 1;
+	}
+	if (e1)
+		decoders[requested_ts_id].get_epg_event(service, last, e1);
+
 	return true;
 }
 
