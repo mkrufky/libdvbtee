@@ -5,6 +5,9 @@
 
 #include "curlhttpget.h"
 
+// FIXME: this is just for the sleep call, which is a temporary hack:
+#include <unistd.h>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
 #ifdef USE_PHONON
@@ -25,7 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("TeeV");
 
-    QUrl url("http://127.0.0.1:64080/tune=44+3/stream/");
+    QString chan_id("33+1");
+    QUrl url("http://127.0.0.1:64080/tune="+chan_id+"/stream/");
 
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
@@ -67,7 +71,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     player->play();
 #endif
-    this->setStatusBar(0);
+    //this->setStatusBar(0);
+
     //this->menuBar()->setVisible(false);
     this->removeToolBar(ui->mainToolBar);
 
@@ -77,6 +82,10 @@ MainWindow::MainWindow(QWidget *parent) :
     get_channels();
 
     connect(m_listBox, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(channel_clicked(QListWidgetItem*)));
+    //connect(player, SIGNAL(), SLOT(playerMediaChanged(QMediaContent)));
+
+    sleep(2);
+    get_info(chan_id);
 }
 
 MainWindow::~MainWindow()
@@ -119,7 +128,18 @@ void MainWindow::channel_clicked(QListWidgetItem *item)
     player->setMedia(url);
     player->play();
 #endif
+    //statusBar()->clearMessage();
+    sleep(3);
+    get_info(chan_id);
 }
+
+//void MainWindow::playerMediaChanged(QMediaContent c)
+//{
+//	QUrl url(c.playlist()->currentMedia().canonicalUrl());
+//	QString chan_id(url.toString().remove(0,url.toString().indexOf("=")+1));
+//	sleep(1);
+//	get_info(chan_id);
+//}
 
 void MainWindow::push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb)
 {
@@ -134,11 +154,26 @@ void MainWindow::get_channels_callback(void *context, void *buffer, size_t size,
     return static_cast<MainWindow*>(context)->push((uint8_t*)buffer, static_cast<MainWindow*>(context)->channels_buffer, size, nmemb);
 }
 
+void MainWindow::get_info_callback(void *context, void *buffer, size_t size, size_t nmemb)
+{
+	return static_cast<MainWindow*>(context)->push((uint8_t*)buffer, static_cast<MainWindow*>(context)->info_buffer, size, nmemb);
+}
+
 void MainWindow::get_channels()
 {
 	channels_buffer.clear();
 	curlhttpget Curl("http://127.0.0.1:64080/json/channels", get_channels_callback, this);
 	fill_channels_box();
+	channels_buffer.clear();
+}
+
+void MainWindow::get_info(QString chan_id)
+{
+	channels_buffer.clear();
+	QString info_url("http://127.0.0.1:64080/json/info="+ chan_id);
+	curlhttpget Curl(info_url.toStdString().c_str(), get_info_callback, this);
+	fill_info_box();
+	info_buffer.clear();
 }
 
 void MainWindow::fill_channels_box()
@@ -159,6 +194,35 @@ void MainWindow::fill_channels_box()
 	    QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
 	    QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
 	    if (str_id.length()) m_listBox->addItem(this_item);
+	}
+    }
+}
+
+void MainWindow::fill_info_box()
+{
+    std::string json_str(info_buffer);
+    Json::Value root;
+    Json::Reader reader;
+
+    QString chan;
+
+    statusBar()->clearMessage();
+
+    if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
+	for ( Json::ArrayIndex idx = 0; idx < 2/*root.size()*/; idx++ ) {
+	    const Json::Value thisEntry = root[idx];
+	    QString str_id(thisEntry["Id"].asString().c_str());
+	    QString str_name(thisEntry["DisplayName"].asString().c_str());
+	    QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
+	    QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
+	    QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
+	    if (str_id.length()) {
+		    chan = this_item;
+		    continue;
+	    }
+	    QString str_title(thisEntry["Title"].asString().c_str());
+	    QString text(chan+" | "+str_title);
+	    statusBar()->showMessage(tr(text.toStdString().c_str()));
 	}
     }
 }
