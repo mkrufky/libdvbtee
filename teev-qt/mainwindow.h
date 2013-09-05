@@ -35,7 +35,7 @@ public:
 
 public slots:
     void channel_clicked(QListWidgetItem*);
-//    void playerMediaChanged(QMediaContent);
+    void playerMediaChanged(QMediaContent);
 
 private:
 #ifdef USE_PHONON
@@ -55,6 +55,8 @@ private:
     std::string channels_buffer;
     std::string info_buffer;
 
+    QString cur_chan_id;
+
     Ui::MainWindow *ui;
 
     void push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb);
@@ -63,7 +65,7 @@ private:
     void fill_channels_box();
     static void get_channels_callback(void *context, void *buffer, size_t size, size_t nmemb);
 
-    void get_info(QString chan_id);
+    void get_info();
     void fill_info_box();
     static void get_info_callback(void *context, void *buffer, size_t size, size_t nmemb);
 };

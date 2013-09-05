@@ -28,8 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("TeeV");
 
-    QString chan_id("33+1");
-    QUrl url("http://127.0.0.1:64080/tune="+chan_id+"/stream/");
+    cur_chan_id = "33+1";
+    QUrl url("http://127.0.0.1:64080/tune="+cur_chan_id+"/stream/");
 
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
@@ -82,10 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
     get_channels();
 
     connect(m_listBox, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(channel_clicked(QListWidgetItem*)));
-    //connect(player, SIGNAL(), SLOT(playerMediaChanged(QMediaContent)));
-
-    sleep(2);
-    get_info(chan_id);
+    connect(player, SIGNAL(currentMediaChanged(QMediaContent)), SLOT(playerMediaChanged(QMediaContent)));
 }
 
 MainWindow::~MainWindow()
@@ -110,8 +107,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::channel_clicked(QListWidgetItem *item)
 {
-    QString chan_id(item->text().remove(0,item->text().indexOf("|")+1));
-    QUrl url("http://127.0.0.1:64080/tune="+ chan_id +"/stream/");
+    cur_chan_id = item->text().remove(0,item->text().indexOf("|")+1);
+    QUrl url("http://127.0.0.1:64080/tune="+ cur_chan_id +"/stream/");
 #ifdef USE_PHONON
 #if 0
     player->stop();
@@ -128,18 +125,18 @@ void MainWindow::channel_clicked(QListWidgetItem *item)
     player->setMedia(url);
     player->play();
 #endif
-    //statusBar()->clearMessage();
-    sleep(3);
-    get_info(chan_id);
 }
 
-//void MainWindow::playerMediaChanged(QMediaContent c)
-//{
-//	QUrl url(c.playlist()->currentMedia().canonicalUrl());
-//	QString chan_id(url.toString().remove(0,url.toString().indexOf("=")+1));
-//	sleep(1);
-//	get_info(chan_id);
-//}
+void MainWindow::playerMediaChanged(QMediaContent c)
+{
+	fprintf(stderr, "%s()", __func__);
+#if 0
+	QUrl url(c.playlist()->currentMedia().canonicalUrl());
+	QString chan_id(url.toString().remove(0,url.toString().indexOf("=")+1));
+#endif
+	sleep(3);
+	get_info();
+}
 
 void MainWindow::push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb)
 {
@@ -167,10 +164,10 @@ void MainWindow::get_channels()
 	channels_buffer.clear();
 }
 
-void MainWindow::get_info(QString chan_id)
+void MainWindow::get_info()
 {
 	channels_buffer.clear();
-	QString info_url("http://127.0.0.1:64080/json/info="+ chan_id);
+	QString info_url("http://127.0.0.1:64080/json/info="+ cur_chan_id);
 	curlhttpget Curl(info_url.toStdString().c_str(), get_info_callback, this);
 	fill_info_box();
 	info_buffer.clear();
