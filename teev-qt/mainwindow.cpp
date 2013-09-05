@@ -83,6 +83,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(m_listBox, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(channel_clicked(QListWidgetItem*)));
     connect(player, SIGNAL(currentMediaChanged(QMediaContent)), SLOT(playerMediaChanged(QMediaContent)));
+
+    sleep(3);
+    get_info();
 }
 
 MainWindow::~MainWindow()
@@ -129,11 +132,6 @@ void MainWindow::channel_clicked(QListWidgetItem *item)
 
 void MainWindow::playerMediaChanged(QMediaContent c)
 {
-	fprintf(stderr, "%s()", __func__);
-#if 0
-	QUrl url(c.playlist()->currentMedia().canonicalUrl());
-	QString chan_id(url.toString().remove(0,url.toString().indexOf("=")+1));
-#endif
 	sleep(3);
 	get_info();
 }
