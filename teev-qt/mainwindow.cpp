@@ -191,15 +191,16 @@ void MainWindow::fill_channels_box()
     m_listBox->clear();
 
     if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
-	for ( Json::ArrayIndex idx = 0; idx < root.size(); idx++ ) {
-	    const Json::Value thisEntry = root[idx];
-	    QString str_id(thisEntry["Id"].asString().c_str());
-	    QString str_name(thisEntry["DisplayName"].asString().c_str());
-	    QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
-	    QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
-	    QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
-	    if (str_id.length()) m_listBox->addItem(this_item);
-	}
+      for ( Json::ArrayIndex idx = 0; idx < root.size(); idx++ ) {
+        const Json::Value thisEntry = root[idx];
+        if (!thisEntry.isObject()) continue;
+        QString str_id(thisEntry["Id"].asString().c_str());
+        QString str_name(thisEntry["DisplayName"].asString().c_str());
+        QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
+        QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
+        QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
+        if (str_id.length()) m_listBox->addItem(this_item);
+      }
     }
 }
 
@@ -214,20 +215,21 @@ void MainWindow::fill_info_box()
     statusBar()->clearMessage();
 
     if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
-	for ( Json::ArrayIndex idx = 0; idx < 2/*root.size()*/; idx++ ) {
-	    const Json::Value thisEntry = root[idx];
-	    QString str_id(thisEntry["Id"].asString().c_str());
-	    QString str_name(thisEntry["DisplayName"].asString().c_str());
-	    QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
-	    QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
-	    QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
-	    if (str_id.length()) {
-		    chan = this_item;
-		    continue;
-	    }
-	    QString str_title(thisEntry["Title"].asString().c_str());
-	    QString text(chan+" | "+str_title);
-	    statusBar()->showMessage(tr(text.toStdString().c_str()));
-	}
+      for ( Json::ArrayIndex idx = 0; idx < 2/*root.size()*/; idx++ ) {
+        const Json::Value thisEntry = root[idx];
+        if (!thisEntry.isObject()) continue;
+        QString str_id(thisEntry["Id"].asString().c_str());
+        QString str_name(thisEntry["DisplayName"].asString().c_str());
+        QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
+        QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
+        QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
+        if (str_id.length()) {
+          chan = this_item;
+          continue;
+        }
+        QString str_title(thisEntry["Title"].asString().c_str());
+        QString text(chan+" | "+str_title);
+        statusBar()->showMessage(tr(text.toStdString().c_str()));
+      }
     }
 }
