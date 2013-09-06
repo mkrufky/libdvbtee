@@ -9,6 +9,10 @@
 
 #include <QGridLayout>
 
+#if (QT_VERSION < 0x050000)
+#define USE_PHONON
+#endif
+
 #ifdef USE_PHONON
 #include <phonon/MediaObject>
 #include <phonon/VideoPlayer>
@@ -35,7 +39,9 @@ public:
 
 public slots:
     void channel_clicked(QListWidgetItem*);
+#ifndef USE_PHONON
     void playerMediaChanged(QMediaContent);
+#endif
 
 private:
 #ifdef USE_PHONON
