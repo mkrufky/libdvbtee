@@ -82,7 +82,9 @@ MainWindow::MainWindow(QWidget *parent) :
     get_channels();
 
     connect(m_listBox, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(channel_clicked(QListWidgetItem*)));
-#ifndef USE_PHONON
+#ifdef USE_PHONON
+    connect(mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)), SLOT(playerSourceChanged(Phonon::MediaSource)));
+#else
     connect(player, SIGNAL(currentMediaChanged(QMediaContent)), SLOT(playerMediaChanged(QMediaContent)));
 #endif
 
@@ -132,13 +134,17 @@ void MainWindow::channel_clicked(QListWidgetItem *item)
 #endif
 }
 
-#ifndef USE_PHONON
+#ifdef USE_PHONON
+void MainWindow::playerSourceChanged(Phonon::MediaSource)
+{
+	sleep(2);
+#else
 void MainWindow::playerMediaChanged(QMediaContent c)
 {
 	sleep(3);
+#endif
 	get_info();
 }
-#endif
 
 void MainWindow::push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb)
 {

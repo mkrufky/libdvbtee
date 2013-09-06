@@ -39,7 +39,9 @@ public:
 
 public slots:
     void channel_clicked(QListWidgetItem*);
-#ifndef USE_PHONON
+#ifdef USE_PHONON
+    void playerSourceChanged(Phonon::MediaSource);
+#else
     void playerMediaChanged(QMediaContent);
 #endif
 
