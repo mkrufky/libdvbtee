@@ -924,8 +924,8 @@ static bool _get_epg_event(decoded_event_t *e,
 	e->event_id      = event_id;
 	e->start_time    = start_time;
 	e->length_sec    = length_sec;
-	strncpy(e->name, name, sizeof(e->name));
-	strncpy(e->text, text, sizeof(e->text));
+	e->name.assign(name);
+	e->text.assign(text);
 
 	return true;
 };

@@ -635,7 +635,9 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name);
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			decoded_event_t ee;
-			memset(&ee, 0, sizeof(ee));
+			//memset(&ee, 0, sizeof(ee));
+			ee.name.clear();
+			ee.text.clear();
 			ee.channel_name  = e->channel_name;
 			ee.chan_major    = e->chan_major;
 			ee.chan_minor    = e->chan_minor;
@@ -661,16 +663,18 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			 tms.tm_hour, tms.tm_min,
 			 tme.tm_hour, tme.tm_min);
 
-		cli_print("%s\t %s\n", time_str, e->name);
+		cli_print("%s\t %s\n", time_str, e->name.c_str());
 	}
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 		decoded_event_t ee;
-		memset(&ee, 0, sizeof(ee));
+		//memset(&ee, 0, sizeof(ee));
+		ee.name.clear();
+		ee.text.clear();
 		ee.event_id = e->event_id;
 		ee.start_time = e->start_time;
 		ee.length_sec = e->length_sec;
-		strncpy(ee.name, e->name, sizeof(ee.name));
-		strncpy(ee.text, e->text, sizeof(ee.text));
+		ee.name.assign(e->name);
+		ee.text.assign(e->text);
 
 		const char *str;
 		switch (data_fmt) {

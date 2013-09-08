@@ -103,7 +103,7 @@ const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 		str.append("</nobr>");
 	}
 	//str.append("show: ");
-	if (e->name) {
+	if (e->name.length()) {
 		time_t end_time = e->start_time + e->length_sec;
 		struct tm tms = *localtime( &e->start_time );
 		struct tm tme = *localtime( &end_time );
@@ -116,7 +116,7 @@ const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 #else
 		str.append(e->name);
 #endif
-		if ((e->text) && strlen(e->text)) {
+		if (e->text.length()) {
 			str.append(": <br><font size=-3>");
 #if 0
 			hstr = url_encode((char *)e->text);
@@ -238,7 +238,7 @@ const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 	str.append("'>\n");
 	str.append("<title lang='en'>");
 #if 1
-	char *hstr = url_encode((char *)e->name);
+	char *hstr = url_encode((char *)e->name.c_str());
 	str.append(hstr);
 	free(hstr);
 #else
@@ -248,7 +248,7 @@ const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 #if 1
 	str.append("<desc lang='en'>");
 #if 1
-	hstr = url_encode((char *)e->text);
+	hstr = url_encode((char *)e->text.c_str());
 	str.append(hstr);
 	free(hstr);
 #else

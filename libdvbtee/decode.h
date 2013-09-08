@@ -323,8 +323,8 @@ typedef struct
 	uint16_t    event_id;
 	time_t      start_time;
 	uint32_t    length_sec;
-	char        name[256];
-	char        text[256];
+	std::string name;
+	std::string text;
 } decoded_event_t;
 
 
