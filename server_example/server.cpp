@@ -228,7 +228,7 @@ int main(int argc, char **argv)
 
 	unsigned int scan_flags  = 0;
 
-        while ((opt = getopt(argc, argv, "a:A:f:d::")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:f:d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 			dvb_adap = strtoul(optarg, NULL, 0);
