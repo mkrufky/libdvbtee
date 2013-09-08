@@ -86,7 +86,7 @@ const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 	str.clear();
 	str.append("<td>");
 	//str.append("channel: ");
-	if (e->channel_name) {
+	if (e->channel_name.length()) {
 		char chan_nbr[12] = { 0 };
 
 		snprintf(chan_nbr, sizeof(chan_nbr), "%d.%d: ", e->chan_major, e->chan_minor);

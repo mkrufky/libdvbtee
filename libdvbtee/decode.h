@@ -314,7 +314,7 @@ typedef void (*dump_epg_header_footer_callback)(void */* context */,
 
 typedef struct
 {
-	const char *channel_name;
+	std::string channel_name;
 	uint16_t    chan_major;
 	uint16_t    chan_minor;
 	uint16_t    chan_physical;

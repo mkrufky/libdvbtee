@@ -632,7 +632,7 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 #if 1
 	if (streamback_newchannel) {
 		if (data_fmt == SERVE_DATA_FMT_CLI)
-			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name);
+			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name.c_str());
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			decoded_event_t ee;
 			//memset(&ee, 0, sizeof(ee));
