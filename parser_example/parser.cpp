@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 
 	context.server = NULL;
 
-        while ((opt = getopt(argc, argv, "F:t:d::")) != -1) {
+	while ((opt = getopt(argc, argv, "F:t:d::")) != -1) {
 		switch (opt) {
 		case 'F': /* Filename */
 			strcpy(filename, optarg);
@@ -194,7 +194,7 @@ int main(int argc, char **argv)
 			context.feeder.close_file();
 		}
 		goto exit;
-        }
+	}
 
 	/* if we're not feeding a file or url then read from stdin */
 	if (NULL == freopen(NULL, "rb", stdin)) {

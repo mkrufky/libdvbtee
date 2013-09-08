@@ -314,7 +314,7 @@ typedef void (*dump_epg_header_footer_callback)(void */* context */,
 
 typedef struct
 {
-	const char *channel_name;
+	std::string channel_name;
 	uint16_t    chan_major;
 	uint16_t    chan_minor;
 	uint16_t    chan_physical;
@@ -323,8 +323,8 @@ typedef struct
 	uint16_t    event_id;
 	time_t      start_time;
 	uint32_t    length_sec;
-	char        name[256];
-	const char *text;
+	std::string name;
+	std::string text;
 } decoded_event_t;
 
 
