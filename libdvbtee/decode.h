@@ -324,7 +324,7 @@ typedef struct
 	time_t      start_time;
 	uint32_t    length_sec;
 	char        name[256];
-	const char *text;
+	char        text[256];
 } decoded_event_t;
 
 

@@ -670,7 +670,7 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 		ee.start_time = e->start_time;
 		ee.length_sec = e->length_sec;
 		strncpy(ee.name, e->name, sizeof(ee.name));
-		ee.text = e->text;
+		strncpy(ee.text, e->text, sizeof(ee.text));
 
 		const char *str;
 		switch (data_fmt) {
