@@ -186,7 +186,7 @@ void MainWindow::get_channels()
 
 void MainWindow::get_info()
 {
-	channels_buffer.clear();
+	info_buffer.clear();
 	QString info_url("http://127.0.0.1:64080/json/info="+ cur_chan_id);
 	curlhttpget Curl(info_url.toStdString().c_str(), get_info_callback, this);
 	fill_info_box();
