@@ -171,7 +171,8 @@ void stop_server(struct dvbtee_context* context)
 	if (!context->server)
 		return;
 
-	context->server->stop();
+	if (context->server->is_running())
+		context->server->stop();
 
 	delete context->server;
 	context->server = NULL;
