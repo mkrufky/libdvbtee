@@ -478,11 +478,11 @@ serve::serve()
 serve::~serve()
 {
 	dprintf("()");
-	tuners.clear();
-	feed_servers.clear();
-
 	stop_monitor();
 	stop();
+
+	tuners.clear();
+	feed_servers.clear();
 }
 
 #if 0
