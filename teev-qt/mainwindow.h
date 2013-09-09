@@ -44,6 +44,7 @@ public slots:
 #else
     void playerMediaChanged(QMediaContent);
 #endif
+    void refresh_clicked();
 
 private:
 #ifdef USE_PHONON

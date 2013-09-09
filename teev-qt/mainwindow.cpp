@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QPushButton>
+
 #include <jsoncpp/json/json.h>
 
 #include "curlhttpget.h"
@@ -88,6 +90,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(player, SIGNAL(currentMediaChanged(QMediaContent)), SLOT(playerMediaChanged(QMediaContent)));
 #endif
 
+    QPushButton *btn = new QPushButton("refresh");
+    statusBar()->addPermanentWidget(btn);
+    connect(btn, SIGNAL(clicked()), SLOT(refresh_clicked()));
+
     sleep(3);
     get_info();
 }
@@ -146,6 +152,12 @@ void MainWindow::playerMediaChanged(QMediaContent c)
 	get_info();
 }
 
+void MainWindow::refresh_clicked()
+{
+	get_info();
+	get_channels();
+}
+
 void MainWindow::push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb)
 {
     uint8_t buf[size * nmemb + 1];
@@ -192,14 +204,14 @@ void MainWindow::fill_channels_box()
 
     if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
       for ( Json::ArrayIndex idx = 0; idx < root.size(); idx++ ) {
-        const Json::Value thisEntry = root[idx];
-        if (!thisEntry.isObject()) continue;
-        QString str_id(thisEntry["Id"].asString().c_str());
-        QString str_name(thisEntry["DisplayName"].asString().c_str());
-        QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
-        QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
-        QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
-        if (str_id.length()) m_listBox->addItem(this_item);
+	const Json::Value thisEntry = root[idx];
+	if (!thisEntry.isObject()) continue;
+	QString str_id(thisEntry["Id"].asString().c_str());
+	QString str_name(thisEntry["DisplayName"].asString().c_str());
+	QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
+	QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
+	QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
+	if (str_id.length()) m_listBox->addItem(this_item);
       }
     }
 }
@@ -216,20 +228,20 @@ void MainWindow::fill_info_box()
 
     if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
       for ( Json::ArrayIndex idx = 0; idx < 2/*root.size()*/; idx++ ) {
-        const Json::Value thisEntry = root[idx];
-        if (!thisEntry.isObject()) continue;
-        QString str_id(thisEntry["Id"].asString().c_str());
-        QString str_name(thisEntry["DisplayName"].asString().c_str());
-        QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
-        QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
-        QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
-        if (str_id.length()) {
-          chan = this_item;
-          continue;
-        }
-        QString str_title(thisEntry["Title"].asString().c_str());
-        QString text(chan+" | "+str_title);
-        statusBar()->showMessage(tr(text.toStdString().c_str()));
+	const Json::Value thisEntry = root[idx];
+	if (!thisEntry.isObject()) continue;
+	QString str_id(thisEntry["Id"].asString().c_str());
+	QString str_name(thisEntry["DisplayName"].asString().c_str());
+	QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
+	QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
+	QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
+	if (str_id.length()) {
+	  chan = this_item;
+	  continue;
+	}
+	QString str_title(thisEntry["Title"].asString().c_str());
+	QString text(chan+" | "+str_title);
+	statusBar()->showMessage(tr(text.toStdString().c_str()));
       }
     }
 }
