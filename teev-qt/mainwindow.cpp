@@ -111,7 +111,7 @@ MainWindow::~MainWindow()
 #endif
 #else
     player->stop();
-    delete player;
+    //delete player;
     delete videoWidget;
 #endif
     delete layout;
