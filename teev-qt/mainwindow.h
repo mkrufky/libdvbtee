@@ -66,6 +66,8 @@ private:
 
     QString cur_chan_id;
 
+    QString dvbteeServerAddr;
+
     Ui::MainWindow *ui;
 
     void push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb);

@@ -25,13 +25,14 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     layout(new QGridLayout),
     m_listBox(new QListWidget),
+    dvbteeServerAddr("127.0.0.1:64080"),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     this->setWindowTitle("TeeV");
 
     cur_chan_id = "33+1";
-    QUrl url("http://127.0.0.1:64080/tune="+cur_chan_id+"/stream/");
+    QUrl url("http://"+dvbteeServerAddr+"/tune="+cur_chan_id+"/stream/");
 
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
@@ -121,7 +122,7 @@ MainWindow::~MainWindow()
 void MainWindow::channel_clicked(QListWidgetItem *item)
 {
     cur_chan_id = item->text().remove(0,item->text().indexOf("|")+1);
-    QUrl url("http://127.0.0.1:64080/tune="+ cur_chan_id +"/stream/");
+    QUrl url("http://"+dvbteeServerAddr+"/tune="+ cur_chan_id +"/stream/");
 #ifdef USE_PHONON
 #if 0
     player->stop();
@@ -179,7 +180,8 @@ void MainWindow::get_info_callback(void *context, void *buffer, size_t size, siz
 void MainWindow::get_channels()
 {
 	channels_buffer.clear();
-	curlhttpget Curl("http://127.0.0.1:64080/json/channels", get_channels_callback, this);
+	QString channels_url("http://"+dvbteeServerAddr+"/json/channels");
+	curlhttpget Curl(channels_url.toStdString().c_str(), get_channels_callback, this);
 	fill_channels_box();
 	channels_buffer.clear();
 }
@@ -187,7 +189,7 @@ void MainWindow::get_channels()
 void MainWindow::get_info()
 {
 	info_buffer.clear();
-	QString info_url("http://127.0.0.1:64080/json/info="+ cur_chan_id);
+	QString info_url("http://"+dvbteeServerAddr+"/json/info="+ cur_chan_id);
 	curlhttpget Curl(info_url.toStdString().c_str(), get_info_callback, this);
 	fill_info_box();
 	info_buffer.clear();
