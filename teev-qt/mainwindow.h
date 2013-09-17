@@ -79,6 +79,8 @@ private:
     void get_info();
     void fill_info_box();
     static void get_info_callback(void *context, void *buffer, size_t size, size_t nmemb);
+
+    void tune(QString chan_id);
 };
 
 #endif // MAINWINDOW_H

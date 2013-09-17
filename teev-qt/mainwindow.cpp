@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("TeeV");
 
     cur_chan_id = "33+1";
-    QUrl url("http://"+dvbteeServerAddr+"/tune="+cur_chan_id+"/stream/");
 
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
@@ -41,8 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef USE_PHONON
 #if 0
     layout->addWidget(player, 0, 0);
-
-    player->play(url);
 #else
     layout->addWidget(videoWidget, 0, 0);
 
@@ -53,26 +50,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     Phonon::AudioOutput *audioOutput = new Phonon::AudioOutput(Phonon::VideoCategory, this);
     Phonon::createPath(mediaObject, audioOutput);
-
-    Phonon::MediaSource *mediaSource = new Phonon::MediaSource(url);
-    mediaObject->setCurrentSource(*mediaSource);
-
-    mediaObject->play();
 #endif
 #else
-    //QMediaPlaylist *playlist = new QMediaPlaylist(player);
-    //playlist->addMedia(url);
-    //playlist->setCurrentIndex(0);
-
-    player->setMedia(url);
-
     player->setVideoOutput(videoWidget);
 
     layout->addWidget(videoWidget, 0, 0);
 
     videoWidget->show();
-
-    player->play();
 #endif
     //this->setStatusBar(0);
 
@@ -95,8 +79,7 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->addPermanentWidget(btn);
     connect(btn, SIGNAL(clicked()), SLOT(refresh_clicked()));
 
-    sleep(3);
-    get_info();
+    tune(cur_chan_id); // FIXME: LATER
 }
 
 MainWindow::~MainWindow()
@@ -122,7 +105,12 @@ MainWindow::~MainWindow()
 void MainWindow::channel_clicked(QListWidgetItem *item)
 {
     cur_chan_id = item->text().remove(0,item->text().indexOf("|")+1);
-    QUrl url("http://"+dvbteeServerAddr+"/tune="+ cur_chan_id +"/stream/");
+    tune(cur_chan_id);
+}
+
+void MainWindow::tune(QString chan_id)
+{
+    QUrl url("http://"+dvbteeServerAddr+"/tune="+ chan_id +"/stream/");
 #ifdef USE_PHONON
 #if 0
     player->stop();
@@ -139,6 +127,9 @@ void MainWindow::channel_clicked(QListWidgetItem *item)
     player->setMedia(url);
     player->play();
 #endif
+    //TEMPORARY HACK!!!
+    sleep(3);
+    get_info();
 }
 
 #ifdef USE_PHONON
