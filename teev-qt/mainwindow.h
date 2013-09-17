@@ -25,6 +25,8 @@
 #include <QVideoWidget>
 #endif
 
+#include "tunerprovider.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -47,6 +49,7 @@ public slots:
     void refresh_clicked();
 
 private:
+    TunerProvider *dvbtee;
 #ifdef USE_PHONON
 #if 0
     Phonon::VideoPlayer *player;

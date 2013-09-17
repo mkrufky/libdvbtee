@@ -10,8 +10,11 @@
 // FIXME: this is just for the sleep call, which is a temporary hack:
 #include <unistd.h>
 
+#define SPAWN_SERVER 1
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    dvbtee(NULL),
 #ifdef USE_PHONON
 #if 0
     player(new Phonon::VideoPlayer(Phonon::VideoCategory, this)),
@@ -32,6 +35,15 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("TeeV");
 
     cur_chan_id = "33+1";
+
+    if (SPAWN_SERVER) {
+	dvbtee = new TunerProvider;
+	//int tuner_number = dvbtee->add_hdhr_tuner();
+	//int tuner_number =
+	dvbtee->add_linuxtv_tuner();
+	//tune *thistuner = dvbtee->get_tuner(tuner_number);
+	dvbtee->start_server();
+    }
 
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
@@ -98,6 +110,11 @@ MainWindow::~MainWindow()
     //delete player;
     delete videoWidget;
 #endif
+    if (dvbtee) {
+	dvbtee->stop_server();
+	delete dvbtee;
+	dvbtee = NULL;
+    }
     delete layout;
     delete ui;
 }
