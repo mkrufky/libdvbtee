@@ -177,11 +177,11 @@ void hlsfeed::push(uint8_t *buffer, size_t size, size_t nmemb)
   if (!push_buffer.write(buffer, size * nmemb))
     while (nmemb)
       if (push_buffer.write(buffer, nmemb)) {
-        buffer += size;
-        nmemb--;
+	buffer += size;
+	nmemb--;
       } else {
-        fprintf(stderr, "%s: FAILED: %zu packets dropped\n", __func__, nmemb);
-        return;
+	fprintf(stderr, "%s: FAILED: %zu packets dropped\n", __func__, nmemb);
+	return;
       }
 #else
   if (datapump_cb)
@@ -195,11 +195,11 @@ void hlsfeed::walk(uint8_t *buffer, size_t size, size_t nmemb)
   if (!walk_buffer.write(buffer, size * nmemb))
     while (nmemb)
       if (walk_buffer.write(buffer, nmemb)) {
-        buffer += size;
-        nmemb--;
+	buffer += size;
+	nmemb--;
       } else {
-        fprintf(stderr, "%s: FAILED: %zu bytes dropped\n", __func__, size * nmemb);
-        return;
+	fprintf(stderr, "%s: FAILED: %zu bytes dropped\n", __func__, size * nmemb);
+	return;
       }
 #else
   walk(buffer);

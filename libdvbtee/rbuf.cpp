@@ -171,19 +171,19 @@ bool rbuf::write(const void* p, int size)
 		return false;
 	}
 
-        if (idx_write + size > capacity) {
+	if (idx_write + size > capacity) {
 		int split = capacity - idx_write;
 		memcpy(p_data + idx_write, p, split);
 		idx_write = size - split;
 		memcpy(p_data, (const char*) p + split, idx_write);
-        } else {
+	} else {
 		memcpy(p_data + idx_write, p, size);
 		idx_write += size;
 		if (idx_write == capacity)
 			idx_write = 0;
-        }
+	}
 	pthread_mutex_unlock(&mutex);
-        return true;
+	return true;
 }
 #else
 bool rbuf::write(const void* p, int size)

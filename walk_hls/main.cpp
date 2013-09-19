@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
     switch (opt) {
     case 'i':
       if (!optarg) {
-        fprintf(stderr, "missing argument\n");
-        return -1;
+	fprintf(stderr, "missing argument\n");
+	return -1;
       }
       strncpy(url, optarg, sizeof(url));
       break;
