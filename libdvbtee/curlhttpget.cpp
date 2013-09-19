@@ -22,7 +22,7 @@
 #include "curlhttpget.h"
 
 curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_callback, void *data_context,
-                         curlhttpget_info_t *info)
+			 curlhttpget_info_t *info)
   : curl_handle(curl_easy_init())
   , data_cb(data_callback)
   , data_ctxt(data_context)

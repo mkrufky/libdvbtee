@@ -34,7 +34,7 @@ class curlhttpget
 {
 public:
   explicit curlhttpget(const char *url = NULL, hls_curl_http_get_data_callback data_callback = NULL, void *data_context = NULL,
-                       curlhttpget_info_t *info = NULL);
+		       curlhttpget_info_t *info = NULL);
 
 private:
   CURL *curl_handle;
