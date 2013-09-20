@@ -10,9 +10,6 @@
 // FIXME: this is just for the sleep call, which is a temporary hack:
 #include <unistd.h>
 
-// enable this to run in local mode instead of client mode
-#define SPAWN_SERVER 0
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     dvbtee(NULL),
@@ -36,15 +33,6 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("TeeV");
 
     cur_chan_id = "33+1";
-
-    if (SPAWN_SERVER) {
-	dvbtee = new TunerProvider;
-	//int tuner_number = dvbtee->add_hdhr_tuner();
-	//int tuner_number =
-	dvbtee->add_linuxtv_tuner();
-	//tune *thistuner = dvbtee->get_tuner(tuner_number);
-	dvbtee->start_server();
-    }
 
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
@@ -79,7 +67,17 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addWidget(m_listBox, 0, 1);
     m_listBox->setMinimumWidth(120);
 
+    m_listBox->clear();
     get_channels();
+    if (!m_listBox->count()) {
+	    dvbtee = new TunerProvider;
+	    //int tuner_number = dvbtee->add_hdhr_tuner();
+	    //int tuner_number =
+	    dvbtee->add_linuxtv_tuner();
+	    //tune *thistuner = dvbtee->get_tuner(tuner_number);
+	    dvbtee->start_server();
+	    get_channels();
+    }
 
     connect(m_listBox, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(channel_clicked(QListWidgetItem*)));
 #ifdef USE_PHONON
