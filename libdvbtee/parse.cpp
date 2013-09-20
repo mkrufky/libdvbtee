@@ -736,6 +736,54 @@ static const char * xine_chandump(void *context, parsed_channel_info_t *c)
 	return NULL;
 }
 
+void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c)
+{
+	//map_ts_elementary_streams::iterator iter_pmt_es = decoded_pmt->es_streams.find(program_number);
+	for (map_ts_elementary_streams::const_iterator iter_pmt_es = decoded_pmt->es_streams.begin();
+	     iter_pmt_es != decoded_pmt->es_streams.end(); ++iter_pmt_es)
+			switch (iter_pmt_es->second.type) {
+#if 1
+				case ST_VideoMpeg1:
+				case ST_VideoMpeg4:
+				case ST_VideoH264:
+				case ST_ATSC_VideoMpeg2:
+#endif
+				case ST_VideoMpeg2:
+					if (!c.vpid) c.vpid = iter_pmt_es->second.pid;
+					break;
+#if 1
+				case ST_AudioMpeg1:
+				case ST_AudioMpeg2:
+				case ST_AudioAAC_ADTS:
+				case ST_AudioAAC_LATM:
+				case ST_ATSC_AudioEAC3:
+#endif
+				case ST_ATSC_AudioAC3:
+					if (!c.apid) c.apid = iter_pmt_es->second.pid;
+					break;
+			}
+
+	c.lcn = 0;
+	c.major = 0;
+	c.minor = 0;
+	map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(c.program_number);
+	if (iter_vct != decoded_vct->channels.end()) {
+		c.major = iter_vct->second.chan_major;
+		c.minor = iter_vct->second.chan_minor;
+		for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
+		c.service_name[7] = 0;
+	} else { // FIXME: use SDT info
+		c.lcn = decoders[ts_id].get_lcn(c.program_number);
+
+		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
+		if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
+			snprintf((char*)c.service_name, sizeof(c.service_name), "%s", decoded_sdt->services[c.program_number].service_name);
+		else {
+			snprintf((char*)c.service_name, sizeof(c.service_name), "%04d_UNKNOWN", c.program_number);
+		}
+	}
+}
+
 unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chandump_callback chandump_cb, void* chandump_context)
 {
 	parsed_channel_info_t c;
@@ -763,52 +811,9 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 		map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(c.program_number);
 		if (iter_pmt == decoded_pmt->end())
 			continue;
-		//map_ts_elementary_streams::iterator iter_pmt_es = iter_pmt->second.es_streams.find(program_number);
-		for (map_ts_elementary_streams::const_iterator iter_pmt_es = iter_pmt->second.es_streams.begin();
-		     iter_pmt_es != iter_pmt->second.es_streams.end(); ++iter_pmt_es)
-				switch (iter_pmt_es->second.type) {
-#if 1
-				case ST_VideoMpeg1:
-				case ST_VideoMpeg4:
-				case ST_VideoH264:
-				case ST_ATSC_VideoMpeg2:
-#endif
-				case ST_VideoMpeg2:
-					if (!c.vpid) c.vpid = iter_pmt_es->second.pid;
-					break;
-#if 1
-				case ST_AudioMpeg1:
-				case ST_AudioMpeg2:
-				case ST_AudioAAC_ADTS:
-				case ST_AudioAAC_LATM:
-				case ST_ATSC_AudioEAC3:
-#endif
-				case ST_ATSC_AudioAC3:
-					if (!c.apid) c.apid = iter_pmt_es->second.pid;
-					break;
-				}
 
-		unsigned char service_name[256] = { 0 };
-		c.lcn = 0;
-		c.major = 0;
-		c.minor = 0;
-		map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(c.program_number);
-		if (iter_vct != decoded_vct->channels.end()) {
-			c.major = iter_vct->second.chan_major;
-			c.minor = iter_vct->second.chan_minor;
-			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
-			c.service_name = service_name;
-		} else { // FIXME: use SDT info
-			c.lcn = decoders[ts_id].get_lcn(c.program_number);
+		parse_channel_info(ts_id, &iter_pmt->second, decoded_vct, c);
 
-			decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
-			if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
-				c.service_name = decoded_sdt->services[c.program_number].service_name;
-			else {
-				sprintf((char*)service_name, "%04d_UNKNOWN", c.program_number);
-				c.service_name = service_name;
-			}
-		}
 		if (!chandump_cb)
 			chandump_cb = xine_chandump;
 
@@ -860,6 +865,51 @@ void parse::epg_dump(decode_report *reporter)
 	//fprintf(stderr, "%s", str.c_str());
 
 	return;
+}
+
+bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0, decoded_event_t *e1)
+{
+	if (!service)
+		return false;
+
+	uint16_t requested_ts_id = get_ts_id(channel);
+
+	if (!channel_info.count(requested_ts_id))
+		return false;
+
+	const map_decoded_pmt* decoded_pmt = decoders[requested_ts_id].get_decoded_pmt();
+	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service);
+	if (iter_pmt == decoded_pmt->end())
+		return false;
+
+	const decoded_vct_t* decoded_vct = decoders[requested_ts_id].get_decoded_vct();
+
+	channel_info_t *info = &channel_info[requested_ts_id];
+
+	if (c) {
+		c->physical_channel = info->channel;
+		c->freq             = info->frequency;
+		c->modulation       = info->modulation;
+		//
+		c->program_number   = service;
+		c->apid = 0;
+		c->vpid = 0;
+		//
+		parse_channel_info(requested_ts_id, &iter_pmt->second, decoded_vct, *c);
+	}
+
+	time_t last;
+
+	time(&last);
+
+	if (e0) {
+		decoders[requested_ts_id].get_epg_event(service, last, e0);
+		last = e0->start_time + e0->length_sec + 1;
+	}
+	if (e1)
+		decoders[requested_ts_id].get_epg_event(service, last, e1);
+
+	return true;
 }
 
 bool parse::is_pmt_ready(uint16_t id)
