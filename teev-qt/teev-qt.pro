@@ -12,21 +12,31 @@ lessThan(QT_MAJOR_VERSION, 5) {
     QT += phonon
 }
 
-LIBS += -ljsoncpp
+unix|win32: LIBS += -lcurl -ljsoncpp
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee/release/ -ldvbtee
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ldvbtee
+else:symbian: LIBS += -ldvbtee
+else:unix: LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
 
 INCLUDEPATH += $$PWD/../libdvbtee
 DEPENDPATH += $$PWD/../libdvbtee
 
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee_server/release/ -ldvbtee_server
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee_server/debug/ -ldvbtee_server
+else:symbian: LIBS += -ldvbtee_server
+else:unix: LIBS += -L$$PWD/../libdvbtee_server/ -ldvbtee_server
+
 INCLUDEPATH += $$PWD/../libdvbtee_server
 DEPENDPATH += $$PWD/../libdvbtee_server
 
-LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
-LIBS += -L$$PWD/../libdvbtee_server/ -ldvbtee_server
-
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libdvbtee/usr/lib/release/ -ldvbpsi
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libdvbtee/usr/lib/debug/ -ldvbpsi
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../usr/lib/release/ -ldvbpsi
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../usr/lib/debug/ -ldvbpsi
 else:symbian: LIBS += -ldvbpsi
-else:unix: LIBS += -L$$PWD/../../libdvbtee/usr/lib/ -ldvbpsi
+else:unix: LIBS += -L$$PWD/../usr/lib/ -ldvbpsi
+
+INCLUDEPATH += $$PWD/../usr/include
+DEPENDPATH += $$PWD/../usr/include
 
 TARGET = teev
 TEMPLATE = app
