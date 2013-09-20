@@ -914,7 +914,7 @@ static bool _get_epg_event(decoded_event_t *e,
 {
 	if (!e) return false;
 
-	e->channel_name  = channel_name;
+	e->channel_name.assign(channel_name);
 	e->chan_major    = chan_major;
 	e->chan_minor    = chan_minor;
 
