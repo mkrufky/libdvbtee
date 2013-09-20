@@ -638,7 +638,7 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			//memset(&ee, 0, sizeof(ee));
 			ee.name.clear();
 			ee.text.clear();
-			ee.channel_name  = e->channel_name;
+			ee.channel_name.assign(e->channel_name);
 			ee.chan_major    = e->chan_major;
 			ee.chan_minor    = e->chan_minor;
 			ee.chan_physical = e->chan_physical;
