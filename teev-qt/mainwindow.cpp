@@ -145,9 +145,6 @@ void MainWindow::tune(QString chan_id)
     player->setMedia(url);
     player->play();
 #endif
-    //TEMPORARY HACK!!!
-    sleep(3);
-    get_info();
 }
 
 #ifdef USE_PHONON
