@@ -10,7 +10,8 @@
 // FIXME: this is just for the sleep call, which is a temporary hack:
 #include <unistd.h>
 
-#define SPAWN_SERVER 1
+// enable this to run in local mode instead of client mode
+#define SPAWN_SERVER 0
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
