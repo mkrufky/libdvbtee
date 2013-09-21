@@ -67,7 +67,10 @@ int TunerProvider::add_hdhr_tuner()
 {
 #ifdef USE_HDHOMERUN
 	int id = tuners.size();
-	tuners[id] = new hdhr_tuner;
+	hdhr_tuner* hdhr  = new hdhr_tuner;
+	tuners[id] = hdhr;
+	//FIXME: if we don't call set_hdhr_id we get undefined effects :-/
+	hdhr->set_hdhr_id("");
 #else
 	int id = -1;
 #endif
