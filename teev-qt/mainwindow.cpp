@@ -32,8 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("TeeV");
 
-    cur_chan_id = "33+1";
-
     this->centralWidget()->setLayout(layout);
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -90,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->addPermanentWidget(btn);
     connect(btn, SIGNAL(clicked()), SLOT(refresh_clicked()));
 
-    tune(cur_chan_id); // FIXME: LATER
+    tune("33~1"); // FIXME: LATER
 }
 
 MainWindow::~MainWindow()
@@ -120,13 +118,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::channel_clicked(QListWidgetItem *item)
 {
-    cur_chan_id = item->text().remove(0,item->text().indexOf("|")+1);
-    tune(cur_chan_id);
+	tune(item->text().remove(0,item->text().indexOf("|")+1));
 }
 
 void MainWindow::tune(QString chan_id)
 {
     QUrl url("http://"+dvbteeServerAddr+"/tune="+ chan_id +"/stream/");
+    cur_chan_id = chan_id;
 #ifdef USE_PHONON
 #if 0
     player->stop();
