@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     videoWidget(new QVideoWidget),
 #endif
     layout(new QGridLayout),
-    m_listBox(new QListWidget),
+    m_listBox(new QListView),
     dvbteeServerAddr("127.0.0.1:64080"),
     ui(new Ui::MainWindow)
 {
@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->setMargin(0);
     layout->setSpacing(0);
 
+    channel_model = new QStringListModel(this);
 #ifdef USE_PHONON
 #if 0
     layout->addWidget(player, 0, 0);
@@ -65,9 +66,9 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addWidget(m_listBox, 0, 1);
     m_listBox->setMinimumWidth(120);
 
-    m_listBox->clear();
+    m_listBox->setModel(channel_model);
     get_channels();
-    if (!m_listBox->count()) {
+    if (!channel_model->rowCount()) {
 	    dvbtee = new TunerProvider;
 	    //int tuner_number = dvbtee->add_hdhr_tuner();
 	    //int tuner_number =
@@ -77,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	    get_channels();
     }
 
-    connect(m_listBox, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(channel_clicked(QListWidgetItem*)));
+    connect(m_listBox, SIGNAL(clicked(QModelIndex)), SLOT(channel_clicked(QModelIndex)));
 #ifdef USE_PHONON
     connect(mediaObject, SIGNAL(currentSourceChanged(Phonon::MediaSource)), SLOT(playerSourceChanged(Phonon::MediaSource)));
 #else
@@ -116,9 +117,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::channel_clicked(QListWidgetItem *item)
+void MainWindow::channel_clicked(QModelIndex index)
 {
-	tune(item->text().remove(0,item->text().indexOf("|")+1));
+	QString chan_text(index.data().toString());
+	tune(chan_text.remove(0,chan_text.indexOf("|")+1));
 }
 
 void MainWindow::tune(QString chan_id)
@@ -204,7 +206,7 @@ void MainWindow::fill_channels_box()
     Json::Value root;
     Json::Reader reader;
 
-    m_listBox->clear();
+    QStringList ChannelList;
 
     if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
       for ( Json::ArrayIndex idx = 0; idx < root.size(); idx++ ) {
@@ -215,9 +217,10 @@ void MainWindow::fill_channels_box()
 	QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
 	QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
 	QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
-	if (str_id.length()) m_listBox->addItem(this_item);
+	if (str_id.length()) ChannelList << this_item;
       }
     }
+    channel_model->setStringList(ChannelList);
 }
 
 void MainWindow::fill_info_box()

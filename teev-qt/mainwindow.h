@@ -40,7 +40,7 @@ public:
     ~MainWindow();
 
 public slots:
-    void channel_clicked(QListWidgetItem*);
+    void channel_clicked(QModelIndex);
 #ifdef USE_PHONON
     void playerSourceChanged(Phonon::MediaSource);
 #else
@@ -63,9 +63,11 @@ private:
     QVideoWidget *videoWidget;
 #endif
     QGridLayout *layout;
-    QListWidget *m_listBox;
+    QListView *m_listBox;
     std::string channels_buffer;
     std::string info_buffer;
+
+    QStringListModel *channel_model;
 
     QString cur_chan_id;
 
