@@ -13,8 +13,12 @@ public:
 	~TunerProvider();
 
 	//the following will return the new tuner id:
-	int add_hdhr_tuner();
+	int add_hdhr_tuner(uint32_t device_id, uint32_t device_ip, unsigned int tuner = 0);
+	int add_hdhr_tuner(unsigned int tuner) { return add_hdhr_tuner(0, 0, tuner); }
+	int add_hdhr_tuner(const char *device_str = NULL);
+
 	int add_linuxtv_tuner();
+	bool add_linuxtv_tuner(int adap, int fe, int demux, int dvr);
 
 	tune *get_tuner(int id) { return tuners.count(id) ? tuners[id] : NULL; }
 

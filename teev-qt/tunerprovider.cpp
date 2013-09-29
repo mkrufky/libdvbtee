@@ -63,14 +63,27 @@ TunerProvider::~TunerProvider()
 	ATSCMultipleStringsDeInit();
 }
 
-int TunerProvider::add_hdhr_tuner()
+int TunerProvider::add_hdhr_tuner(const char *device_str)
 {
 #ifdef USE_HDHOMERUN
 	int id = tuners.size();
 	hdhr_tuner* hdhr  = new hdhr_tuner;
 	tuners[id] = hdhr;
 	//FIXME: if we don't call set_hdhr_id we get undefined effects :-/
-	hdhr->set_hdhr_id("");
+	hdhr->set_hdhr_id(device_str ? device_str : "");
+#else
+	int id = -1;
+#endif
+	return id;
+}
+
+int TunerProvider::add_hdhr_tuner(uint32_t device_id, uint32_t device_ip, unsigned int tuner)
+{
+#ifdef USE_HDHOMERUN
+	int id = tuners.size();
+	hdhr_tuner* hdhr  = new hdhr_tuner;
+	tuners[id] = hdhr;
+	hdhr->set_hdhr_id(device_id, device_ip, tuner);
 #else
 	int id = -1;
 #endif
@@ -82,6 +95,19 @@ int TunerProvider::add_linuxtv_tuner()
 #ifdef USE_LINUXTV
 	int id = tuners.size();
 	tuners[id] = new linuxtv_tuner;
+#else
+	int id = -1;
+#endif
+	return id;
+}
+
+bool TunerProvider::add_linuxtv_tuner(int adap, int fe, int demux, int dvr)
+{
+#ifdef USE_LINUXTV
+	int id = tuners.size();
+	linuxtv_tuner *linuxtv = new linuxtv_tuner;
+	tuners[id] = linuxtv;
+	linuxtv->set_device_ids(adap, fe, demux, dvr);
 #else
 	int id = -1;
 #endif
