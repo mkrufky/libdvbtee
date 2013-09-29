@@ -10,6 +10,22 @@
 // FIXME: this is just for the sleep call, which is a temporary hack:
 #include <unistd.h>
 
+
+#include <QStyledItemDelegate>
+
+class ListViewDelegate : public QStyledItemDelegate
+{
+public:
+	ListViewDelegate(QObject *parent = 0) {}
+	virtual QString displayText(const QVariant &value, const QLocale &locale) const
+	{
+		Q_UNUSED(locale);
+		QString chan_text(value.toString());
+		return chan_text.remove(chan_text.indexOf("|"), chan_text.length());
+	}
+};
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     dvbtee(NULL),
@@ -67,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_listBox->setMinimumWidth(120);
 
     m_listBox->setModel(channel_model);
+    m_listBox->setItemDelegate(new ListViewDelegate(this));
     get_channels();
     if (!channel_model->rowCount()) {
 	    dvbtee = new TunerProvider;
