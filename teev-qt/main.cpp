@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
     int opt, channel = 0;
 
     /* LinuxDVB context: */
-    int dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
-    int fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
+    int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
+    int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
     int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
     int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 
@@ -65,10 +65,10 @@ int main(int argc, char *argv[])
     TunerProvider *provider = (b_read_dvr || b_hdhr) ? new TunerProvider() : NULL;
 
     if (b_hdhr)
-	    provider->add_hdhr_tuner(); // FIXME: specify
+	    provider->add_hdhr_tuner(hdhrname);
 
     if (b_read_dvr)
-	    provider->add_linuxtv_tuner(); // FIXME: specify
+	    provider->add_linuxtv_tuner(dvb_adap, fe_id, demux_id, dvr_id);
 
 
     MainWindow w(0, provider);
