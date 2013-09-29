@@ -21,8 +21,7 @@ int main(int argc, char *argv[])
     int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
     int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 
-    char hdhrname[256];
-    memset(&hdhrname, 0, sizeof(hdhrname));
+    QString hdhrname;
 
     while ((opt = getopt(argc, argv, "a:A:c:f:T:d::H::")) != -1) {
 	    switch (opt) {
@@ -53,8 +52,7 @@ int main(int argc, char *argv[])
 			    libdvbtee_set_debug_level(255);
 		    break;
 	    case 'H':
-		    if (optarg)
-			    strcpy(hdhrname, optarg);
+		    hdhrname = optarg;
 		    b_hdhr = true;
 		    break;
 	    default:
@@ -65,7 +63,7 @@ int main(int argc, char *argv[])
     TunerProvider *provider = (b_read_dvr || b_hdhr) ? new TunerProvider() : NULL;
 
     if (b_hdhr)
-	    provider->add_hdhr_tuner(hdhrname);
+	    provider->add_hdhr_tuner(hdhrname.toStdString().c_str());
 
     if (b_read_dvr)
 	    provider->add_linuxtv_tuner(dvb_adap, fe_id, demux_id, dvr_id);
