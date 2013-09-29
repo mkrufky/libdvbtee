@@ -26,9 +26,9 @@ public:
 };
 
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget *parent, TunerProvider *provider) :
     QMainWindow(parent),
-    dvbtee(NULL),
+    dvbtee(provider),
 #ifdef USE_PHONON
 #if 0
     player(new Phonon::VideoPlayer(Phonon::VideoCategory, this)),
@@ -44,6 +44,11 @@ MainWindow::MainWindow(QWidget *parent) :
     m_listBox(new QListView),
     dvbteeServerAddr("127.0.0.1:64080"),
     ui(new Ui::MainWindow)
+{
+	setupMainWindow();
+}
+
+void MainWindow::setupMainWindow()
 {
     ui->setupUi(this);
     this->setWindowTitle("TeeV");
@@ -86,11 +91,14 @@ MainWindow::MainWindow(QWidget *parent) :
     m_listBox->setItemDelegate(new ListViewDelegate(this));
     get_channels();
     if (!channel_model->rowCount()) {
-	    dvbtee = new TunerProvider;
-	    //int tuner_number = dvbtee->add_hdhr_tuner();
-	    //int tuner_number =
-	    dvbtee->add_linuxtv_tuner();
-	    //tune *thistuner = dvbtee->get_tuner(tuner_number);
+	    if (!dvbtee) {
+		    //
+		    dvbtee = new TunerProvider;
+		    //int tuner_number = dvbtee->add_hdhr_tuner();
+		    //int tuner_number =
+		    dvbtee->add_linuxtv_tuner();
+		    //tune *thistuner = dvbtee->get_tuner(tuner_number);
+	    }
 	    dvbtee->start_server();
 	    get_channels();
     }

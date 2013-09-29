@@ -36,8 +36,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0, TunerProvider *provider = NULL);
     ~MainWindow();
+
+    void setupMainWindow();
 
 public slots:
     void channel_clicked(QModelIndex);
