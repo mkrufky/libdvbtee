@@ -111,6 +111,7 @@ void MainWindow::setupMainWindow()
 		    dvbtee->add_linuxtv_tuner();
 		    //tune *thistuner = dvbtee->get_tuner(tuner_number);
 	    }
+	    remoteServerAddr = "127.0.0.1";
 	    dvbtee->start_server(remoteServerPort);
 	    get_channels();
     }
