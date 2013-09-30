@@ -22,8 +22,10 @@ int main(int argc, char *argv[])
     int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 
     QString hdhrname;
+    QString server("127.0.0.1");
+    uint16_t port = 64080;
 
-    while ((opt = getopt(argc, argv, "a:A:c:f:T:d::H::")) != -1) {
+    while ((opt = getopt(argc, argv, "a:A:c:f:T:d::H::s:p:")) != -1) {
 	    switch (opt) {
 	    case 'a': /* adapter */
 		    dvb_adap = strtoul(optarg, NULL, 0);
@@ -55,6 +57,12 @@ int main(int argc, char *argv[])
 		    hdhrname = optarg;
 		    b_hdhr = true;
 		    break;
+	    case 's': /* remote server address */
+		    server = optarg;
+		    break;
+	    case 'p': /* server port */
+		    port = strtoul(optarg, NULL, 0);
+		    break;
 	    default:
 		    return -1;
 	    }
@@ -69,7 +77,7 @@ int main(int argc, char *argv[])
 	    provider->add_linuxtv_tuner(dvb_adap, fe_id, demux_id, dvr_id);
 
 
-    MainWindow w(0, provider);
+    MainWindow w(0, provider, server, port);
     w.show();
 
     return a.exec();

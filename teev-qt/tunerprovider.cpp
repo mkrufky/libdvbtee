@@ -22,7 +22,7 @@ void TunerProvider::stop_server()
 	return;
 }
 
-int TunerProvider::start_server(unsigned int flags, uint16_t port_requested)
+int TunerProvider::start_server(uint16_t port_requested, unsigned int flags)
 {
 	if (server) return -1;
 
@@ -32,7 +32,7 @@ int TunerProvider::start_server(unsigned int flags, uint16_t port_requested)
 		server->add_tuner(iter->second);
 
 		if (flags & 2)
-			iter->second->feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+iter->first);
+			iter->second->feeder.parser.out.add_http_server(port_requested+1+iter->first);
 	}
 	server->set_scan_flags(0, flags >> 2);
 

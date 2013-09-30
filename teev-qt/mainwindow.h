@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, TunerProvider *provider = NULL);
+    explicit MainWindow(QWidget *parent = 0, TunerProvider *provider = NULL, QString remoteServer = "127.0.0.1", uint16_t remotePort = 64080);
     ~MainWindow();
 
     void setupMainWindow();
@@ -73,7 +73,8 @@ private:
 
     QString cur_chan_id;
 
-    QString dvbteeServerAddr;
+    QString remoteServerAddr;
+    uint16_t remoteServerPort;
 
     Ui::MainWindow *ui;
 
@@ -88,6 +89,8 @@ private:
     static void get_info_callback(void *context, void *buffer, size_t size, size_t nmemb);
 
     void tune(QString chan_id);
+
+    QString dvbteeServerAddr();
 };
 
 #endif // MAINWINDOW_H

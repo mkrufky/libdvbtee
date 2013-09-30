@@ -26,7 +26,7 @@ public:
 };
 
 
-MainWindow::MainWindow(QWidget *parent, TunerProvider *provider) :
+MainWindow::MainWindow(QWidget *parent, TunerProvider *provider, QString remoteServer, uint16_t remotePort) :
     QMainWindow(parent),
     dvbtee(provider),
 #ifdef USE_PHONON
@@ -42,10 +42,22 @@ MainWindow::MainWindow(QWidget *parent, TunerProvider *provider) :
 #endif
     layout(new QGridLayout),
     m_listBox(new QListView),
-    dvbteeServerAddr("127.0.0.1:64080"),
+    remoteServerAddr(remoteServer),
+    remoteServerPort(remotePort),
     ui(new Ui::MainWindow)
 {
 	setupMainWindow();
+}
+
+QString MainWindow::dvbteeServerAddr()
+{
+	QString host;
+	char port[7];
+	host = remoteServerAddr;
+	snprintf(port, sizeof(port), ":%d", remoteServerPort);
+	host += port;
+
+	return host;
 }
 
 void MainWindow::setupMainWindow()
@@ -99,7 +111,7 @@ void MainWindow::setupMainWindow()
 		    dvbtee->add_linuxtv_tuner();
 		    //tune *thistuner = dvbtee->get_tuner(tuner_number);
 	    }
-	    dvbtee->start_server();
+	    dvbtee->start_server(remoteServerPort);
 	    get_channels();
     }
 
@@ -150,7 +162,7 @@ void MainWindow::channel_clicked(QModelIndex index)
 
 void MainWindow::tune(QString chan_id)
 {
-    QUrl url("http://"+dvbteeServerAddr+"/tune="+ chan_id +"/stream/");
+    QUrl url("http://"+dvbteeServerAddr()+"/tune="+ chan_id +"/stream/");
     cur_chan_id = chan_id;
 #ifdef USE_PHONON
 #if 0
@@ -209,7 +221,7 @@ void MainWindow::get_info_callback(void *context, void *buffer, size_t size, siz
 void MainWindow::get_channels()
 {
 	channels_buffer.clear();
-	QString channels_url("http://"+dvbteeServerAddr+"/json/channels");
+	QString channels_url("http://"+dvbteeServerAddr()+"/json/channels");
 	curlhttpget Curl(channels_url.toStdString().c_str(), get_channels_callback, this);
 	fill_channels_box();
 	channels_buffer.clear();
@@ -218,7 +230,7 @@ void MainWindow::get_channels()
 void MainWindow::get_info()
 {
 	info_buffer.clear();
-	QString info_url("http://"+dvbteeServerAddr+"/json/info="+ cur_chan_id);
+	QString info_url("http://"+dvbteeServerAddr()+"/json/info="+ cur_chan_id);
 	curlhttpget Curl(info_url.toStdString().c_str(), get_info_callback, this);
 	fill_info_box();
 	info_buffer.clear();
