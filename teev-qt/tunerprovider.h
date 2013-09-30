@@ -22,7 +22,7 @@ public:
 
 	tune *get_tuner(int id) { return tuners.count(id) ? tuners[id] : NULL; }
 
-	int start_server(unsigned int flags = 0);
+	int start_server(unsigned int flags = 0, uint16_t port_requested = SERVE_DEFAULT_PORT);
 	void stop_server();
 private:
 	map_tuners tuners;

@@ -22,7 +22,7 @@ void TunerProvider::stop_server()
 	return;
 }
 
-int TunerProvider::start_server(unsigned int flags)
+int TunerProvider::start_server(unsigned int flags, uint16_t port_requested)
 {
 	if (server) return -1;
 
@@ -36,7 +36,7 @@ int TunerProvider::start_server(unsigned int flags)
 	}
 	server->set_scan_flags(0, flags >> 2);
 
-	return server->start();
+	return server->start(port_requested);
 }
 
 TunerProvider::TunerProvider()
