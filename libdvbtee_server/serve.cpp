@@ -723,7 +723,7 @@ int serve::start(struct libdvbtee_server_config *cfg)
 
 int serve::start(uint16_t port_requested)
 {
-	dprintf("()");
+	dprintf("(%d)", port_requested);
 
 	listener.set_callback(this, add_client);
 
