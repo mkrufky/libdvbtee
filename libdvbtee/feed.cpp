@@ -67,7 +67,7 @@ feed::feed()
 
 feed::~feed()
 {
-	dprintf("()");
+	dprintf("(%s)", strlen(filename) ? filename : "");
 
 	close_file();
 }
