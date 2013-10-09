@@ -94,7 +94,7 @@ public:
 	unsigned int get_channel() { return cur_chan; }
 	time_t last_touched();
 
-	virtual char *get_name() { return feeder.get_filename(); }
+	virtual const char *get_name() { return feeder.get_filename(); }
 
 	virtual bool check() { vrtdbg; return false; }
 
