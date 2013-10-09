@@ -357,6 +357,11 @@ int hdhr_tuner::hdhr_pull_callback()
 int hdhr_tuner::start_feed()
 {
 	if (!dev) return -1;
+
+	if (!get_channel()) {
+		dprintf("not tuned!");
+		return -1;
+	}
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	hdhomerun_device_stream_start(hdhr_dev);
 	if (0 == feeder.pull(this, hdhr_pull_callback)) {
