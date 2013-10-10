@@ -207,6 +207,15 @@ bool hdhr_tuner::set_hdhr_id(const char *device_str, bool use_pid_filter)
 	return ret;
 }
 
+const char *hdhr_tuner::get_name()
+{
+	if (dev) {
+		struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
+		if (hdhr_dev) return hdhomerun_device_get_name(hdhr_dev);
+	}
+	return feeder.get_filename();
+}
+
 bool hdhr_tuner::check()
 {
 	if (!dev) return false;
