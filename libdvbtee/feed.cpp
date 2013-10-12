@@ -99,7 +99,7 @@ void feed::set_filename(char* new_file)
 	dprintf("(%s)", new_file);
 
 	strncpy(filename, new_file, sizeof(filename));
-};
+}
 
 int feed::open_file()
 {
