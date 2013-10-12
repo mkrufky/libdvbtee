@@ -305,7 +305,7 @@ unsigned int tune::get_scan_results(bool wait, chandump_callback chandump_cb, vo
 	if (scan_epg) feeder.parser.epg_dump();
 
 	return ret;
-};
+}
 
 int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, scan_progress_callback progress_cb, void* progress_context, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
