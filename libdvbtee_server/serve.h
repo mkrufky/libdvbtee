@@ -30,8 +30,8 @@
 
 #define SERVE_DEFAULT_PORT 64080
 
-typedef std::map<uint8_t, tune*> tuner_map;
-typedef std::map<uint8_t, feed*> feeder_map;
+typedef std::map<unsigned int, tune*> tuner_map;
+typedef std::map<unsigned int, feed*> feeder_map;
 
 class serve;
 
