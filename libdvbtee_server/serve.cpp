@@ -120,7 +120,7 @@ bool serve::add_feeder(feed *new_feeder)
 	while (feeders.count(new_id)) new_id++;
 	feeders[new_id] = new_feeder;
 	return true;
-};
+}
 
 bool serve::add_tuner(tune *new_tuner)
 {
@@ -128,7 +128,7 @@ bool serve::add_tuner(tune *new_tuner)
 	while (tuners.count(new_id)) new_id++;
 	tuners[new_id] = new_tuner;
 	return true;
-};
+}
 
 bool serve_client::list_feeders()
 {
