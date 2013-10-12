@@ -30,8 +30,8 @@
 
 #define SERVE_DEFAULT_PORT 64080
 
-typedef std::map<uint8_t, tune*> tuner_map;
-typedef std::map<uint8_t, feed*> feeder_map;
+typedef std::map<unsigned int, tune*> tuner_map;
+typedef std::map<unsigned int, feed*> feeder_map;
 
 class serve;
 
@@ -130,8 +130,8 @@ public:
 	int start(uint16_t port_requested = SERVE_DEFAULT_PORT);
 	void stop();
 
-	bool add_tuner(tune *new_tuner) /*{ tuners[tuners.size()] = new_tuner; }*/;
-	bool add_feeder(feed *new_feeder) /*{ feeders[feeders.size()] = new_feeder; }*/;
+	bool add_tuner(tune *new_tuner);
+	bool add_feeder(feed *new_feeder);
 	static bool add_feeder(void*, feed*);
 
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,

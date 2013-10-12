@@ -67,7 +67,7 @@ feed::feed()
 
 feed::~feed()
 {
-	dprintf("()");
+	dprintf("(%s)", strlen(filename) ? filename : "");
 
 	close_file();
 }
@@ -204,6 +204,8 @@ int feed::pull(void *priv, pull_callback cb)
 
 	pull_priv = priv;
 	pull_cb = cb;
+
+	strncpy(filename, "PULLCALLBACK", sizeof(filename));
 
 	int ret = pthread_create(&h_thread, NULL, pull_thread, this);
 

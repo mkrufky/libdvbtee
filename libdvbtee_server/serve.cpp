@@ -116,13 +116,17 @@ bool serve::add_feeder(void *p_this, feed *new_feeder)
 
 bool serve::add_feeder(feed *new_feeder)
 {
-	feeders[feeders.size()] = new_feeder;
+	unsigned int new_id = feeders.size();
+	while (feeders.count(new_id)) new_id++;
+	feeders[new_id] = new_feeder;
 	return true;
 };
 
 bool serve::add_tuner(tune *new_tuner)
 {
-	tuners[tuners.size()] = new_tuner;
+	unsigned int new_id = tuners.size();
+	while (tuners.count(new_id)) new_id++;
+	tuners[new_id] = new_tuner;
 	return true;
 };
 
@@ -141,13 +145,15 @@ bool serve_client::list_tuners()
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if (iter->second->check()) {
 			unsigned int cur_chan = iter->second->get_channel();
-			cli_print("tuner %d:\tchannel %d, state:%s%s%s%s%s\n",
+			const char *tuner_name = iter->second->get_name();
+			cli_print("tuner %d:\tchannel %d, state:%s%s%s%s%s\t%s\n",
 				  iter->first, cur_chan,
 				  iter->second->is_idle() ? " idle" : "",
 				  iter->second->is_open() ? " open" : "",
 				  iter->second->is_lock() ? " lock" : "",
 				  iter->second->is_scan() ? " scan" : "",
-				  iter->second->is_feed() ? " feed" : "");
+				  iter->second->is_feed() ? " feed" : "",
+				  tuner_name);
 		}
 	return true;
 }

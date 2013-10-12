@@ -51,6 +51,8 @@ public:
 
 	bool __tune_channel(dvbtee_fe_modulation_t, unsigned int);
 
+	const char *get_name();
+
 	bool check();
 private:
 	void add_filter(uint16_t);
