@@ -1286,7 +1286,7 @@ bool serve_client::__command(char* cmdline)
 			ser = strtok_r(NULL, ".-+~", &cmdtune);
 		}
 
-		cli_print("preparing to tune to physical channel %d, service %d...\n", phy, ser);
+		cli_print("preparing to tune to physical channel %d, service %s...\n", phy, (!ser) ? "?" : ser);
 
 		/* see if tuner has the right physical channel, if not
 		 * then find another tuner that does or change it */
