@@ -931,19 +931,19 @@ bool parse::is_pmt_ready(uint16_t id)
 		}
 	return true;
 
-};
+}
 
 bool parse::is_psip_ready()
 {
 	return ((has_pat) &&
 		(((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit))) &&
 		((decoders.count(get_ts_id())) && (is_pmt_ready())));
-};
+}
 
 bool parse::is_epg_ready()
 {
 	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
-};
+}
 
 int parse::add_output(void* priv, stream_callback callback)
 {
@@ -1219,7 +1219,7 @@ void parse::set_ts_id(uint16_t new_ts_id)
 	ts_id = new_ts_id;
 	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
 	decoders[ts_id].set_physical_channel(channel_info[ts_id].channel);
-};
+}
 
 uint16_t parse::get_ts_id(unsigned int channel)
 {

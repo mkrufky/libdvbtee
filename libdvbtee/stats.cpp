@@ -136,7 +136,7 @@ void stats::push_pid(int c, const uint16_t pid)
 pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
 {
 	if (pkt_stats) {
-		memset(pkt_stats, 0, sizeof(pkt_stats));
+		memset(pkt_stats, 0, sizeof(pkt_stats_t));
 
 		const uint8_t *q = p;
 
@@ -209,7 +209,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 		return;
 	}
 
-	memset(pkt_stats, 0, sizeof(pkt_stats));
+	memset(pkt_stats, 0, sizeof(pkt_stats_t));
 
 	parse(p, pkt_stats);
 

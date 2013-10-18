@@ -928,7 +928,7 @@ static bool _get_epg_event(decoded_event_t *e,
 	e->text.assign(text);
 
 	return true;
-};
+}
 
 void decode_report::dump_epg_event(const char * channel_name,
 				   uint16_t chan_major,
@@ -953,7 +953,7 @@ void decode_report::dump_epg_event(const char * channel_name,
 		      name, text);
 
 	dump_epg_event_cb(context, &e);
-};
+}
 
 
 void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decode_report *reporter)
@@ -1524,17 +1524,17 @@ const uint16_t decode::get_lcn(uint16_t service_id)
 const map_decoded_eit* decode::get_decoded_eit()
 {
 	return networks.count(orig_network_id) ? networks[orig_network_id].get_decoded_eit(decoded_pat.ts_id) : NULL;
-};
+}
 
 const decoded_sdt_t* decode::get_decoded_sdt()
 {
 	return networks.count(orig_network_id) ? networks[orig_network_id].get_decoded_sdt(decoded_pat.ts_id) : NULL;
-};
+}
 
 const decoded_nit_t* decode::get_decoded_nit()
 {
 	return networks.count(network_id) ? networks[network_id].get_decoded_nit() : NULL;
-};
+}
 
 #if 0
 bool decode::complete_psip()

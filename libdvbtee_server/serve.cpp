@@ -120,7 +120,7 @@ bool serve::add_feeder(feed *new_feeder)
 	while (feeders.count(new_id)) new_id++;
 	feeders[new_id] = new_feeder;
 	return true;
-};
+}
 
 bool serve::add_tuner(tune *new_tuner)
 {
@@ -128,7 +128,7 @@ bool serve::add_tuner(tune *new_tuner)
 	while (tuners.count(new_id)) new_id++;
 	tuners[new_id] = new_tuner;
 	return true;
-};
+}
 
 bool serve_client::list_feeders()
 {
@@ -1286,7 +1286,7 @@ bool serve_client::__command(char* cmdline)
 			ser = strtok_r(NULL, ".-+~", &cmdtune);
 		}
 
-		cli_print("preparing to tune to physical channel %d, service %d...\n", phy, ser);
+		cli_print("preparing to tune to physical channel %d, service %s...\n", phy, (!ser) ? "?" : ser);
 
 		/* see if tuner has the right physical channel, if not
 		 * then find another tuner that does or change it */

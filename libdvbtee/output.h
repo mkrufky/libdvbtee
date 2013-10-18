@@ -145,7 +145,7 @@ private:
 #endif
 };
 
-typedef std::map<int, output_stream> output_stream_map;
+typedef std::map<unsigned int, output_stream> output_stream_map;
 
 class output
 {
