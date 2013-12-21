@@ -30,7 +30,7 @@
 #include "output.h"
 #include "stats.h"
 
-#define LIBDVBTEE_VERSION "0.2.2"
+#define LIBDVBTEE_VERSION "0.2.3"
 
 #define USE_STATIC_DECODE_MAP 1
 
