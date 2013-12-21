@@ -67,7 +67,7 @@ feed::feed()
 
 feed::~feed()
 {
-	dprintf("()");
+	dprintf("(%s)", strlen(filename) ? filename : "");
 
 	close_file();
 }
@@ -98,8 +98,8 @@ void feed::set_filename(char* new_file)
 {
 	dprintf("(%s)", new_file);
 
-	strcpy(filename, new_file);
-};
+	strncpy(filename, new_file, sizeof(filename));
+}
 
 int feed::open_file()
 {
@@ -204,6 +204,8 @@ int feed::pull(void *priv, pull_callback cb)
 
 	pull_priv = priv;
 	pull_cb = cb;
+
+	strncpy(filename, "PULLCALLBACK", sizeof(filename));
 
 	int ret = pthread_create(&h_thread, NULL, pull_thread, this);
 
@@ -493,7 +495,7 @@ int feed::start_stdin()
 		return -1;
 	}
 	fprintf(stderr, "%s: using STDIN\n", __func__);
-	strcpy(filename, "STDIN");
+	strncpy(filename, "STDIN", sizeof(filename));
 
 	f_kill_thread = false;
 
@@ -521,7 +523,7 @@ int feed::start_socket(char* source)
 	int ret;
 
 	dprintf("(<--%s)", source);
-	strcpy(filename, source);
+	strncpy(filename, source, sizeof(filename));
 
 	if (strstr(source, ":")) {
 		ip = strtok_r(source, ":", &save);
@@ -686,7 +688,7 @@ int feed::start_udp_listener(uint16_t port_requested)
 bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_event) {
 	time_t start_time = time(NULL);
 	while ((!f_kill_thread) &&
-	       ((timeout == 0) || ((time(NULL) - start_time) < (timeout)) )) {
+	       ((timeout == 0) || ((time(NULL) - start_time) < (time_t)(timeout)) )) {
 
 		switch (wait_event) {
 		case FEED_EVENT_PSIP:

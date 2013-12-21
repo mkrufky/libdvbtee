@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
+QT       -= core
 
 TARGET = dvbtee
 TEMPLATE = lib
@@ -24,7 +25,6 @@ SOURCES += channels.cpp \
     stats.cpp \
     tune.cpp \
     hdhr_tuner.cpp \
-    linuxtv_tuner.cpp \
     atsctext.cpp \
     hlsfeed.cpp \
     curlhttpget.cpp
@@ -43,7 +43,6 @@ HEADERS += atsctext.h \
     rbuf.h \
     stats.h \
     tune.h \
-    linuxtv_tuner.h \
     hdhr_tuner.h \
     hlsfeed.h \
     curlhttpget.h
@@ -56,6 +55,11 @@ symbian {
     addFiles.sources = dvbtee.dll
     addFiles.path = !:/sys/bin
     DEPLOYMENT += addFiles
+}
+
+unix:!macx:!symbian {
+    HEADERS += linuxtv_tuner.h
+    SOURCES += linuxtv_tuner.cpp
 }
 
 unix:!symbian {
@@ -81,10 +85,12 @@ DEPENDPATH += $$PWD/../usr/include
 
 unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/../usr/lib/libdvbpsi.a
 
+macx: LIBS += -liconv
+
 symbian: LIBS += -lhdhomerun
 else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
 
 INCLUDEPATH += /usr/lib/libhdhomerun
 DEPENDPATH += /usr/lib/libhdhomerun
 
-QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64
+QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64 -D__STDC_FORMAT_MACROS

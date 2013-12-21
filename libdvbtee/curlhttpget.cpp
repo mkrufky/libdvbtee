@@ -21,7 +21,8 @@
 
 #include "curlhttpget.h"
 
-curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_callback, void *data_context)
+curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_callback, void *data_context,
+			 curlhttpget_info_t *info)
   : curl_handle(curl_easy_init())
   , data_cb(data_callback)
   , data_ctxt(data_context)
@@ -30,7 +31,7 @@ curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_c
 //curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "hlswalker");
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libdvbtee");
 
   if (data_cb) {
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, this);
@@ -38,9 +39,23 @@ curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_c
   }
 
   CURLcode res = curl_easy_perform(curl_handle);
-  if (res != CURLE_OK) fprintf(stderr, "%s: curl_easy_perform() failed: %s\nURL: %s\n\n", __func__, curl_easy_strerror(res), url);
+  if (res != CURLE_OK) {
+    fprintf(stderr, "%s: curl_easy_perform() failed: %s\nURL: %s\n\n", __func__, curl_easy_strerror(res), url);
+    goto fail;
+  }
 
+  if (info) getinfo(info);
+
+fail:
   curl_easy_cleanup(curl_handle);
+}
+
+void curlhttpget::getinfo(curlhttpget_info_t *info)
+{
+  info->total_time = 0.0;
+  CURLcode res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME, &info->total_time);
+  if (res == CURLE_OK)
+    fprintf(stderr, "%s: total time: %f\n", __func__, info->total_time);
 }
 
 //static

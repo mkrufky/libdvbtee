@@ -26,6 +26,9 @@
 #include <fcntl.h>
 #include <map>
 
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/dmx.h>
+
 #include "linuxtv_tuner.h"
 #include "log.h"
 #define CLASS_MODULE "linuxtv_tuner"
@@ -35,6 +38,51 @@
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
 static map_chan_to_ts_id channels;
+
+static dvbtee_fe_type_t dvbtee_fe_type(fe_type_t fe_type)
+{
+	switch (fe_type) {
+	case FE_QPSK: return DVBTEE_FE_QPSK;
+	case FE_QAM:  return DVBTEE_FE_QAM;
+	case FE_OFDM: return DVBTEE_FE_OFDM;
+	default:
+	case FE_ATSC: return DVBTEE_FE_ATSC;
+	}
+}
+
+#if 0
+static dvbtee_fe_modulation_t dvbtee_fe_modulation(fe_modulation_t modulation)
+{
+	switch (modulation) {
+	default:
+	case VSB_8:   return DVBTEE_VSB_8;
+	case VSB_16:  return DVBTEE_VSB_16;
+	case QAM_64:  return DVBTEE_QAM_64;
+	case QAM_256: return DVBTEE_QAM_256;
+	}
+}
+#endif
+
+static fe_modulation_t fe_modulation(dvbtee_fe_modulation_t modulation)
+{
+	switch (modulation) {
+	default:
+	case DVBTEE_VSB_8:   return VSB_8;
+	case DVBTEE_VSB_16:  return VSB_16;
+	case DVBTEE_QAM_64:  return QAM_64;
+	case DVBTEE_QAM_256: return QAM_256;
+	}
+}
+
+static dvbtee_fe_status_t dvbtee_fe_status(fe_status_t status)
+{
+	int ret = (dvbtee_fe_status_t)0;
+
+	if (status & FE_HAS_SYNC) ret |= (int)DVBTEE_FE_HAS_SYNC;
+	if (status & FE_HAS_LOCK) ret |= (int)DVBTEE_FE_HAS_LOCK;
+
+	return (dvbtee_fe_status_t)ret;
+}
 
 linuxtv_tuner::linuxtv_tuner()
   : adap_id(-1)
@@ -136,9 +184,9 @@ bool linuxtv_tuner::check()
 			is_scan() ? " scan" : "",
 			is_feed() ? " feed" : "");
 		if (cur_chan) {
-			fe_status_t status = fe_status();
+			dvbtee_fe_status_t status = fe_status();
 			uint16_t snr = get_snr();
-			dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
+			dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & DVBTEE_FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
 			last_touched();
 		}
 	}
@@ -209,7 +257,7 @@ int linuxtv_tuner::open_fe()
 			fprintf(stderr, "open_frontend: FE_GET_FRONTEND failed\n");
 			goto fail;
 		}
-		fe_type = fe_info.type;
+		fe_type = dvbtee_fe_type(fe_info.type);
 		state |= TUNE_STATE_OPEN;
 		return fe_fd;
 	default:
@@ -219,13 +267,13 @@ fail:
 	return close_fe();
 }
 
-fe_status_t linuxtv_tuner::fe_status()
+dvbtee_fe_status_t linuxtv_tuner::fe_status()
 {
 	fe_status_t status = (fe_status_t)0;
 
 	if (ioctl(fe_fd, FE_READ_STATUS, &status) < 0) {
 		perror("FE_READ_STATUS failed");
-		return (fe_status_t)0;
+		return (dvbtee_fe_status_t)0;
 	}
 
 	fprintf(stderr, "%s%s%s%s%s ",
@@ -239,7 +287,7 @@ fe_status_t linuxtv_tuner::fe_status()
 	if (status & FE_HAS_LOCK)
 		state |= TUNE_STATE_LOCK;
 
-	return status;
+	return dvbtee_fe_status(status);
 }
 
 uint16_t linuxtv_tuner::get_snr()
@@ -325,7 +373,7 @@ fail_demux:
 	return -1;
 }
 
-bool linuxtv_tuner::tune_channel(fe_modulation_t modulation, unsigned int channel)
+bool linuxtv_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	bool ret;
 
@@ -350,26 +398,26 @@ bool linuxtv_tuner::tune_channel(fe_modulation_t modulation, unsigned int channe
 	return ret;
 }
 
-bool linuxtv_tuner::tune_atsc(fe_modulation_t modulation, unsigned int channel)
+bool linuxtv_tuner::tune_atsc(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	struct dvb_frontend_parameters fe_params;
 
 	memset(&fe_params, 0, sizeof(struct dvb_frontend_parameters));
 
 	switch (modulation) {
-	case VSB_8:
-	case VSB_16:
+	case DVBTEE_VSB_8:
+	case DVBTEE_VSB_16:
 		fe_params.frequency = atsc_vsb_chan_to_freq(channel);
 		break;
-	case QAM_64:
-	case QAM_256:
+	case DVBTEE_QAM_64:
+	case DVBTEE_QAM_256:
 		fe_params.frequency = atsc_qam_chan_to_freq(channel);
 		break;
 	default:
 		fprintf(stderr, "modulation not supported!\n");
 		return false;
 	}
-	fe_params.u.vsb.modulation = modulation;
+	fe_params.u.vsb.modulation = fe_modulation(modulation);
 
 	if (ioctl(fe_fd, FE_SET_FRONTEND, &fe_params) < 0) {
 		fprintf(stderr, "linuxtv_tuner: FE_SET_FRONTEND failed\n");

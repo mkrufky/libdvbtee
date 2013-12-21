@@ -49,7 +49,9 @@ public:
 	void stop_feed();
 	int start_feed();
 
-	bool tune_channel(fe_modulation_t, unsigned int);
+	bool __tune_channel(dvbtee_fe_modulation_t, unsigned int);
+
+	const char *get_name();
 
 	bool check();
 private:
@@ -58,7 +60,7 @@ private:
 	void clear_filters();
 	static void clear_filters(void *);
 
-	fe_status_t fe_status();
+	dvbtee_fe_status_t fe_status();
 
 	void hdhr_status();
 

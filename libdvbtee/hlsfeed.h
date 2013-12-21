@@ -38,17 +38,23 @@ private:
   void *datapump_ctxt;
 
   void push(uint8_t *buffer, size_t size, size_t nmemb);
+  void walk(uint8_t *buffer, size_t size, size_t nmemb);
   void walk(uint8_t *buffer);
 
   static void curl_push_callback(void *context, void *buffer, size_t size, size_t nmemb);
   static void curl_walk_callback(void *context, void *buffer, size_t size, size_t nmemb);
 
-  rbuf ringbuffer;
+  rbuf push_buffer;
+  rbuf walk_buffer;
   bool f_kill_thread;
-  pthread_t h_thread;
+  pthread_t h_push_thread;
+  pthread_t h_walk_thread;
 
   static void* push_thread(void*);
   void* push_thread();
+
+  static void* walk_thread(void*);
+  void* walk_thread();
 };
 
 #endif // HLSFEEDER_H

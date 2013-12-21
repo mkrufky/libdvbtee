@@ -46,7 +46,7 @@ unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 
 	bool any_cli = false;
 
-static tune *find_idle_tuner()
+static tune *find_first_idle_tuner()
 {
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
@@ -54,6 +54,21 @@ static tune *find_idle_tuner()
 			return iter->second;
 		}
 	return NULL;
+}
+
+static tune *find_idle_tuner()
+{
+	tune *tuner = NULL;
+	time_t last_touched = 0;
+	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
+		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
+			dprintf("tuner %d is available", iter->first);
+			if ((!tuner) || (iter->second->last_touched() > last_touched)) {
+				tuner = iter->second;
+				last_touched = iter->second->last_touched();
+			}
+		}
+	return tuner;
 }
 
 static tune *find_tuned_tuner(unsigned int phy)
@@ -101,15 +116,19 @@ bool serve::add_feeder(void *p_this, feed *new_feeder)
 
 bool serve::add_feeder(feed *new_feeder)
 {
-	feeders[feeders.size()] = new_feeder;
+	unsigned int new_id = feeders.size();
+	while (feeders.count(new_id)) new_id++;
+	feeders[new_id] = new_feeder;
 	return true;
-};
+}
 
 bool serve::add_tuner(tune *new_tuner)
 {
-	tuners[tuners.size()] = new_tuner;
+	unsigned int new_id = tuners.size();
+	while (tuners.count(new_id)) new_id++;
+	tuners[new_id] = new_tuner;
 	return true;
-};
+}
 
 bool serve_client::list_feeders()
 {
@@ -126,13 +145,15 @@ bool serve_client::list_tuners()
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if (iter->second->check()) {
 			unsigned int cur_chan = iter->second->get_channel();
-			cli_print("tuner %d:\tchannel %d, state:%s%s%s%s%s\n",
+			const char *tuner_name = iter->second->get_name();
+			cli_print("tuner %d:\tchannel %d, state:%s%s%s%s%s\t%s\n",
 				  iter->first, cur_chan,
 				  iter->second->is_idle() ? " idle" : "",
 				  iter->second->is_open() ? " open" : "",
 				  iter->second->is_lock() ? " lock" : "",
 				  iter->second->is_scan() ? " scan" : "",
-				  iter->second->is_feed() ? " feed" : "");
+				  iter->second->is_feed() ? " feed" : "",
+				  tuner_name);
 		}
 	return true;
 }
@@ -463,11 +484,11 @@ serve::serve()
 serve::~serve()
 {
 	dprintf("()");
-	tuners.clear();
-	feed_servers.clear();
-
 	stop_monitor();
 	stop();
+
+	tuners.clear();
+	feed_servers.clear();
 }
 
 #if 0
@@ -617,11 +638,13 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 #if 1
 	if (streamback_newchannel) {
 		if (data_fmt == SERVE_DATA_FMT_CLI)
-			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name);
+			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name.c_str());
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			decoded_event_t ee;
-			memset(&ee, 0, sizeof(ee));
-			ee.channel_name  = e->channel_name;
+			//memset(&ee, 0, sizeof(ee));
+			ee.name.clear();
+			ee.text.clear();
+			ee.channel_name.assign(e->channel_name);
 			ee.chan_major    = e->chan_major;
 			ee.chan_minor    = e->chan_minor;
 			ee.chan_physical = e->chan_physical;
@@ -646,16 +669,18 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			 tms.tm_hour, tms.tm_min,
 			 tme.tm_hour, tme.tm_min);
 
-		cli_print("%s\t %s\n", time_str, e->name);
+		cli_print("%s\t %s\n", time_str, e->name.c_str());
 	}
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 		decoded_event_t ee;
-		memset(&ee, 0, sizeof(ee));
+		//memset(&ee, 0, sizeof(ee));
+		ee.name.clear();
+		ee.text.clear();
 		ee.event_id = e->event_id;
 		ee.start_time = e->start_time;
 		ee.length_sec = e->length_sec;
-		ee.name = e->name;
-		ee.text = e->text;
+		ee.name.assign(e->name);
+		ee.text.assign(e->text);
 
 		const char *str;
 		switch (data_fmt) {
@@ -704,7 +729,7 @@ int serve::start(struct libdvbtee_server_config *cfg)
 
 int serve::start(uint16_t port_requested)
 {
-	dprintf("()");
+	dprintf("(%d)", port_requested);
 
 	listener.set_callback(this, add_client);
 
@@ -964,7 +989,7 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 		if (!flags)
 			flags = SCAN_VSB;
 
-		if (tuner->tune_channel((flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
+		if (tuner->tune_channel((flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) {
 
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
 				tuner->close_fe();
@@ -1104,7 +1129,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 
 			chan = strtok_r(name, "-", &save);
 			temp = strtok_r(NULL, "-", &save);
-			c.service_name = (unsigned char *)(((temp) && strlen(temp)) ? temp : chan);
+			sprintf((char*)c.service_name, "%s", (unsigned char *)(((temp) && strlen(temp)) ? temp : chan));
 
 			temp = strtok_r(chan, ".", &save);
 			if (temp) {
@@ -1261,7 +1286,7 @@ bool serve_client::__command(char* cmdline)
 			ser = strtok_r(NULL, ".-+~", &cmdtune);
 		}
 
-		cli_print("preparing to tune to physical channel %d...\n", phy, ser);
+		cli_print("preparing to tune to physical channel %d, service %s...\n", phy, (!ser) ? "?" : ser);
 
 		/* see if tuner has the right physical channel, if not
 		 * then find another tuner that does or change it */
@@ -1324,6 +1349,10 @@ bool serve_client::__command(char* cmdline)
 			str = xml_dump_epg_header_footer_callback(this, true, false);
 			streamback((const uint8_t*)str, strlen(str));
 		}
+		if (data_fmt == SERVE_DATA_FMT_JSON) {
+			str = json_dump_epg_header_footer_callback(this, true, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
 
 		/* channels verified during this session */
 		tuner->get_scan_results(false, chandump, this);
@@ -1332,6 +1361,12 @@ bool serve_client::__command(char* cmdline)
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, false, false);
+			streamback((const uint8_t*)str, strlen(str));
+		}
+		if (data_fmt == SERVE_DATA_FMT_JSON) {
+			str = " {} ";
+			streamback((const uint8_t*)str, strlen(str));
+			str = json_dump_epg_header_footer_callback(this, false, false);
 			streamback((const uint8_t*)str, strlen(str));
 		}
 
@@ -1407,6 +1442,80 @@ bool serve_client::__command(char* cmdline)
 
 		str = xml_dump_epg_header_footer_callback(this, false, false);
 		streamback((const uint8_t*)str, strlen(str));
+
+	} else if (strstr(cmd, "info")) {
+		char *cmdinfo;
+		uint16_t ser = 0;
+		unsigned int phy = 0;
+#if 0
+		if (!tuner) {
+			cli_print("NO TUNER!\n");
+			return false;
+		}
+#endif
+		if ((arg) && strlen(arg)) {
+			phy = strtoul(strtok_r(arg, ".-+~", &cmdinfo), NULL, 0);
+			ser = strtoul(strtok_r(NULL, ".-+~", &cmdinfo), NULL, 0);
+		}
+
+		cli_print("dumping stream info for physical channel %d, service %d...\n", phy, ser);
+		parsed_channel_info_t c;
+		decoded_event_t e[2];
+
+		if (feeder->parser.get_stream_info(phy, ser, &c, &e[0], &e[1])) {
+
+			const char *str;
+
+			if (data_fmt == SERVE_DATA_FMT_XML) {
+				str = xml_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+			if (data_fmt == SERVE_DATA_FMT_JSON) {
+				str = json_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
+			streamback_started = true;
+			chandump(false, &c);
+
+			if (data_fmt == SERVE_DATA_FMT_HTML) {
+				str = html_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
+			epg_event_callback(&e[0]);
+
+			if (data_fmt == SERVE_DATA_FMT_HTML) {
+				str = html_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+				str = html_dump_epg_header_footer_callback(this, true, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+			if (data_fmt == SERVE_DATA_FMT_JSON) {
+				str = ",";
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
+			epg_event_callback(&e[1]);
+
+			if (data_fmt == SERVE_DATA_FMT_HTML) {
+				str = html_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+
+			streamback_started = false;
+
+			if (data_fmt == SERVE_DATA_FMT_XML) {
+				str = xml_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+			if (data_fmt == SERVE_DATA_FMT_JSON) {
+//				str = " {} ";
+//				streamback((const uint8_t*)str, strlen(str));
+				str = json_dump_epg_header_footer_callback(this, false, false);
+				streamback((const uint8_t*)str, strlen(str));
+			}
+		}
 
 	} else if (strstr(cmd, "stop")) {
 		bool stop_output = (strstr(cmd, "stopoutput")) ? true : false;

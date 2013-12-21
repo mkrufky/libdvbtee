@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       -= gui
+QT       -= core
 
 TARGET = walk_hls
 CONFIG   -= app_bundle
@@ -13,14 +14,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    hlsinput.cpp \
-    hlsfeed.cpp \
-    curlhttpget.cpp
+    hlsinput.cpp
 
 HEADERS += \
-    hlsinput.h \
-    hlsfeed.h \
-    curlhttpget.h
+    hlsinput.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libdvbtee/libdvbtee/release/ -ldvbtee
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libdvbtee/libdvbtee/debug/ -ldvbtee

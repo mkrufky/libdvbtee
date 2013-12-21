@@ -175,6 +175,7 @@ void parse::process_pat(const decoded_pat_t *decoded_pat)
 				if (!dvbpsi_decoder_present(h_pmt[iter->second].get_handle()))
 					dvbpsi_pmt_attach(h_pmt[iter->second].get_handle(), iter->first, take_pmt, this);
 				add_filter(iter->second);
+				rcvd_pmt[iter->first] = false;
 			}
 		}
 }
@@ -233,6 +234,8 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(p_pmt->i_program_number);
 	if (iter_pmt != decoded_pmt->end())
 		process_pmt(&iter_pmt->second);
+
+	rcvd_pmt[p_pmt->i_program_number] = true;
 
 	return true;
 }
@@ -527,42 +530,44 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 }
 
 #if USE_STATIC_DECODE_MAP
-#define define_table_wrapper(a, b, c)					\
+#define define_table_wrapper(a, b, c, d)				\
 void parse::a(void* p_this, b* p_table)					\
 {									\
 	parse* parser = (parse*)p_this;					\
 	if ((parser) &&							\
 	    (((parser->a(p_table, false)) && (parser->get_ts_id())) &&	\
-	     (decoders[parser->get_ts_id()].a(p_table))))		\
+	     ((decoders[parser->get_ts_id()].a(p_table)) ||		\
+	      (!parser->d))))						\
 		parser->a(p_table, true);				\
 	c(p_table);							\
 }
 #else
-#define define_table_wrapper(a, b, c)					\
+#define define_table_wrapper(a, b, c, d)				\
 void parse::a(void* p_this, b* p_table)					\
 {									\
 	parse* parser = (parse*)p_this;					\
 	if ((parser) &&							\
 	    (((parser->a(p_table, false)) && (parser->get_ts_id())) &&	\
-	     (parser->decoders[parser->get_ts_id()].a(p_table))))	\
+	     ((parser->decoders[parser->get_ts_id()].a(p_table)) ||	\
+	      (!parser->d))))						\
 		parser->a(p_table, true);				\
 	c(p_table);							\
 }
 #endif /* USE_STATIC_DECODE_MAP */
 
-define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_pat_delete);
-define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_pmt_delete);
-define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_eit_delete);
-define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_nit_delete);
-define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_nit_delete);
-define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_sdt_delete);
-define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_sdt_delete);
-define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_tot_delete);
-define_table_wrapper(take_vct, dvbpsi_atsc_vct_t, dvbpsi_atsc_DeleteVCT);
-define_table_wrapper(take_eit, dvbpsi_atsc_eit_t, dvbpsi_atsc_DeleteEIT);
-define_table_wrapper(take_ett, dvbpsi_atsc_ett_t, dvbpsi_atsc_DeleteETT);
-define_table_wrapper(take_stt, dvbpsi_atsc_stt_t, dvbpsi_atsc_DeleteSTT);
-define_table_wrapper(take_mgt, dvbpsi_atsc_mgt_t, dvbpsi_atsc_DeleteMGT);
+define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_pat_delete, has_pat)
+define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_pmt_delete, is_pmt_ready(p_table->i_program_number))
+define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_eit_delete, enabled)
+define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_nit_delete, has_nit)
+define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_nit_delete, enabled)
+define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_sdt_delete, has_sdt)
+define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_sdt_delete, enabled)
+define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_tot_delete, enabled)
+define_table_wrapper(take_vct, dvbpsi_atsc_vct_t, dvbpsi_atsc_DeleteVCT, has_vct)
+define_table_wrapper(take_eit, dvbpsi_atsc_eit_t, dvbpsi_atsc_DeleteEIT, enabled)
+define_table_wrapper(take_ett, dvbpsi_atsc_ett_t, dvbpsi_atsc_DeleteETT, enabled)
+define_table_wrapper(take_stt, dvbpsi_atsc_stt_t, dvbpsi_atsc_DeleteSTT, enabled)
+define_table_wrapper(take_mgt, dvbpsi_atsc_mgt_t, dvbpsi_atsc_DeleteMGT, has_mgt)
 
 void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_extension, void *p_data)
 {
@@ -653,7 +658,9 @@ parse::parse()
 	dvbpsi_AttachDemux(h_demux[PID_TOT].get_handle(), attach_table, this);//if !scan_mode
 
 	memset(&service_ids, 0, sizeof(service_ids));
+	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
 	service_ids.clear();
+	rcvd_pmt.clear();
 	out_pids.clear();
 }
 
@@ -672,6 +679,7 @@ parse::~parse()
 		fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
 	service_ids.clear();
+	rcvd_pmt.clear();
 	out_pids.clear();
 }
 
@@ -695,6 +703,7 @@ void parse::detach_demux()
 
 	clear_filters();
 	service_ids.clear();
+	rcvd_pmt.clear();
 	payload_pids.clear();
 	out_pids.clear();
 }
@@ -794,6 +803,54 @@ static const char * xine_chandump(void *context, parsed_channel_info_t *c)
 	return NULL;
 }
 
+void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c)
+{
+	//map_ts_elementary_streams::iterator iter_pmt_es = decoded_pmt->es_streams.find(program_number);
+	for (map_ts_elementary_streams::const_iterator iter_pmt_es = decoded_pmt->es_streams.begin();
+	     iter_pmt_es != decoded_pmt->es_streams.end(); ++iter_pmt_es)
+			switch (iter_pmt_es->second.type) {
+#if 1
+				case ST_VideoMpeg1:
+				case ST_VideoMpeg4:
+				case ST_VideoH264:
+				case ST_ATSC_VideoMpeg2:
+#endif
+				case ST_VideoMpeg2:
+					if (!c.vpid) c.vpid = iter_pmt_es->second.pid;
+					break;
+#if 1
+				case ST_AudioMpeg1:
+				case ST_AudioMpeg2:
+				case ST_AudioAAC_ADTS:
+				case ST_AudioAAC_LATM:
+				case ST_ATSC_AudioEAC3:
+#endif
+				case ST_ATSC_AudioAC3:
+					if (!c.apid) c.apid = iter_pmt_es->second.pid;
+					break;
+			}
+
+	c.lcn = 0;
+	c.major = 0;
+	c.minor = 0;
+	map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(c.program_number);
+	if (iter_vct != decoded_vct->channels.end()) {
+		c.major = iter_vct->second.chan_major;
+		c.minor = iter_vct->second.chan_minor;
+		for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
+		c.service_name[7] = 0;
+	} else { // FIXME: use SDT info
+		c.lcn = decoders[ts_id].get_lcn(c.program_number);
+
+		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
+		if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
+			snprintf((char*)c.service_name, sizeof(c.service_name), "%s", decoded_sdt->services[c.program_number].service_name);
+		else {
+			snprintf((char*)c.service_name, sizeof(c.service_name), "%04d_UNKNOWN", c.program_number);
+		}
+	}
+}
+
 unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chandump_callback chandump_cb, void* chandump_context)
 {
 	parsed_channel_info_t c;
@@ -821,52 +878,9 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 		map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(c.program_number);
 		if (iter_pmt == decoded_pmt->end())
 			continue;
-		//map_ts_elementary_streams::iterator iter_pmt_es = iter_pmt->second.es_streams.find(program_number);
-		for (map_ts_elementary_streams::const_iterator iter_pmt_es = iter_pmt->second.es_streams.begin();
-		     iter_pmt_es != iter_pmt->second.es_streams.end(); ++iter_pmt_es)
-				switch (iter_pmt_es->second.type) {
-#if 1
-				case ST_VideoMpeg1:
-				case ST_VideoMpeg4:
-				case ST_VideoH264:
-				case ST_ATSC_VideoMpeg2:
-#endif
-				case ST_VideoMpeg2:
-					if (!c.vpid) c.vpid = iter_pmt_es->second.pid;
-					break;
-#if 1
-				case ST_AudioMpeg1:
-				case ST_AudioMpeg2:
-				case ST_AudioAAC_ADTS:
-				case ST_AudioAAC_LATM:
-				case ST_ATSC_AudioEAC3:
-#endif
-				case ST_ATSC_AudioAC3:
-					if (!c.apid) c.apid = iter_pmt_es->second.pid;
-					break;
-				}
 
-		unsigned char service_name[256] = { 0 };
-		c.lcn = 0;
-		c.major = 0;
-		c.minor = 0;
-		map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(c.program_number);
-		if (iter_vct != decoded_vct->channels.end()) {
-			c.major = iter_vct->second.chan_major;
-			c.minor = iter_vct->second.chan_minor;
-			for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
-			c.service_name = service_name;
-		} else { // FIXME: use SDT info
-			c.lcn = decoders[ts_id].get_lcn(c.program_number);
+		parse_channel_info(ts_id, &iter_pmt->second, decoded_vct, c);
 
-			decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
-			if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
-				c.service_name = decoded_sdt->services[c.program_number].service_name;
-			else {
-				sprintf((char*)service_name, "%04d_UNKNOWN", c.program_number);
-				c.service_name = service_name;
-			}
-		}
 		if (!chandump_cb)
 			chandump_cb = xine_chandump;
 
@@ -920,17 +934,83 @@ void parse::epg_dump(decode_report *reporter)
 	return;
 }
 
+bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0, decoded_event_t *e1)
+{
+	if (!service)
+		return false;
+
+	uint16_t requested_ts_id = get_ts_id(channel);
+
+	if (!channel_info.count(requested_ts_id))
+		return false;
+
+	const map_decoded_pmt* decoded_pmt = decoders[requested_ts_id].get_decoded_pmt();
+	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service);
+	if (iter_pmt == decoded_pmt->end())
+		return false;
+
+	const decoded_vct_t* decoded_vct = decoders[requested_ts_id].get_decoded_vct();
+
+	channel_info_t *info = &channel_info[requested_ts_id];
+
+	if (c) {
+		c->physical_channel = info->channel;
+		c->freq             = info->frequency;
+		c->modulation       = info->modulation;
+		//
+		c->program_number   = service;
+		c->apid = 0;
+		c->vpid = 0;
+		//
+		parse_channel_info(requested_ts_id, &iter_pmt->second, decoded_vct, *c);
+	}
+
+	time_t last;
+
+	time(&last);
+
+	if (e0) {
+		decoders[requested_ts_id].get_epg_event(service, last, e0);
+		last = e0->start_time + e0->length_sec + 1;
+	}
+	if (e1)
+		decoders[requested_ts_id].get_epg_event(service, last, e1);
+
+	return true;
+}
+
+bool parse::is_pmt_ready(uint16_t id)
+{
+#if 0
+	return (has_pat && decoders[get_ts_id()].complete_pmt());
+#endif
+	if ((!has_pat) || (!rcvd_pmt.size()))
+		return false;
+
+	if (id) return (rcvd_pmt.count(id) && rcvd_pmt[id]);
+
+	for (map_rcvd::const_iterator iter = rcvd_pmt.begin(); iter != rcvd_pmt.end(); ++iter)
+		if ((iter->first) && (!iter->second)) {
+#if 1//DBG
+			fprintf(stderr, "%s: missing pmt for program %d\n", __func__, iter->first);
+#endif
+			return false;
+		}
+	return true;
+
+}
+
 bool parse::is_psip_ready()
 {
 	return ((has_pat) &&
 		(((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit))) &&
-		((decoders.count(get_ts_id())) && (decoders[get_ts_id()].complete_pmt())));
-};
+		((decoders.count(get_ts_id())) && (is_pmt_ready())));
+}
 
 bool parse::is_epg_ready()
 {
 	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
-};
+}
 
 int parse::add_output(void* priv, stream_callback callback)
 {
@@ -1055,6 +1135,47 @@ fail:
 	return target_id;
 }
 
+int parse::add_stdout()
+{
+	map_pidtype pids;
+	add_service_pids(pids);
+	return add_stdout(pids);
+}
+
+int parse::add_stdout(uint16_t service)
+{
+	map_pidtype pids;
+	if (service)
+		add_service_pids(service, pids);
+
+	return add_stdout(pids);
+}
+
+int parse::add_stdout(char* services)
+{
+	map_pidtype pids;
+	if (services)
+		add_service_pids(services, pids);
+
+	return add_stdout(pids);
+}
+
+int parse::add_stdout(map_pidtype &pids)
+{
+	int ret, target_id = out.add_stdout(pids);
+	if (target_id < 0)
+		goto fail;
+
+	ret = out.start();
+	if (ret < 0)
+		return ret;
+
+	out.get_pids(out_pids);
+	dprintf("success adding stdout target id:%4d", target_id);
+fail:
+	return target_id;
+}
+
 #define CHAR_CMD_COMMA ","
 
 void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
@@ -1165,10 +1286,12 @@ void parse::set_ts_id(uint16_t new_ts_id)
 	ts_id = new_ts_id;
 	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
 	decoders[ts_id].set_physical_channel(channel_info[ts_id].channel);
-};
+}
 
 uint16_t parse::get_ts_id(unsigned int channel)
 {
+	if (!channel)
+		return get_ts_id();
 	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		if (channel == iter->second.channel)
 			return iter->first;

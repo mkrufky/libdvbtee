@@ -40,10 +40,10 @@ public:
 	feed(const feed&);
 	feed& operator= (const feed&);
 
-	int open_file(char* new_file) { set_filename(new_file); return open_file(); };
-	int open_file(int new_fd) { fd = new_fd; return fd; }; /* assumes already open */
+	int open_file(char* new_file) { set_filename(new_file); return open_file(); }
+	int open_file(int new_fd) { fd = new_fd; return fd; } /* assumes already open */
 
-	void stop_without_wait() { f_kill_thread = true; };
+	void stop_without_wait() { f_kill_thread = true; }
 	void stop();
 	int start();
 	int start_stdin();
@@ -58,7 +58,7 @@ public:
 
 	void close_file();
 
-	char* get_filename() { return filename; };
+	char* get_filename() { return filename; }
 	bool check();
 
 	parse parser;

@@ -18,6 +18,7 @@
  *
  *****************************************************************************/
 
+#include <inttypes.h>
 #include <errno.h>
 #include <pthread.h>
 #include <signal.h>
@@ -28,7 +29,6 @@
 
 #include "feed.h"
 #include "hlsfeed.h"
-#define USE_LINUXTV
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
 #endif
@@ -151,16 +151,16 @@ static void bitrate_stats(void *priv, stats_map &bitrates, stats_map &discontinu
 	for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
 		char a[16];
 		char b[16];
-		fprintf(stderr, "pid %04x %5lu p%s  %sb%s  %sbit\n",
+		fprintf(stderr, "pid %04x %5" PRIu64 " p%s  %sb%s  %sbit\n",
 			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
 			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
 			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		fprintf(stderr, "pid %04x\t%lu discontinuities (%lu%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
+		fprintf(stderr, "pid %04x\t%" PRIu64 " discontinuities (%" PRIu64 "%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
 
 	if (tei_count)
-		fprintf(stderr, "tei count: %lu (%lu%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
+		fprintf(stderr, "tei count: %" PRIu64 " (%" PRIu64 "%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
 
 	fprintf(stderr,"\n");
 }
@@ -171,7 +171,8 @@ void stop_server(struct dvbtee_context* context)
 	if (!context->server)
 		return;
 
-	context->server->stop();
+	if (context->server->is_running())
+		context->server->stop();
 
 	delete context->server;
 	context->server = NULL;
@@ -240,7 +241,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 					scan_start = scan_min + ((0 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 					scan_end   = scan_min + ((1 + ((i + j) - num_tuners)) * (unsigned int)channels_to_scan/num_tuners);
 				}
-				fprintf(stderr, "speed & %sredundancy scan: pass %d of %lu, tuner %d scanning from %d to %d\n",
+				fprintf(stderr, "speed & %sredundancy scan: pass %d of %zu, tuner %d scanning from %d to %d\n",
 					(partial_redundancy) ? "partial " : "",
 					j + 1, num_tuners - partial_redundancy,
 					i, scan_start, scan_end);
@@ -444,7 +445,7 @@ int main(int argc, char **argv)
 				strcpy(outfilename, optarg);
 				b_output_file = true;
 			} else
-				b_output_stdout = true; /* FIXME: not yet supported */
+				b_output_stdout = true;
 			break;
 		case 'O': /* output options */
 			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
@@ -468,6 +469,7 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
+#define b_READ_TUNER (b_read_dvr || b_hdhr)
 
 	context_map[getpid()] = &context;
 
@@ -483,7 +485,7 @@ int main(int argc, char **argv)
 #endif
 	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
 
-	if (((b_scan) && (num_tuners == -1)) || (b_read_dvr)) {
+	if (((b_scan) && (num_tuners == -1)) || b_READ_TUNER) {
 #ifdef USE_HDHOMERUN
 		if (b_hdhr) {
 			tuner = new hdhr_tuner;
@@ -528,18 +530,25 @@ int main(int argc, char **argv)
 			iter->second->feeder.parser.out.set_options(out_opt);
 	}
 	if (b_bitrate_stats) {
-		if (b_read_dvr) // FIXME
+		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 		else
 			context._file_feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 	}
 	if (b_output_file) {
-		if (b_read_dvr) // FIXME
+		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_output(outfilename);
 		else
 			context._file_feeder.parser.add_output(outfilename);
+	}
+	if (b_output_stdout) {
+		if (b_READ_TUNER) // FIXME
+			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+				iter->second->feeder.parser.add_stdout();
+		else
+			context._file_feeder.parser.add_stdout();
 	}
 	if (b_serve)
 		start_server(&context, serv_flags | (scan_flags << 2));
@@ -550,7 +559,7 @@ int main(int argc, char **argv)
 	if ((scan_max) && (!scan_min))
 		channel = scan_min = scan_max;
 
-	if ((b_scan) && ((b_read_dvr) || (num_tuners >= 0))) {
+	if ((b_scan) && (b_READ_TUNER || (num_tuners >= 0))) {
 		if (num_tuners >= 0)
 			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
 		else {
@@ -605,7 +614,7 @@ int main(int argc, char **argv)
 		}
 
 		if (tuner->tune_channel(
-				(scan_flags == SCAN_VSB) ? VSB_8 : QAM_256, channel)) {
+				(scan_flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) {
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
 				tuner->close_fe();
 				goto exit; /* NO LOCK! */
@@ -616,7 +625,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ((tuner) && (b_read_dvr)) {
+	if ((tuner) && b_READ_TUNER) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
 		if (b_serve) /* if we're running in server mode, we dont wait, stop or close */

@@ -39,13 +39,13 @@ public:
 	socket_listen(const socket_listen&);
 	socket_listen& operator= (const socket_listen&);
 
-	void set_callback(void *priv, accept_socket_callback cb) { accept_socket_data = priv; accept_socket_cb = cb; };
+	void set_callback(void *priv, accept_socket_callback cb) { accept_socket_data = priv; accept_socket_cb = cb; }
 
 	int start(uint16_t port_requested);
 	int start_udp(uint16_t port_requested);
 	void stop();
 
-	bool is_running() { return ((f_kill_thread == false) && (sock_fd >= 0) /* && (port) */ ); };
+	bool is_running() { return ((f_kill_thread == false) && (sock_fd >= 0) /* && (port) */ ); }
 private:
 	pthread_t h_thread;
 	bool f_kill_thread;
@@ -56,7 +56,7 @@ private:
 	void *udp_listen_thread();
 	static void *udp_listen_thread(void*);
 
-	void stop_without_wait() { f_kill_thread = true; };
+	void stop_without_wait() { f_kill_thread = true; }
 	void close_socket();
 
 	int sock_fd;

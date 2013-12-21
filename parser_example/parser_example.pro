@@ -4,9 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
 QT       -= gui
+QT       -= core
 
 TARGET = parser
 CONFIG   += console

@@ -33,7 +33,7 @@
 #include "output.h"
 #include "stats.h"
 
-#define LIBDVBTEE_VERSION "0.1.9"
+#define LIBDVBTEE_VERSION "0.2.3"
 
 #define USE_STATIC_DECODE_MAP 1
 
@@ -107,7 +107,7 @@ typedef struct {
 	uint16_t physical_channel;
 	uint32_t freq;
 	const char *modulation;
-	unsigned char *service_name;
+	unsigned char service_name[256];
 } parsed_channel_info_t;
 
 typedef const char * (*chandump_callback)(void *context, parsed_channel_info_t *c);
@@ -118,15 +118,17 @@ public:
 	parse();
 	~parse();
 
-	unsigned int get_fed_pkt_count() const { return fed_pkt_count; };
-	uint16_t get_ts_id() const { return ts_id; };
+	unsigned int get_fed_pkt_count() const { return fed_pkt_count; }
+	uint16_t get_ts_id() const { return ts_id; }
 	uint16_t get_ts_id(unsigned int channel);
+
+	bool get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0 = NULL, decoded_event_t *e1 = NULL);
 
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
 	void add_service_pids(char* service_ids, map_pidtype &pids);
 	void add_service_pids(map_pidtype &pids);
 
-	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); };
+	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); }
 
 	void set_service_ids(char *ids);
 
@@ -151,16 +153,22 @@ public:
 	int add_output(int, unsigned int, char*);
 	int add_output(void* priv, stream_callback, char*);
 
+	int add_stdout();
+	int add_stdout(map_pidtype&);
+	int add_stdout(uint16_t);
+	int add_stdout(char*);
+
 	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
 	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
-	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; };
+	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; }
 
-	void set_scan_mode(bool onoff) { scan_mode = onoff; };
-	void set_epg_mode(bool onoff)  { epg_mode = onoff; };
-	void enable(bool onoff)  { enabled = onoff; };
+	void set_scan_mode(bool onoff) { scan_mode = onoff; }
+	void set_epg_mode(bool onoff)  { epg_mode = onoff; }
+	void enable(bool onoff)  { enabled = onoff; }
 //got_all_eit()
+	bool is_pmt_ready(uint16_t id = 0);
 	bool is_psip_ready();
 	bool is_epg_ready();
 
@@ -217,7 +225,7 @@ private:
 	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); };
 
 	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
-	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); };
+	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); }
 	unsigned int xine_dump(uint16_t, channel_info_t*, chandump_callback, void* chandump_context);
 
 	void set_ts_id(uint16_t);
@@ -246,6 +254,7 @@ private:
 	bool has_sdt;
 	bool has_nit;
 	bool expect_vct;
+	map_rcvd rcvd_pmt;
 
 //	uint8_t grab_next_eit(uint8_t current_eit_x);
 	map_pidtype eit_pids; /* pid, eit-x */
@@ -276,6 +285,8 @@ private:
 	demux demuxer;
 #endif
 	map_pidtype out_pids;
+
+	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&);
 };
 
 #endif //__PARSE_H__

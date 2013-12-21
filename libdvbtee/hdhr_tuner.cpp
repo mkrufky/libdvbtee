@@ -207,6 +207,15 @@ bool hdhr_tuner::set_hdhr_id(const char *device_str, bool use_pid_filter)
 	return ret;
 }
 
+const char *hdhr_tuner::get_name()
+{
+	if (dev) {
+		struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
+		if (hdhr_dev) return hdhomerun_device_get_name(hdhr_dev);
+	}
+	return feeder.get_filename();
+}
+
 bool hdhr_tuner::check()
 {
 	if (!dev) return false;
@@ -216,7 +225,8 @@ bool hdhr_tuner::check()
 		dprintf("tuner not configured!");
 	else {
 		uint32_t device_ip = hdhomerun_device_get_device_ip(hdhr_dev);
-		char *device_filter, *device_streaminfo;
+		char *device_filter = NULL;
+		char *device_streaminfo = NULL;
 		hdhomerun_device_get_tuner_filter(hdhr_dev, &device_filter);
 		hdhomerun_device_get_tuner_streaminfo(hdhr_dev, &device_streaminfo);
 		dprintf("(name: %s, id: %d, tuner: %d, ip: %d.%d.%d.%d, filter: %s) state:%s%s%s%s%s\nstreaminfo:\n%s",
@@ -319,12 +329,12 @@ void hdhr_tuner::hdhr_status()
 	return;
 }
 
-fe_status_t hdhr_tuner::fe_status()
+dvbtee_fe_status_t hdhr_tuner::fe_status()
 {
-	if (!dev) return (fe_status_t)0;
+	if (!dev) return (dvbtee_fe_status_t)0;
 	hdhr_status();
 	struct hdhomerun_tuner_status_t *hdhr_status = dev->get_hdhr_status();
-	return (fe_status_t)((hdhr_status->lock_supported) ? FE_HAS_LOCK : (hdhr_status->signal_present) ? FE_HAS_SIGNAL : 0); // FIXME
+	return (dvbtee_fe_status_t)((hdhr_status->lock_supported) ? DVBTEE_FE_HAS_LOCK : (hdhr_status->signal_present) ? DVBTEE_FE_HAS_SIGNAL : 0); // FIXME
 }
 
 void hdhr_tuner::stop_feed()
@@ -356,6 +366,11 @@ int hdhr_tuner::hdhr_pull_callback()
 int hdhr_tuner::start_feed()
 {
 	if (!dev) return -1;
+
+	if (!get_channel()) {
+		dprintf("not tuned!");
+		return -1;
+	}
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	hdhomerun_device_stream_start(hdhr_dev);
 	if (0 == feeder.pull(this, hdhr_pull_callback)) {
@@ -365,7 +380,7 @@ int hdhr_tuner::start_feed()
 	return -1;
 }
 
-bool hdhr_tuner::tune_channel(fe_modulation_t modulation, unsigned int channel)
+bool hdhr_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
 	if (!dev) return false;
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();

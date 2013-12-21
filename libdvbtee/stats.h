@@ -62,8 +62,8 @@ typedef struct
 	unsigned int splicing_point:1;
 	unsigned int tp_priv_data:1;
 	unsigned int field_ext:1;
-	unsigned long long PCR:48;
-	unsigned long long OPCR:48;
+	uint8_t PCR[6];
+	uint8_t OPCR[6];
 	signed int splicing_countdown:8;
 } adaptation_field_t;
 
@@ -80,12 +80,12 @@ public:
 	stats(const stats&);
 	stats& operator= (const stats&);
 #endif
-	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; };
-	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; };
+	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; }
+	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; }
 
-	void push_pid(const uint16_t pid) { push_pid(188, pid); };
+	void push_pid(const uint16_t pid) { push_pid(188, pid); }
 
-	void push(int c, const uint8_t *p, pkt_stats_t *pkt_stats = NULL) { for(int i = 0; i < c; i++) push(p+i*188, pkt_stats); };
+	void push(int c, const uint8_t *p, pkt_stats_t *pkt_stats = NULL) { for(int i = 0; i < c; i++) push(p+i*188, pkt_stats); }
 	void push(const uint8_t *p, pkt_stats_t *pkt_stats = NULL);
 
 	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats);
@@ -95,6 +95,8 @@ private:
 	continuity_map continuity;
 	uint64_t tei_count;
 	time_t __timenow;
+
+	stats_map last_pcr_base;
 
 	pkt_hdr_t hdr;
 	adaptation_field_t adapt;
@@ -107,15 +109,15 @@ private:
 	statistics_callback statistics_cb;
 	void *statistics_priv;
 
-	void __push_pid(int c, const uint16_t pid) { statistics[pid] += c; statistics[0x2000] += c; };
+	void __push_pid(int c, const uint16_t pid) { statistics[pid] += c; statistics[0x2000] += c; }
 	void push_pid(int c, const uint16_t pid);
 
-	void __push(const uint8_t *p) { push_pid( (p[0] == 0x47) ? ((uint16_t) (p[1] & 0x1f) << 8) + p[2] : (uint16_t) - 1 ); };
+	void __push(const uint8_t *p) { push_pid( (p[0] == 0x47) ? ((uint16_t) (p[1] & 0x1f) << 8) + p[2] : (uint16_t) - 1 ); }
 
 	void show(bool per_sec = true);
 
 	void push_stats(pkt_stats_t *pkt_stats);
-	void push_discontinuity(const uint16_t pid) { discontinuities[pid]++; discontinuities[0x2000]++; };
+	void push_discontinuity(const uint16_t pid) { discontinuities[pid]++; discontinuities[0x2000]++; }
 	void clear_stats();
 };
 

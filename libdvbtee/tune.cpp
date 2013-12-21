@@ -95,16 +95,23 @@ int tune::close_fe() {
 
 bool tune::wait_for_lock_or_timeout(unsigned int time_ms)
 {
-	unsigned int status = (fe_status_t)0;
+	unsigned int status = (dvbtee_fe_status_t)0;
 	time_t start_time = time(NULL);
-	while ((0 == ((status |= fe_status()) & FE_HAS_LOCK)) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) ))
+	while ((0 == ((status |= fe_status()) & DVBTEE_FE_HAS_LOCK)) && ( (time(NULL) - start_time) < ((int)time_ms / 1000) ))
 		usleep(200*1000);
-	if ((status & (FE_HAS_LOCK | FE_HAS_SYNC)) == FE_HAS_SYNC) {
+	if ((status & (DVBTEE_FE_HAS_LOCK | DVBTEE_FE_HAS_SYNC)) == DVBTEE_FE_HAS_SYNC) {
 		start_time = time(NULL);
-		while ((0 == ((status |= fe_status()) & FE_HAS_LOCK)) && ( (time(NULL) - start_time) < (2 * (int)time_ms / 1000) ))
+		while ((0 == ((status |= fe_status()) & DVBTEE_FE_HAS_LOCK)) && ( (time(NULL) - start_time) < (2 * (int)time_ms / 1000) ))
 			usleep(200*1000);
 	}
-	return ((status & FE_HAS_LOCK) == FE_HAS_LOCK);
+	return ((status & DVBTEE_FE_HAS_LOCK) == DVBTEE_FE_HAS_LOCK);
+}
+
+bool tune::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
+{
+	feeder.parser.reset();
+
+	return __tune_channel(modulation, channel);
 }
 
 void tune::stop_feed()
@@ -135,11 +142,12 @@ void* tune::scan_thread()
 {
 	if (!is_scan()) {
 
-	scan_progress_t progress = {
-		.total = (unsigned int)scan_channel_list.size(),
-		.current = 0,
-		.physical_channel = 0,
-	};
+	scan_progress_t progress;
+
+	progress.total = (unsigned int)scan_channel_list.size(),
+	progress.current = 0,
+	progress.physical_channel = 0,
+
 	state |= TUNE_STATE_SCAN;
 
 	feeder.parser.set_scan_mode(true);
@@ -167,19 +175,19 @@ void* tune::scan_thread()
 		if (scan_progress_cb)
 			scan_progress_cb(scan_progress_context, &progress);
 
-		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? VSB_8 : QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
+		if ((!f_kill_thread) && ((tune_channel((scan_mode == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) && (wait_for_lock_or_timeout(2000)))) {
 
 			if (f_kill_thread)
 				break;
 
 			switch (fe_type) {
 			default:
-			case FE_ATSC:
+			case DVBTEE_FE_ATSC:
 				feeder.parser.set_channel_info(channel,
 							       (scan_mode == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 							       (scan_mode == SCAN_VSB) ? "8VSB" : "QAM_256");
 				break;
-			case FE_OFDM:
+			case DVBTEE_FE_OFDM:
 				feeder.parser.set_channel_info(channel, dvbt_chan_to_freq(channel),
 							       ((channel <= 12) ?
 								"INVERSION_AUTO:BANDWIDTH_7_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO" :
@@ -187,7 +195,7 @@ void* tune::scan_thread()
 				break;
 			}
 			if (0 == start_feed()) {
-				int timeout = (scan_epg) ? 16 : (fe_type == FE_ATSC) ? 4 : 12;
+				int timeout = (scan_epg) ? 16 : (fe_type == DVBTEE_FE_ATSC) ? 4 : 12;
 				while ((!f_kill_thread) && (timeout)) {
 					if (scan_epg)
 						feeder.wait_for_epg(1000);
@@ -198,7 +206,6 @@ void* tune::scan_thread()
 				stop_feed();
 				channels[channel] = feeder.parser.get_ts_id();
 			} // else what if we cant start the feed???
-			feeder.parser.reset();
 		}
 	}
 	close_fe();
@@ -298,7 +305,7 @@ unsigned int tune::get_scan_results(bool wait, chandump_callback chandump_cb, vo
 	if (scan_epg) feeder.parser.epg_dump();
 
 	return ret;
-};
+}
 
 int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, scan_progress_callback progress_cb, void* progress_context, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
