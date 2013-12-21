@@ -508,10 +508,12 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 		if (container) { attach_table_auto_detach(container, dvbpsi_atsc_AttachEIT, dvbpsi_atsc_DetachEIT, take_eit, i_table_id, i_extension) } else
 		dvbpsi_atsc_AttachEIT(p_dvbpsi, i_table_id, i_extension, take_eit, this);
 		break;
+#ifdef ETT
 	case TID_ATSC_ETT:
 		if (container) { attach_table_auto_detach(container, dvbpsi_atsc_AttachETT, dvbpsi_atsc_DetachETT, take_ett, i_table_id, i_extension) } else
 		dvbpsi_atsc_AttachETT(p_dvbpsi, i_table_id, i_extension, take_ett, this);
 		break;
+#endif
 	case TID_ATSC_STT:
 		if (container) { attach_table_auto_detach(container, dvbpsi_atsc_AttachSTT, dvbpsi_atsc_DetachSTT, take_stt, i_table_id, i_extension) } else
 		dvbpsi_atsc_AttachSTT(p_dvbpsi, i_table_id, i_extension, take_stt, this);
