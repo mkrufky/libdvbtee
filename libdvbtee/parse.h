@@ -64,7 +64,7 @@ public:
 	dvbpsi_class& operator= (const dvbpsi_class&);
 
 	bool packet_push(uint8_t* p_data);
-	dvbpsi_t* get_handle() { return handle; };
+	dvbpsi_t* get_handle() { return handle; }
 	void set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext)
 		{
 		  uint32_t idx = (((id << 16) & 0x00ff0000) | (ext & 0x0000ffff));
