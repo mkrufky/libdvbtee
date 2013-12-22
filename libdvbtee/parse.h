@@ -205,7 +205,7 @@ private:
 	static void take_mgt(void*, dvbpsi_atsc_mgt_t*);
 
 	static void attach_table(dvbpsi_t*, uint8_t, uint16_t, void *);
-	static void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c, void *d) { attach_table(a->get_handle(), b, c, d); };
+	static void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c, void *d) { attach_table(a->get_handle(), b, c, d); }
 
 	bool take_pat(dvbpsi_pat_t*, bool);
 	bool take_pmt(dvbpsi_pmt_t*, bool);
@@ -222,7 +222,7 @@ private:
 	bool take_mgt(dvbpsi_atsc_mgt_t*, bool);
 
 	void attach_table(dvbpsi_t*, uint8_t, uint16_t);
-	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); };
+	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); }
 
 	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
 	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); }
