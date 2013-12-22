@@ -1440,9 +1440,9 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 	cur_ett.etm_id     = p_ett->i_etm_id;
 	cur_ett.etm_length = p_ett->i_etm_length;
 #if USING_DVBPSI_VERSION_0
-	memcpy(&cur_ett.etm, p_ett->p_etm, p_ett->i_etm_length);
+	memcpy(cur_ett.etm, p_ett->p_etm, p_ett->i_etm_length);
 #else
-	memcpy(&cur_ett.etm, p_ett->p_etm_data, p_ett->i_etm_length);
+	memcpy(cur_ett.etm, p_ett->p_etm_data, (sizeof(cur_ett.etm) >= p_ett->i_etm_length) ? p_ett->i_etm_length : sizeof(cur_ett.etm));
 #endif
 
 	unsigned char message[256];
