@@ -30,7 +30,22 @@
 #include "output.h"
 #include "stats.h"
 
-#define LIBDVBTEE_VERSION "0.3.0"
+/* update version number by updating the LIBDVBTEE_VERSION_FOO fields below */
+#define LIBDVBTEE_VERSION_A 0
+#define LIBDVBTEE_VERSION_B 3
+#define LIBDVBTEE_VERSION_C 0
+
+#define QUOTE(str) #str
+#define EXPAND_AND_QUOTE(str) QUOTE(str)
+
+/* Machine readible LIBDVBTEE version */
+#define LIBDVBTEE_VERSION_INT  ((LIBDVBTEE_VERSION_A<<16)+(LIBDVBTEE_VERSION_B<<8)+LIBDVBTEE_VERSION_C)
+
+/* Human readible LIBDVBTEE version */
+#define LIBDVBTEE_VERSION EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_A)"."EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_B)"."EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_C)
+
+extern char *parse_libdvbpsi_version;
+
 
 #define USE_STATIC_DECODE_MAP 1
 

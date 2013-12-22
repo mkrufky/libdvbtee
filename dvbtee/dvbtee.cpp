@@ -265,12 +265,9 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 	fprintf(stderr, "found %d services in total\n", count);
 }
 
-#define QUOTE(str) #str
-#define EXPAND_AND_QUOTE(str) QUOTE(str)
-
 void usage(bool help, char *myname)
 {
-	fprintf(stderr, "built against libdvbpsi version %s\n\n", EXPAND_AND_QUOTE(DVBPSI_VERSION));
+	fprintf(stderr, "built against libdvbpsi version %s\n\n", parse_libdvbpsi_version);
 	fprintf(stderr, "  "
 		"-a\tadapter id\n  "
 		"-A\t(1 for ATSC, 2 for ClearQAM)\n  "
