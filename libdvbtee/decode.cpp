@@ -1412,8 +1412,7 @@ void decode::dump_epg(decode_report *reporter)
 
 unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message)
 {
-	// we're assuming that message is an array of 256 unsigned char's
-	memset(message, 0, sizeof(char) * 256);
+	memset(message, 0, sizeof_message);
 
 	if (decoded_ett.count(etm_id)) {
 
