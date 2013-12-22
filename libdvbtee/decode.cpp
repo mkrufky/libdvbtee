@@ -469,19 +469,24 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 #define VCT_DBG 1
 {
+#if USING_DVBPSI_VERSION_0
+	uint16_t __ts_id = p_vct->i_ts_id;
+#else
+	uint16_t __ts_id = p_vct->i_extension;
+#endif
 	if ((decoded_vct.version == p_vct->i_version) &&
-	    (decoded_vct.ts_id   == p_vct->i_extension)) {
+	    (decoded_vct.ts_id   == __ts_id)) {
 
 		dprintf("v%d, ts_id %d, b_cable_vct %d: ALREADY DECODED",
-			p_vct->i_version, p_vct->i_extension, p_vct->b_cable_vct);
+			p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 		return false;
 	}
 #if VCT_DBG
 	fprintf(stderr, "%s: v%d, ts_id %d, b_cable_vct %d\n", __func__,
-		p_vct->i_version, p_vct->i_extension, p_vct->b_cable_vct);
+		p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 #endif
 	decoded_vct.version   = p_vct->i_version;
-	decoded_vct.ts_id     = p_vct->i_extension;
+	decoded_vct.ts_id     = __ts_id;
 	decoded_vct.cable_vct = p_vct->b_cable_vct;
 	decoded_vct.channels.clear();
 
@@ -673,18 +678,27 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 		       unsigned int* services_w_eit_pf, unsigned int* services_w_eit_sched)
 #define SDT_DBG 1
 {
+#if USING_DVBPSI_VERSION_0
+	uint16_t __ts_id = p_sdt->i_ts_id;
+#else
+	uint16_t __ts_id = p_sdt->i_extension;
+#endif
 	if ((decoded_sdt->version    == p_sdt->i_version) &&
 	    (decoded_sdt->network_id == p_sdt->i_network_id)) {
 
 		dprintf("v%d | ts_id %d | network_id %d: ALREADY DECODED",
-			p_sdt->i_version, p_sdt->i_extension, p_sdt->i_network_id);
+			p_sdt->i_version,
+			__ts_id,
+			p_sdt->i_network_id);
 		return false;
 	}
 	dprintf("v%02d | ts_id %05d | network_id %05d\n"
 		/*"------------------------------------"*/,
-		p_sdt->i_version, p_sdt->i_extension, p_sdt->i_network_id);
+		p_sdt->i_version,
+		__ts_id,
+		p_sdt->i_network_id);
 
-	decoded_sdt->ts_id      = p_sdt->i_extension;
+	decoded_sdt->ts_id      = __ts_id;
 	decoded_sdt->version    = p_sdt->i_version;
 	decoded_sdt->network_id = p_sdt->i_network_id;
 
@@ -759,13 +773,19 @@ bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 
 bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descriptors, uint8_t eit_x)
 {
-	decoded_eit_t &cur_eit = decoded_eit[eit_x][p_eit->i_extension];
+#if USING_DVBPSI_VERSION_0
+	uint16_t __service_id = p_eit->i_service_id;
+#else
+	uint16_t __service_id = p_eit->i_extension;
+#endif
+
+	decoded_eit_t &cur_eit = decoded_eit[eit_x][__service_id];
 
 	if ((cur_eit.version == p_eit->i_version) &&
-	    (cur_eit.service_id == p_eit->i_extension)) {
+	    (cur_eit.service_id == __service_id)) {
 #if DBG
 		fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d: ALREADY DECODED\n", __func__, eit_x,
-			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_extension);
+			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, service_id);
 #endif
 		return false;
 	}
@@ -773,7 +793,7 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descrip
 	fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d | table id: 0x%02x, last_table id: 0x%02x\n", __func__, eit_x,
 		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id, p_eit->i_table_id, p_eit->i_last_table_id);
 #endif
-	cur_eit.service_id    = p_eit->i_extension;
+	cur_eit.service_id    = __service_id;
 	cur_eit.version       = p_eit->i_version;
 	cur_eit.ts_id         = p_eit->i_ts_id;
 	cur_eit.network_id    = p_eit->i_network_id;
@@ -1420,12 +1440,16 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 	cur_ett.version    = p_ett->i_version;
 	cur_ett.etm_id     = p_ett->i_etm_id;
 	cur_ett.etm_length = p_ett->i_etm_length;
+#if USING_DVBPSI_VERSION_0
+	memcpy(&cur_ett.etm, p_ett->p_etm, p_ett->i_etm_length);
+#else
 	memcpy(&cur_ett.etm, p_ett->p_etm_data, p_ett->i_etm_length);
+#endif
 
 	unsigned char message[256];
 	memset(message, 0, sizeof(char) * 256);
 
-	decode_multiple_string(p_ett->p_etm_data, p_ett->i_etm_length, message, sizeof(message));
+	decode_multiple_string(cur_ett.etm, cur_ett.etm_length, message, sizeof(message));
 
 	fprintf(stderr, "%s: v%d, ID: %d: %s\n", __func__,
 		p_ett->i_version, p_ett->i_etm_id, message);

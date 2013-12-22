@@ -39,6 +39,7 @@
 
 #include <map>
 
+#if !USING_DVBPSI_VERSION_0
 typedef void (*dvbpsi_detach_table_callback)(dvbpsi_t *, uint8_t, uint16_t);
 
 typedef struct {
@@ -50,7 +51,7 @@ typedef struct {
 typedef std::map<uint32_t, detach_table_t> detach_table_map;
 
 #define attach_table_auto_detach(class, attach, detach, callback, id, ext) \
-  if (attach(class->get_handle(), id, ext, callback, this)) class->set_detach(detach, id, ext);
+  if (attach(class->get_handle(), id, ext, callback, this)) class->set_detach(detach, id, ext)
 
 
 class dvbpsi_class
@@ -83,6 +84,9 @@ private:
 
 //typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
 typedef std::map<uint16_t, dvbpsi_class> map_dvbpsi;
+#else
+typedef std::map<uint16_t, dvbpsi_handle> map_dvbpsi;
+#endif
 typedef std::map<uint16_t, decode> map_decoder;
 #if 0 // moved to output.h
 typedef std::map<uint16_t, uint16_t> map_pidtype;
@@ -204,8 +208,12 @@ private:
 	static void take_stt(void*, dvbpsi_atsc_stt_t*);
 	static void take_mgt(void*, dvbpsi_atsc_mgt_t*);
 
+#if USING_DVBPSI_VERSION_0
+	static void attach_table(void*, dvbpsi_handle, uint8_t, uint16_t);
+#else
 	static void attach_table(dvbpsi_t*, uint8_t, uint16_t, void *);
 	static void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c, void *d) { attach_table(a->get_handle(), b, c, d); }
+#endif
 
 	bool take_pat(dvbpsi_pat_t*, bool);
 	bool take_pmt(dvbpsi_pmt_t*, bool);
@@ -221,8 +229,12 @@ private:
 	bool take_stt(dvbpsi_atsc_stt_t*, bool);
 	bool take_mgt(dvbpsi_atsc_mgt_t*, bool);
 
+#if USING_DVBPSI_VERSION_0
+	void attach_table(dvbpsi_handle, uint8_t, uint16_t);
+#else
 	void attach_table(dvbpsi_t*, uint8_t, uint16_t);
 	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); }
+#endif
 
 	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
 	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); }
@@ -237,7 +249,11 @@ private:
 
 	unsigned int fed_pkt_count;
 
+#if USING_DVBPSI_VERSION_0
+	dvbpsi_handle h_pat;
+#else
 	dvbpsi_class  h_pat;
+#endif
 	map_dvbpsi    h_pmt;
 	map_dvbpsi    h_demux;
 
