@@ -1656,4 +1656,13 @@ bool dvbpsi_class::packet_push(uint8_t* p_data)
 {
 	return ((handle) && (dvbpsi_decoder_present(handle))) ? dvbpsi_packet_push(handle, p_data) : false;
 }
+
+void dvbpsi_class::set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext)
+{
+	uint32_t idx = (((id << 16) & 0x00ff0000) | (ext & 0x0000ffff));
+	dprintf("attaching table %02x|%04x...", id, ext);
+	tables[idx].detach_cb = cb;
+	tables[idx].table_id = id;
+	tables[idx].table_id_ext = ext;
+}
 #endif

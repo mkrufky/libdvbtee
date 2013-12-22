@@ -22,9 +22,6 @@
 #ifndef __PARSE_H__
 #define __PARSE_H__
 
-//FIXME: for dvbpsi_class - move to .cpp file
-#include <stdio.h>
-
 #include <stdint.h>
 #include <string.h>
 
@@ -65,14 +62,7 @@ public:
 
 	bool packet_push(uint8_t* p_data);
 	dvbpsi_t* get_handle() { return handle; }
-	void set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext)
-		{
-		  uint32_t idx = (((id << 16) & 0x00ff0000) | (ext & 0x0000ffff));
-		  fprintf(stderr, "%s: attaching table %02x|%04x\n", __func__, id, ext);
-		  tables[idx].detach_cb = cb;
-		  tables[idx].table_id = id;
-		  tables[idx].table_id_ext = ext;
-		};
+	void set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext);
 	void detach_demux();
 
 	void purge();
