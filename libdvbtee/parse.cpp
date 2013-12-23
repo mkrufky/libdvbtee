@@ -31,6 +31,8 @@
 #include "log.h"
 #define CLASS_MODULE "parse"
 
+const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
+
 #if USE_STATIC_DECODE_MAP
 static map_decoder   decoders;
 #endif
@@ -137,6 +139,14 @@ void parse::rewrite_pat()
 	if (0 == service_ids.size())
 		return;
 
+#if !USING_DVBPSI_VERSION_0
+	dvbpsi_class dvbpsi;
+#else
+#define dvbpsi_pat_init(a, b, c, d)     dvbpsi_InitPAT(a, b, c, d)
+#define dvbpsi_pat_program_add(a, b, c) dvbpsi_PATAddProgram(a, b, c)
+#define dvbpsi_pat_sections_generate(a, b, c) dvbpsi_GenPATSections(b, c)
+#define dvbpsi_pat_empty(a) dvbpsi_EmptyPAT(a)
+#endif
 	dvbpsi_pat_t pat;
 	dvbpsi_psi_section_t* p_section;
 	const decoded_pat_t *decoded_pat = decoders[ts_id].get_decoded_pat();
@@ -144,26 +154,38 @@ void parse::rewrite_pat()
 	if (rewritten_pat_ver_offset == 0x1e)
 		rewritten_pat_ver_offset = 0;
 
-	dvbpsi_InitPAT(&pat, ts_id, 0x1f & (++rewritten_pat_ver_offset + decoded_pat->version), 1);
+	dvbpsi_pat_init(&pat, ts_id, 0x1f & (++rewritten_pat_ver_offset + decoded_pat->version), 1);
 
 	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
-		dvbpsi_PATAddProgram(&pat, iter->first, ((decoded_pat_t *) decoded_pat)->programs[iter->first]);
+		dvbpsi_pat_program_add(&pat, iter->first, ((decoded_pat_t *) decoded_pat)->programs[iter->first]);
 
-	p_section = dvbpsi_GenPATSections(&pat, 0);
+	p_section = dvbpsi_pat_sections_generate(dvbpsi.get_handle(), &pat, 0);
 	pat_pkt[0] = 0x47;
 	pat_pkt[1] = pat_pkt[2] = pat_pkt[3] = 0x00;
 	writePSI(pat_pkt, p_section);
 	dvbpsi_DeletePSISections(p_section);
-	dvbpsi_EmptyPAT(&pat);
+	dvbpsi_pat_empty(&pat);
 }
 
 void parse::process_pat(const decoded_pat_t *decoded_pat)
 {
+	dprintf("()");
 	for (map_decoded_pat_programs::const_iterator iter = decoded_pat->programs.begin();
 	     iter != decoded_pat->programs.end(); ++iter)
 		if (iter->first > 0) {// FIXME: > 0 ???
 			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
+#if USING_DVBPSI_VERSION_0
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
+#else
+				if (h_pmt.count(iter->second)) {
+					if (dvbpsi_decoder_present(h_pmt[iter->second].get_handle()))
+						dvbpsi_pmt_detach(h_pmt[iter->second].get_handle());
+					h_pmt.erase(iter->second);
+				}
+
+				if (!dvbpsi_decoder_present(h_pmt[iter->second].get_handle()))
+					dvbpsi_pmt_attach(h_pmt[iter->second].get_handle(), iter->first, take_pmt, this);
+#endif
 				add_filter(iter->second);
 				rcvd_pmt[iter->first] = false;
 			}
@@ -178,7 +200,17 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 
 	if (!decoded) {
 		set_ts_id(p_pat->i_ts_id);
+#if USING_DVBPSI_VERSION_0
 		h_demux[PID_ATSC] = dvbpsi_AttachDemux(attach_table, this);
+#else
+		if (h_demux.count(PID_ATSC)) {
+			h_demux[PID_ATSC].detach_demux();
+			h_demux.erase(PID_ATSC);
+		}
+
+		if (!dvbpsi_decoder_present(h_demux[PID_ATSC].get_handle()))
+			dvbpsi_AttachDemux(h_demux[PID_ATSC].get_handle(), attach_table, this);
+#endif
 		return true;
 	}
 
@@ -225,12 +257,17 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 
 bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 {
+#if USING_DVBPSI_VERSION_0
+	uint16_t __ts_id = p_vct->i_ts_id;
+#else
+	uint16_t __ts_id = p_vct->i_extension;
+#endif
 	dprintf("(%s): v%d, ts_id %d, b_cable_vct %d",
 		(decoded) ? "post" : "pre",
-		p_vct->i_version, p_vct->i_ts_id, p_vct->b_cable_vct);
+		p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 
 	if (!decoded) {
-		set_ts_id(p_vct->i_ts_id);
+		set_ts_id(__ts_id);
 		return true;
 	}
 	has_vct = true;
@@ -238,22 +275,16 @@ bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 	return true;
 }
 
-bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
+void parse::process_mgt(bool attach)
 {
-	dprintf("(%s): v%d",
-		(decoded) ? "post" : "pre",
-		p_mgt->i_version);
-
-	if (!decoded) return true;
-#if 0
-	has_mgt = false;
-#endif
 	const decoded_mgt_t* decoded_mgt = decoders[ts_id].get_decoded_mgt();
 
 	bool b_expecting_vct = false;
 
 	eit_pids.clear();
-	for (map_decoded_mgt_tables::const_iterator iter =
+	if (!decoded_mgt)
+		fprintf(stderr, "%s: decoded_mgt is NULL!!!\n", __func__);
+	else for (map_decoded_mgt_tables::const_iterator iter =
 	       decoded_mgt->tables.begin();
 	     iter != decoded_mgt->tables.end(); ++iter) {
 
@@ -303,17 +334,44 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 			break;
 		}
 		if ((b_attach_demux) && (iter->second.pid != PID_ATSC)) {
+
+#if USING_DVBPSI_VERSION_0
 			if (h_demux.count(iter->second.pid))
 #if 0
 				dvbpsi_DetachDemux(h_demux[iter->second.pid]);
 #else
 			{} else
 #endif
+#else
+			if (h_demux.count(iter->second.pid)) {
+				h_demux[iter->second.pid].detach_demux();
+				h_demux.erase(iter->second.pid);
+			}
+
+			if ((attach) && (!dvbpsi_decoder_present(h_demux[iter->second.pid].get_handle())))
+				dvbpsi_AttachDemux(h_demux[iter->second.pid].get_handle(), attach_table, this);
+#endif
 			add_filter(iter->second.pid);
+#if USING_DVBPSI_VERSION_0
 			h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
+#endif
 		}
 	}
 	expect_vct = b_expecting_vct;
+}
+
+bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
+{
+	dprintf("(%s): v%d",
+		(decoded) ? "post" : "pre",
+		p_mgt->i_version);
+
+	if (!decoded) return true;
+#if 0
+	has_mgt = false;
+#endif
+	process_mgt(true);
+
 	has_mgt = true;
 
 	return true;
@@ -347,12 +405,17 @@ bool parse::take_nit_other(dvbpsi_nit_t* p_nit, bool decoded)
 
 bool parse::take_sdt_actual(dvbpsi_sdt_t* p_sdt, bool decoded)
 {
+#if USING_DVBPSI_VERSION_0
+	uint16_t __ts_id = p_sdt->i_ts_id;
+#else
+	uint16_t __ts_id = p_sdt->i_extension;
+#endif
 	dprintf("(%s): v%d | ts_id %d | network_id %d",
 		(decoded) ? "post" : "pre",
-		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
+		p_sdt->i_version, __ts_id, p_sdt->i_network_id);
 
 	if (!decoded) {
-		set_ts_id(p_sdt->i_ts_id);
+		set_ts_id(__ts_id);
 		return true;
 	}
 
@@ -363,9 +426,14 @@ bool parse::take_sdt_actual(dvbpsi_sdt_t* p_sdt, bool decoded)
 
 bool parse::take_sdt_other(dvbpsi_sdt_t* p_sdt, bool decoded)
 {
+#if USING_DVBPSI_VERSION_0
+	uint16_t __ts_id = p_sdt->i_ts_id;
+#else
+	uint16_t __ts_id = p_sdt->i_extension;
+#endif
 	dprintf("(%s): v%d | ts_id %d | network_id %d",
 		(decoded) ? "post" : "pre",
-		p_sdt->i_version, p_sdt->i_ts_id, p_sdt->i_network_id);
+		p_sdt->i_version, __ts_id, p_sdt->i_network_id);
 
 	if (!decoded) {
 #if 0
@@ -381,9 +449,14 @@ bool parse::take_sdt_other(dvbpsi_sdt_t* p_sdt, bool decoded)
 
 bool parse::take_eit(dvbpsi_eit_t* p_eit, bool decoded)
 {
+#if USING_DVBPSI_VERSION_0
+	uint16_t __ts_id = p_eit->i_ts_id;
+#else
+	uint16_t __ts_id = p_eit->i_extension;
+#endif
 	dprintf("(%s): v%d, service_id %d",
 		(decoded) ? "post" : "pre",
-		p_eit->i_version, p_eit->i_service_id);
+		p_eit->i_version, __ts_id);
 
 	if (decoded) return true;
 
@@ -412,15 +485,57 @@ bool parse::take_ett(dvbpsi_atsc_ett_t* p_ett, bool decoded)
 	return true;
 }
 
+#if USING_DVBPSI_VERSION_0
+#define attach_table_auto_detach_wrapper(container, attach, detach, take, table_id, extension) \
+	attach(h_dvbpsi, table_id, extension, take, this)
+#define attach_table_auto_detach_wrapper_noext(container, attach, detach, take, table_id, extension) \
+	attach(h_dvbpsi, table_id, take, this)
+#define dvbpsi_eit_attach dvbpsi_AttachEIT
+#define dvbpsi_nit_attach dvbpsi_AttachNIT
+#define dvbpsi_sdt_attach dvbpsi_AttachSDT
+#define dvbpsi_tot_attach dvbpsi_AttachTOT
+#else
+#define attach_table_auto_detach_wrapper(container, attach, detach, take, table_id, extension) \
+	if (container) { \
+		attach_table_auto_detach(container, attach, detach, take, table_id, extension); \
+	} else { \
+		attach(p_dvbpsi, table_id, extension, take, this); \
+	}
+#define attach_table_auto_detach_wrapper_noext attach_table_auto_detach_wrapper
+#endif
+
+#if USING_DVBPSI_VERSION_0
 void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_extension)
+#else
+void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_extension)
+#endif
 {
+#if !USING_DVBPSI_VERSION_0
+	dvbpsi_class *container = NULL;
+	for (map_dvbpsi::iterator iter = h_demux.begin(); iter != h_demux.end(); ++iter)
+		if (iter->second.get_handle() == p_dvbpsi)
+			container = &iter->second;
+	if (!container) fprintf(stdout, "%s: CONTAINER NOT FOUND FOR %02x|%04x!\n", __func__, i_table_id, i_extension);
+	//uint32_t idx = (((i_table_id << 16) & 0x00ff0000) | (i_extension & 0x0000ffff));
+#endif
 	if ((scan_mode) && (!epg_mode)) switch (i_table_id) {
+#if 0 /* already handled */
+	case 0x00: // PAT
+	case 0x01: // CAT
+	case 0x02: // program_map_section
+	case 0x03: // transport_stream_description_section
+	case 0x04: /* ISO_IEC_14496_scene_description_section */
+	case 0x05: /* ISO_IEC_14496_object_descriptor_section */
+	case 0x06: /* Metadata_section */
+	case 0x07: /* IPMP_Control_Information_section (defined in ISO/IEC 13818-11) */
+	/* 0x08-0x3F: ITU-T Rec. H.222.0 | ISO/IEC 13818-1 reserved */
+#endif
 	default:
 		return;
-	case TID_NIT_ACTUAL:
-	case TID_NIT_OTHER:
-	case TID_SDT_ACTUAL:
-	case TID_SDT_OTHER:
+	case TID_NIT_ACTUAL:	// 0x40: // NIT network_information_section - actual_network
+	case TID_NIT_OTHER:	// 0x41: // NIT network_information_section - other_network
+	case TID_SDT_ACTUAL:	// 0x42: // SDT service_description_section - actual_transport_stream
+	case TID_SDT_OTHER:	// 0x46: // SDT service_description_section - other_transport_stream
 	case TID_ATSC_TVCT:
 	case TID_ATSC_CVCT:
 	case TID_ATSC_MGT:
@@ -431,44 +546,46 @@ void parse::attach_table(dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_
 	case TID_EIT_OTHER:          /* eit | other  | p/f   */
 	case 0x50 ... 0x5f: /* eit | actual | sched */
 	case TID_EIT_ACTUAL:     /* eit | actual | p/f */
-		dvbpsi_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_eit_attach, dvbpsi_eit_detach, take_eit, i_table_id, i_extension);
 		break;
 	case TID_NIT_ACTUAL:
-		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit_actual, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_nit_attach, dvbpsi_nit_detach, take_nit_actual, i_table_id, i_extension);
 		break;
 	case TID_NIT_OTHER:
-		dvbpsi_AttachNIT(h_dvbpsi, i_table_id, i_extension, take_nit_other, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_nit_attach, dvbpsi_nit_detach, take_nit_other, i_table_id, i_extension);
 		break;
 	case TID_SDT_ACTUAL:
-		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt_actual, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_sdt_attach, dvbpsi_sdt_detach, take_sdt_actual, i_table_id, i_extension);
 		break;
 	case TID_SDT_OTHER:
-		dvbpsi_AttachSDT(h_dvbpsi, i_table_id, i_extension, take_sdt_other, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_sdt_attach, dvbpsi_sdt_detach, take_sdt_other, i_table_id, i_extension);
 		break;
 	case TID_TDT:
 	case TID_TOT:
-		dvbpsi_AttachTOT(h_dvbpsi, i_table_id, i_extension, take_tot, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_tot_attach, dvbpsi_tot_detach, take_tot, i_table_id, i_extension);
 		break;
 	case TID_ATSC_TVCT:
 	case TID_ATSC_CVCT:
-		dvbpsi_atsc_AttachVCT(h_dvbpsi, i_table_id, i_extension, take_vct, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachVCT, dvbpsi_atsc_DetachVCT, take_vct, i_table_id, i_extension);
 		break;
 	case TID_ATSC_EIT:
-		dvbpsi_atsc_AttachEIT(h_dvbpsi, i_table_id, i_extension, take_eit, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachEIT, dvbpsi_atsc_DetachEIT, take_eit, i_table_id, i_extension);
 		break;
+#ifdef ETT
 	case TID_ATSC_ETT:
-		dvbpsi_atsc_AttachETT(h_dvbpsi, i_table_id, i_extension, take_ett, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachETT, dvbpsi_atsc_DetachETT, take_ett, i_table_id, i_extension);
 		break;
+#endif
 	case TID_ATSC_STT:
-		dvbpsi_atsc_AttachSTT(h_dvbpsi, i_table_id, take_stt, this);
+		attach_table_auto_detach_wrapper_noext(container, dvbpsi_atsc_AttachSTT, dvbpsi_atsc_DetachSTT, take_stt, i_table_id, i_extension);
 		break;
 #ifdef RRT
 	case TID_ATSC_RRT:
-		dvbpsi_atsc_AttachRRT(h_dvbpsi, i_table_id, i_extension, take_rrt, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachRRT, dvbpsi_atsc_DetachRRT, take_rrt, i_table_id, i_extension);
 		break;
 #endif
 	case TID_ATSC_MGT:
-		dvbpsi_atsc_AttachMGT(h_dvbpsi, i_table_id, i_extension, take_mgt, this);
+		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachMGT, dvbpsi_atsc_DetachMGT, take_mgt, i_table_id, i_extension);
 		break;
 	}
 }
@@ -499,26 +616,44 @@ void parse::a(void* p_this, b* p_table)					\
 }
 #endif /* USE_STATIC_DECODE_MAP */
 
-define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_DeletePAT, has_pat)
-define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_DeletePMT, is_pmt_ready(p_table->i_program_number))
-define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_DeleteEIT, enabled)
-define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_DeleteNIT, has_nit)
-define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_DeleteNIT, enabled)
-define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_DeleteSDT, has_sdt)
-define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_DeleteSDT, enabled)
-define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_DeleteTOT, enabled)
+#if USING_DVBPSI_VERSION_0
+#define dvbpsi_pat_delete dvbpsi_DeletePAT
+#define dvbpsi_pmt_delete dvbpsi_DeletePMT
+#define dvbpsi_eit_delete dvbpsi_DeleteEIT
+#define dvbpsi_nit_delete dvbpsi_DeleteNIT
+#define dvbpsi_sdt_delete dvbpsi_DeleteSDT
+#define dvbpsi_tot_delete dvbpsi_DeleteTOT
+#endif
+
+define_table_wrapper(take_pat, dvbpsi_pat_t, dvbpsi_pat_delete, has_pat)
+define_table_wrapper(take_pmt, dvbpsi_pmt_t, dvbpsi_pmt_delete, is_pmt_ready(p_table->i_program_number))
+define_table_wrapper(take_eit, dvbpsi_eit_t, dvbpsi_eit_delete, enabled)
+define_table_wrapper(take_nit_actual, dvbpsi_nit_t, dvbpsi_nit_delete, has_nit)
+define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_nit_delete, enabled)
+define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_sdt_delete, has_sdt)
+define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_sdt_delete, enabled)
+define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_tot_delete, enabled)
 define_table_wrapper(take_vct, dvbpsi_atsc_vct_t, dvbpsi_atsc_DeleteVCT, has_vct)
 define_table_wrapper(take_eit, dvbpsi_atsc_eit_t, dvbpsi_atsc_DeleteEIT, enabled)
 define_table_wrapper(take_ett, dvbpsi_atsc_ett_t, dvbpsi_atsc_DeleteETT, enabled)
 define_table_wrapper(take_stt, dvbpsi_atsc_stt_t, dvbpsi_atsc_DeleteSTT, enabled)
 define_table_wrapper(take_mgt, dvbpsi_atsc_mgt_t, dvbpsi_atsc_DeleteMGT, has_mgt)
 
+#if USING_DVBPSI_VERSION_0
 void parse::attach_table(void* p_this, dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_extension)
 {
 	parse* parser = (parse*)p_this;
 	if (parser)
 		parser->attach_table(h_dvbpsi, i_table_id, i_extension);
 }
+#else
+void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_extension, void *p_data)
+{
+	parse* parser = (parse*)p_data;
+	if (parser)
+		parser->attach_table(p_dvbpsi, i_table_id, i_extension);
+}
+#endif
 
 #if 0
 uint8_t parse::grab_next_eit(uint8_t current_eit_x)
@@ -592,6 +727,7 @@ parse::parse()
 
 	memset(&new_channel_info, 0, sizeof(channel_info_t));
 
+#if USING_DVBPSI_VERSION_0
 	h_pat = dvbpsi_AttachPAT(take_pat, this);
 #if 0
 	h_demux[PID_ATSC] = dvbpsi_AttachDemux(attach_table, this);
@@ -600,6 +736,16 @@ parse::parse()
 	h_demux[PID_NIT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_SDT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_TOT]  = dvbpsi_AttachDemux(attach_table, this);//if !scan_mode
+#else
+	dvbpsi_pat_attach(h_pat.get_handle(), take_pat, this);
+#if 0
+	dvbpsi_AttachDemux(h_demux[PID_ATSC].get_handle(), attach_table, this);
+#endif
+	dvbpsi_AttachDemux(h_demux[PID_EIT].get_handle(), attach_table, this);//if !scan_mode
+	dvbpsi_AttachDemux(h_demux[PID_NIT].get_handle(), attach_table, this);
+	dvbpsi_AttachDemux(h_demux[PID_SDT].get_handle(), attach_table, this);
+	dvbpsi_AttachDemux(h_demux[PID_TOT].get_handle(), attach_table, this);//if !scan_mode
+#endif
 
 	memset(&service_ids, 0, sizeof(service_ids));
 	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
@@ -631,15 +777,33 @@ void parse::detach_demux()
 {
 	dprintf("()");
 
+#if USING_DVBPSI_VERSION_0
 	for (map_dvbpsi::const_iterator iter = h_demux.begin(); iter != h_demux.end(); ++iter)
 		dvbpsi_DetachDemux(iter->second);
+#else
+	for (map_dvbpsi::iterator iter = h_demux.begin(); iter != h_demux.end(); ++iter)
+		iter->second.detach_demux();
+#endif
 	h_demux.clear();
 
+#if USING_DVBPSI_VERSION_0
 	for (map_dvbpsi::const_iterator iter = h_pmt.begin(); iter != h_pmt.end(); ++iter)
-		dvbpsi_DetachPMT(iter->second);
+	dvbpsi_DetachPMT(iter->second);
+#else
+	for (map_dvbpsi::iterator iter = h_pmt.begin(); iter != h_pmt.end(); ++iter) {
+		if (dvbpsi_decoder_present(iter->second.get_handle()))
+			dvbpsi_pmt_detach(iter->second.get_handle());
+	}
+#endif
 	h_pmt.clear();
 
+#if USING_DVBPSI_VERSION_0
 	dvbpsi_DetachPAT(h_pat);
+#else
+	if (dvbpsi_decoder_present(h_pat.get_handle()))
+		dvbpsi_pat_detach(h_pat.get_handle());
+	h_pat.purge();
+#endif
 
 	clear_filters();
 	service_ids.clear();
@@ -700,14 +864,30 @@ void parse::reset()
 	has_nit = false;
 	expect_vct = true;
 
+#if USING_DVBPSI_VERSION_0
 	h_pat = dvbpsi_AttachPAT(take_pat, this);
-#if 0
 	h_demux[PID_ATSC] = dvbpsi_AttachDemux(attach_table, this);
-#endif
 	h_demux[PID_EIT]  = dvbpsi_AttachDemux(attach_table, this);//if !scan_mode
 	h_demux[PID_NIT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_SDT]  = dvbpsi_AttachDemux(attach_table, this);
 	h_demux[PID_TOT]  = dvbpsi_AttachDemux(attach_table, this);//if !scan_mode
+#else
+	if (!dvbpsi_decoder_present(h_pat.get_handle()))
+		dvbpsi_pat_attach(h_pat.get_handle(), take_pat, this);
+#if 0
+	if (!dvbpsi_decoder_present(h_demux[PID_ATSC].get_handle()))
+		dvbpsi_AttachDemux(h_demux[PID_ATSC].get_handle(), attach_table, this);
+#endif
+	if (!dvbpsi_decoder_present(h_demux[PID_EIT].get_handle()))
+		dvbpsi_AttachDemux(h_demux[PID_EIT].get_handle(), attach_table, this);//if !scan_mode
+	if (!dvbpsi_decoder_present(h_demux[PID_NIT].get_handle()))
+		dvbpsi_AttachDemux(h_demux[PID_NIT].get_handle(), attach_table, this);
+	if (!dvbpsi_decoder_present(h_demux[PID_SDT].get_handle()))
+		dvbpsi_AttachDemux(h_demux[PID_SDT].get_handle(), attach_table, this);
+	if (!dvbpsi_decoder_present(h_demux[PID_TOT].get_handle()))
+		dvbpsi_AttachDemux(h_demux[PID_TOT].get_handle(), attach_table, this);//if !scan_mode
+#endif
+
 	reset_filters();
 }
 
@@ -1284,7 +1464,11 @@ int parse::feed(int count, uint8_t* p_data)
 
 		switch (pkt_stats.pid) {
 		case PID_PAT:
+#if USING_DVBPSI_VERSION_0
 			dvbpsi_PushPacket(h_pat, p);
+#else
+			h_pat.packet_push(p);
+#endif
 			send_pkt = (service_ids.size()) ? false : true;
 			out_type = OUTPUT_PATPMT;
 			if (!send_pkt) {
@@ -1301,11 +1485,20 @@ int parse::feed(int count, uint8_t* p_data)
 			out_type = OUTPUT_PSIP;
 			/* fall-thru */
 		default:
+#if USING_DVBPSI_VERSION_0
 			map_dvbpsi::const_iterator iter;
+#else
+			map_dvbpsi::iterator iter;
+#endif
 
 			iter = h_pmt.find(pkt_stats.pid);
 			if (iter != h_pmt.end()) {
+#if USING_DVBPSI_VERSION_0
 				dvbpsi_PushPacket(iter->second, p);
+#else
+				iter->second.packet_push(p);
+#endif
+
 				send_pkt = true;
 				out_type = OUTPUT_PATPMT;
 				break;
@@ -1317,7 +1510,11 @@ int parse::feed(int count, uint8_t* p_data)
 
 				if (decoders[ts_id].eit_x_complete(iter_eit->second)) {
 					if (h_demux.count(iter_eit->first)) {
+#if USING_DVBPSI_VERSION_0
 						dvbpsi_DetachDemux(h_demux[iter_eit->first]);
+#else
+						h_demux[iter_eit->first].detach_demux();
+#endif
 						h_demux.erase(iter_eit->first);
 					}
 					eit_pids.erase(iter_eit->first);
@@ -1330,7 +1527,12 @@ int parse::feed(int count, uint8_t* p_data)
 
 			iter = h_demux.find(pkt_stats.pid);
 			if (iter != h_demux.end()) {
+#if USING_DVBPSI_VERSION_0
 				dvbpsi_PushPacket(iter->second, p);
+#else
+				iter->second.packet_push(p);
+#endif
+
 				send_pkt = true;
 				//if (!out_type) out_type = OUTPUT_PSIP;
 				break;
@@ -1367,3 +1569,102 @@ int parse::feed(int count, uint8_t* p_data)
 #endif
 	return 0;
 }
+
+#if !USING_DVBPSI_VERSION_0
+static void dvbpsi_message(dvbpsi_t *handle, const dvbpsi_msg_level_t level, const char* msg)
+{
+	const char *status;
+	switch(level)
+	{
+		case DVBPSI_MSG_ERROR: status = "Error: "; break;
+		case DVBPSI_MSG_WARN:  status = "Warning: "; break;
+		case DVBPSI_MSG_DEBUG: status = "Debug: "; if (dbg & DBG_DVBPSI) break;
+		default: /* do nothing */
+			return;
+	}
+	fprintf(stderr, "%s%s\n", status, msg);
+}
+
+dvbpsi_class::dvbpsi_class()
+  : handle(dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG))
+{
+	dprintf("()");
+	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
+}
+
+dvbpsi_class::~dvbpsi_class()
+{
+	if (dvbpsi_decoder_present(handle)) {
+		fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT DETACHED!!! !!! !!! !!!\n\n");
+		detach_demux();
+	}
+
+	if (handle) dvbpsi_delete(handle);
+	dprintf("()");
+}
+
+dvbpsi_class::dvbpsi_class(const dvbpsi_class&)
+{
+	dprintf("(copy)");
+
+	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
+	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
+}
+
+dvbpsi_class& dvbpsi_class::operator= (const dvbpsi_class& cSource)
+{
+	dprintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
+	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
+
+	return *this;
+}
+
+void dvbpsi_class::purge()
+{
+	dprintf("()");
+	detach_demux();
+	if (handle) dvbpsi_delete(handle);
+	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
+	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
+}
+
+void dvbpsi_class::detach_tables()
+{
+	dprintf("()");
+	if ((handle) && (tables.size()))
+		for (detach_table_map::iterator iter = tables.begin(); iter != tables.end(); ++iter)
+			if (iter->second.detach_cb) {
+				dprintf("detaching table: %02x|%04x...", iter->second.table_id, iter->second.table_id_ext);
+				iter->second.detach_cb(handle, iter->second.table_id, iter->second.table_id_ext);
+			}
+}
+
+void dvbpsi_class::detach_demux()
+{
+	dprintf("()");
+	if ((handle) && (dvbpsi_decoder_present(handle))) {
+		detach_tables();
+		dvbpsi_DetachDemux(handle);
+		dprintf("(done)");
+	}
+}
+
+bool dvbpsi_class::packet_push(uint8_t* p_data)
+{
+	return ((handle) && (dvbpsi_decoder_present(handle))) ? dvbpsi_packet_push(handle, p_data) : false;
+}
+
+void dvbpsi_class::set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext)
+{
+	uint32_t idx = (((id << 16) & 0x00ff0000) | (ext & 0x0000ffff));
+	dprintf("attaching table %02x|%04x...", id, ext);
+	tables[idx].detach_cb = cb;
+	tables[idx].table_id = id;
+	tables[idx].table_id_ext = ext;
+}
+#endif

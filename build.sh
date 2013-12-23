@@ -42,7 +42,7 @@ if [ -e libdvbpsi ]; then
 else
     git clone git://github.com/mkrufky/libdvbpsi.git
     cd libdvbpsi
-    git checkout atsc
+    git checkout new_descriptors
     patch -p2 < ../libdvbpsi-silence-TS-discontinuity-messages.patch
 fi
 
@@ -51,7 +51,7 @@ if [ -e .configured ]; then
 else
     ./bootstrap
     if [ -e ../.x86 ]; then
-	./configure --prefix=${DVBTEE_ROOT}/usr/
+	./configure --prefix=${DVBTEE_ROOT}/usr/  --disable-debug --disable-release
     else
 	./configure --prefix=${DVBTEE_ROOT}/usr/ --host=mipsel-linux --target=mipsel-linux
     fi
