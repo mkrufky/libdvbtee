@@ -36,6 +36,15 @@ typedef struct
 	unsigned char text[256];
 } dr4d_t;
 
+typedef struct
+{
+	uint8_t       stream_type;
+	uint16_t      elementary_pid;
+	unsigned char iso_639_code[3];
+} dra1_t;
+
+typedef std::map<uint16_t, dra1_t> map_dra1;
+
 class desc
 {
 public:
@@ -49,13 +58,20 @@ public:
 
 	dr4d_t _4d;
 
+	map_dra1 _a1;
+
 	unsigned char provider_name[256];
 	unsigned char service_name[256];
 private:
+	bool iso639language(dvbpsi_descriptor_t*);
 	bool service(dvbpsi_descriptor_t*);
 	bool short_event(dvbpsi_descriptor_t*);
 	bool freq_list(dvbpsi_descriptor_t*);
+	bool ac3_audio(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
+	bool caption_service(dvbpsi_descriptor_t*);
+	bool extended_channel_name(dvbpsi_descriptor_t*);
+	bool service_location(dvbpsi_descriptor_t*);
 };
 
 #endif /* __DECODE_H__ */
