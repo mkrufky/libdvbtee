@@ -31,7 +31,7 @@
 #include "log.h"
 #define CLASS_MODULE "parse"
 
-char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
+const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
 
 #if USE_STATIC_DECODE_MAP
 static map_decoder   decoders;

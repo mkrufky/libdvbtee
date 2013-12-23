@@ -44,7 +44,7 @@
 /* Human readible LIBDVBTEE version */
 #define LIBDVBTEE_VERSION EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_A)"."EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_B)"."EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_C)
 
-extern char *parse_libdvbpsi_version;
+extern const char *parse_libdvbpsi_version;
 
 
 #define USE_STATIC_DECODE_MAP 1
