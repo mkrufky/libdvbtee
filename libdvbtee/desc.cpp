@@ -368,7 +368,8 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 		_a1[element->i_elementary_pid].elementary_pid = element->i_elementary_pid;
 		_a1[element->i_elementary_pid].stream_type    = element->i_stream_type;
 		memcpy(_a1[element->i_elementary_pid].iso_639_code, element->i_iso_639_code, 3);
-		dprintf("%d, %02x, %c%c%c", element->i_elementary_pid, element->i_stream_type,
+		dprintf("pid: 0x%04x, type %02x: %s, %c%c%c", element->i_elementary_pid,
+			element->i_stream_type, streamtype_name(element->i_stream_type),
 			element->i_iso_639_code[0],
 			element->i_iso_639_code[1],
 			element->i_iso_639_code[2]);
