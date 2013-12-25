@@ -814,8 +814,9 @@ void output::add_http_client(void *p_this, int socket)
 
 void output::add_http_client(int socket)
 {
-	add(socket, OUTPUT_STREAM_HTTP);
-	if (0 != start())
+	if (0 > add(socket, OUTPUT_STREAM_HTTP))
+		perror("output.add(socket, OUTPUT_STREAM_HTTP) failed");
+	else if (0 != start())
 		perror("output.start() failed");
 	return;
 }
