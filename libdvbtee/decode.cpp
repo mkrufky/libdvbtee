@@ -122,6 +122,9 @@ decode_network_service::decode_network_service(const decode_network_service&)
 {
 	dprintf("(copy)");
 
+	services_w_eit_pf = 0;
+	services_w_eit_sched = 0;
+
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
 	decoded_sdt.services.clear();
 
@@ -141,6 +144,9 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 
 	if (this == &cSource)
 		return *this;
+
+	services_w_eit_pf = 0;
+	services_w_eit_sched = 0;
 
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
 	decoded_sdt.services.clear();
@@ -193,6 +199,8 @@ decode_network::decode_network(const decode_network&)
 {
 	dprintf("(copy)");
 
+	orig_network_id = 0;
+
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 
 	decoded_nit.ts_list.clear();
@@ -209,6 +217,8 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 	if (this == &cSource)
 		return *this;
 
+	orig_network_id = 0;
+
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 
 	decoded_nit.ts_list.clear();
@@ -223,6 +233,7 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 decode::decode()
   : orig_network_id(0)
   , network_id(0)
+  , stream_time((time_t)0)
   , eit_x(0)
   , physical_channel(0)
 {
@@ -322,6 +333,10 @@ decode::decode(const decode&)
 	rcvd_pmt.clear();
 	decoded_ett.clear();
 
+	orig_network_id = 0;
+	network_id = 0;
+	stream_time = (time_t)0;
+	eit_x = 0;
 	physical_channel = 0;
 }
 
@@ -363,6 +378,10 @@ decode& decode::operator= (const decode& cSource)
 	rcvd_pmt.clear();
 	decoded_ett.clear();
 
+	orig_network_id = 0;
+	network_id = 0;
+	stream_time = (time_t)0;
+	eit_x = 0;
 	physical_channel = 0;
 
 	return *this;
@@ -1014,8 +1033,8 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 	time_t start = atsc_datetime_utc(event->start_time /*+ (60 * tz_offset)*/);
 	time_t end   = atsc_datetime_utc(event->start_time + event->length_sec /*+ (60 * tz_offset)*/);
 
-	unsigned char name[256];
-	memset(name, 0, sizeof(char) * 256);
+	unsigned char name[512];
+	memset(name, 0, sizeof(name));
 	decode_multiple_string(event->title, event->title_bytes, name, sizeof(name));
 
 	//FIXME: descriptors
@@ -1025,7 +1044,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 
 	if (reporter) {
-		unsigned char message[256];
+		unsigned char message[512];
 		reporter->dump_epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
 					 physical_channel, channel->program,
@@ -1078,8 +1097,8 @@ void decode::get_epg_event(const decoded_vct_channel_t *channel, const decoded_a
 	time_t start = atsc_datetime_utc(event->start_time /*+ (60 * tz_offset)*/);
 	time_t end   = atsc_datetime_utc(event->start_time + event->length_sec /*+ (60 * tz_offset)*/);
 
-	unsigned char name[256];
-	memset(name, 0, sizeof(char) * 256);
+	unsigned char name[512];
+	memset(name, 0, sizeof(name));
 	decode_multiple_string(event->title, event->title_bytes, name, sizeof(name));
 #if 1
 	//FIXME: descriptors
@@ -1088,7 +1107,7 @@ void decode::get_epg_event(const decoded_vct_channel_t *channel, const decoded_a
 	struct tm tme = *localtime( &end  );
 	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
-	unsigned char message[256];
+	unsigned char message[512];
 	_get_epg_event(e, (const char *)service_name,
 		      channel->chan_major, channel->chan_minor,
 		      physical_channel, channel->program,
@@ -1163,8 +1182,8 @@ bool decode::get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_eve
 
 			if ((start <= showtime) && (end > showtime)) {
 #if 1
-				unsigned char name[256];
-				memset(name, 0, sizeof(char) * 256);
+				unsigned char name[512];
+				memset(name, 0, sizeof(name));
 				decode_multiple_string(iter_eit->second.title, iter_eit->second.title_bytes, name, sizeof(name));
 
 				//FIXME: descriptors
@@ -1445,8 +1464,8 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 	memcpy(cur_ett.etm, p_ett->p_etm_data, (sizeof(cur_ett.etm) >= p_ett->i_etm_length) ? p_ett->i_etm_length : sizeof(cur_ett.etm));
 #endif
 
-	unsigned char message[256];
-	memset(message, 0, sizeof(char) * 256);
+	unsigned char message[512];
+	memset(message, 0, sizeof(message));
 
 	decode_multiple_string(cur_ett.etm, cur_ett.etm_length, message, sizeof(message));
 

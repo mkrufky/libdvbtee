@@ -96,7 +96,13 @@ void hlsfeed::walk(uint8_t *buffer)
       char *saveToo;
       char *durationText = strtok_r(line, ":", &saveToo);
       durationText = strtok_r(NULL, ",", &saveToo);
-      duration = convertToDouble(std::string(durationText));
+      try {
+	duration = convertToDouble(std::string(durationText));
+      }
+      catch (BadConversion& e) {
+	perror(e.what());
+	duration = 0;
+      }
       fprintf(stderr, "%s: playback duration: %f\n", __func__, duration);
     } else if (strstr(line, ".ts"))
       curlhttpget Curl(line, curl_push_callback, this, &info);

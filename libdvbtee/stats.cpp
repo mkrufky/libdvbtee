@@ -67,11 +67,11 @@ stats& stats::operator= (const stats& cSource)
 
 static void parse_pcr(uint8_t *pcr, uint64_t *pcr_base, unsigned int *pcr_ext)
 {
-	*pcr_base = (pcr[0] * 0x2000000) +
-		    (pcr[1] * 0x20000) +
-		    (pcr[2] * 0x200) +
-		    (pcr[3] * 0x02) +
-		    ((pcr[4] & 0x80) >> 7);
+	*pcr_base = ((uint64_t)pcr[0] * 0x2000000) +
+		    ((uint64_t)pcr[1] * 0x20000) +
+		    ((uint64_t)pcr[2] * 0x200) +
+		    ((uint64_t)pcr[3] * 0x02) +
+		    ((uint64_t)(pcr[4] & 0x80) >> 7);
 
 	*pcr_ext = ((pcr[4] & 0x01) * 0x100) + pcr[5];
 
@@ -134,6 +134,14 @@ void stats::push_pid(int c, const uint16_t pid)
 }
 
 pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
+{
+	adaptation_field_t adapt;
+	pkt_hdr_t hdr;
+
+	return parse(p, pkt_stats, hdr, adapt);
+}
+
+pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats, pkt_hdr_t &hdr, adaptation_field_t &adapt)
 {
 	if (pkt_stats) {
 		memset(pkt_stats, 0, sizeof(pkt_stats_t));
@@ -204,6 +212,9 @@ void stats::push_stats(pkt_stats_t *pkt_stats)
 
 void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 {
+	adaptation_field_t adapt;
+	pkt_hdr_t hdr;
+
 	if (!pkt_stats) {
 		__push(p);
 		return;
@@ -211,7 +222,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 
 	memset(pkt_stats, 0, sizeof(pkt_stats_t));
 
-	parse(p, pkt_stats);
+	parse(p, pkt_stats, hdr, adapt);
 
 	if (hdr.adaptation_flags & 0x01) {// payload present
 		if (continuity.count(hdr.pid)) {

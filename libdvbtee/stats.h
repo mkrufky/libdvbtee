@@ -98,9 +98,6 @@ private:
 
 	stats_map last_pcr_base;
 
-	pkt_hdr_t hdr;
-	adaptation_field_t adapt;
-
 	const char *parent;
 
 	streamtime_callback streamtime_cb;
@@ -108,6 +105,8 @@ private:
 
 	statistics_callback statistics_cb;
 	void *statistics_priv;
+
+	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats, pkt_hdr_t &hdr, adaptation_field_t &adapt);
 
 	void __push_pid(int c, const uint16_t pid) { statistics[pid] += c; statistics[0x2000] += c; }
 	void push_pid(int c, const uint16_t pid);

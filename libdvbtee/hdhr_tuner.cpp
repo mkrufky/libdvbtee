@@ -38,10 +38,12 @@ class hdhr_tuner_device
 {
 public:
 	hdhr_tuner_device()
+	  : hdhr_dev(NULL)
 	{
 		dprintf("(dev)");
 		hdhr_dbg = hdhomerun_debug_create();
 		hdhomerun_debug_enable(hdhr_dbg);
+		memset(&hdhr_status, 0, sizeof(hdhr_status));
 	}
 	~hdhr_tuner_device()
 	{
@@ -302,7 +304,7 @@ void hdhr_tuner::hdhr_status()
 {
 	if (!dev) return;
 	char *tuner_status;
-	if (!state & TUNE_STATE_LOCK)
+	if (~state & TUNE_STATE_LOCK)
 		dev->wait_for_lock();
 	struct hdhomerun_tuner_status_t *hdhr_status =
 		dev->get_tuner_status(&tuner_status);

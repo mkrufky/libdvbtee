@@ -384,7 +384,7 @@ int main(int argc, char **argv)
 			break;
 		case 'c': /* channel list | channel / scan min */
 			if (strstr(optarg, ","))
-				strcpy(channel_list, optarg);
+				strncpy(channel_list, optarg, sizeof(channel_list));
 
 			/* if a list was provided, use the first item */
 			channel = strtoul(optarg, NULL, 0);
@@ -394,7 +394,7 @@ int main(int argc, char **argv)
 			break;
 		case 'C': /* channel list | channel / scan max */
 			if (strstr(optarg, ","))
-				strcpy(channel_list, optarg);
+				strncpy(channel_list, optarg, sizeof(channel_list));
 
 			/* if a list was provided, use the first item */
 			scan_max = strtoul(optarg, NULL, 0);
@@ -406,7 +406,7 @@ int main(int argc, char **argv)
 			b_read_dvr = true;
 			break;
 		case 'F': /* Filename */
-			strcpy(filename, optarg);
+			strncpy(filename, optarg, sizeof(filename));
 			break;
 		case 't': /* timeout */
 			timeout = strtoul(optarg, NULL, 0);
@@ -426,10 +426,10 @@ int main(int argc, char **argv)
 			serv_flags = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			break;
 		case 'i': /* pull local/remote tcp/udp port for data */
-			strcpy(tcpipfeedurl, optarg);
+			strncpy(tcpipfeedurl, optarg, sizeof(tcpipfeedurl));
 			break;
 		case 'I': /* request a service by its service id */
-			strcpy(service_ids, optarg);
+			strncpy(service_ids, optarg, sizeof(service_ids));
 			break;
 		case 'E': /* enable EPG scan, optional arg to limit the number of EITs to parse */
 #if 0
@@ -443,7 +443,7 @@ int main(int argc, char **argv)
 			break;
 		case 'o': /* output filtered data, optional arg is a filename */
 			if (optarg) {
-				strcpy(outfilename, optarg);
+				strncpy(outfilename, optarg, sizeof(outfilename));
 				b_output_file = true;
 			} else
 				b_output_stdout = true;
@@ -459,7 +459,7 @@ int main(int argc, char **argv)
 			break;
 		case 'H':
 			if (optarg)
-				strcpy(hdhrname, optarg);
+				strncpy(hdhrname, optarg, sizeof(hdhrname));
 			b_hdhr = true;
 			break;
 		case 'h':

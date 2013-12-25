@@ -290,7 +290,8 @@ static char http_conn_close[] =
 /*****************************************************************************/
 
 serve_client::serve_client()
-  : f_kill_thread(false)
+  : h_thread((pthread_t)NULL)
+  , f_kill_thread(false)
   , server(NULL)
   , tuner(NULL)
   , feeder(NULL)
@@ -298,6 +299,8 @@ serve_client::serve_client()
   , channels_conf_file(NULL)
   , data_fmt(SERVE_DATA_FMT_NONE)
   , reporter(NULL)
+  , streamback_started(false)
+  , streamback_newchannel(false)
 {
 	dprintf("()");
 	services.clear();
@@ -313,12 +316,17 @@ serve_client::~serve_client()
 serve_client::serve_client(const serve_client&)
 {
 	dprintf("(copy)");
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
 	feeder = NULL;
 	sock_fd = -1;
+	channels_conf_file = NULL;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	reporter = NULL;
+	streamback_started = false;
+	streamback_newchannel = false;
 	services.clear();
 }
 
@@ -329,12 +337,18 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 	if (this == &cSource)
 		return *this;
 
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
 	feeder = NULL;
 	sock_fd = -1;
+	channels_conf_file = NULL;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	reporter = NULL;
+	streamback_started = false;
+	streamback_newchannel = false;
+	services.clear();
 	services.clear();
 
 	return *this;
@@ -395,8 +409,10 @@ void* serve_client::client_thread()
 
 	gethostname(hostname, sizeof(hostname));
 	if (!strlen(hostname))
-		strcpy(hostname, "darkwing");
-	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
+		strncpy(hostname, "darkwing", sizeof(hostname));
+
+	if (0 != getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen))
+		perror("getpeername() failed");
 
 	snprintf(cli_prompt, sizeof(cli_prompt), "%s> ", hostname);
 
@@ -886,8 +902,6 @@ bool serve_client::command(char* cmdline)
 	}
 #endif
 	if (item) while (item) {
-		if (!item)
-			item = cmdline;
 
 		ret = __command(item);
 		if (!ret)
