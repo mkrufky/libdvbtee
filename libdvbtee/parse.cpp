@@ -1314,9 +1314,7 @@ void parse::add_service_pids(char* service_ids, map_pidtype &pids)
 	char *save, *id = (service_ids) ? strtok_r(service_ids, CHAR_CMD_COMMA, &save) : NULL;
 
 	if (id) while (id) {
-		if (!id)
-			id = service_ids;
-		if (id) add_service_pids(strtoul(id, NULL, 0), pids);
+		add_service_pids(strtoul(id, NULL, 0), pids);
 		id = strtok_r(NULL, CHAR_CMD_COMMA, &save);
 	} else
 		if (service_ids) add_service_pids(strtoul(service_ids, NULL, 0), pids);
@@ -1337,8 +1335,6 @@ void parse::set_service_ids(char *ids)
 	payload_pids.clear();
 
 	if (id) while (id) {
-		if (!id)
-			id = ids;
 		if (id) set_service_id(strtoul(id, NULL, 0));
 		id = strtok_r(NULL, CHAR_CMD_COMMA, &save);
 	} else

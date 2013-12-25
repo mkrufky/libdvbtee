@@ -34,9 +34,12 @@
 
 
 socket_listen::socket_listen()
-  : f_kill_thread(false)
+  : h_thread((pthread_t)NULL)
+  , f_kill_thread(false)
   , sock_fd(-1)
   , port(0)
+  , accept_socket_cb(NULL)
+  , accept_socket_data(NULL)
 {
 	dprintf("()");
 }
@@ -51,9 +54,12 @@ socket_listen::~socket_listen()
 socket_listen::socket_listen(const socket_listen&)
 {
 	dprintf("(copy)");
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	sock_fd = -1;
 	port = 0;
+	accept_socket_cb = NULL;
+	accept_socket_data = NULL;
 }
 
 socket_listen& socket_listen::operator= (const socket_listen& cSource)
@@ -63,9 +69,12 @@ socket_listen& socket_listen::operator= (const socket_listen& cSource)
 	if (this == &cSource)
 		return *this;
 
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	sock_fd = -1;
 	port = 0;
+	accept_socket_cb = NULL;
+	accept_socket_data = NULL;
 
 	return *this;
 }

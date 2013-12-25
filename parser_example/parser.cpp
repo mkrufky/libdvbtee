@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "F:t:d::")) != -1) {
 		switch (opt) {
 		case 'F': /* Filename */
-			strcpy(filename, optarg);
+			strncpy(filename, optarg, sizeof(filename));
 			break;
 
 		case 't': /* timeout */

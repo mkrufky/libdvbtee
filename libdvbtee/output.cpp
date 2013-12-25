@@ -213,7 +213,8 @@ static inline size_t write_stdout(uint8_t* p_data, int size) {
 }
 
 output_stream::output_stream()
-  : f_kill_thread(false)
+  : h_thread((pthread_t)NULL)
+  , f_kill_thread(false)
   , f_streaming(false)
   , sock(-1)
   , mimetype(MIMETYPE_OCTET_STREAM)
@@ -228,6 +229,7 @@ output_stream::output_stream()
 	dprintf("()");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	memset(&name, 0, sizeof(name));
+	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
 }
 
@@ -245,6 +247,7 @@ output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	stream_cb = NULL;
@@ -253,7 +256,9 @@ output_stream::output_stream(const output_stream&)
 	count_out = 0;
 	sock = -1;
 	mimetype = MIMETYPE_OCTET_STREAM;
+	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
+	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
 	have_pat = false;
 }
@@ -266,6 +271,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 		return *this;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	stream_cb = NULL;
@@ -274,7 +280,9 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	count_out = 0;
 	sock = -1;
 	mimetype = MIMETYPE_OCTET_STREAM;
+	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
+	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
 	have_pat = false;
 
@@ -685,7 +693,8 @@ int output_stream::get_pids(map_pidtype &result)
 /* ----------------------------------------------------------------- */
 
 output::output()
-  : f_kill_thread(false)
+  : h_thread((pthread_t)NULL)
+  , f_kill_thread(false)
   , f_streaming(false)
   , ringbuffer()
   , num_targets(0)
@@ -716,6 +725,7 @@ output::output(const output&)
 {
 	dprintf("(copy)");
 
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	num_targets = 0;
@@ -736,6 +746,7 @@ output& output::operator= (const output& cSource)
 	if (this == &cSource)
 		return *this;
 
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	num_targets = 0;
@@ -814,8 +825,10 @@ void output::add_http_client(void *p_this, int socket)
 
 void output::add_http_client(int socket)
 {
-	add(socket, OUTPUT_STREAM_HTTP);
-	start();
+	if (0 > add(socket, OUTPUT_STREAM_HTTP))
+		perror("output.add(socket, OUTPUT_STREAM_HTTP) failed");
+	else if (0 != start())
+		perror("output.start() failed");
 	return;
 }
 
@@ -1053,8 +1066,6 @@ int output::add(char* target, map_pidtype &pids)
 	int ret = -1;
 	char *item = strtok_r(target, CHAR_CMD_COMMA, &save);
 	if (item) while (item) {
-		if (!item)
-			item = target;
 
 		ret = __add(item, pids);
 		if (ret < 0)

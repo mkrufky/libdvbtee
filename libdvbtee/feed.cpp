@@ -50,7 +50,9 @@ void libdvbtee_set_debug_level(unsigned int debug)
 #define BUFSIZE ((4096/188)*188)
 
 feed::feed()
-  : f_kill_thread(false)
+  : h_thread((pthread_t)NULL)
+  , h_feed_thread((pthread_t)NULL)
+  , f_kill_thread(false)
   , fd(-1)
   , feed_thread_prio(100)
   , ringbuffer()
@@ -75,9 +77,13 @@ feed::~feed()
 feed::feed(const feed&)
 {
 	dprintf("(copy)");
+	h_thread = (pthread_t)NULL;
+	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
 	feed_thread_prio = 100;
+	pull_cb = NULL;
+	pull_priv = NULL;
 }
 
 feed& feed::operator= (const feed& cSource)
@@ -87,9 +93,13 @@ feed& feed::operator= (const feed& cSource)
 	if (this == &cSource)
 		return *this;
 
+	h_thread = (pthread_t)NULL;
+	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
 	feed_thread_prio = 100;
+	pull_cb = NULL;
+	pull_priv = NULL;
 
 	return *this;
 }
@@ -119,8 +129,10 @@ void feed::close_file()
 {
 	dprintf("()");
 
-	close(fd);
-	fd = -1;
+	if (fd >= 0) {
+		close(fd);
+		fd = -1;
+	}
 }
 
 bool feed::check()
@@ -257,8 +269,12 @@ void *feed::feed_thread()
 
 	if (feed_thread_prio != 100) {
 		pid_t tid = syscall(SYS_gettid);
-		dprintf("setting priority from %d to %d", getpriority(PRIO_PROCESS, tid), feed_thread_prio);
-		setpriority(PRIO_PROCESS, tid, feed_thread_prio);
+		if (tid >= 0) {
+			dprintf("setting priority from %d to %d",
+				getpriority(PRIO_PROCESS, tid), feed_thread_prio);
+			if (0 > setpriority(PRIO_PROCESS, tid, feed_thread_prio))
+				perror("setpriority() failed");
+		}
 	}
 	dprintf("()");
 	while (!f_kill_thread) {
@@ -590,7 +606,6 @@ void feed::add_tcp_feed(int socket)
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
-	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
 
 	dprintf("(%d)", socket);
 	if (fd >= 0) {
@@ -606,16 +621,22 @@ void feed::add_tcp_feed(int socket)
 
 	f_kill_thread = false;
 
-	int ret = pthread_create(&h_thread, NULL, tcp_client_feed_thread, this);
+	if (0 != getpeername(fd, (struct sockaddr*)&tcpsa, &salen)) {
+		perror("getpeername() failed");
+		goto fail_close_file;
+	}
 
-	if (0 != ret) {
+	if (0 != pthread_create(&h_thread, NULL, tcp_client_feed_thread, this)) {
 		perror("pthread_create() failed");
-		close_file();
+		goto fail_close_file;
 #if FEED_BUFFER
 	} else {
 		start_feed();
 #endif
 	}
+	return;
+fail_close_file:
+	close_file();
 	return;
 }
 
