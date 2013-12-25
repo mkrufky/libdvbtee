@@ -657,9 +657,6 @@ exit:
 		while (context.server->is_running()) sleep(1);
 		stop_server(&context);
 	}
-//	cleanup(&context);
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
+	cleanup(&context);
 	return 0;
 }
