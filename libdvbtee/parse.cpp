@@ -1335,8 +1335,6 @@ void parse::set_service_ids(char *ids)
 	payload_pids.clear();
 
 	if (id) while (id) {
-		if (!id)
-			id = ids;
 		if (id) set_service_id(strtoul(id, NULL, 0));
 		id = strtok_r(NULL, CHAR_CMD_COMMA, &save);
 	} else
