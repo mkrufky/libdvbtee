@@ -259,8 +259,11 @@ void *feed::feed_thread()
 
 	if (feed_thread_prio != 100) {
 		pid_t tid = syscall(SYS_gettid);
-		dprintf("setting priority from %d to %d", getpriority(PRIO_PROCESS, tid), feed_thread_prio);
-		setpriority(PRIO_PROCESS, tid, feed_thread_prio);
+		if (tid >= 0) {
+			dprintf("setting priority from %d to %d",
+				getpriority(PRIO_PROCESS, tid), feed_thread_prio);
+			setpriority(PRIO_PROCESS, tid, feed_thread_prio);
+		}
 	}
 	dprintf("()");
 	while (!f_kill_thread) {
