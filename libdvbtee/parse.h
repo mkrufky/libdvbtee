@@ -177,6 +177,8 @@ public:
 	void set_epg_mode(bool onoff)  { epg_mode = onoff; }
 	void enable(bool onoff)  { enabled = onoff; }
 
+	void enable_ett_collection(bool onoff) { dont_collect_ett = !onoff; }
+
 	bool is_pmt_ready(uint16_t id = 0);
 	bool is_psip_ready();
 	bool is_epg_ready();
