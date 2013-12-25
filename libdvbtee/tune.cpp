@@ -37,10 +37,14 @@ typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 static map_chan_to_ts_id channels;
 
 tune::tune()
-  : f_kill_thread(false)
+  : h_thread((pthread_t)NULL)
+  , f_kill_thread(false)
   , state(TUNE_STATE_IDLE)
   , cur_chan(0)
+  , time_touched((time_t)0)
+  , scan_mode(0)
   , scan_epg(false)
+  , scan_complete(false)
   , fe_type(DVBTEE_FE_OFDM)
   , last_query((time_t)0)
   , scan_progress_cb(NULL)
@@ -64,9 +68,16 @@ tune::tune(const tune&)
 
 //	channels.clear();
 	feeder.parser.cleanup();
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	cur_chan = 0;
 	state = TUNE_STATE_IDLE;
+	time_touched = (time_t)0;
+	scan_mode = 0;
+	scan_epg = false;
+	scan_complete = false;
+	fe_type = DVBTEE_FE_OFDM;
+	last_query = (time_t)0;
 	scan_progress_cb = NULL;
 	scan_progress_context = NULL;
 }
@@ -80,9 +91,16 @@ tune& tune::operator= (const tune& cSource)
 
 //	channels.clear();
 	feeder.parser.cleanup();
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	cur_chan = 0;
 	state = TUNE_STATE_IDLE;
+	time_touched = (time_t)0;
+	scan_mode = 0;
+	scan_epg = false;
+	scan_complete = false;
+	fe_type = DVBTEE_FE_OFDM;
+	last_query = (time_t)0;
 	scan_progress_cb = NULL;
 	scan_progress_context = NULL;
 
