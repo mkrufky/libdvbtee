@@ -135,6 +135,14 @@ void stats::push_pid(int c, const uint16_t pid)
 
 pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats)
 {
+	adaptation_field_t adapt;
+	pkt_hdr_t hdr;
+
+	return parse(p, pkt_stats, hdr, adapt);
+}
+
+pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats, pkt_hdr_t &hdr, adaptation_field_t &adapt)
+{
 	if (pkt_stats) {
 		memset(pkt_stats, 0, sizeof(pkt_stats_t));
 
@@ -204,6 +212,9 @@ void stats::push_stats(pkt_stats_t *pkt_stats)
 
 void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 {
+	adaptation_field_t adapt;
+	pkt_hdr_t hdr;
+
 	if (!pkt_stats) {
 		__push(p);
 		return;
@@ -211,7 +222,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 
 	memset(pkt_stats, 0, sizeof(pkt_stats_t));
 
-	parse(p, pkt_stats);
+	parse(p, pkt_stats, hdr, adapt);
 
 	if (hdr.adaptation_flags & 0x01) {// payload present
 		if (continuity.count(hdr.pid)) {
