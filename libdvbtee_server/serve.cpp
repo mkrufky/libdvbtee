@@ -888,8 +888,6 @@ bool serve_client::command(char* cmdline)
 	}
 #endif
 	if (item) while (item) {
-		if (!item)
-			item = cmdline;
 
 		ret = __command(item);
 		if (!ret)
