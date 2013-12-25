@@ -1055,8 +1055,6 @@ int output::add(char* target, map_pidtype &pids)
 	int ret = -1;
 	char *item = strtok_r(target, CHAR_CMD_COMMA, &save);
 	if (item) while (item) {
-		if (!item)
-			item = target;
 
 		ret = __add(item, pids);
 		if (ret < 0)
