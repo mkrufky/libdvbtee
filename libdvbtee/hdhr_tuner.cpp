@@ -43,6 +43,7 @@ public:
 		dprintf("(dev)");
 		hdhr_dbg = hdhomerun_debug_create();
 		hdhomerun_debug_enable(hdhr_dbg);
+		memset(&hdhr_status, 0, sizeof(hdhr_status));
 	}
 	~hdhr_tuner_device()
 	{
