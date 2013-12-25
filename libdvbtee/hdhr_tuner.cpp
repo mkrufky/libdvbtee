@@ -303,7 +303,7 @@ void hdhr_tuner::hdhr_status()
 {
 	if (!dev) return;
 	char *tuner_status;
-	if (!state & TUNE_STATE_LOCK)
+	if (~state & TUNE_STATE_LOCK)
 		dev->wait_for_lock();
 	struct hdhomerun_tuner_status_t *hdhr_status =
 		dev->get_tuner_status(&tuner_status);
