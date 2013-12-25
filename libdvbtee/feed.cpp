@@ -262,7 +262,8 @@ void *feed::feed_thread()
 		if (tid >= 0) {
 			dprintf("setting priority from %d to %d",
 				getpriority(PRIO_PROCESS, tid), feed_thread_prio);
-			setpriority(PRIO_PROCESS, tid, feed_thread_prio);
+			if (0 > setpriority(PRIO_PROCESS, tid, feed_thread_prio))
+				perror("setpriority() failed");
 		}
 	}
 	dprintf("()");
