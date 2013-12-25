@@ -592,7 +592,6 @@ void feed::add_tcp_feed(int socket)
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
-	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
 
 	dprintf("(%d)", socket);
 	if (fd >= 0) {
@@ -605,6 +604,8 @@ void feed::add_tcp_feed(int socket)
 		sprintf(filename, "TCPSOCKET: %d", socket);
 
 	fd = socket;
+
+	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
 
 	f_kill_thread = false;
 
