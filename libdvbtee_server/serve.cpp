@@ -316,12 +316,17 @@ serve_client::~serve_client()
 serve_client::serve_client(const serve_client&)
 {
 	dprintf("(copy)");
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
 	feeder = NULL;
 	sock_fd = -1;
+	channels_conf_file = NULL;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	reporter = NULL;
+	streamback_started = false;
+	streamback_newchannel = false;
 	services.clear();
 }
 
@@ -332,12 +337,18 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 	if (this == &cSource)
 		return *this;
 
+	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
 	feeder = NULL;
 	sock_fd = -1;
+	channels_conf_file = NULL;
 	data_fmt = SERVE_DATA_FMT_NONE;
+	reporter = NULL;
+	streamback_started = false;
+	streamback_newchannel = false;
+	services.clear();
 	services.clear();
 
 	return *this;
