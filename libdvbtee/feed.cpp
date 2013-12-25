@@ -119,8 +119,10 @@ void feed::close_file()
 {
 	dprintf("()");
 
-	close(fd);
-	fd = -1;
+	if (fd >= 0) {
+		close(fd);
+		fd = -1;
+	}
 }
 
 bool feed::check()
