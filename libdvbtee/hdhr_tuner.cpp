@@ -38,6 +38,7 @@ class hdhr_tuner_device
 {
 public:
 	hdhr_tuner_device()
+	  : hdhr_dev(NULL)
 	{
 		dprintf("(dev)");
 		hdhr_dbg = hdhomerun_debug_create();
