@@ -67,11 +67,11 @@ stats& stats::operator= (const stats& cSource)
 
 static void parse_pcr(uint8_t *pcr, uint64_t *pcr_base, unsigned int *pcr_ext)
 {
-	*pcr_base = (pcr[0] * 0x2000000) +
-		    (pcr[1] * 0x20000) +
-		    (pcr[2] * 0x200) +
-		    (pcr[3] * 0x02) +
-		    ((pcr[4] & 0x80) >> 7);
+	*pcr_base = ((uint64_t)pcr[0] * 0x2000000) +
+		    ((uint64_t)pcr[1] * 0x20000) +
+		    ((uint64_t)pcr[2] * 0x200) +
+		    ((uint64_t)pcr[3] * 0x02) +
+		    ((uint64_t)(pcr[4] & 0x80) >> 7);
 
 	*pcr_ext = ((pcr[4] & 0x01) * 0x100) + pcr[5];
 
