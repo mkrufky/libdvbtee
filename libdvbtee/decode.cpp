@@ -122,6 +122,9 @@ decode_network_service::decode_network_service(const decode_network_service&)
 {
 	dprintf("(copy)");
 
+	services_w_eit_pf = 0;
+	services_w_eit_sched = 0;
+
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
 	decoded_sdt.services.clear();
 
@@ -141,6 +144,9 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 
 	if (this == &cSource)
 		return *this;
+
+	services_w_eit_pf = 0;
+	services_w_eit_sched = 0;
 
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
 	decoded_sdt.services.clear();
@@ -193,6 +199,8 @@ decode_network::decode_network(const decode_network&)
 {
 	dprintf("(copy)");
 
+	orig_network_id = 0;
+
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 
 	decoded_nit.ts_list.clear();
@@ -209,6 +217,8 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 	if (this == &cSource)
 		return *this;
 
+	orig_network_id = 0;
+
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 
 	decoded_nit.ts_list.clear();
@@ -223,6 +233,7 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 decode::decode()
   : orig_network_id(0)
   , network_id(0)
+  , stream_time((time_t)0)
   , eit_x(0)
   , physical_channel(0)
 {
@@ -322,6 +333,10 @@ decode::decode(const decode&)
 	rcvd_pmt.clear();
 	decoded_ett.clear();
 
+	orig_network_id = 0;
+	network_id = 0;
+	stream_time = (time_t)0;
+	eit_x = 0;
 	physical_channel = 0;
 }
 
@@ -363,6 +378,10 @@ decode& decode::operator= (const decode& cSource)
 	rcvd_pmt.clear();
 	decoded_ett.clear();
 
+	orig_network_id = 0;
+	network_id = 0;
+	stream_time = (time_t)0;
+	eit_x = 0;
 	physical_channel = 0;
 
 	return *this;
