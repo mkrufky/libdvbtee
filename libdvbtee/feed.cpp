@@ -75,9 +75,13 @@ feed::~feed()
 feed::feed(const feed&)
 {
 	dprintf("(copy)");
+	h_thread = (pthread_t)NULL;
+	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
 	feed_thread_prio = 100;
+	pull_cb = NULL;
+	pull_priv = NULL;
 }
 
 feed& feed::operator= (const feed& cSource)
@@ -87,9 +91,13 @@ feed& feed::operator= (const feed& cSource)
 	if (this == &cSource)
 		return *this;
 
+	h_thread = (pthread_t)NULL;
+	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
 	feed_thread_prio = 100;
+	pull_cb = NULL;
+	pull_priv = NULL;
 
 	return *this;
 }
