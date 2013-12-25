@@ -242,7 +242,8 @@ int rbuf::read(void* p, int size)
 	void *q = NULL;
 	int newsize = get_read_ptr(&q, size);
 
-	if (newsize)
+	/*  newsize will never be < 0, but this should satisfy the coverity checker */
+	if (newsize > 0)
 		memcpy(p, q, newsize);
 
 	put_read_ptr(newsize);
@@ -291,7 +292,8 @@ int rbuf::__get_read_ptr(void**p, int size)
 {
 	int max_size = __get_size();
 
-	if (max_size == 0)
+	/*  max_size will never be < 0, but this should satisfy the coverity checker */
+	if (max_size <= 0)
 		return 0;
 
 	if (size > max_size)
