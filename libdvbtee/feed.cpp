@@ -605,20 +605,24 @@ void feed::add_tcp_feed(int socket)
 
 	fd = socket;
 
-	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
-
 	f_kill_thread = false;
 
-	int ret = pthread_create(&h_thread, NULL, tcp_client_feed_thread, this);
+	if (0 != getpeername(fd, (struct sockaddr*)&tcpsa, &salen)) {
+		perror("getpeername() failed");
+		goto fail_close_file;
+	}
 
-	if (0 != ret) {
+	if (0 != pthread_create(&h_thread, NULL, tcp_client_feed_thread, this)) {
 		perror("pthread_create() failed");
-		close_file();
+		goto fail_close_file;
 #if FEED_BUFFER
 	} else {
 		start_feed();
 #endif
 	}
+	return;
+fail_close_file:
+	close_file();
 	return;
 }
 
