@@ -396,7 +396,9 @@ void* serve_client::client_thread()
 	gethostname(hostname, sizeof(hostname));
 	if (!strlen(hostname))
 		strcpy(hostname, "darkwing");
-	getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen);
+
+	if (0 != getpeername(sock_fd, (struct sockaddr*)&tcpsa, &salen))
+		perror("getpeername() failed");
 
 	snprintf(cli_prompt, sizeof(cli_prompt), "%s> ", hostname);
 
