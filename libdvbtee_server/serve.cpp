@@ -290,7 +290,8 @@ static char http_conn_close[] =
 /*****************************************************************************/
 
 serve_client::serve_client()
-  : f_kill_thread(false)
+  : h_thread((pthread_t)NULL)
+  , f_kill_thread(false)
   , server(NULL)
   , tuner(NULL)
   , feeder(NULL)
@@ -298,6 +299,8 @@ serve_client::serve_client()
   , channels_conf_file(NULL)
   , data_fmt(SERVE_DATA_FMT_NONE)
   , reporter(NULL)
+  , streamback_started(false)
+  , streamback_newchannel(false)
 {
 	dprintf("()");
 	services.clear();
