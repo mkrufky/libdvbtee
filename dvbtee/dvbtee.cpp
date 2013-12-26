@@ -608,12 +608,6 @@ int main(int argc, char **argv)
 		if (!scan_flags)
 			scan_flags = SCAN_VSB;
 
-		if (strlen(service_ids) > 0) {
-			tuner->feeder.parser.set_service_ids(service_ids);
-			if (out_opt < 0)
-				tuner->feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
-		}
-
 		if (tuner->tune_channel(
 				(scan_flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) {
 			if (!tuner->wait_for_lock_or_timeout(2000)) {
@@ -623,6 +617,12 @@ int main(int argc, char **argv)
 			tuner->feeder.parser.set_channel_info(channel,
 				(scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
 				(scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
+		}
+
+		if (strlen(service_ids) > 0) {
+			tuner->feeder.parser.set_service_ids(service_ids);
+			if (out_opt < 0)
+				tuner->feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
 		}
 	}
 
@@ -657,9 +657,6 @@ exit:
 		while (context.server->is_running()) sleep(1);
 		stop_server(&context);
 	}
-//	cleanup(&context);
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
+	cleanup(&context);
 	return 0;
 }

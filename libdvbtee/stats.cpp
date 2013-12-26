@@ -148,6 +148,9 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats, pkt_hdr_t &h
 
 		const uint8_t *q = p;
 
+		memset(&adapt, 0, sizeof(adapt));
+		memset(&hdr, 0, sizeof(hdr));
+
 		hdr.sync_byte          = q[0];
 		hdr.tei                = (q[1] & 0x80) >> 7;
 		hdr.payload_unit_start = (q[1] & 0x40) >> 6;
