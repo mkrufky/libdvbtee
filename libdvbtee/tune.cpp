@@ -130,9 +130,11 @@ bool tune::wait_for_lock_or_timeout(unsigned int time_ms)
 
 bool tune::tune_channel(dvbtee_fe_modulation_t modulation, unsigned int channel)
 {
+	bool ret = __tune_channel(modulation, channel);
+
 	feeder.parser.reset();
 
-	return __tune_channel(modulation, channel);
+	return ret;
 }
 
 void tune::stop_feed()
