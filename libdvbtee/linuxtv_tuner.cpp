@@ -206,6 +206,7 @@ int linuxtv_tuner::open_available_tuner(unsigned int max_adap, unsigned int max_
 			int ret = open_fe();
 			if (ret >= 0) {
 				feeder.parser.set_addfilter_callback(add_filter, this);
+				feeder.parser.reset();
 				return ret;
 			}
 			fe_id++;
