@@ -337,6 +337,7 @@ int linuxtv_tuner::start_feed()
 		perror("DMX_SET_BUFFER_SIZE failed");
 #endif
 	struct dmx_pes_filter_params pesfilter;
+	memset(&pesfilter, 0, sizeof(pesfilter));
 
 	pesfilter.pid = 0x2000;
 	pesfilter.input = DMX_IN_FRONTEND;
@@ -507,6 +508,7 @@ void linuxtv_tuner::add_filter(uint16_t pid)
 		perror("DMX_SET_BUFFER_SIZE failed");
 #endif
 	struct dmx_pes_filter_params pesfilter;
+	memset(&pesfilter, 0, sizeof(pesfilter));
 
 	pesfilter.pid = pid;
 	pesfilter.input = DMX_IN_FRONTEND;
