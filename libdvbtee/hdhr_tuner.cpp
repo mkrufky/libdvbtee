@@ -93,6 +93,7 @@ hdhr_tuner::hdhr_tuner()
 	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
 	dev = new hdhr_tuner_device();
+	fe_type = DVBTEE_FE_ATSC; // FIXME
 }
 
 hdhr_tuner::~hdhr_tuner()

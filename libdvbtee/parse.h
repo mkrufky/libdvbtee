@@ -189,7 +189,7 @@ public:
 
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 
-	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; reset_filters(); }
+	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; }
 
 	output out;
 
