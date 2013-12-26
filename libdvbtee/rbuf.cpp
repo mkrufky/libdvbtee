@@ -76,7 +76,7 @@ void rbuf::dealloc()
 	pthread_mutex_lock(&mutex);
 
 	if (p_data)
-		delete p_data;
+		delete[] p_data;
 	p_data = NULL;
 
 	capacity = 0;
@@ -91,7 +91,7 @@ void rbuf::set_capacity(int cap)
 	pthread_mutex_lock(&mutex);
 
 	if (p_data)
-		delete p_data;
+		delete[] p_data;
 
 	p_data = new char[(capacity = cap)];
 	__reset();
