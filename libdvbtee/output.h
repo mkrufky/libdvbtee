@@ -140,8 +140,8 @@ private:
 	bool want_pid(uint16_t pid) { return ((!pids.size()) || (pids.count(pid))) ? true : false; }
 	bool want_pkt(uint8_t *p) { return ((p) && (want_pid(((p[1] & 0x1f) << 8) | p[2]))); }
 #else
-	bool want_pid(uint16_t pid) { return true; }
-	bool want_pkt(uint8_t *p) { return true; }
+	bool want_pid(uint16_t pid) { (void)pid; return true; }
+	bool want_pkt(uint8_t *p) { (void)p; return true; }
 #endif
 };
 
