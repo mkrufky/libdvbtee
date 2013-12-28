@@ -417,10 +417,10 @@ public:
 
 	unsigned char* get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message); /* message must be an array of 256 unsigned char's */
 
-	const uint8_t get_current_eit_x() { return eit_x; }
-	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; }
+	uint8_t get_current_eit_x() { return eit_x; }
+	uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; }
 
-	const uint16_t get_lcn(uint16_t);
+	uint16_t get_lcn(uint16_t);
 
 	const decode_network*  get_decoded_network();
 

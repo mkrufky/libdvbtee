@@ -1588,7 +1588,7 @@ const decode_network* decode::get_decoded_network()
 	return networks.count(orig_network_id) ? &networks[orig_network_id] : NULL;
 }
 
-const uint16_t decode::get_lcn(uint16_t service_id)
+uint16_t decode::get_lcn(uint16_t service_id)
 {
 	return networks.count(network_id) ? networks[network_id].descriptors.lcn[service_id]: 0;
 }
