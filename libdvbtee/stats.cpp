@@ -78,7 +78,7 @@ static void parse_pcr(uint8_t *pcr, uint64_t *pcr_base, unsigned int *pcr_ext)
 	return;
 }
 
-static time_t walltime(void *p) { return time(NULL); }
+static time_t walltime(void *p) { (void)p; return time(NULL); }
 
 char *stats_scale_unit(char *b, size_t n, uint64_t x)
 {
