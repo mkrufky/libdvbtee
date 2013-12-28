@@ -221,6 +221,16 @@ bool serve::scan(unsigned int flags, scan_progress_callback progress_cb, void *p
 	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, progress_cb, progress_context, chandump_cb, chandump_context);
 }
 
+void serve::set_scan_flags(unsigned int tuner_id, unsigned int flags)
+{
+	scan_flags[tuner_id] = flags;
+}
+
+unsigned int serve::get_scan_flags(unsigned int tuner_id)
+{
+	return scan_flags.count(tuner_id) ? scan_flags[tuner_id] : 0;
+}
+
 /*****************************************************************************/
 
 #define CRLF "\r\n"
@@ -494,6 +504,7 @@ serve::serve()
 	dprintf("()");
 	tuners.clear();
 	feed_servers.clear();
+	scan_flags.clear();
 	start_monitor();
 }
 
@@ -505,6 +516,7 @@ serve::~serve()
 
 	tuners.clear();
 	feed_servers.clear();
+	scan_flags.clear();
 }
 
 #if 0
