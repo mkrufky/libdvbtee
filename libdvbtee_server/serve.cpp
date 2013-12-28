@@ -221,14 +221,14 @@ bool serve::scan(unsigned int flags, scan_progress_callback progress_cb, void *p
 	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, progress_cb, progress_context, chandump_cb, chandump_context);
 }
 
-void serve::set_scan_flags(unsigned int tuner_id, unsigned int flags)
+void serve::set_scan_flags(tune *p_tuner, unsigned int flags)
 {
-	scan_flags[tuner_id] = flags;
+	scan_flags[p_tuner] = flags;
 }
 
-unsigned int serve::get_scan_flags(unsigned int tuner_id)
+unsigned int serve::get_scan_flags(tune *p_tuner)
 {
-	return scan_flags.count(tuner_id) ? scan_flags[tuner_id] : 0;
+	return scan_flags.count(p_tuner) ? scan_flags[p_tuner] : 0;
 }
 
 /*****************************************************************************/
@@ -1280,7 +1280,7 @@ bool serve_client::__command(char* cmdline)
 	}
 
 	if (tuner)
-		scan_flags = server->get_scan_flags(tuner_id);
+		scan_flags = server->get_scan_flags(tuner);
 
 	if (!feeder) {
 		cli_print("NO TUNER / FEEDER!\n");

@@ -186,11 +186,11 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 
 	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 		context->server->add_tuner(iter->second);
+		context->server->set_scan_flags(iter->second, flags >> 2);
 
 		if (flags & 2)
 			iter->second->feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+iter->first);
 	}
-	context->server->set_scan_flags(0, flags >> 2);
 
 	return context->server->start();
 }

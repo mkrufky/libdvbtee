@@ -150,8 +150,8 @@ public:
 		  unsigned int tuner_id = 0)
 		{ return scan(flags, progress_cb, progress_context, NULL, NULL, tuner_id); }
 
-	void set_scan_flags(unsigned int tuner_id, unsigned int flags);
-	unsigned int get_scan_flags(unsigned int tuner_id);
+	void set_scan_flags(tune* p_tuner, unsigned int flags);
+	unsigned int get_scan_flags(tune* p_tuner);
 
 	bool is_running() { return listener.is_running(); }
 	bool is_cli_enabled() { return f_cli_enabled; }
@@ -187,7 +187,7 @@ private:
 	void add_client(int);
 	static void add_client(void*, int);
 
-	std::map<unsigned int, unsigned int> scan_flags;
+	std::map<tune*, unsigned int> scan_flags;
 
 	bool f_reclaim_resources;
 	bool f_cli_enabled;

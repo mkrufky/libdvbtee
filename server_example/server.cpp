@@ -140,7 +140,7 @@ int start_server(struct dvbtee_context* context, unsigned int flags, int port, i
 	if (eavesdropping_port)
 		context->tuner.feeder.parser.out.add_http_server(eavesdropping_port);
 
-	context->server->set_scan_flags(0, flags);
+	context->server->set_scan_flags(&context->tuner, flags);
 
 	return context->server->start(port);
 }
