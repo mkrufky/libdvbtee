@@ -23,12 +23,12 @@
 
 static void write_stdout(void *context, void *buffer, size_t size, size_t nmemb)
 {
-  fwrite(buffer, size, nmemb, stdout);
+	fwrite(buffer, size, nmemb, stdout);
 }
 
 void hlsinput::write_feed(void *context, void *buffer, size_t size, size_t nmemb)
 {
-  static_cast<hlsinput*>(context)->feeder.push(size * nmemb, (const uint8_t*)buffer);
+	static_cast<hlsinput*>(context)->feeder.push(size * nmemb, (const uint8_t*)buffer);
 }
 
 hlsinput::hlsinput(bool feed_stdout)
@@ -38,10 +38,10 @@ hlsinput::hlsinput(bool feed_stdout)
 
 bool hlsinput::get(const char *url)
 {
-  if (b_stdout)
-    hlsfeed hlsFeeder(url, write_stdout, this);
-  else
-    hlsfeed hlsFeeder(url, write_feed, this);
+	if (b_stdout)
+		hlsfeed hlsFeeder(url, write_stdout, this);
+	else
+		hlsfeed hlsFeeder(url, write_feed, this);
 
-  return true;
+	return true;
 }

@@ -25,25 +25,25 @@
 
 int main(int argc, char *argv[])
 {
-  int opt;
-  bool feed_stdout = false;
-  char url[2048] = { 0 };
+	int opt;
+	bool feed_stdout = false;
+	char url[2048] = { 0 };
 
-  while ((opt = getopt(argc, argv, "i:o")) != -1) {
-    switch (opt) {
-    case 'i':
-      if (!optarg) {
-	fprintf(stderr, "missing argument\n");
-	return -1;
-      }
-      strncpy(url, optarg, sizeof(url));
-      break;
-    case 'o':
-      feed_stdout = true;
-      break;
-    }
-  }
+	while ((opt = getopt(argc, argv, "i:o")) != -1) {
+		switch (opt) {
+		case 'i':
+			if (!optarg) {
+				fprintf(stderr, "missing argument\n");
+				return -1;
+			}
+			strncpy(url, optarg, sizeof(url));
+			break;
+		case 'o':
+			feed_stdout = true;
+			break;
+		}
+	}
 
-  hlsinput hls(feed_stdout);
-  hls.get(url);
+	hlsinput hls(feed_stdout);
+	hls.get(url);
 }
