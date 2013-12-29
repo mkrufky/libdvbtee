@@ -196,7 +196,7 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 }
 
 void multiscan(struct dvbtee_context* context, unsigned int scan_method,
-	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg, int eit_limit)
+	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg)
 {
 	int count = 0;
 	int partial_redundancy = 0;
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
 
 	if ((b_scan) && (b_READ_TUNER || (num_tuners >= 0))) {
 		if (num_tuners >= 0)
-			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
+			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg); // FIXME: channel_list
 		else {
 			if (strlen(channel_list)) {
 				if (tuner) tuner->scan_for_services(scan_flags, channel_list, scan_epg);
