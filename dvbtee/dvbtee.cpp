@@ -521,15 +521,13 @@ int main(int argc, char **argv)
 			context.tuners[context.tuners.size()] = new_tuner;
 		} else
 #endif
-#ifdef USE_LINUXTV
 		{
+#ifdef USE_LINUXTV
 			tune *new_tuner = new linuxtv_tuner;
 			new_tuner->feeder.parser.limit_eit(eit_limit);
 			context.tuners[context.tuners.size()] = new_tuner;
-		}
-#else
-			{}
 #endif
+		}
 	if (out_opt > 0) {
 		if ((strlen(tcpipfeedurl)) || (strlen(filename)))
 			context._file_feeder.parser.out.set_options(out_opt);
