@@ -530,7 +530,7 @@ int main(int argc, char **argv)
 			new_tuner->feeder.parser.limit_eit(eit_limit);
 			context.tuners[context.tuners.size()] = new_tuner;
 		} else {
-			fprintf(stderr, "ERROR allocating tuner %d\n", context.tuners.size());
+			fprintf(stderr, "ERROR allocating tuner %lu\n", context.tuners.size());
 			break;
 		}
 	}
