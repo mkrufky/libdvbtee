@@ -23,6 +23,7 @@
 
 static void write_stdout(void *context, void *buffer, size_t size, size_t nmemb)
 {
+	(void)context;
 	fwrite(buffer, size, nmemb, stdout);
 }
 
