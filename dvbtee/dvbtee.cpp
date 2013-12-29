@@ -515,12 +515,18 @@ int main(int argc, char **argv)
 	}
 	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners))
 #ifdef USE_HDHOMERUN
-		if (b_hdhr)
-			context.tuners[context.tuners.size()] = new hdhr_tuner;
-		else
+		if (b_hdhr) {
+			tune *new_tuner = new hdhr_tuner;
+			new_tuner->feeder.parser.limit_eit(eit_limit);
+			context.tuners[context.tuners.size()] = new_tuner;
+		} else
 #endif
 #ifdef USE_LINUXTV
-			context.tuners[context.tuners.size()] = new linuxtv_tuner;
+		{
+			tune *new_tuner = new linuxtv_tuner;
+			new_tuner->feeder.parser.limit_eit(eit_limit);
+			context.tuners[context.tuners.size()] = new_tuner;
+		}
 #else
 			{}
 #endif
