@@ -513,21 +513,28 @@ int main(int argc, char **argv)
 		context.tuners[context.tuners.size()] = tuner;
 		tuner->feeder.parser.limit_eit(eit_limit);
 	}
-	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners))
+#if (defined(USE_HDHOMERUN) | defined(USE_LINUXTV))
+	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners)) {
+		tune *new_tuner = NULL;
 #ifdef USE_HDHOMERUN
 		if (b_hdhr) {
-			tune *new_tuner = new hdhr_tuner;
-			new_tuner->feeder.parser.limit_eit(eit_limit);
-			context.tuners[context.tuners.size()] = new_tuner;
+			new_tuner = new hdhr_tuner;
 		} else
 #endif
 		{
 #ifdef USE_LINUXTV
-			tune *new_tuner = new linuxtv_tuner;
-			new_tuner->feeder.parser.limit_eit(eit_limit);
-			context.tuners[context.tuners.size()] = new_tuner;
+			new_tuner = new linuxtv_tuner;
 #endif
 		}
+		if (new_tuner) {
+			new_tuner->feeder.parser.limit_eit(eit_limit);
+			context.tuners[context.tuners.size()] = new_tuner;
+		} else {
+			fprintf(stderr, "ERROR allocating tuner %d\n", context.tuners.size());
+			break;
+		}
+	}
+#endif
 	if (out_opt > 0) {
 		if ((strlen(tcpipfeedurl)) || (strlen(filename)))
 			context._file_feeder.parser.out.set_options(out_opt);
