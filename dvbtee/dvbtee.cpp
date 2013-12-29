@@ -329,11 +329,13 @@ int main(int argc, char **argv)
 
 	context.server = NULL;
 
+#ifdef USE_LINUXTV
 	/* LinuxDVB context: */
 	int dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
 	int fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
 	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
 	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
+#endif
 
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
@@ -372,8 +374,10 @@ int main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
+#ifdef USE_LINUXTV
 			dvb_adap = strtoul(optarg, NULL, 0);
 			b_read_dvr = true;
+#endif
 			break;
 		case 'A': /* ATSC / QAM */
 			scan_flags = strtoul(optarg, NULL, 0);
@@ -402,8 +406,10 @@ int main(int argc, char **argv)
 			b_read_dvr = true;
 			break;
 		case 'f': /* frontend */
+#ifdef USE_LINUXTV
 			fe_id = strtoul(optarg, NULL, 0);
 			b_read_dvr = true;
+#endif
 			break;
 		case 'F': /* Filename */
 			strncpy(filename, optarg, sizeof(filename));
