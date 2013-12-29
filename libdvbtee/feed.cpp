@@ -197,6 +197,7 @@ int feed::setup_feed(int prio)
 
 	return start_feed();
 #else
+	(void)prio;
 	return 0;
 #endif
 }
