@@ -54,8 +54,10 @@ feed::feed()
   , h_feed_thread((pthread_t)NULL)
   , f_kill_thread(false)
   , fd(-1)
+#if FEED_BUFFER
   , feed_thread_prio(100)
   , ringbuffer()
+#endif
   , pull_cb(NULL)
   , pull_priv(NULL)
 {
@@ -81,7 +83,9 @@ feed::feed(const feed&)
 	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
+#if FEED_BUFFER
 	feed_thread_prio = 100;
+#endif
 	pull_cb = NULL;
 	pull_priv = NULL;
 }
@@ -97,7 +101,9 @@ feed& feed::operator= (const feed& cSource)
 	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
+#if FEED_BUFFER
 	feed_thread_prio = 100;
+#endif
 	pull_cb = NULL;
 	pull_priv = NULL;
 
@@ -141,11 +147,13 @@ bool feed::check()
 	return true; //FIXME
 }
 
+#if FEED_BUFFER
 //static
 void* feed::feed_thread(void *p_this)
 {
 	return static_cast<feed*>(p_this)->feed_thread();
 }
+#endif
 
 //static
 void* feed::file_feed_thread(void *p_this)
@@ -177,6 +185,7 @@ void* feed::pull_thread(void *p_this)
 	return static_cast<feed*>(p_this)->pull_thread();
 }
 
+#if FEED_BUFFER
 int feed::start_feed()
 {
 #if 0
@@ -189,6 +198,7 @@ int feed::start_feed()
 
 	return ret;
 }
+#endif
 
 int feed::setup_feed(int prio)
 {
@@ -263,6 +273,7 @@ void feed::stop()
 	dprintf("done");
 }
 
+#if FEED_BUFFER
 void *feed::feed_thread()
 {
 	unsigned char *data = NULL;
@@ -292,6 +303,7 @@ void *feed::feed_thread()
 	}
 	pthread_exit(NULL);
 }
+#endif
 
 void *feed::file_feed_thread()
 {
