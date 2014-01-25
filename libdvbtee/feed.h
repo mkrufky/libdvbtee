@@ -81,17 +81,21 @@ private:
 
 	char filename[256];
 	int fd;
+#if FEED_BUFFER
 	int feed_thread_prio;
 
 	rbuf ringbuffer;
 
 	void            *feed_thread();
+#endif
 	void       *file_feed_thread();
 	void      *stdin_feed_thread();
 	void *tcp_client_feed_thread();
 	void *udp_listen_feed_thread();
 	void            *pull_thread();
+#if FEED_BUFFER
 	static void            *feed_thread(void*);
+#endif
 	static void       *file_feed_thread(void*);
 	static void      *stdin_feed_thread(void*);
 	static void *tcp_client_feed_thread(void*);
@@ -100,7 +104,9 @@ private:
 
 	void set_filename(char*);
 	int  open_file();
+#if FEED_BUFFER
 	int start_feed();
+#endif
 
 	socket_listen listener;
 	static void add_tcp_feed(void*, int);

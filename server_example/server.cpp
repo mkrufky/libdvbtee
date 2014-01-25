@@ -140,7 +140,7 @@ int start_server(struct dvbtee_context* context, unsigned int flags, int port, i
 	if (eavesdropping_port)
 		context->tuner.feeder.parser.out.add_http_server(eavesdropping_port);
 
-	context->server->set_scan_flags(0, flags);
+	context->server->set_scan_flags(&context->tuner, flags);
 
 	return context->server->start(port);
 }
@@ -220,24 +220,30 @@ int main(int argc, char **argv)
 
 	context.server = NULL;
 
+#ifdef USE_LINUXTV
 	/* LinuxDVB context: */
 	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
 	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
 	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
 	int fe_id    = 0; /* ID Y, /dev/dvb/adapterX/frontendY */
+#endif
 
 	unsigned int scan_flags  = 0;
 
 	while ((opt = getopt(argc, argv, "a:A:f:d::")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
+#ifdef USE_LINUXTV
 			dvb_adap = strtoul(optarg, NULL, 0);
+#endif
 			break;
 		case 'A': /* ATSC / QAM */
 			scan_flags = strtoul(optarg, NULL, 0);
 			break;
 		case 'f': /* frontend */
+#ifdef USE_LINUXTV
 			fe_id = strtoul(optarg, NULL, 0);
+#endif
 			break;
 		case 'd':
 			if (optarg)

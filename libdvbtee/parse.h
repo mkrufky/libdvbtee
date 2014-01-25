@@ -264,7 +264,9 @@ private:
 	map_dvbpsi    h_pmt;
 	map_dvbpsi    h_demux;
 
+#if 0
 	time_t stream_time;
+#endif
 	uint16_t ts_id;
 	map_pidtype service_ids; // ignore the type name used here
 
