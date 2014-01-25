@@ -186,17 +186,17 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 
 	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 		context->server->add_tuner(iter->second);
+		context->server->set_scan_flags(iter->second, flags >> 2);
 
 		if (flags & 2)
 			iter->second->feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+iter->first);
 	}
-	context->server->set_scan_flags(0, flags >> 2);
 
 	return context->server->start();
 }
 
 void multiscan(struct dvbtee_context* context, unsigned int scan_method,
-	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg, int eit_limit)
+	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg)
 {
 	int count = 0;
 	int partial_redundancy = 0;
@@ -329,11 +329,13 @@ int main(int argc, char **argv)
 
 	context.server = NULL;
 
+#ifdef USE_LINUXTV
 	/* LinuxDVB context: */
 	int dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
 	int fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
 	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
 	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
+#endif
 
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
@@ -372,8 +374,10 @@ int main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
+#ifdef USE_LINUXTV
 			dvb_adap = strtoul(optarg, NULL, 0);
 			b_read_dvr = true;
+#endif
 			break;
 		case 'A': /* ATSC / QAM */
 			scan_flags = strtoul(optarg, NULL, 0);
@@ -402,8 +406,10 @@ int main(int argc, char **argv)
 			b_read_dvr = true;
 			break;
 		case 'f': /* frontend */
+#ifdef USE_LINUXTV
 			fe_id = strtoul(optarg, NULL, 0);
 			b_read_dvr = true;
+#endif
 			break;
 		case 'F': /* Filename */
 			strncpy(filename, optarg, sizeof(filename));
@@ -513,16 +519,27 @@ int main(int argc, char **argv)
 		context.tuners[context.tuners.size()] = tuner;
 		tuner->feeder.parser.limit_eit(eit_limit);
 	}
-	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners))
+#if (defined(USE_HDHOMERUN) | defined(USE_LINUXTV))
+	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners)) {
+		tune *new_tuner = NULL;
 #ifdef USE_HDHOMERUN
-		if (b_hdhr)
-			context.tuners[context.tuners.size()] = new hdhr_tuner;
-		else
+		if (b_hdhr) {
+			new_tuner = new hdhr_tuner;
+		} else
 #endif
+		{
 #ifdef USE_LINUXTV
-			context.tuners[context.tuners.size()] = new linuxtv_tuner;
-#else
-			{}
+			new_tuner = new linuxtv_tuner;
+#endif
+		}
+		if (new_tuner) {
+			new_tuner->feeder.parser.limit_eit(eit_limit);
+			context.tuners[context.tuners.size()] = new_tuner;
+		} else {
+			fprintf(stderr, "ERROR allocating tuner %lu\n", context.tuners.size());
+			break;
+		}
+	}
 #endif
 	if (out_opt > 0) {
 		if ((strlen(tcpipfeedurl)) || (strlen(filename)))
@@ -562,7 +579,7 @@ int main(int argc, char **argv)
 
 	if ((b_scan) && (b_READ_TUNER || (num_tuners >= 0))) {
 		if (num_tuners >= 0)
-			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg, eit_limit); // FIXME: channel_list
+			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg); // FIXME: channel_list
 		else {
 			if (strlen(channel_list)) {
 				if (tuner) tuner->scan_for_services(scan_flags, channel_list, scan_epg);

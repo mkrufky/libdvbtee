@@ -1487,11 +1487,14 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 	cur_ett.version    = p_ett->i_version;
 	cur_ett.etm_id     = p_ett->i_etm_id;
 	cur_ett.etm_length = p_ett->i_etm_length;
+	memcpy(cur_ett.etm,
 #if USING_DVBPSI_VERSION_0
-	memcpy(cur_ett.etm, p_ett->p_etm, p_ett->i_etm_length);
+	       p_ett->p_etm,
 #else
-	memcpy(cur_ett.etm, p_ett->p_etm_data, (sizeof(cur_ett.etm) >= p_ett->i_etm_length) ? p_ett->i_etm_length : sizeof(cur_ett.etm));
+	       p_ett->p_etm_data,
 #endif
+	       (sizeof(cur_ett.etm) >= p_ett->i_etm_length) ?
+		       p_ett->i_etm_length : sizeof(cur_ett.etm));
 
 	unsigned char message[512];
 	memset(message, 0, sizeof(message));
@@ -1617,7 +1620,7 @@ const decode_network* decode::get_decoded_network()
 	return networks.count(orig_network_id) ? &networks[orig_network_id] : NULL;
 }
 
-const uint16_t decode::get_lcn(uint16_t service_id)
+uint16_t decode::get_lcn(uint16_t service_id)
 {
 	return networks.count(network_id) ? networks[network_id].descriptors.lcn[service_id]: 0;
 }

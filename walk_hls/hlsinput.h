@@ -26,13 +26,13 @@
 class hlsinput
 {
 public:
-  explicit hlsinput(bool feed_stdout = false);
-  bool get(const char *url);
+	explicit hlsinput(bool feed_stdout = false);
+	bool get(const char *url);
 private:
-  bool b_stdout;
-  feed feeder;
+	bool b_stdout;
+	feed feeder;
 
-  static void write_feed(void *context, void *buffer, size_t size, size_t nmemb);
+	static void write_feed(void *context, void *buffer, size_t size, size_t nmemb);
 };
 
 #endif // HLSINPUT_H
