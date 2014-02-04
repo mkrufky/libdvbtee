@@ -3,7 +3,11 @@
 
 #include <QPushButton>
 
+#ifdef USE_JSONCPP
 #include <jsoncpp/json/json.h>
+#else
+#include <QJsonDocument>
+#endif
 
 #include "curlhttpget.h"
 
@@ -239,12 +243,12 @@ void MainWindow::get_info()
 
 void MainWindow::fill_channels_box()
 {
+    QStringList ChannelList;
+#ifdef USE_JSONCPP
     std::string json_str(channels_buffer);
 
     Json::Value root;
     Json::Reader reader;
-
-    QStringList ChannelList;
 
     if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
       for ( Json::ArrayIndex idx = 0; idx < root.size(); idx++ ) {
@@ -258,18 +262,38 @@ void MainWindow::fill_channels_box()
 	if (str_id.length()) ChannelList << this_item;
       }
     }
+#else
+    if (!channels_buffer.length())
+        return;
+
+    QJsonDocument d = QJsonDocument::fromJson(QString(channels_buffer.c_str()).toUtf8());
+    QJsonArray a = d.array();
+
+    foreach (const QJsonValue & v, a)
+    {
+        QJsonObject thisEntry = v.toObject();
+
+        QString str_id(thisEntry["Id"].toString());
+        QString str_name(thisEntry["DisplayName"].toString());
+        QString str_major(thisEntry["MajorChannelNo"].toString());
+        QString str_minor(thisEntry["MinorChannelNo"].toString());
+        QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
+
+        if (str_id.length()) ChannelList << this_item;
+    }
+#endif
     channel_model->setStringList(ChannelList);
 }
 
 void MainWindow::fill_info_box()
 {
-    std::string json_str(info_buffer);
-    Json::Value root;
-    Json::Reader reader;
-
     QString chan;
 
     statusBar()->clearMessage();
+#ifdef USE_JSONCPP
+    std::string json_str(info_buffer);
+    Json::Value root;
+    Json::Reader reader;
 
     if ( (!json_str.empty()) && reader.parse(json_str, root) ) {
       for ( Json::ArrayIndex idx = 0; idx < 2/*root.size()*/; idx++ ) {
@@ -289,4 +313,29 @@ void MainWindow::fill_info_box()
 	statusBar()->showMessage(tr(text.toStdString().c_str()));
       }
     }
+#else
+    if (!info_buffer.length())
+        return;
+
+    QJsonDocument d = QJsonDocument::fromJson(QString(info_buffer.c_str()).toUtf8());
+    QJsonArray a = d.array();
+
+    foreach (const QJsonValue & v, a)
+    {
+        QJsonObject thisEntry = v.toObject();
+
+        QString str_id(thisEntry["Id"].toString());
+        QString str_name(thisEntry["DisplayName"].toString());
+        QString str_major(thisEntry["MajorChannelNo"].toString());
+        QString str_minor(thisEntry["MinorChannelNo"].toString());
+        QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
+        if (str_id.length()) {
+          chan = this_item;
+          continue;
+        }
+        QString str_title(thisEntry["Title"].toString());
+        QString text(chan+" | "+str_title);
+        statusBar()->showMessage(tr(text.toStdString().c_str()));
+    }
+#endif
 }

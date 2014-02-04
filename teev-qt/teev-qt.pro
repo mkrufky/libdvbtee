@@ -10,9 +10,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets multimedia multimediawidgets
 
 lessThan(QT_MAJOR_VERSION, 5) {
     QT += phonon
+    QMAKE_CXXFLAGS += -DUSE_JSONCPP
+    LIBS += -ljsoncpp
 }
 
-unix|win32: LIBS += -lcurl -ljsoncpp
+unix|win32: LIBS += -lcurl
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee/release/ -ldvbtee
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ldvbtee
