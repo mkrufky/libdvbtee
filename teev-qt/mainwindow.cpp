@@ -264,22 +264,22 @@ void MainWindow::fill_channels_box()
     }
 #else
     if (!channels_buffer.length())
-        return;
+	return;
 
     QJsonDocument d = QJsonDocument::fromJson(QString(channels_buffer.c_str()).toUtf8());
     QJsonArray a = d.array();
 
     foreach (const QJsonValue & v, a)
     {
-        QJsonObject thisEntry = v.toObject();
+	QJsonObject thisEntry = v.toObject();
 
-        QString str_id(thisEntry["Id"].toString());
-        QString str_name(thisEntry["DisplayName"].toString());
-        QString str_major(thisEntry["MajorChannelNo"].toString());
-        QString str_minor(thisEntry["MinorChannelNo"].toString());
-        QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
+	QString str_id(thisEntry["Id"].toString());
+	QString str_name(thisEntry["DisplayName"].toString());
+	QString str_major(thisEntry["MajorChannelNo"].toString());
+	QString str_minor(thisEntry["MinorChannelNo"].toString());
+	QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
 
-        if (str_id.length()) ChannelList << this_item;
+	if (str_id.length()) ChannelList << this_item;
     }
 #endif
     channel_model->setStringList(ChannelList);
@@ -315,27 +315,30 @@ void MainWindow::fill_info_box()
     }
 #else
     if (!info_buffer.length())
-        return;
+	return;
 
     QJsonDocument d = QJsonDocument::fromJson(QString(info_buffer.c_str()).toUtf8());
     QJsonArray a = d.array();
 
     foreach (const QJsonValue & v, a)
     {
-        QJsonObject thisEntry = v.toObject();
+	QJsonObject thisEntry = v.toObject();
 
-        QString str_id(thisEntry["Id"].toString());
-        QString str_name(thisEntry["DisplayName"].toString());
-        QString str_major(thisEntry["MajorChannelNo"].toString());
-        QString str_minor(thisEntry["MinorChannelNo"].toString());
-        QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
-        if (str_id.length()) {
-          chan = this_item;
-          continue;
-        }
-        QString str_title(thisEntry["Title"].toString());
-        QString text(chan+" | "+str_title);
-        statusBar()->showMessage(tr(text.toStdString().c_str()));
+	QString str_id(thisEntry["Id"].toString());
+	QString str_name(thisEntry["DisplayName"].toString());
+	QString str_major(thisEntry["MajorChannelNo"].toString());
+	QString str_minor(thisEntry["MinorChannelNo"].toString());
+	QString this_item = str_major + "." + str_minor + ": " + str_name;// + " |" + str_id;
+	if (str_id.length()) {
+	    chan = this_item;
+	    continue;
+	}
+
+	QString str_title(thisEntry["Title"].toString());
+	QString text(chan+" | "+str_title);
+	statusBar()->showMessage(tr(text.toStdString().c_str()));
+	// force exit after first (now) entry
+	return;
     }
 #endif
 }
