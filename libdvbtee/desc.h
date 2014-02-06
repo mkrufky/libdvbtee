@@ -43,6 +43,13 @@ typedef struct
 	unsigned char iso_639_code[3];
 } dra1_t;
 
+typedef struct
+{
+	uint8_t       audio_type;
+	unsigned char iso_639_code[3];
+} dr0a_t;
+
+typedef std::map<uint8_t, dr0a_t> map_dr0a;
 typedef std::map<uint16_t, dra1_t> map_dra1;
 
 class desc
@@ -55,6 +62,8 @@ public:
 
 	//FIXME:	const map_lcn* get_lcn() { return &lcn; };
 	map_lcn lcn;
+
+	map_dr0a _0a;
 
 	dr4d_t _4d;
 

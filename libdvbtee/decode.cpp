@@ -477,16 +477,37 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 		//FIXME: descriptors
 		descriptors.decode(p_es->p_first_descriptor);
 
+#ifdef COPY_DRA1_FROM_VCT_TO_PMT // disabled, to be deleted
 		if (descriptors._a1.count(p_es->i_pid)) {
 			memcpy(cur_es.iso_639_code,
 			       descriptors._a1[p_es->i_pid].iso_639_code,
 			       sizeof(descriptors._a1[p_es->i_pid].iso_639_code));
 		}
+#endif
+		desc local_descriptors;
+		local_descriptors.decode(p_es->p_first_descriptor);
+
+		std::string languages;
+
+		for (map_dr0a::const_iterator iter_dr0a = local_descriptors._0a.begin(); iter_dr0a != local_descriptors._0a.end(); ++iter_dr0a) {
+			if (!languages.empty()) languages.append(", ");
+			if (iter_dr0a->second.iso_639_code[0]) {
+				for (int i=0; i<3; i++) languages.push_back(iter_dr0a->second.iso_639_code[i]);
+
+				memcpy(cur_es.iso_639_code,
+				       iter_dr0a->second.iso_639_code,
+				       sizeof(iter_dr0a->second.iso_639_code));
+			}
+		}
 #if PMT_DBG
 		fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
 			cur_es.pid, cur_es.type,
 			streamtype_name(cur_es.type),
+#if 1 //def COPY_DRA1_FROM_VCT_TO_PMT // FIXME
 			cur_es.iso_639_code);
+#else
+			languages.c_str());
+#endif
 #endif
 		p_es = p_es->p_next;
 	}
@@ -556,12 +577,14 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 		std::string languages;
 
 		for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
+#ifdef COPY_DRA1_FROM_VCT_TO_PMT // disabled, to be deleted
 			//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
 			if (decoded_pmt.count(p_channel->i_program_number)) {
 				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_pid].iso_639_code,
 				       iter_dra1->second.iso_639_code, sizeof(iter_dra1->second.iso_639_code));
 				dprintf("copied service location descriptor from VCT into PMT");
 			}
+#endif
 			if (!languages.empty()) languages.append(", ");
 			if (iter_dra1->second.iso_639_code[0])
 				for (int i=0; i<3; i++) languages.push_back(iter_dra1->second.iso_639_code[i]);
