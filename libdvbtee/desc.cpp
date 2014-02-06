@@ -29,15 +29,22 @@
 #include "log.h"
 #define CLASS_MODULE "desc"
 
+//#define DVBPSI_SUPPORTS_DR_81_86_A0_A1 (DVBPSI_VERSION_INT > ((1<<16)+(1<<8)+1))
+#define DVBPSI_SUPPORTS_DR_81_86_A0_A1 1
+
 #include "dvbpsi/dr_0a.h" /* ISO639 language descriptor */
 #include "dvbpsi/dr_48.h" /* service descriptor */
 #include "dvbpsi/dr_4d.h" /* short event descriptor */
 #include "dvbpsi/dr_62.h" /* frequency list descriptor */
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 #include "dvbpsi/dr_81.h" /* AC-3 Audio descriptor */
+#endif
 #include "dvbpsi/dr_83.h" /* LCN descriptor */
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 #include "dvbpsi/dr_86.h" /* caption service descriptor */
 #include "dvbpsi/dr_a0.h" /* extended channel name descriptor */
 #include "dvbpsi/dr_a1.h" /* service location descriptor */
+#endif
 
 #include "desc.h"
 
@@ -263,6 +270,7 @@ static inline const char *num_channels(uint8_t num_channels_code)
 
 bool desc::ac3_audio(dvbpsi_descriptor_t* p_descriptor)
 {
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 	if (p_descriptor->i_tag != DT_Ac3Audio)
 		return false;
 
@@ -287,7 +295,7 @@ bool desc::ac3_audio(dvbpsi_descriptor_t* p_descriptor)
 			dr->language_2[0],
 			dr->language_2[1],
 			dr->language_2[2]);
-
+#endif
 	return true;
 }
 
@@ -314,6 +322,7 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 
 bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 {
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 	if (p_descriptor->i_tag != DT_CaptionService)
 		return false;
 
@@ -338,12 +347,13 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 			service->i_iso_639_code[1],
 			service->i_iso_639_code[2]);
 	}
-
+#endif
 	return true;
 }
 
 bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 {
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 	if (p_descriptor->i_tag != DT_ExtendedChannelName)
 		return false;
 
@@ -355,12 +365,13 @@ bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 	decode_multiple_string(dr->i_long_channel_name, dr->i_long_channel_name_length, name, sizeof(name));
 
 	dprintf("%s", name);
-
+#endif
 	return true;
 }
 
 bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 {
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 	if (p_descriptor->i_tag != DT_ServiceLocation)
 		return false;
 
@@ -382,7 +393,7 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 			element->i_iso_639_code[1],
 			element->i_iso_639_code[2]);
 	}
-
+#endif
 	return true;
 }
 
