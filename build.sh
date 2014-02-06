@@ -42,7 +42,6 @@ if [ -e libdvbpsi ]; then
 else
     git clone git://github.com/mkrufky/libdvbpsi.git
     cd libdvbpsi
-    git checkout new_descriptors
     patch -p2 < ../libdvbpsi-silence-TS-discontinuity-messages.patch
 fi
 
