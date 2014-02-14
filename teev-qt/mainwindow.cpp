@@ -131,7 +131,15 @@ void MainWindow::setupMainWindow()
     statusBar()->addPermanentWidget(btn);
     connect(btn, SIGNAL(clicked()), SLOT(refresh_clicked()));
 
+#if 0
     tune("33~1"); // FIXME: LATER
+#else
+    if (channel_model->rowCount()) {
+	    QString chan_text(channel_model->stringList().front());
+	    //QString chan_text(channel_model->stringList().back());
+	    tune(chan_text.remove(0,chan_text.indexOf("|")+1));
+    }
+#endif
 }
 
 MainWindow::~MainWindow()
