@@ -266,7 +266,10 @@ void MainWindow::fill_channels_box()
 	QString str_name(thisEntry["DisplayName"].asString().c_str());
 	QString str_major(thisEntry["MajorChannelNo"].asString().c_str());
 	QString str_minor(thisEntry["MinorChannelNo"].asString().c_str());
-	QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
+	QString leading_spaces;
+	for (int i = 0; i < 3 - str_major.length(); i++) leading_spaces.append(" ");
+	QString this_item = leading_spaces + str_major + "." + str_minor + ": " + str_name + " |" + str_id;
+
 	if (str_id.length()) ChannelList << this_item;
       }
     }
@@ -285,11 +288,15 @@ void MainWindow::fill_channels_box()
 	QString str_name(thisEntry["DisplayName"].toString());
 	QString str_major(thisEntry["MajorChannelNo"].toString());
 	QString str_minor(thisEntry["MinorChannelNo"].toString());
-	QString this_item = str_major + "." + str_minor + ": " + str_name + " |" + str_id;
+	QString leading_spaces;
+	for (int i = 0; i < 3 - str_major.length(); i++) leading_spaces.append(" ");
+	QString this_item = leading_spaces + str_major + "." + str_minor + ": " + str_name + " |" + str_id;
 
 	if (str_id.length()) ChannelList << this_item;
     }
 #endif
+    ChannelList.sort();
+
     channel_model->setStringList(ChannelList);
 }
 
