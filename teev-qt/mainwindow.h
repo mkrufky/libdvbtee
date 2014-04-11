@@ -27,7 +27,7 @@
 #include <QVideoWidget>
 #endif
 
-#include "tunerprovider.h"
+#include "serverprovider.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,7 +38,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0, TunerProvider *provider = NULL, QString remoteServer = "127.0.0.1", uint16_t remotePort = 64080);
+    explicit MainWindow(QWidget *parent = 0, ServerProvider *provider = NULL, QString remoteServer = "127.0.0.1", uint16_t remotePort = 64080);
     ~MainWindow();
 
     void setupMainWindow();
@@ -53,7 +53,7 @@ public slots:
     void refresh_clicked();
 
 private:
-    TunerProvider *dvbtee;
+    ServerProvider *dvbtee;
 #ifdef USE_PHONON
 #if 0
     Phonon::VideoPlayer *player;

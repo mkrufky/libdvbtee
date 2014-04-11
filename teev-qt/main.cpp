@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	    }
     }
 
-    TunerProvider *provider = (b_read_dvr || b_hdhr) ? new TunerProvider() : NULL;
+    ServerProvider *provider = (b_read_dvr || b_hdhr) ? new ServerProvider() : NULL;
 
     if (b_hdhr)
 	    provider->add_hdhr_tuner(hdhrname.toStdString().c_str());

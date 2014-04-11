@@ -46,10 +46,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
 	mainwindow.cpp \
-	tunerprovider.cpp
+	tunerprovider.cpp \
+	serverprovider.cpp
 
 HEADERS  += mainwindow.h \
-	tunerprovider.h
+	tunerprovider.h \
+	serverprovider.h
 
 FORMS    += mainwindow.ui
 

@@ -30,7 +30,7 @@ public:
 };
 
 
-MainWindow::MainWindow(QWidget *parent, TunerProvider *provider, QString remoteServer, uint16_t remotePort) :
+MainWindow::MainWindow(QWidget *parent, ServerProvider *provider, QString remoteServer, uint16_t remotePort) :
     QMainWindow(parent),
     dvbtee(provider),
 #ifdef USE_PHONON
@@ -109,7 +109,7 @@ void MainWindow::setupMainWindow()
     if (!channel_model->rowCount()) {
 	    if (!dvbtee) {
 		    //
-		    dvbtee = new TunerProvider;
+		    dvbtee = new ServerProvider;
 		    //int tuner_number = dvbtee->add_hdhr_tuner();
 		    //int tuner_number =
 		    dvbtee->add_linuxtv_tuner();
