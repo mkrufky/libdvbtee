@@ -16,7 +16,11 @@ fi
 if [ -e Makefile ]; then
     echo Makefile already exists...
 else
-    qmake -r
+    if [ -e .staticlib ]; then
+        qmake -r CONFIG+=staticlib
+    else
+        qmake -r
+    fi
 fi
 
 mkdir -p usr/bin
