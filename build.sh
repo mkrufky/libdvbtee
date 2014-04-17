@@ -53,6 +53,7 @@ if [ -e .configured ]; then
     git log -1
 else
     ./bootstrap
+    patch -p1 < ../dvbpsi-noexamples.patch
     if [ -e ../.x86 ]; then
 	./configure --prefix=${DVBTEE_ROOT}/usr/  --disable-debug --disable-release
     else
