@@ -45,11 +45,11 @@ mkrufky at linuxtv dot org
 -F      filename to use as input
 -t      timeout
 -T      number of tuners (dvb adapters) allowed to use, 0 for all
--s      scan, optional arg when using multiple tuners: 
-        1 for speed, 2 for redundancy, 
-        3 for speed AND redundancy, 
+-s      scan, optional arg when using multiple tuners:
+        1 for speed, 2 for redundancy,
+        3 for speed AND redundancy,
         4 for optimized speed / partial redundancy
--S      server mode, optional arg 1 for command server, 
+-S      server mode, optional arg 1 for command server,
         2 for http stream server, 3 for both
 -i      pull local/remote tcp/udp port for data
 -I      request a service and its associated PES streams by its service id
