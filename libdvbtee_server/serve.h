@@ -133,6 +133,7 @@ public:
 	bool add_tuner(tune *new_tuner);
 	bool add_feeder(feed *new_feeder);
 	static bool add_feeder(void*, feed*);
+	static bool add_feeder_static(void *v, feed *f) { return add_feeder(v, f); }
 
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);

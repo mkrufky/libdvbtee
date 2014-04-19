@@ -1592,10 +1592,10 @@ bool serve_client::__command(char* cmdline)
 			int ret;
 			if (strstr(cmd, "udp")) {
 				cli_print("starting TS listener on UDP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_udp_listener(portnum, server->add_feeder, server);
+				ret = server->feed_servers[portnum].start_udp_listener(portnum, server->add_feeder_static, server);
 			} else {
 				cli_print("starting TS listener on TCP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder, server);
+				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder_static, server);
 			}
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}
