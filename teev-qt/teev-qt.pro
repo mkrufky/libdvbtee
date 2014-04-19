@@ -43,14 +43,15 @@ DEPENDPATH += $$PWD/../usr/include
 TARGET = teev
 TEMPLATE = app
 
+INCLUDEPATH += $$PWD/../tunerprovider/
+
+LIBS += -L$$PWD/../tunerprovider/ -ldvbtee_tunerprovider
 
 SOURCES += main.cpp\
 	mainwindow.cpp \
-	tunerprovider.cpp \
 	serverprovider.cpp
 
 HEADERS  += mainwindow.h \
-	tunerprovider.h \
 	serverprovider.h
 
 FORMS    += mainwindow.ui
