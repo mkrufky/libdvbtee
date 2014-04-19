@@ -1,7 +1,7 @@
 /*****************************************************************************
- * Copyright (C) 2011-2013 Michael Krufky
+ * Copyright (C) 2011-2014 Michael Ira Krufky
  *
- * Author: Michael Krufky <mkrufky@linuxtv.org>
+ * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -133,6 +133,7 @@ public:
 	bool add_tuner(tune *new_tuner);
 	bool add_feeder(feed *new_feeder);
 	static bool add_feeder(void*, feed*);
+	static bool add_feeder_static(void *v, feed *f) { return add_feeder(v, f); }
 
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);

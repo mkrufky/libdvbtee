@@ -1,7 +1,7 @@
 /*****************************************************************************
- * Copyright (C) 2011-2013 Michael Krufky
+ * Copyright (C) 2011-2014 Michael Ira Krufky
  *
- * Author: Michael Krufky <mkrufky@linuxtv.org>
+ * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -1592,10 +1592,10 @@ bool serve_client::__command(char* cmdline)
 			int ret;
 			if (strstr(cmd, "udp")) {
 				cli_print("starting TS listener on UDP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_udp_listener(portnum, server->add_feeder, server);
+				ret = server->feed_servers[portnum].start_udp_listener(portnum, server->add_feeder_static, server);
 			} else {
 				cli_print("starting TS listener on TCP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder, server);
+				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder_static, server);
 			}
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}

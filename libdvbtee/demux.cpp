@@ -1,7 +1,7 @@
 /*****************************************************************************
- * Copyright (C) 2011-2013 Michael Krufky
+ * Copyright (C) 2011-2014 Michael Ira Krufky
  *
- * Author: Michael Krufky <mkrufky@linuxtv.org>
+ * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

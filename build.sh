@@ -16,7 +16,11 @@ fi
 if [ -e Makefile ]; then
     echo Makefile already exists...
 else
-    qmake -r
+    if [ -e .staticlib ]; then
+        qmake -r CONFIG+=staticlib
+    else
+        qmake -r
+    fi
 fi
 
 mkdir -p usr/bin
@@ -49,6 +53,7 @@ if [ -e .configured ]; then
     git log -1
 else
     ./bootstrap
+    patch -p1 < ../dvbpsi-noexamples.patch
     if [ -e ../.x86 ]; then
 	./configure --prefix=${DVBTEE_ROOT}/usr/  --disable-debug --disable-release
     else
