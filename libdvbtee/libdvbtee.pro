@@ -90,6 +90,8 @@ macx: LIBS += -liconv
 symbian: LIBS += -lhdhomerun
 else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
 
+# some distros use a different location for libhdhomerun headers :-/
+INCLUDEPATH += /usr/include/libhdhomerun
 INCLUDEPATH += /usr/lib/libhdhomerun
 DEPENDPATH += /usr/lib/libhdhomerun
 
