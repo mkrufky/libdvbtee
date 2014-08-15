@@ -130,9 +130,9 @@ void hlsfeed::walk(uint8_t *buffer)
       }
       fprintf(stderr, "%s: playback duration: %f\n", __func__, duration);
     } else if (strstr(line, ".ts")) {
-      curlhttpget(push_iface, line, &info);
+      curlhttpget(line, &push_iface, &info);
     } else if (strstr(line, ".m3u8")) {
-      curlhttpget(walk_iface, line);
+      curlhttpget(line, &walk_iface);
     } else if (!strstr(line, "#EXT"))
       fprintf(stderr, "%s: invalid line: '%s'\n", __func__, line);
 

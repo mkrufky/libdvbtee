@@ -37,13 +37,13 @@ typedef struct {
 class curlhttpget
 {
 public:
-  explicit curlhttpget(curlhttpget_iface &iface, const char *url = NULL,
+  explicit curlhttpget(const char *url = NULL, curlhttpget_iface *iface = NULL,
 		       curlhttpget_info_t *info = NULL);
 
 private:
   CURL *curl_handle;
 
-  curlhttpget_iface &m_iface;
+  curlhttpget_iface *m_iface;
 
   void getinfo(curlhttpget_info_t *info);
 
