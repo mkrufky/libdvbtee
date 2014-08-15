@@ -81,6 +81,13 @@ static tune *find_tuned_tuner(unsigned int phy)
 	return NULL;
 }
 
+class empty_tuner_iface : public tune_iface
+{
+public:
+//	virtual void scan_progress(scan_progress_t *p) {}
+};
+
+
 static inline const char *data_fmt_str(unsigned int data_fmt)
 {
 	const char *fmt;
@@ -206,7 +213,7 @@ bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
 	return true;
 }
 
-bool serve::scan(unsigned int flags, scan_progress_callback progress_cb, void *progress_context, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+bool serve::scan(tune_iface &iface, unsigned int flags, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
@@ -218,7 +225,7 @@ bool serve::scan(unsigned int flags, scan_progress_callback progress_cb, void *p
 
 	dprintf("scanning for services...");
 
-	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, progress_cb, progress_context, chandump_cb, chandump_context);
+	return cmd_tuner_scan(iface, tuner, NULL, false, wait_for_results, flags, chandump_cb, chandump_context);
 }
 
 void serve::set_scan_flags(tune *p_tuner, unsigned int flags)
@@ -1038,17 +1045,16 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 	return false;
 }
 
-bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
-			   scan_progress_callback progress_cb, void *progress_context,
+bool serve::cmd_tuner_scan(tune_iface &iface, tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
 			   chandump_callback chandump_cb, void *chandump_context)
 {
 	if (!flags)
 		flags = SCAN_VSB;
 
 	if ((arg) && strlen(arg))
-		tuner->scan_for_services(flags, arg, scanepg, progress_cb, progress_context, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(iface, flags, arg, scanepg, chandump_cb, chandump_context, wait_for_results);
 	else
-		tuner->scan_for_services(flags, 0, 0, scanepg, progress_cb, progress_context, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(iface, flags, 0, 0, scanepg, chandump_cb, chandump_context, wait_for_results);
 
 	return true;
 }
@@ -1292,10 +1298,11 @@ bool serve_client::__command(char* cmdline)
 			return false;
 		}
 		cli_print("scanning for services...\n");
-		server->cmd_tuner_scan(tuner, arg,
+		empty_tuner_iface iface;
+		server->cmd_tuner_scan(iface, tuner, arg,
 				      (strstr(cmd, "scanepg")) ? true : false,
 				      (strstr(cmd, "startscan")) ? false : true,
-				      scan_flags, NULL, NULL, chandump, this);
+				      scan_flags, chandump, this);
 
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;

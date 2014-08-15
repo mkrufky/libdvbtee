@@ -138,18 +138,9 @@ public:
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
 	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
-	bool scan(unsigned int flags,
-		  scan_progress_callback progress_cb = NULL, void* progress_context = NULL,
+	bool scan(tune_iface &iface, unsigned int flags,
 		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL,
 		  unsigned int tuner_id = 0);
-	bool scan(unsigned int flags,
-		  chandump_callback chandump_cb, void *chandump_context,
-		  unsigned int tuner_id = 0)
-		{ return scan(flags, NULL, NULL, chandump_cb, chandump_context, tuner_id); }
-	bool scan(unsigned int flags,
-		  scan_progress_callback progress_cb, void *progress_context,
-		  unsigned int tuner_id = 0)
-		{ return scan(flags, progress_cb, progress_context, NULL, NULL, tuner_id); }
 
 	void set_scan_flags(tune* p_tuner, unsigned int flags);
 	unsigned int get_scan_flags(tune* p_tuner);
@@ -164,8 +155,7 @@ public:
 	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; }
 
 	/* FIXME: move to private */
-	bool cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
-			    scan_progress_callback progress_cb, void *progress_context,
+	bool cmd_tuner_scan(tune_iface &iface, tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
 			    chandump_callback chandump_cb, void *chandump_context);
 	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
 

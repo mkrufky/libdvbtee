@@ -203,6 +203,12 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 	return context->server->start();
 }
 
+class empty_tuner_iface : public tune_iface
+{
+public:
+//	virtual void scan_progress(scan_progress_t *p) {}
+};
+
 void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 	       unsigned int scan_flags, unsigned int scan_min, unsigned int scan_max, bool scan_epg)
 {
@@ -210,6 +216,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 	int partial_redundancy = 0;
 	int channels_to_scan = scan_max - scan_min + 1;
 	size_t num_tuners = context->tuners.size();
+	empty_tuner_iface iface;
 
 	switch (scan_method) {
 	case 1: /* speed */
@@ -218,7 +225,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 			int scan_start = scan_min + ((0 + i) * (unsigned int)channels_to_scan/num_tuners);
 			int scan_end   = scan_min + ((1 + i) * (unsigned int)channels_to_scan/num_tuners);
 			fprintf(stderr, "speed scan: tuner %d scanning from %d to %d\n", i, scan_start, scan_end);
-			iter->second->tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
+			iter->second->tune::start_scan(iface, scan_flags, scan_start, scan_end, scan_epg);
 			sleep(1); // FIXME
 		}
 		break;
@@ -226,7 +233,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 		for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 			int i = iter->first;
 			fprintf(stderr, "redundancy scan: tuner %d scanning from %d to %d\n", i, scan_min, scan_max);
-			iter->second->tune::start_scan(scan_flags, scan_min, scan_max, scan_epg);
+			iter->second->tune::start_scan(iface, scan_flags, scan_min, scan_max, scan_epg);
 			sleep(5); // FIXME
 		}
 		break;
@@ -253,7 +260,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 					(partial_redundancy) ? "partial " : "",
 					j + 1, num_tuners - partial_redundancy,
 					i, scan_start, scan_end);
-				iter->second->tune::start_scan(scan_flags, scan_start, scan_end, scan_epg);
+				iter->second->tune::start_scan(iface, scan_flags, scan_start, scan_end, scan_epg);
 				sleep(1); // FIXME
 			}
 		}
@@ -586,13 +593,14 @@ int main(int argc, char **argv)
 		channel = scan_min = scan_max;
 
 	if ((b_scan) && (b_READ_TUNER || (num_tuners >= 0))) {
+		empty_tuner_iface dvbtee_tune_iface;
 		if (num_tuners >= 0)
 			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg); // FIXME: channel_list
 		else {
 			if (strlen(channel_list)) {
-				if (tuner) tuner->scan_for_services(scan_flags, channel_list, scan_epg);
+				if (tuner) tuner->scan_for_services(dvbtee_tune_iface, scan_flags, channel_list, scan_epg);
 			} else {
-				if (tuner) tuner->scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
+				if (tuner) tuner->scan_for_services(dvbtee_tune_iface, scan_flags, scan_min, scan_max, scan_epg);
 			}
 		}
 		goto exit;
