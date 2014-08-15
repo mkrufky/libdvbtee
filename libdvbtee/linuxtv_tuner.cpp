@@ -151,7 +151,7 @@ bool linuxtv_tuner::set_device_ids(int adap, int fe, int demux, int dvr, bool ke
 	dvr_id   = dvr;
 
 	if (kernel_pid_filter)
-		feeder.parser.set_addfilter_callback(add_filter, this);
+		feeder.parser.set_tsfilter_iface(*this);
 
 	return ((adap >= 0) && (fe >= 0) && (demux >= 0) && (dvr >= 0)); /* TO DO: -1 should signify auto/search */
 }
@@ -205,7 +205,7 @@ int linuxtv_tuner::open_available_tuner(unsigned int max_adap, unsigned int max_
 		while ((unsigned int)fe_id < max_fe) {
 			int ret = open_fe();
 			if (ret >= 0) {
-				feeder.parser.set_addfilter_callback(add_filter, this);
+				feeder.parser.set_tsfilter_iface(*this);
 				feeder.parser.reset();
 				return ret;
 			}
@@ -473,13 +473,12 @@ void linuxtv_tuner::clear_filters()
 	filtered_pids.clear();
 }
 
-//static
-void linuxtv_tuner::add_filter(void *p_this, uint16_t pid)
+void linuxtv_tuner::addfilter(uint16_t pid)
 {
 	if (pid == 0xffff)
-		return static_cast<linuxtv_tuner*>(p_this)->clear_filters();
+		return clear_filters();
 	else
-		return static_cast<linuxtv_tuner*>(p_this)->add_filter(pid);
+		return add_filter(pid);
 }
 
 void linuxtv_tuner::add_filter(uint16_t pid)

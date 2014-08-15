@@ -150,13 +150,12 @@ void hdhr_tuner::clear_filters()
 	hdhomerun_device_set_tuner_filter(hdhr_dev, "0x0000-0x1fff");
 }
 
-//static
-void hdhr_tuner::add_filter(void *p_this, uint16_t pid)
+void hdhr_tuner::addfilter(uint16_t pid)
 {
 	if (pid == 0xffff)
-		return static_cast<hdhr_tuner*>(p_this)->clear_filters();
+		return clear_filters();
 	else
-		return static_cast<hdhr_tuner*>(p_this)->add_filter(pid);
+		return add_filter(pid);
 }
 
 void hdhr_tuner::add_filter(uint16_t pid)
@@ -195,7 +194,7 @@ bool hdhr_tuner::set_hdhr_id(uint32_t device_id, uint32_t device_ip, unsigned in
 	if (!dev) return false;
 	bool ret = dev->set_hdhr_id(device_id, device_ip, tuner);
 	if ((ret) && (use_pid_filter))
-		feeder.parser.set_addfilter_callback(add_filter, this);
+		feeder.parser.set_tsfilter_iface(*this);
 
 	return ret;
 }
@@ -205,7 +204,7 @@ bool hdhr_tuner::set_hdhr_id(const char *device_str, bool use_pid_filter)
 	if (!dev) return false;
 	bool ret = dev->set_hdhr_id(device_str);
 	if ((ret) && (use_pid_filter))
-		feeder.parser.set_addfilter_callback(add_filter, this);
+		feeder.parser.set_tsfilter_iface(*this);
 
 	return ret;
 }

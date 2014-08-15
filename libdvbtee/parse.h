@@ -104,7 +104,12 @@ typedef struct {
 } channel_info_t;
 typedef std::map<uint16_t, channel_info_t> map_channel_info;
 
-typedef void (*addfilter_callback)(void *, uint16_t);
+class tsfilter_iface
+{
+public:
+	virtual void addfilter(uint16_t) = 0;
+};
+
 
 typedef struct {
 	uint16_t lcn;
@@ -190,7 +195,7 @@ public:
 
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 
-	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; }
+	void set_tsfilter_iface(tsfilter_iface &iface) { m_tsfilter_iface = &iface; }
 
 	output out;
 
@@ -292,10 +297,9 @@ private:
 	unsigned int tei_count;
 	map_pidtype payload_pids;
 
-	addfilter_callback addfilter_cb;
-	void* addfilter_context;
-	void add_filter(uint16_t pid) { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, pid); }
-	void clear_filters() { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, 0xffff); }
+	tsfilter_iface *m_tsfilter_iface;
+	void add_filter(uint16_t pid) { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(pid); }
+	void clear_filters() { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(0xffff); }
 	void reset_filters();
 
 	bool enabled;
