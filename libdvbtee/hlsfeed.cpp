@@ -112,6 +112,9 @@ void hlsfeed::walk(uint8_t *buffer)
   char *line = strtok_r(playlist, "\n", &save);
   double duration;
   curlhttpget_info_t info = { 0 };
+  pushwalk_iface push_iface(*this, PUSHWALK_PUSH);
+  pushwalk_iface walk_iface(*this, PUSHWALK_WALK);
+
   while (line) {
     //if (line[0] == '#')
     if (strstr(line, "#EXTINF:")) {
@@ -127,11 +130,9 @@ void hlsfeed::walk(uint8_t *buffer)
       }
       fprintf(stderr, "%s: playback duration: %f\n", __func__, duration);
     } else if (strstr(line, ".ts")) {
-      pushwalk_iface iface(*this, PUSHWALK_PUSH);
-      curlhttpget(iface, line, &info);
+      curlhttpget(push_iface, line, &info);
     } else if (strstr(line, ".m3u8")) {
-      pushwalk_iface iface(*this, PUSHWALK_WALK);
-      curlhttpget(iface, line);
+      curlhttpget(walk_iface, line);
     } else if (!strstr(line, "#EXT"))
       fprintf(stderr, "%s: invalid line: '%s'\n", __func__, line);
 
