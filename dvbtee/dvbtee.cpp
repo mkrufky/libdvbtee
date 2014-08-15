@@ -51,10 +51,18 @@ typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
 map_pid_to_context context_map;
 
-static void write_feed(void *context, void *buffer, size_t size, size_t nmemb)
+class write_feed : public curlhttpget_iface
 {
-	static_cast<dvbtee_context*>(context)->_file_feeder.push(size * nmemb, (const uint8_t*)buffer);
-}
+public:
+	write_feed(dvbtee_context *ctxt = NULL) : m_ctxt(ctxt) {}
+
+	void write_data(void *buffer, size_t size, size_t nmemb)
+	{
+		m_ctxt->_file_feeder.push(size * nmemb, (const uint8_t*)buffer);
+	}
+private:
+	dvbtee_context *m_ctxt;
+};
 
 
 void cleanup_tuners(struct dvbtee_context* context, bool quick = false)
@@ -606,7 +614,8 @@ int main(int argc, char **argv)
 
 	if (strlen(tcpipfeedurl)) {
 		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
-			hlsfeed hlsFeeder(tcpipfeedurl, write_feed, &context);
+			write_feed iface(&context);
+			hlsfeed(iface, tcpipfeedurl);
 		} else
 		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);

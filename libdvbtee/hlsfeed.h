@@ -29,20 +29,17 @@
 class hlsfeed
 {
 public:
-  explicit hlsfeed(const char *url = NULL, hls_curl_http_get_data_callback data_pump_callback = NULL, void *data_pump_context = NULL);
+  explicit hlsfeed(curlhttpget_iface &iface, const char *url = NULL);
+
+  void push(uint8_t *buffer, size_t size, size_t nmemb);
+  void walk(uint8_t *buffer, size_t size, size_t nmemb);
 
 private:
   const char *toplevel;
   std::string Url;
-  hls_curl_http_get_data_callback datapump_cb;
-  void *datapump_ctxt;
+  curlhttpget_iface &m_iface;
 
-  void push(uint8_t *buffer, size_t size, size_t nmemb);
-  void walk(uint8_t *buffer, size_t size, size_t nmemb);
   void walk(uint8_t *buffer);
-
-  static void curl_push_callback(void *context, void *buffer, size_t size, size_t nmemb);
-  static void curl_walk_callback(void *context, void *buffer, size_t size, size_t nmemb);
 
   rbuf push_buffer;
   rbuf walk_buffer;
