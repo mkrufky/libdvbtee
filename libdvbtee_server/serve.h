@@ -62,6 +62,10 @@ private:
 	feed *feeder;
 
 	int sock_fd;
+#define TEMPHACK 1
+#if TEMPHACK
+public:
+#endif
 	FILE *channels_conf_file;
 #define SERVE_DATA_FMT_NONE 0
 #define SERVE_DATA_FMT_HTML 1
@@ -71,6 +75,9 @@ private:
 #define SERVE_DATA_FMT_CLI  16
 #define SERVE_DATA_FMT_TEXT (SERVE_DATA_FMT_HTML | SERVE_DATA_FMT_JSON | SERVE_DATA_FMT_XML)
 	unsigned int data_fmt;
+#if TEMPHACK
+private:
+#endif
 
 	void stop_without_wait() { f_kill_thread = true; }
 	void close_socket();
@@ -91,7 +98,13 @@ private:
 
 	decode_report *reporter;
 
+#if TEMPHACK
+public:
+#endif
 	void streamback(const uint8_t*, size_t);
+#if TEMPHACK
+private:
+#endif
 	static void streamback(void*, const uint8_t*, size_t);
 	static void streamback(void*, const char*);
 
@@ -103,12 +116,19 @@ private:
 	static void epg_header_footer_callback(void * context, bool header, bool channel);
 	static void epg_event_callback(void * context, decoded_event_t *e);
 
+#if !TEMPHACK
 	const char * chandump(bool save_to_disk, parsed_channel_info_t *c);
 	static const char * chandump(void *context, parsed_channel_info_t *c);
 	static const char * chandump_to_disk(void *context, parsed_channel_info_t *c);
+#else
+public:
+#endif
 
 	void cli_print(const char *, ...);
 	static void cli_print(void *, const char *, ...);
+#if TEMPHACK
+private:
+#endif
 
 	std::string services;
 };
@@ -137,19 +157,19 @@ public:
 
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
-	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
+	bool get_channels(parse_iface *iface, unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
-		  tune_iface *iface = NULL,
-		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL,
+		  tune_iface *t_iface = NULL,
+		  parse_iface *p_iface = NULL,
 		  unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
-		  chandump_callback chandump_cb, void *chandump_context,
+		  parse_iface *iface,
 		  unsigned int tuner_id = 0)
-		{ return scan(flags, NULL, chandump_cb, chandump_context, tuner_id); }
+		{ return scan(flags, NULL, iface, tuner_id); }
 	bool scan(unsigned int flags,
 		  tune_iface *iface,
 		  unsigned int tuner_id = 0)
-		{ return scan(flags, iface, NULL, NULL, tuner_id); }
+		{ return scan(flags, iface, NULL, tuner_id); }
 
 
 	void set_scan_flags(tune* p_tuner, unsigned int flags);
@@ -166,9 +186,8 @@ public:
 
 	/* FIXME: move to private */
 	bool cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
-			    tune_iface *iface,
-			    chandump_callback chandump_cb, void *chandump_context);
-	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
+			    tune_iface *t_iface, parse_iface *p_iface);
+	bool cmd_config_channels_conf_load(tune* tuner, parse_iface *iface);
 
 	feed_server_map feed_servers;
 

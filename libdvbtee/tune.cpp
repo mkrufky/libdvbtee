@@ -314,35 +314,35 @@ int tune::start_scan(unsigned int mode, bool epg, tune_iface *iface)
 	return ret;
 }
 
-unsigned int tune::get_scan_results(bool wait, chandump_callback chandump_cb, void* chandump_context)
+unsigned int tune::get_scan_results(bool wait, parse_iface *iface)
 {
 	if (wait) wait_for_scan_complete();
 
-	unsigned int ret = feeder.parser.xine_dump(chandump_cb, chandump_context);
+	unsigned int ret = feeder.parser.xine_dump(iface);
 
 	if (scan_epg) feeder.parser.epg_dump();
 
 	return ret;
 }
 
-int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, tune_iface *iface, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
+int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, tune_iface *t_iface, parse_iface *p_iface, bool wait_for_results)
 {
 	unsigned int count = 0;
 
 	if (!mode)
 		mode = SCAN_VSB;
 
-	if (0 != start_scan(scan_mode, channel_list, epg, iface))
+	if (0 != start_scan(scan_mode, channel_list, epg, t_iface))
 		return -1;
 
 	if (wait_for_results) {
-		count += get_scan_results(true, chandump_cb, chandump_context);
+		count += get_scan_results(true, p_iface);
 		fprintf(stderr, "found %d services\n", count);
 	}
 	return 0;
 }
 
-int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, tune_iface *iface, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
+int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, tune_iface *t_iface, parse_iface *p_iface, bool wait_for_results)
 {
 	unsigned int count = 0;
 	unsigned int total_count = 0;
@@ -354,12 +354,12 @@ int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int ma
 
 		count = 0;
 
-		if (0 != start_scan(scan_mode, min, max, epg, iface))
+		if (0 != start_scan(scan_mode, min, max, epg, t_iface))
 			return -1;
 
 		if (wait_for_results) {
 
-			count += get_scan_results(true, chandump_cb, chandump_context);
+			count += get_scan_results(true, p_iface);
 			total_count += count;
 #if 0
 			for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)

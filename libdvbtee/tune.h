@@ -104,13 +104,13 @@ public:
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
-	int scan_for_services(unsigned int, char *, bool epg = false, tune_iface *iface = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
-	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *iface = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
+	int scan_for_services(unsigned int, char *, bool epg = false, tune_iface *t_iface = NULL, parse_iface *p_iface = NULL, bool wait_for_results = true);
+	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *t_iface = NULL, parse_iface *p_iface = NULL, bool wait_for_results = true);
 	/* FIXME: deprecate start_scan & move to private */
 	int start_scan(unsigned int, char *, bool epg = false, tune_iface *iface = NULL);
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *iface = NULL);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); }
-	unsigned int get_scan_results(bool wait = true, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
+	unsigned int get_scan_results(bool wait = true, parse_iface *iface = NULL);
 	void stop_scan() { f_kill_thread = true; }
 
 	feed feeder;

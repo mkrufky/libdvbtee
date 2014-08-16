@@ -126,6 +126,13 @@ typedef struct {
 
 typedef const char * (*chandump_callback)(void *context, parsed_channel_info_t *c);
 
+class parse_iface
+{
+public:
+	virtual void chandump(parsed_channel_info_t *) = 0;
+};
+
+
 class parse
 {
 public:
@@ -172,7 +179,7 @@ public:
 	int add_stdout(uint16_t);
 	int add_stdout(char*);
 
-	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
+	unsigned int xine_dump(parse_iface *iface = NULL); /* full channel dump  */
 	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
@@ -249,9 +256,8 @@ private:
 	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); }
 #endif
 
-	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
-	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); }
-	unsigned int xine_dump(uint16_t, channel_info_t*, chandump_callback, void* chandump_context);
+	unsigned int xine_dump(uint16_t ts_id, parse_iface *iface) { return xine_dump(ts_id, &channel_info[ts_id], iface); }
+	unsigned int xine_dump(uint16_t, channel_info_t*, parse_iface *);
 
 	void set_ts_id(uint16_t);
 	void set_service_id(uint16_t id) { service_ids[id] = 0; }

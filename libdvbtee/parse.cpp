@@ -895,7 +895,7 @@ inline uint16_t tp_pkt_pid(uint8_t* pkt)
 	return (pkt[0] == 0x47) ? ((uint16_t) (pkt[1] & 0x1f) << 8) + pkt[2] : (uint16_t) - 1;
 }
 
-static const char * xine_chandump(void *context, parsed_channel_info_t *c)
+static const char * xine_chandump(parsed_channel_info_t *c)
 {
 	char channelno[7]; /* XXX.XXX */
 	if (c->major + c->minor > 1)
@@ -963,7 +963,7 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 	}
 }
 
-unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chandump_callback chandump_cb, void* chandump_context)
+unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, parse_iface *iface)
 {
 	parsed_channel_info_t c;
 	c.freq             = channel_info->frequency;
@@ -993,10 +993,10 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 
 		parse_channel_info(ts_id, &iter_pmt->second, decoded_vct, c);
 
-		if (!chandump_cb)
-			chandump_cb = xine_chandump;
-
-		chandump_cb(chandump_context, &c);
+		if (iface)
+			iface->chandump(&c);
+		else
+			xine_chandump(&c);
 		count++;
 	}
 	return count;
@@ -1004,7 +1004,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
-unsigned int parse::xine_dump(chandump_callback chandump_cb, void* chandump_context)
+unsigned int parse::xine_dump(parse_iface *iface)
 {
 	map_chan_to_ts_id channels;
 	int count = 0;
@@ -1020,7 +1020,7 @@ unsigned int parse::xine_dump(chandump_callback chandump_cb, void* chandump_cont
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		count += xine_dump(iter->second, &channel_info[iter->second], chandump_cb, chandump_context);
+		count += xine_dump(iter->second, &channel_info[iter->second], iface);
 
 	channels.clear();
 #endif
