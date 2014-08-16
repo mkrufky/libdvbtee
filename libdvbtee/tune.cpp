@@ -236,7 +236,7 @@ void* tune::scan_thread()
 
 #define CHAR_CMD_COMMA ","
 
-int tune::start_scan(tune_iface *iface, unsigned int mode, char *channel_list, bool epg)
+int tune::start_scan(unsigned int mode, char *channel_list, bool epg, tune_iface *iface)
 {
 	char *save;
 	char *item = strtok_r(channel_list, CHAR_CMD_COMMA, &save);
@@ -257,7 +257,7 @@ int tune::start_scan(tune_iface *iface, unsigned int mode, char *channel_list, b
 	return start_scan(iface, mode, epg);
 }
 
-int tune::start_scan(tune_iface *iface, unsigned int mode, unsigned int min, unsigned int max, bool epg)
+int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool epg, tune_iface *iface)
 {
 	//channels.clear();
 	scan_channel_list.clear();
@@ -332,7 +332,7 @@ int tune::scan_for_services(tune_iface *iface, unsigned int mode, char *channel_
 	if (!mode)
 		mode = SCAN_VSB;
 
-	if (0 != start_scan(iface, scan_mode, channel_list, epg))
+	if (0 != start_scan(scan_mode, channel_list, epg, iface))
 		return -1;
 
 	if (wait_for_results) {
@@ -354,7 +354,7 @@ int tune::scan_for_services(tune_iface *iface, unsigned int mode, unsigned int m
 
 		count = 0;
 
-		if (0 != start_scan(iface, scan_mode, min, max, epg))
+		if (0 != start_scan(scan_mode, min, max, epg, iface))
 			return -1;
 
 		if (wait_for_results) {

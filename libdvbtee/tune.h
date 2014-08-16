@@ -109,10 +109,8 @@ public:
 	int scan_for_services(unsigned int mode, char *channel_list, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true) { return scan_for_services(mode, channel_list, epg, chandump_cb, chandump_context, wait_for_results); }
 	int scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true) { return scan_for_services(mode, min, max, epg, chandump_cb, chandump_context, wait_for_results); }
 	/* FIXME: deprecate start_scan & move to private */
-	int start_scan(tune_iface *, unsigned int, char *, bool epg = false);
-	int start_scan(tune_iface *, unsigned int, unsigned int, unsigned int, bool epg = false);
-	int start_scan(unsigned int mode, char *channel_list, bool epg = false) { return start_scan(NULL, mode, channel_list, epg); }
-	int start_scan(unsigned int mode, unsigned int min, unsigned int max, bool epg = false) { return start_scan(NULL, mode, min, max, epg); }
+	int start_scan(unsigned int, char *, bool epg = false, tune_iface *iface = NULL);
+	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *iface = NULL);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); }
 	unsigned int get_scan_results(bool wait = true, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
 	void stop_scan() { f_kill_thread = true; }
