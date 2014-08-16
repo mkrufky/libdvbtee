@@ -81,7 +81,6 @@ static tune *find_tuned_tuner(unsigned int phy)
 	return NULL;
 }
 
-
 static inline const char *data_fmt_str(unsigned int data_fmt)
 {
 	const char *fmt;
