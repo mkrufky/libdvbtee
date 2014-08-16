@@ -936,64 +936,61 @@ exit:
 	return ret;
 }
 
-class serve_parser_iface : public parse_iface
+serve_parser_iface::serve_parser_iface(serve_client &client, bool to_disk)
+ : m_serve_client(client)
+ , m_to_disk(to_disk)
 {
-public:
-	serve_parser_iface(serve_client &client, bool toDisk = false)
-		: m_serve_client(client)
-		, m_to_disk(toDisk) {}
-	virtual void chandump(parsed_channel_info_t *c)
-	{
-		const char *str = NULL;
-		char channelno[7] = { 0 }; /* XXX.XXX */
-		if (c->major + c->minor > 1)
-			sprintf(channelno, "%d.%d", c->major, c->minor);
-		else if (c->lcn)
-			sprintf(channelno, "%d", c->lcn);
-		else
-			sprintf(channelno, "%d", c->physical_channel);
+	//
+}
 
-		m_serve_client.cli_print("%s-%s:%d:%s:%d:%d:%d\t tune=%d~%d\n",
-			  channelno,
-			  c->service_name,
-			  c->freq,//iter_vct->second.carrier_freq,
-			  c->modulation,
-			  c->vpid, c->apid, c->program_number,
-			  c->physical_channel,
-			  c->program_number);
+void serve_parser_iface::chandump(parsed_channel_info_t *c)
+{
+	const char *str = NULL;
+	char channelno[7] = { 0 }; /* XXX.XXX */
+	if (c->major + c->minor > 1)
+		sprintf(channelno, "%d.%d", c->major, c->minor);
+	else if (c->lcn)
+		sprintf(channelno, "%d", c->lcn);
+	else
+		sprintf(channelno, "%d", c->physical_channel);
 
-		if (m_to_disk) {
-			//char diskbuf[96] = { 0 };
-			//snprintf(diskbuf, 96,
-			fprintf(m_serve_client.channels_conf_file,
-				"%s-%s:%d:%s:%d:%d:%d\n",
-				channelno,
-				c->service_name,
-				c->freq,//iter_vct->second.carrier_freq,
-				c->modulation,
-				c->vpid, c->apid, c->program_number);
+	m_serve_client.cli_print("%s-%s:%d:%s:%d:%d:%d\t tune=%d~%d\n",
+		  channelno,
+		  c->service_name,
+		  c->freq,//iter_vct->second.carrier_freq,
+		  c->modulation,
+		  c->vpid, c->apid, c->program_number,
+		  c->physical_channel,
+		  c->program_number);
 
-			//if (channels_fd >= 0)
-			//	write(channels_fd, (const void *)diskbuf, sizeof(diskbuf));
-		} else
-		if (m_serve_client.data_fmt & SERVE_DATA_FMT_TEXT) {
+	if (m_to_disk) {
+		//char diskbuf[96] = { 0 };
+		//snprintf(diskbuf, 96,
+		fprintf(m_serve_client.channels_conf_file,
+			"%s-%s:%d:%s:%d:%d:%d\n",
+			channelno,
+			c->service_name,
+			c->freq,//iter_vct->second.carrier_freq,
+			c->modulation,
+			c->vpid, c->apid, c->program_number);
 
-			str =
-			  (USE_JSON(m_serve_client.data_fmt)) ?
-				json_dump_channels(this, c) :
-			  (USE_XML(m_serve_client.data_fmt)) ?
-				xml_dump_channels(this, c) :
-				html_dump_channels(this, c);
+		//if (channels_fd >= 0)
+		//	write(channels_fd, (const void *)diskbuf, sizeof(diskbuf));
+	} else
+	if (m_serve_client.data_fmt & SERVE_DATA_FMT_TEXT) {
 
-			m_serve_client.streamback((const uint8_t *)str, strlen(str));
-		}
+		str =
+		  (USE_JSON(m_serve_client.data_fmt)) ?
+			json_dump_channels(this, c) :
+		  (USE_XML(m_serve_client.data_fmt)) ?
+			xml_dump_channels(this, c) :
+			html_dump_channels(this, c);
 
-		return;
+		m_serve_client.streamback((const uint8_t *)str, strlen(str));
 	}
-private:
-	serve_client& m_serve_client;
-	bool m_to_disk;
-};
+
+	return;
+}
 
 bool serve_client::cmd_tuner_stop()
 {

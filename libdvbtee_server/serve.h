@@ -33,10 +33,13 @@
 typedef std::map<unsigned int, tune*> tuner_map;
 typedef std::map<unsigned int, feed*> feeder_map;
 
+class serve_parser_iface;
+
 class serve;
 
 class serve_client
 {
+	friend class serve_parser_iface;
 public:
 	serve_client();
 	~serve_client();
@@ -62,10 +65,6 @@ private:
 	feed *feeder;
 
 	int sock_fd;
-#define TEMPHACK 1
-#if TEMPHACK
-public:
-#endif
 	FILE *channels_conf_file;
 #define SERVE_DATA_FMT_NONE 0
 #define SERVE_DATA_FMT_HTML 1
@@ -75,9 +74,6 @@ public:
 #define SERVE_DATA_FMT_CLI  16
 #define SERVE_DATA_FMT_TEXT (SERVE_DATA_FMT_HTML | SERVE_DATA_FMT_JSON | SERVE_DATA_FMT_XML)
 	unsigned int data_fmt;
-#if TEMPHACK
-private:
-#endif
 
 	void stop_without_wait() { f_kill_thread = true; }
 	void close_socket();
@@ -98,13 +94,7 @@ private:
 
 	decode_report *reporter;
 
-#if TEMPHACK
-public:
-#endif
 	void streamback(const uint8_t*, size_t);
-#if TEMPHACK
-private:
-#endif
 	static void streamback(void*, const uint8_t*, size_t);
 	static void streamback(void*, const char*);
 
@@ -116,21 +106,24 @@ private:
 	static void epg_header_footer_callback(void * context, bool header, bool channel);
 	static void epg_event_callback(void * context, decoded_event_t *e);
 
-#if !TEMPHACK
 	const char * chandump(bool save_to_disk, parsed_channel_info_t *c);
 	static const char * chandump(void *context, parsed_channel_info_t *c);
 	static const char * chandump_to_disk(void *context, parsed_channel_info_t *c);
-#else
-public:
-#endif
 
 	void cli_print(const char *, ...);
 	static void cli_print(void *, const char *, ...);
-#if TEMPHACK
-private:
-#endif
 
 	std::string services;
+};
+
+class serve_parser_iface : public parse_iface
+{
+public:
+	serve_parser_iface(serve_client&, bool to_disk = false);
+	virtual void chandump(parsed_channel_info_t*);
+private:
+	serve_client& m_serve_client;
+	bool m_to_disk;
 };
 
 typedef std::map<int, serve_client> serve_client_map;
