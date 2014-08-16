@@ -54,14 +54,14 @@ map_pid_to_context context_map;
 class write_feed : public curlhttpget_iface
 {
 public:
-	write_feed(dvbtee_context *ctxt = NULL) : m_ctxt(ctxt) {}
+	write_feed(dvbtee_context &ctxt) : m_ctxt(ctxt) {}
 
 	void write_data(void *buffer, size_t size, size_t nmemb)
 	{
-		m_ctxt->_file_feeder.push(size * nmemb, (const uint8_t*)buffer);
+		m_ctxt._file_feeder.push(size * nmemb, (const uint8_t*)buffer);
 	}
 private:
-	dvbtee_context *m_ctxt;
+	dvbtee_context &m_ctxt;
 };
 
 
@@ -614,7 +614,7 @@ int main(int argc, char **argv)
 
 	if (strlen(tcpipfeedurl)) {
 		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
-			write_feed iface(&context);
+			write_feed iface(context);
 			hlsfeed(iface, tcpipfeedurl);
 		} else
 		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
