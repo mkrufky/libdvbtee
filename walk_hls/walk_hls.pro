@@ -19,21 +19,21 @@ SOURCES += main.cpp \
 HEADERS += \
     hlsinput.h
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libdvbtee/libdvbtee/release/ -ldvbtee
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libdvbtee/libdvbtee/debug/ -ldvbtee
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee/release/ -ldvbtee
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ldvbtee
 else:symbian: LIBS += -ldvbtee
-else:unix: LIBS += -L$$PWD/../../libdvbtee/libdvbtee/ -ldvbtee
+else:unix: LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
 
-INCLUDEPATH += $$PWD/../../libdvbtee/libdvbtee
-DEPENDPATH += $$PWD/../../libdvbtee/libdvbtee
+INCLUDEPATH += $$PWD/../libdvbtee
+DEPENDPATH += $$PWD/../libdvbtee
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../libdvbtee/usr/lib/release/ -ldvbpsi
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../libdvbtee/usr/lib/debug/ -ldvbpsi
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../usr/lib/release/ -ldvbpsi
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../usr/lib/debug/ -ldvbpsi
 else:symbian: LIBS += -ldvbpsi
-else:unix: LIBS += -L$$PWD/../../libdvbtee/usr/lib/ -ldvbpsi
+else:unix: LIBS += -L$$PWD/../usr/lib/ -ldvbpsi
 
-INCLUDEPATH += $$PWD/../../libdvbtee/usr/include
-DEPENDPATH += $$PWD/../../libdvbtee/usr/include
+INCLUDEPATH += $$PWD/../usr/include
+DEPENDPATH += $$PWD/../usr/include
 
 unix|win32: LIBS += -lcurl
 
