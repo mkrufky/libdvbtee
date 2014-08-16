@@ -883,9 +883,9 @@ void serve_client::cli_print(const char *fmt, ...)
 #define CHAR_CMD_SET "/"
 #endif
 
-#define USE_JSON (data_fmt == SERVE_DATA_FMT_JSON)
-#define USE_HTML (data_fmt == SERVE_DATA_FMT_HTML)
-#define USE_XML  (data_fmt == SERVE_DATA_FMT_XML)
+#define USE_JSON(data_fmt) (data_fmt == SERVE_DATA_FMT_JSON)
+#define USE_HTML(data_fmt) (data_fmt == SERVE_DATA_FMT_HTML)
+#define USE_XML(data_fmt)  (data_fmt == SERVE_DATA_FMT_XML)
 
 bool serve_client::command(char* cmdline)
 {
@@ -903,7 +903,7 @@ bool serve_client::command(char* cmdline)
 
 	if (stream_http_headers) {
 		const char *str;
-		if ((USE_JSON) || (USE_XML))
+		if ((USE_JSON(data_fmt)) || (USE_XML(data_fmt)))
 			str = http_response(MIMETYPE_TEXT_PLAIN);
 		else
 			str = http_response(MIMETYPE_TEXT_HTML);
@@ -983,9 +983,9 @@ const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 
 		str =
-		  (USE_JSON) ?
+		  (USE_JSON(data_fmt)) ?
 			json_dump_channels(this, c) :
-		  (USE_XML) ?
+		  (USE_XML(data_fmt)) ?
 			xml_dump_channels(this, c) :
 			html_dump_channels(this, c);
 
