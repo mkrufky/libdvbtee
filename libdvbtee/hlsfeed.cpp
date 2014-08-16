@@ -48,7 +48,7 @@ inline double convertToDouble(std::string const& s)
   return x;
 }
 
-hlsfeed::hlsfeed(curlhttpget_iface &iface, const char *url)
+hlsfeed::hlsfeed(const char *url, curlhttpget_iface *iface)
   : toplevel(url)
   , Url(url)
   , m_iface(iface)
@@ -170,8 +170,7 @@ void* hlsfeed::push_thread()
 		buf_size /= 188;
 		buf_size *= 188;
 
-		m_iface.write_data(data, 188, buf_size / 188);
-
+		if (m_iface) m_iface->write_data(data, 188, buf_size / 188);
 
 		push_buffer.put_read_ptr(buf_size);
 	}

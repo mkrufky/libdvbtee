@@ -615,7 +615,7 @@ int main(int argc, char **argv)
 	if (strlen(tcpipfeedurl)) {
 		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
 			write_feed iface(context);
-			hlsfeed(iface, tcpipfeedurl);
+			hlsfeed(tcpipfeedurl, &iface);
 		} else
 		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);

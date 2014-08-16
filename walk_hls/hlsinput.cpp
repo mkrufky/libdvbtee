@@ -38,7 +38,7 @@ hlsinput::hlsinput(bool feed_stdout)
 
 bool hlsinput::get(const char *url)
 {
-	hlsfeed(*this, url);
+	hlsfeed(url, this);
 
 	return true;
 }

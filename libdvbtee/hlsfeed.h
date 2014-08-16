@@ -29,7 +29,7 @@
 class hlsfeed
 {
 public:
-  explicit hlsfeed(curlhttpget_iface &iface, const char *url = NULL);
+  explicit hlsfeed(const char *url = NULL, curlhttpget_iface *iface = NULL);
 
   void push(uint8_t *buffer, size_t size, size_t nmemb);
   void walk(uint8_t *buffer, size_t size, size_t nmemb);
@@ -37,7 +37,7 @@ public:
 private:
   const char *toplevel;
   std::string Url;
-  curlhttpget_iface &m_iface;
+  curlhttpget_iface *m_iface;
 
   void walk(uint8_t *buffer);
 
