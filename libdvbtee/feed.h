@@ -117,7 +117,13 @@ private:
 
 typedef std::map<int, feed> feed_map;
 
-typedef bool (*feed_notify_callback)(void*, feed*);
+class feed_server_iface
+{
+public:
+	virtual ~feed_server_iface() {}
+	virtual void add_feeder(feed*) = 0;
+};
+
 
 class feed_server
 {
@@ -125,14 +131,13 @@ public:
 	feed_server();
 	~feed_server();
 
-	int start_tcp_listener(uint16_t port_requested, feed_notify_callback notify_cb = NULL, void *context = NULL);
-	int start_udp_listener(uint16_t port_requested, feed_notify_callback notify_cb = NULL, void *context = NULL);
+	int start_tcp_listener(uint16_t port_requested, feed_server_iface *iface = NULL);
+	int start_udp_listener(uint16_t port_requested, feed_server_iface *iface = NULL);
 private:
 	feed_map feeders;
 	socket_listen listener;
 
-	feed_notify_callback connection_notify_cb;
-	void *parent_context;
+	feed_server_iface *m_iface;
 
 	void add_tcp_feed(int);
 	static void add_tcp_feed(void*, int);

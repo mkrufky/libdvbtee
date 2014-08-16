@@ -108,18 +108,11 @@ static inline const char *data_fmt_str(unsigned int data_fmt)
 	return fmt;
 }
 
-//static
-bool serve::add_feeder(void *p_this, feed *new_feeder)
-{
-	return static_cast<serve*>(p_this)->add_feeder(new_feeder);
-}
-
-bool serve::add_feeder(feed *new_feeder)
+void serve::add_feeder(feed *new_feeder)
 {
 	unsigned int new_id = feeders.size();
 	while (feeders.count(new_id)) new_id++;
 	feeders[new_id] = new_feeder;
-	return true;
 }
 
 bool serve::add_tuner(tune *new_tuner)
@@ -497,7 +490,8 @@ void* serve_client::client_thread()
 }
 
 serve::serve()
-  : f_kill_thread(false)
+  : feed_server_iface()
+  , f_kill_thread(false)
   , f_reclaim_resources(true)
   , f_cli_enabled(true)
 {
@@ -1600,10 +1594,10 @@ bool serve_client::__command(char* cmdline)
 			int ret;
 			if (strstr(cmd, "udp")) {
 				cli_print("starting TS listener on UDP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_udp_listener(portnum, server->add_feeder_static, server);
+				ret = server->feed_servers[portnum].start_udp_listener(portnum, server);
 			} else {
 				cli_print("starting TS listener on TCP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder_static, server);
+				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server);
 			}
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}

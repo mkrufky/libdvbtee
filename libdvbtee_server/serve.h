@@ -121,7 +121,7 @@ struct libdvbtee_server_config {
 	bool cli_disabled;
 };
 
-class serve
+class serve : public feed_server_iface
 {
 public:
 	serve();
@@ -132,9 +132,7 @@ public:
 	void stop();
 
 	bool add_tuner(tune *new_tuner);
-	bool add_feeder(feed *new_feeder);
-	static bool add_feeder(void*, feed*);
-	static bool add_feeder_static(void *v, feed *f) { return add_feeder(v, f); }
+	void add_feeder(feed *new_feeder);
 
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
