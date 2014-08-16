@@ -33,8 +33,6 @@
 typedef std::map<unsigned int, tune*> tuner_map;
 typedef std::map<unsigned int, feed*> feeder_map;
 
-class serve_parser_iface;
-
 class serve;
 
 class serve_client
@@ -114,16 +112,6 @@ private:
 	static void cli_print(void *, const char *, ...);
 
 	std::string services;
-};
-
-class serve_parser_iface : public parse_iface
-{
-public:
-	serve_parser_iface(serve_client&, bool to_disk = false);
-	virtual void chandump(parsed_channel_info_t*);
-private:
-	serve_client& m_serve_client;
-	bool m_to_disk;
 };
 
 typedef std::map<int, serve_client> serve_client_map;

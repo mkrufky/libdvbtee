@@ -936,6 +936,16 @@ exit:
 	return ret;
 }
 
+class serve_parser_iface : public parse_iface
+{
+public:
+	serve_parser_iface(serve_client&, bool to_disk = false);
+	virtual void chandump(parsed_channel_info_t*);
+private:
+	serve_client& m_serve_client;
+	bool m_to_disk;
+};
+
 serve_parser_iface::serve_parser_iface(serve_client &client, bool to_disk)
  : m_serve_client(client)
  , m_to_disk(to_disk)
