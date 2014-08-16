@@ -254,7 +254,7 @@ int tune::start_scan(unsigned int mode, char *channel_list, bool epg, tune_iface
 	} else
 		scan_channel_list[atoi(channel_list)] = false;
 
-	return start_scan(iface, mode, epg);
+	return start_scan(mode, epg, iface);
 }
 
 int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool epg, tune_iface *iface)
@@ -285,10 +285,10 @@ int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool
 	for (unsigned int channel = scan_min; channel <= scan_max; channel++)
 		scan_channel_list[channel] = false; // TODO: set true if channel found
 
-	return start_scan(iface, mode, epg);
+	return start_scan(mode, epg, iface);
 }
 
-int tune::start_scan(tune_iface *iface, unsigned int mode, bool epg)
+int tune::start_scan(unsigned int mode, bool epg, tune_iface *iface)
 {
 	m_iface = iface;
 

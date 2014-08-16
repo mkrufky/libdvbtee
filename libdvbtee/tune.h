@@ -152,7 +152,7 @@ private:
 #if 0
 	uint16_t get_snr();
 #endif
-	int start_scan(tune_iface*, unsigned int, bool epg);
+	int start_scan(unsigned int, bool epg, tune_iface*);
 
 	tune_iface *m_iface;
 };
