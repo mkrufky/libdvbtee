@@ -58,8 +58,7 @@ feed::feed()
   , feed_thread_prio(100)
   , ringbuffer()
 #endif
-  , pull_cb(NULL)
-  , pull_priv(NULL)
+  , m_pull_iface(NULL)
 {
 	dprintf("()");
 
@@ -86,8 +85,7 @@ feed::feed(const feed&)
 #if FEED_BUFFER
 	feed_thread_prio = 100;
 #endif
-	pull_cb = NULL;
-	pull_priv = NULL;
+	m_pull_iface = NULL;
 }
 
 feed& feed::operator= (const feed& cSource)
@@ -104,8 +102,7 @@ feed& feed::operator= (const feed& cSource)
 #if FEED_BUFFER
 	feed_thread_prio = 100;
 #endif
-	pull_cb = NULL;
-	pull_priv = NULL;
+	m_pull_iface = NULL;
 
 	return *this;
 }
@@ -221,12 +218,11 @@ int feed::push(int size, const uint8_t* data)
 #endif
 }
 
-int feed::pull(void *priv, pull_callback cb)
+int feed::pull(feed_pull_iface *iface)
 {
 	f_kill_thread = false;
 
-	pull_priv = priv;
-	pull_cb = cb;
+	m_pull_iface = iface;
 
 	strncpy(filename, "PULLCALLBACK", sizeof(filename));
 
@@ -422,7 +418,8 @@ void *feed::pull_thread()
 	dprintf("()");
 
 	while (!f_kill_thread)
-		if (0 >= pull_cb(pull_priv))
+		if ((m_pull_iface) &&
+		    (0 >= m_pull_iface->pull()))
 			usleep(50*1000);
 
 	pthread_exit(NULL);

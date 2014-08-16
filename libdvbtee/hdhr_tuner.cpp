@@ -348,12 +348,7 @@ void hdhr_tuner::stop_feed()
 	hdhomerun_device_stream_flush(hdhr_dev);
 }
 
-int hdhr_tuner::hdhr_pull_callback(void *p_this)
-{
-	return static_cast<hdhr_tuner*>(p_this)->hdhr_pull_callback();
-}
-
-int hdhr_tuner::hdhr_pull_callback()
+int hdhr_tuner::pull()
 {
 	if (!dev) return -1;
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
@@ -375,7 +370,7 @@ int hdhr_tuner::start_feed()
 	}
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	hdhomerun_device_stream_start(hdhr_dev);
-	if (0 == feeder.pull(this, hdhr_pull_callback)) {
+	if (0 == feeder.pull(this)) {
 		state |= TUNE_STATE_FEED;
 		return 0;
 	}

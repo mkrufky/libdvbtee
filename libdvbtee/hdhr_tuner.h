@@ -29,7 +29,7 @@ typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 
 class hdhr_tuner_device;
 
-class hdhr_tuner: public tune, public tsfilter_iface
+class hdhr_tuner: public tune, public tsfilter_iface, public feed_pull_iface
 {
 public:
 	hdhr_tuner();
@@ -56,6 +56,8 @@ public:
 	bool check();
 
 	void addfilter(uint16_t pid);
+
+	int pull();
 private:
 	void add_filter(uint16_t);
 	void clear_filters();
@@ -66,9 +68,6 @@ private:
 	void hdhr_status();
 
 	filtered_pid_map filtered_pids;
-
-	int hdhr_pull_callback();
-	static int hdhr_pull_callback(void*);
 
 	class hdhr_tuner_device *dev;
 
