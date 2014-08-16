@@ -142,6 +142,15 @@ public:
 		  tune_iface *iface = NULL,
 		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL,
 		  unsigned int tuner_id = 0);
+	bool scan(unsigned int flags,
+		  chandump_callback chandump_cb, void *chandump_context,
+		  unsigned int tuner_id = 0)
+		{ return scan(flags, NULL, chandump_cb, chandump_context, tuner_id); }
+	bool scan(unsigned int flags,
+		  tune_iface *iface,
+		  unsigned int tuner_id = 0)
+		{ return scan(flags, iface, NULL, NULL, tuner_id); }
+
 
 	void set_scan_flags(tune* p_tuner, unsigned int flags);
 	unsigned int get_scan_flags(tune* p_tuner);

@@ -1038,7 +1038,8 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 	return false;
 }
 
-bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags, tune_iface *iface,
+bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
+			   tune_iface *iface,
 			   chandump_callback chandump_cb, void *chandump_context)
 {
 	if (!flags)
