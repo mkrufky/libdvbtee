@@ -38,8 +38,7 @@ socket_listen::socket_listen()
   , f_kill_thread(false)
   , sock_fd(-1)
   , port(0)
-  , accept_socket_cb(NULL)
-  , accept_socket_data(NULL)
+  , m_socket_listen_iface(NULL)
 {
 	dprintf("()");
 }
@@ -58,8 +57,7 @@ socket_listen::socket_listen(const socket_listen&)
 	f_kill_thread = false;
 	sock_fd = -1;
 	port = 0;
-	accept_socket_cb = NULL;
-	accept_socket_data = NULL;
+	m_socket_listen_iface = NULL;
 }
 
 socket_listen& socket_listen::operator= (const socket_listen& cSource)
@@ -73,8 +71,7 @@ socket_listen& socket_listen::operator= (const socket_listen& cSource)
 	f_kill_thread = false;
 	sock_fd = -1;
 	port = 0;
-	accept_socket_cb = NULL;
-	accept_socket_data = NULL;
+	m_socket_listen_iface = NULL;
 
 	return *this;
 }
@@ -210,8 +207,8 @@ void* socket_listen::listen_thread()
 	while (!f_kill_thread) {
 		int accepted_sock_fd = accept(sock_fd, (struct sockaddr*)&tcpsa, &salen);
 		if (accepted_sock_fd != -1) {
-			if (accept_socket_cb)
-				accept_socket_cb(accept_socket_data, accepted_sock_fd);
+			if (m_socket_listen_iface)
+				m_socket_listen_iface->accept_socket(accepted_sock_fd);
 			else
 				dprintf("(accept_socket callback not defined!)");
 		}
@@ -233,8 +230,8 @@ void* socket_listen::udp_listen_thread()
 
 	while (!f_kill_thread) {
 		if (sock_fd != -1) {
-			if (accept_socket_cb)
-				accept_socket_cb(accept_socket_data, sock_fd);
+			if (m_socket_listen_iface)
+				m_socket_listen_iface->accept_socket(sock_fd);
 			else
 				dprintf("(accept_socket callback not defined!)");
 		}

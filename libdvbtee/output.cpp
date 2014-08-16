@@ -814,12 +814,6 @@ void* output::output_thread()
 	pthread_exit(NULL);
 }
 
-//static
-void output::add_http_client(void *p_this, int socket)
-{
-	return static_cast<output*>(p_this)->add_http_client(socket);
-}
-
 void output::add_http_client(int socket)
 {
 	if (0 > add(socket, OUTPUT_STREAM_HTTP))
@@ -832,7 +826,7 @@ void output::add_http_client(int socket)
 int output::add_http_server(int port)
 {
 	dprintf("(%d)", port);
-	listener.set_callback(this, add_http_client);
+	listener.set_interface(this);
 	return listener.start(port);
 }
 

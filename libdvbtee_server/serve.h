@@ -121,7 +121,7 @@ struct libdvbtee_server_config {
 	bool cli_disabled;
 };
 
-class serve : public feed_server_iface
+class serve : public feed_server_iface, public socket_listen_iface
 {
 public:
 	serve();
@@ -171,6 +171,8 @@ public:
 	feed_server_map feed_servers;
 
 	serve_client_map* get_client_map() { return &client_map; }
+
+	void accept_socket(int);
 private:
 	socket_listen listener;
 	serve_client_map client_map;
@@ -183,9 +185,6 @@ private:
 
 	int start_monitor();
 	void stop_monitor() { f_kill_thread = true; }
-
-	void add_client(int);
-	static void add_client(void*, int);
 
 	std::map<tune*, unsigned int> scan_flags;
 

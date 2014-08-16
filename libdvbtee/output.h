@@ -147,7 +147,7 @@ private:
 
 typedef std::map<unsigned int, output_stream> output_stream_map;
 
-class output
+class output : public socket_listen_iface
 {
 public:
 	output();
@@ -181,6 +181,8 @@ public:
 
 	int get_pids(map_pidtype&);
 	void reset_pids(int target_id);
+
+	void accept_socket(int sock) { add_http_client(sock); }
 private:
 	output_stream_map output_streams;
 
@@ -194,7 +196,6 @@ private:
 	static void *output_thread(void*);
 
 	void add_http_client(int);
-	static void add_http_client(void*, int);
 
 	void stop_without_wait() { f_kill_thread = true; }
 

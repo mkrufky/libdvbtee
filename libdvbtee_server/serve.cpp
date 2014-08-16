@@ -723,13 +723,7 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 }
 
 
-//static
-void serve::add_client(void *p_this, int socket)
-{
-	return static_cast<serve*>(p_this)->add_client(socket);
-}
-
-void serve::add_client(int socket)
+void serve::accept_socket(int socket)
 {
 	if (socket < 0) {
 		fprintf(stderr, "not attaching to invalid socket, %d\n", socket);
@@ -753,7 +747,7 @@ int serve::start(uint16_t port_requested)
 {
 	dprintf("(%d)", port_requested);
 
-	listener.set_callback(this, add_client);
+	listener.set_interface(this);
 
 	return listener.start(port_requested);
 }

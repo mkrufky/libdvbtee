@@ -606,12 +606,6 @@ int feed::start_socket(char* source)
 	return ret;
 }
 
-//static
-void feed::add_tcp_feed(void *p_this, int socket)
-{
-	return static_cast<feed*>(p_this)->add_tcp_feed(socket);
-}
-
 void feed::add_tcp_feed(int socket)
 {
 	struct sockaddr_in tcpsa;
@@ -659,7 +653,7 @@ int feed::start_tcp_listener(uint16_t port_requested)
 
 	fd = -1;
 
-	listener.set_callback(this, add_tcp_feed);
+	listener.set_interface(this);
 
 	return listener.start(port_requested);
 }
@@ -762,12 +756,6 @@ feed_server::~feed_server()
 	feeders.clear();
 }
 
-//static
-void feed_server::add_tcp_feed(void *p_this, int socket)
-{
-	return static_cast<feed_server*>(p_this)->add_tcp_feed(socket);
-}
-
 void feed_server::add_tcp_feed(int socket)
 {
 	if (socket >= 0) {
@@ -785,7 +773,7 @@ int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_iface *
 	dprintf("(%d)", port_requested);
 
 	/* set listener callback to notify us (feed_server) of new connections */
-	listener.set_callback(this, add_tcp_feed);
+	listener.set_interface(this);
 
 	/* set connection notify callback to notify parent server of new feeds */
 	m_iface = iface;

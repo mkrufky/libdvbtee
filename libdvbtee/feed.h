@@ -35,7 +35,7 @@ public:
 
 void libdvbtee_set_debug_level(unsigned int debug);
 
-class feed
+class feed : public socket_listen_iface
 {
 public:
 	feed();
@@ -78,6 +78,8 @@ public:
 	inline bool wait_for_epg(unsigned int time_ms) { return wait_for_event_or_timeout(time_ms / 1000, FEED_EVENT_EPG); }
 
 	void add_tcp_feed(int);
+
+	void accept_socket(int sock) { add_tcp_feed(sock); }
 private:
 	pthread_t h_thread;
 	pthread_t h_feed_thread;
@@ -113,7 +115,6 @@ private:
 #endif
 
 	socket_listen listener;
-	static void add_tcp_feed(void*, int);
 
 	feed_pull_iface *m_pull_iface;
 };
@@ -128,7 +129,7 @@ public:
 };
 
 
-class feed_server
+class feed_server : public socket_listen_iface
 {
 public:
 	feed_server();
@@ -136,6 +137,8 @@ public:
 
 	int start_tcp_listener(uint16_t port_requested, feed_server_iface *iface = NULL);
 	int start_udp_listener(uint16_t port_requested, feed_server_iface *iface = NULL);
+
+	void accept_socket(int sock) { add_tcp_feed(sock); }
 private:
 	feed_map feeders;
 	socket_listen listener;
@@ -143,7 +146,6 @@ private:
 	feed_server_iface *m_iface;
 
 	void add_tcp_feed(int);
-	static void add_tcp_feed(void*, int);
 };
 
 typedef std::map<int, feed_server> feed_server_map;
