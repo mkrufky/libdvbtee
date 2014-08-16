@@ -28,17 +28,17 @@
 
 class hlsfeed
 {
+  friend class pushwalk_iface;
 public:
   explicit hlsfeed(const char *url = NULL, curlhttpget_iface *iface = NULL);
-
-  void push(uint8_t *buffer, size_t size, size_t nmemb);
-  void walk(uint8_t *buffer, size_t size, size_t nmemb);
 
 private:
   const char *toplevel;
   std::string Url;
   curlhttpget_iface *m_iface;
 
+  void push(uint8_t *buffer, size_t size, size_t nmemb);
+  void walk(uint8_t *buffer, size_t size, size_t nmemb);
   void walk(uint8_t *buffer);
 
   rbuf push_buffer;
