@@ -148,8 +148,6 @@ int start_server(struct dvbtee_context* context, unsigned int flags, int port, i
 class server_parse_iface : public parse_iface
 {
 public:
-	server_parse_iface() {}
-
 	virtual void chandump(parsed_channel_info_t *c)
 	{
 		char channelno[7]; /* XXX.XXX */
