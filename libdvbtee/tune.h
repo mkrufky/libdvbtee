@@ -68,7 +68,7 @@ typedef enum {
 class tune_iface
 {
 public:
-	virtual void scan_progress(scan_progress_t *p) {}
+	virtual void scan_progress(scan_progress_t *p) = 0;
 };
 
 #if 0
