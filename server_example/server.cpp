@@ -180,22 +180,14 @@ bool list_channels(serve *server)
 	return server->get_channels(chandump, NULL);
 }
 
-class empty_tuner_iface : public tune_iface
-{
-public:
-//	virtual void scan_progress(scan_progress_t *p) {}
-};
-
 bool start_async_channel_scan(serve *server, unsigned int flags = 0)
 {
-	empty_tuner_iface iface;
-	return server->scan(iface, flags);
+	return server->scan(flags);
 }
 
 bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 {
-	empty_tuner_iface iface;
-	return server->scan(iface, flags, chandump, NULL);
+	return server->scan(flags, chandump, NULL);
 }
 
 
