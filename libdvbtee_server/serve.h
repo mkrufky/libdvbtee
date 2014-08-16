@@ -138,7 +138,7 @@ public:
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
 	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
-	bool scan(tune_iface &iface, unsigned int flags,
+	bool scan(tune_iface *iface, unsigned int flags,
 		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL,
 		  unsigned int tuner_id = 0);
 
@@ -155,7 +155,7 @@ public:
 	void reclaim_resources(bool enable = true) { f_reclaim_resources = enable; }
 
 	/* FIXME: move to private */
-	bool cmd_tuner_scan(tune_iface &iface, tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
+	bool cmd_tuner_scan(tune_iface *iface, tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
 			    chandump_callback chandump_cb, void *chandump_context);
 	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
 

@@ -81,12 +81,6 @@ static tune *find_tuned_tuner(unsigned int phy)
 	return NULL;
 }
 
-class empty_tuner_iface : public tune_iface
-{
-public:
-//	virtual void scan_progress(scan_progress_t *p) {}
-};
-
 
 static inline const char *data_fmt_str(unsigned int data_fmt)
 {
@@ -213,7 +207,7 @@ bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
 	return true;
 }
 
-bool serve::scan(tune_iface &iface, unsigned int flags, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+bool serve::scan(tune_iface *iface, unsigned int flags, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
@@ -1045,7 +1039,7 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 	return false;
 }
 
-bool serve::cmd_tuner_scan(tune_iface &iface, tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
+bool serve::cmd_tuner_scan(tune_iface *iface, tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
 			   chandump_callback chandump_cb, void *chandump_context)
 {
 	if (!flags)
@@ -1298,8 +1292,7 @@ bool serve_client::__command(char* cmdline)
 			return false;
 		}
 		cli_print("scanning for services...\n");
-		empty_tuner_iface iface;
-		server->cmd_tuner_scan(iface, tuner, arg,
+		server->cmd_tuner_scan(NULL, tuner, arg,
 				      (strstr(cmd, "scanepg")) ? true : false,
 				      (strstr(cmd, "startscan")) ? false : true,
 				      scan_flags, chandump, this);

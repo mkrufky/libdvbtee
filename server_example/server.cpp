@@ -182,12 +182,12 @@ bool list_channels(serve *server)
 
 bool start_async_channel_scan(serve *server, unsigned int flags = 0)
 {
-	return server->scan(flags);
+	return server->scan(NULL, flags);
 }
 
 bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 {
-	return server->scan(flags, chandump, NULL);
+	return server->scan(NULL, flags, chandump, NULL);
 }
 
 
