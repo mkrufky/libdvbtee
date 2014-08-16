@@ -124,8 +124,6 @@ typedef struct {
 	unsigned char service_name[256];
 } parsed_channel_info_t;
 
-typedef const char * (*chandump_callback)(void *context, parsed_channel_info_t *c);
-
 class parse_iface
 {
 public:
