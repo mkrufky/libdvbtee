@@ -1046,9 +1046,9 @@ bool serve::cmd_tuner_scan(tune_iface *iface, tune* tuner, char *arg, bool scane
 		flags = SCAN_VSB;
 
 	if ((arg) && strlen(arg))
-		tuner->scan_for_services(iface, flags, arg, scanepg, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(flags, arg, scanepg, iface, chandump_cb, chandump_context, wait_for_results);
 	else
-		tuner->scan_for_services(iface, flags, 0, 0, scanepg, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(flags, 0, 0, scanepg, iface, chandump_cb, chandump_context, wait_for_results);
 
 	return true;
 }

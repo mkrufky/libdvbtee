@@ -104,10 +104,8 @@ public:
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
-	int scan_for_services(tune_iface *, unsigned int, char *, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
-	int scan_for_services(tune_iface *, unsigned int, unsigned int, unsigned int, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
-	int scan_for_services(unsigned int mode, char *channel_list, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true) { return scan_for_services(mode, channel_list, epg, chandump_cb, chandump_context, wait_for_results); }
-	int scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg = false, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true) { return scan_for_services(mode, min, max, epg, chandump_cb, chandump_context, wait_for_results); }
+	int scan_for_services(unsigned int, char *, bool epg = false, tune_iface *iface = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
+	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *iface = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
 	/* FIXME: deprecate start_scan & move to private */
 	int start_scan(unsigned int, char *, bool epg = false, tune_iface *iface = NULL);
 	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *iface = NULL);

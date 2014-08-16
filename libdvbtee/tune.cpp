@@ -325,7 +325,7 @@ unsigned int tune::get_scan_results(bool wait, chandump_callback chandump_cb, vo
 	return ret;
 }
 
-int tune::scan_for_services(tune_iface *iface, unsigned int mode, char *channel_list, bool epg, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
+int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, tune_iface *iface, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
 	unsigned int count = 0;
 
@@ -342,7 +342,7 @@ int tune::scan_for_services(tune_iface *iface, unsigned int mode, char *channel_
 	return 0;
 }
 
-int tune::scan_for_services(tune_iface *iface, unsigned int mode, unsigned int min, unsigned int max, bool epg, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
+int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int max, bool epg, tune_iface *iface, chandump_callback chandump_cb, void* chandump_context, bool wait_for_results)
 {
 	unsigned int count = 0;
 	unsigned int total_count = 0;
