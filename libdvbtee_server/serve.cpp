@@ -207,7 +207,7 @@ bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
 	return true;
 }
 
-bool serve::scan(tune_iface *iface, unsigned int flags, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+bool serve::scan(unsigned int flags, tune_iface *iface, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
@@ -219,7 +219,7 @@ bool serve::scan(tune_iface *iface, unsigned int flags, chandump_callback chandu
 
 	dprintf("scanning for services...");
 
-	return cmd_tuner_scan(iface, tuner, NULL, false, wait_for_results, flags, chandump_cb, chandump_context);
+	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, iface, chandump_cb, chandump_context);
 }
 
 void serve::set_scan_flags(tune *p_tuner, unsigned int flags)
@@ -1039,7 +1039,7 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 	return false;
 }
 
-bool serve::cmd_tuner_scan(tune_iface *iface, tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
+bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags, tune_iface *iface,
 			   chandump_callback chandump_cb, void *chandump_context)
 {
 	if (!flags)
@@ -1292,10 +1292,10 @@ bool serve_client::__command(char* cmdline)
 			return false;
 		}
 		cli_print("scanning for services...\n");
-		server->cmd_tuner_scan(NULL, tuner, arg,
+		server->cmd_tuner_scan(tuner, arg,
 				      (strstr(cmd, "scanepg")) ? true : false,
 				      (strstr(cmd, "startscan")) ? false : true,
-				      scan_flags, chandump, this);
+				      scan_flags, NULL, chandump, this);
 
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;
