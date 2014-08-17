@@ -1488,7 +1488,7 @@ int parse::feed(int count, uint8_t* p_data)
 
 	rewind.check();
 
-	if (is_basic_psip_ready()) {
+	if (has_pat) {
 		uint8_t b[size];
 		int actual = rewind.read(b, size);
 		__feed(actual, b);
