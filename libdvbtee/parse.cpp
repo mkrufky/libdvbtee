@@ -1492,6 +1492,8 @@ int parse::feed(int count, uint8_t* p_data)
 		uint8_t b[size];
 		int actual = rewind.read(b, size);
 		__feed(actual, b);
+		size = rewind.get_size();
+		if (size < actual) dprintf("rewind rbuf consumed!  was: %u (%up), now: %u (%up)", actual, actual/188, size, size/188);
 	}
 
 	return ret;
@@ -1641,7 +1643,10 @@ int parse::__feed(int count, uint8_t* p_data)
 #endif
 #endif
 		} else if (!unwanted_pids.count(pkt_stats.pid)) {
-			if (!is_psip_ready()) rewind.write(p, 188);
+			if (!is_psip_ready()) {
+				if (!rewind.write(p, 188))
+					fprintf(stderr, "%s> FAILED: %d bytes dropped (rbuf)\n", __func__, 188);
+			}
 		}
 #if DBG
 		addpid(pid);
