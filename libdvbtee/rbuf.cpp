@@ -188,8 +188,12 @@ bool rbuf::write(const void* p, int size)
 #else
 bool rbuf::write(const void* p, int size)
 {
+	int size_in = size;
+
 	pthread_mutex_lock(&mutex);
-	if (__get_size() + size > capacity) {
+	int size_before = __get_size();
+
+	if (size_before + size_in > capacity) {
 		pthread_mutex_unlock(&mutex);
 		return false;
 	}
@@ -216,6 +220,10 @@ bool rbuf::write(const void* p, int size)
 			return false;
 		}
 #endif
+	}
+	if ((size_before + size_in) && (!__get_size())) {
+		__put_read_ptr(size_in);
+		dprintf("advancing read_ptr: dropped %u bytes", size_in);
 	}
 	pthread_mutex_unlock(&mutex);
 	return true;
