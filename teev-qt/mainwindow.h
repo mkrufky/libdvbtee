@@ -68,8 +68,6 @@ private:
 #endif
     QGridLayout *layout;
     QListView *m_listBox;
-    std::string channels_buffer;
-    std::string info_buffer;
 
     QStringListModel *channel_model;
 
@@ -81,10 +79,10 @@ private:
     Ui::MainWindow *ui;
 
     void get_channels();
-    void fill_channels_box();
+    void fill_channels_box(std::string &);
 
     void get_info();
-    void fill_info_box();
+    void fill_info_box(std::string &);
 
     void tune(QString chan_id);
 

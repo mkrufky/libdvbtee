@@ -231,29 +231,29 @@ private:
 
 void MainWindow::get_channels()
 {
-	curl_iface iface(channels_buffer);
-	channels_buffer.clear();
+	std::string buffer;
+	curl_iface iface(buffer);
+	buffer.clear();
 	QString channels_url("http://"+dvbteeServerAddr()+"/json/channels");
 	curlhttpget(channels_url.toStdString().c_str(), &iface);
-	fill_channels_box();
-	channels_buffer.clear();
+	fill_channels_box(buffer);
 }
 
 void MainWindow::get_info()
 {
-	curl_iface iface(info_buffer);
-	info_buffer.clear();
+	std::string buffer;
+	curl_iface iface(buffer);
+	buffer.clear();
 	QString info_url("http://"+dvbteeServerAddr()+"/json/info="+ cur_chan_id);
 	curlhttpget(info_url.toStdString().c_str(), &iface);
-	fill_info_box();
-	info_buffer.clear();
+	fill_info_box(buffer);
 }
 
-void MainWindow::fill_channels_box()
+void MainWindow::fill_channels_box(std::string &buffer)
 {
     QStringList ChannelList;
 #ifdef USE_JSONCPP
-    std::string json_str(channels_buffer);
+    std::string json_str(buffer);
 
     Json::Value root;
     Json::Reader reader;
@@ -274,10 +274,10 @@ void MainWindow::fill_channels_box()
       }
     }
 #else
-    if (!channels_buffer.length())
+    if (!buffer.length())
 	return;
 
-    QJsonDocument d = QJsonDocument::fromJson(QString(channels_buffer.c_str()).toUtf8());
+    QJsonDocument d = QJsonDocument::fromJson(QString(buffer.c_str()).toUtf8());
     QJsonArray a = d.array();
 
     foreach (const QJsonValue & v, a)
@@ -300,13 +300,13 @@ void MainWindow::fill_channels_box()
     channel_model->setStringList(ChannelList);
 }
 
-void MainWindow::fill_info_box()
+void MainWindow::fill_info_box(std::string &buffer)
 {
     QString chan;
 
     statusBar()->clearMessage();
 #ifdef USE_JSONCPP
-    std::string json_str(info_buffer);
+    std::string json_str(buffer);
     Json::Value root;
     Json::Reader reader;
 
@@ -329,10 +329,10 @@ void MainWindow::fill_info_box()
       }
     }
 #else
-    if (!info_buffer.length())
+    if (!buffer.length())
 	return;
 
-    QJsonDocument d = QJsonDocument::fromJson(QString(info_buffer.c_str()).toUtf8());
+    QJsonDocument d = QJsonDocument::fromJson(QString(buffer.c_str()).toUtf8());
     QJsonArray a = d.array();
 
     foreach (const QJsonValue & v, a)
