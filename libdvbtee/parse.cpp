@@ -1104,7 +1104,7 @@ bool parse::is_pmt_ready(uint16_t id)
 
 	for (map_rcvd::const_iterator iter = rcvd_pmt.begin(); iter != rcvd_pmt.end(); ++iter)
 		if ((iter->first) && (!iter->second)) {
-#if 1//DBG
+#if DBG
 			fprintf(stderr, "%s: missing pmt for program %d\n", __func__, iter->first);
 #endif
 			return false;
