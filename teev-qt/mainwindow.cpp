@@ -213,38 +213,38 @@ void MainWindow::refresh_clicked()
 	get_channels();
 }
 
-void MainWindow::push(uint8_t *buffer, std::string &push_buffer, size_t size, size_t nmemb)
+class curl_iface : public curlhttpget_iface
 {
-    uint8_t buf[size * nmemb + 1];
-    memset(buf, 0, sizeof(buf));
-    memcpy(buf, buffer, size * nmemb);
-    push_buffer.append((const char*)buf);
-}
+public:
+	curl_iface(std::string &buffer) : curlhttpget_iface(), m_buffer(buffer) {}
 
-void MainWindow::get_channels_callback(void *context, void *buffer, size_t size, size_t nmemb)
-{
-    return static_cast<MainWindow*>(context)->push((uint8_t*)buffer, static_cast<MainWindow*>(context)->channels_buffer, size, nmemb);
-}
-
-void MainWindow::get_info_callback(void *context, void *buffer, size_t size, size_t nmemb)
-{
-	return static_cast<MainWindow*>(context)->push((uint8_t*)buffer, static_cast<MainWindow*>(context)->info_buffer, size, nmemb);
-}
+	void write_data(void *buffer, size_t size, size_t nmemb)
+	{
+		uint8_t buf[size * nmemb + 1];
+		memset(buf, 0, sizeof(buf));
+		memcpy(buf, buffer, size * nmemb);
+		m_buffer.append((const char*)buf);
+	}
+private:
+	std::string &m_buffer;
+};
 
 void MainWindow::get_channels()
 {
+	curl_iface iface(channels_buffer);
 	channels_buffer.clear();
 	QString channels_url("http://"+dvbteeServerAddr()+"/json/channels");
-	curlhttpget Curl(channels_url.toStdString().c_str(), get_channels_callback, this);
+	curlhttpget(channels_url.toStdString().c_str(), &iface);
 	fill_channels_box();
 	channels_buffer.clear();
 }
 
 void MainWindow::get_info()
 {
+	curl_iface iface(info_buffer);
 	info_buffer.clear();
 	QString info_url("http://"+dvbteeServerAddr()+"/json/info="+ cur_chan_id);
-	curlhttpget Curl(info_url.toStdString().c_str(), get_info_callback, this);
+	curlhttpget(info_url.toStdString().c_str(), &iface);
 	fill_info_box();
 	info_buffer.clear();
 }
