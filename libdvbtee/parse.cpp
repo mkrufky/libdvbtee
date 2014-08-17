@@ -188,6 +188,22 @@ void parse::process_pat(const decoded_pat_t *decoded_pat)
 #endif
 				add_filter(iter->second);
 				rcvd_pmt[iter->first] = false;
+			} else {
+				/* track known 'unwanted' PMTs: */
+#if USING_DVBPSI_VERSION_0
+				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_unwanted_pmt, this);
+#else
+				if (h_pmt.count(iter->second)) {
+					if (dvbpsi_decoder_present(h_pmt[iter->second].get_handle()))
+						dvbpsi_pmt_detach(h_pmt[iter->second].get_handle());
+					h_pmt.erase(iter->second);
+				}
+
+				if (!dvbpsi_decoder_present(h_pmt[iter->second].get_handle()))
+					dvbpsi_pmt_attach(h_pmt[iter->second].get_handle(), iter->first, take_unwanted_pmt, this);
+#endif
+				add_filter(iter->second);
+				rcvd_pmt[iter->first] = false;
 			}
 		}
 }
@@ -236,6 +252,19 @@ void parse::process_pmt(const decoded_pmt_t *pmt)
 	}
 }
 
+void parse::process_unwanted_pmt(const decoded_pmt_t *pmt)
+{
+	dprintf(": v%d, service_id %d, pcr_pid %d",
+		pmt->version, pmt->program, pmt->pcr_pid);
+
+	for (map_ts_elementary_streams::const_iterator iter_pmt_es = pmt->es_streams.begin();
+	     iter_pmt_es != pmt->es_streams.end(); ++iter_pmt_es) {
+
+		unwanted_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+	}
+}
+
+
 bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 {
 	dprintf("(%s): v%d, service_id %d, pcr_pid %d",
@@ -249,6 +278,25 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(p_pmt->i_program_number);
 	if (iter_pmt != decoded_pmt->end())
 		process_pmt(&iter_pmt->second);
+
+	rcvd_pmt[p_pmt->i_program_number] = true;
+
+	return true;
+}
+
+bool parse::take_unwanted_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
+{
+	dprintf("(%s): v%d, service_id %d, pcr_pid %d",
+		(decoded) ? "post" : "pre",
+		p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
+
+	if (!decoded) return true;
+
+	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+
+	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(p_pmt->i_program_number);
+	if (iter_pmt != decoded_pmt->end())
+		process_unwanted_pmt(&iter_pmt->second);
 
 	rcvd_pmt[p_pmt->i_program_number] = true;
 
@@ -356,6 +404,9 @@ void parse::process_mgt(bool attach)
 			h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
 #endif
 		}
+		/* track known 'unwanted' PMTs: */
+		if (!b_attach_demux)
+			unwanted_pids[iter->second.pid] = 0;
 	}
 	expect_vct = b_expecting_vct;
 }
@@ -639,6 +690,21 @@ define_table_wrapper(take_ett, dvbpsi_atsc_ett_t, dvbpsi_atsc_DeleteETT, enabled
 define_table_wrapper(take_stt, dvbpsi_atsc_stt_t, dvbpsi_atsc_DeleteSTT, enabled)
 define_table_wrapper(take_mgt, dvbpsi_atsc_mgt_t, dvbpsi_atsc_DeleteMGT, has_mgt)
 
+void parse::take_unwanted_pmt(void* p_this, dvbpsi_pmt_t* p_table)
+{
+	parse* parser = (parse*)p_this;
+	if ((parser) &&
+	    (((parser->take_unwanted_pmt(p_table, false)) && (parser->get_ts_id())) &&
+#if USE_STATIC_DECODE_MAP
+	     ((decoders[parser->get_ts_id()].take_pmt(p_table)) ||
+#else
+	     ((parser->decoders[parser->get_ts_id()].take_pmt(p_table)) ||
+#endif
+	      (!parser->is_pmt_ready(p_table->i_program_number)))))
+		parser->take_unwanted_pmt(p_table, true);
+	dvbpsi_pmt_delete(p_table);
+}
+
 #if USING_DVBPSI_VERSION_0
 void parse::attach_table(void* p_this, dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_extension)
 {
@@ -752,6 +818,7 @@ parse::parse()
 	service_ids.clear();
 	rcvd_pmt.clear();
 	out_pids.clear();
+	unwanted_pids.clear();
 }
 
 parse::~parse()
@@ -810,6 +877,7 @@ void parse::detach_demux()
 	rcvd_pmt.clear();
 	payload_pids.clear();
 	out_pids.clear();
+	unwanted_pids.clear();
 }
 
 void parse::stop()

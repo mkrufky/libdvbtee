@@ -204,6 +204,7 @@ private:
 #endif
 	static void take_pat(void*, dvbpsi_pat_t*);
 	static void take_pmt(void*, dvbpsi_pmt_t*);
+	static void take_unwanted_pmt(void*, dvbpsi_pmt_t*);
 	static void take_eit(void*, dvbpsi_eit_t*);
 	static void take_nit_actual(void*, dvbpsi_nit_t*);
 	static void take_nit_other(void*,  dvbpsi_nit_t*);
@@ -225,6 +226,7 @@ private:
 
 	bool take_pat(dvbpsi_pat_t*, bool);
 	bool take_pmt(dvbpsi_pmt_t*, bool);
+	bool take_unwanted_pmt(dvbpsi_pmt_t*, bool);
 	bool take_eit(dvbpsi_eit_t*, bool);
 	bool take_nit_actual(dvbpsi_nit_t*, bool);
 	bool take_nit_other(dvbpsi_nit_t*,  bool);
@@ -291,6 +293,7 @@ private:
 	bool process_err_pkts;
 	unsigned int tei_count;
 	map_pidtype payload_pids;
+	map_pidtype unwanted_pids;
 
 	addfilter_callback addfilter_cb;
 	void* addfilter_context;
@@ -306,6 +309,7 @@ private:
 	void rewrite_pat();
 	void process_pat(const decoded_pat_t *);
 	void process_pmt(const decoded_pmt_t *);
+	void process_unwanted_pmt(const decoded_pmt_t *);
 	void process_mgt(bool attach);
 #ifdef DVBTEE_DEMUXER
 	demux demuxer;
