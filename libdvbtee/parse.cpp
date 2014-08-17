@@ -1115,9 +1115,7 @@ bool parse::is_pmt_ready(uint16_t id)
 
 bool parse::is_psip_ready()
 {
-	return ((has_pat) &&
-		(((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit))) &&
-		((decoders.count(get_ts_id())) && (is_pmt_ready())));
+	return ((is_basic_psip_ready()) && ((decoders.count(get_ts_id())) && (is_pmt_ready())));
 }
 
 bool parse::is_epg_ready()

@@ -180,6 +180,7 @@ public:
 	void enable_ett_collection(bool onoff) { dont_collect_ett = !onoff; }
 
 	bool is_pmt_ready(uint16_t id = 0);
+	inline bool is_basic_psip_ready() { return ((has_pat) && (((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit)))); }
 	bool is_psip_ready();
 	bool is_epg_ready();
 
