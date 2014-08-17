@@ -881,6 +881,7 @@ void parse::detach_demux()
 	payload_pids.clear();
 	out_pids.clear();
 	unwanted_pids.clear();
+	rewind.reset();
 }
 
 void parse::stop()
