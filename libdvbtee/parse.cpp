@@ -781,6 +781,7 @@ parse::parse()
   , enabled(true)
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
+  , rewind()
 {
 	if (!hello)
 		fprintf(stdout, "# dvbtee v" LIBDVBTEE_VERSION
@@ -819,6 +820,8 @@ parse::parse()
 	rcvd_pmt.clear();
 	out_pids.clear();
 	unwanted_pids.clear();
+
+	rewind.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 }
 
 parse::~parse()
@@ -1475,6 +1478,26 @@ uint16_t parse::get_ts_id(unsigned int channel)
 
 int parse::feed(int count, uint8_t* p_data)
 {
+	int ret = __feed(count, p_data);
+
+	int size = rewind.get_size();
+
+	if (size <= 0)
+		return ret;
+
+	rewind.check();
+
+	if (is_basic_psip_ready()) {
+		uint8_t b[size];
+		int actual = rewind.read(b, size);
+		__feed(actual, b);
+	}
+
+	return ret;
+}
+
+int parse::__feed(int count, uint8_t* p_data)
+{
 	if (count <= 0) {
 		/* no data! */
 		return count;
@@ -1616,6 +1639,8 @@ int parse::feed(int count, uint8_t* p_data)
 			demuxer.push(pkt_stats.pid, p);
 #endif
 #endif
+		} else if (!unwanted_pids.count(pkt_stats.pid)) {
+			if (!is_psip_ready()) rewind.write(p, 188);
 		}
 #if DBG
 		addpid(pid);
