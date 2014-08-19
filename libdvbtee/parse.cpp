@@ -1582,7 +1582,9 @@ static void dvbpsi_message(dvbpsi_t *handle, const dvbpsi_msg_level_t level, con
 dvbpsi_class::dvbpsi_class()
   : handle(dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG))
 {
+#if DBG
 	dprintf("()");
+#endif
 	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
 }
 
@@ -1594,21 +1596,25 @@ dvbpsi_class::~dvbpsi_class()
 	}
 
 	if (handle) dvbpsi_delete(handle);
+#if DBG
 	dprintf("()");
+#endif
 }
 
 dvbpsi_class::dvbpsi_class(const dvbpsi_class&)
 {
+#if DBG
 	dprintf("(copy)");
-
+#endif
 	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
 	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
 }
 
 dvbpsi_class& dvbpsi_class::operator= (const dvbpsi_class& cSource)
 {
+#if DBG
 	dprintf("(operator=)");
-
+#endif
 	if (this == &cSource)
 		return *this;
 
@@ -1620,7 +1626,9 @@ dvbpsi_class& dvbpsi_class::operator= (const dvbpsi_class& cSource)
 
 void dvbpsi_class::purge()
 {
+#if DBG
 	dprintf("()");
+#endif
 	detach_demux();
 	if (handle) dvbpsi_delete(handle);
 	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
@@ -1629,22 +1637,30 @@ void dvbpsi_class::purge()
 
 void dvbpsi_class::detach_tables()
 {
+#if DBG
 	dprintf("()");
+#endif
 	if ((handle) && (tables.size()))
 		for (detach_table_map::iterator iter = tables.begin(); iter != tables.end(); ++iter)
 			if (iter->second.detach_cb) {
+#if DBG
 				dprintf("detaching table: %02x|%04x...", iter->second.table_id, iter->second.table_id_ext);
+#endif
 				iter->second.detach_cb(handle, iter->second.table_id, iter->second.table_id_ext);
 			}
 }
 
 void dvbpsi_class::detach_demux()
 {
+#if DBG
 	dprintf("()");
+#endif
 	if ((handle) && (dvbpsi_decoder_present(handle))) {
 		detach_tables();
 		dvbpsi_DetachDemux(handle);
+#if DBG
 		dprintf("(done)");
+#endif
 	}
 }
 
