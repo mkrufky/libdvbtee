@@ -781,7 +781,7 @@ parse::parse()
   , enabled(true)
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
-  , rewind()
+  , rewind(__func__)
 {
 	if (!hello)
 		fprintf(stdout, "# dvbtee v" LIBDVBTEE_VERSION
