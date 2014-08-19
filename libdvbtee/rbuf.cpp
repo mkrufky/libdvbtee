@@ -229,7 +229,7 @@ bool rbuf::write(const void* p, int size)
 		}
 #endif
 	}
-	if ((size_before + size_in) && (!__get_size())) {
+	if ((size_in) && (!__get_size())) {
 		__put_read_ptr(size_in);
 		dprintf("advancing read_ptr: dropped %u bytes", size_in);
 	}
