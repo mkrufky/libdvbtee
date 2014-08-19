@@ -27,11 +27,13 @@
 
 class rbuf {
 public:
-    rbuf();
+    rbuf(const char *name = "");
     ~rbuf();
 
     rbuf(const rbuf&);
     rbuf& operator= (const rbuf&);
+
+    void set_name(const char *);
 
     void set_capacity(int);
     int  get_capacity();
@@ -66,6 +68,8 @@ private:
 
     int  __get_read_ptr(void**, int);
     void __put_read_ptr(int);
+
+    const char *p_name;
 };
 
 #endif /* __RBUF_H__ */

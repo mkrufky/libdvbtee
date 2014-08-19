@@ -23,15 +23,21 @@
 #include <string.h>
 #include "rbuf.h"
 #include "log.h"
-#define CLASS_MODULE "rbuf"
+#define CLASS_MODULE "rbuf::%s"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
+#define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, p_name, ##arg)
 
-rbuf::rbuf()
+void rbuf::set_name(const char *name)
+{
+	p_name = name;
+}
+
+rbuf::rbuf(const char *name)
   : capacity(0)
   , p_data(NULL)
   , idx_read(0)
   , idx_write(0)
+  , p_name(name)
 {
 	dprintf("()");
 	pthread_mutex_init(&mutex, 0);
@@ -46,9 +52,10 @@ rbuf::~rbuf()
 	pthread_mutex_destroy(&mutex);
 }
 
-rbuf::rbuf(const rbuf&)
+rbuf::rbuf(const rbuf& cSource)
 {
 	dprintf("(copy)");
+	p_name    = cSource.p_name;
 	p_data    = NULL;
 	capacity  = 0;
 	idx_read  = 0;
@@ -62,6 +69,7 @@ rbuf& rbuf::operator= (const rbuf& cSource)
 	if (this == &cSource)
 		return *this;
 
+	p_name    = cSource.p_name;
 	p_data    = NULL;
 	capacity  = 0;
 	idx_read  = 0;
