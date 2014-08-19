@@ -227,7 +227,6 @@ output_stream::output_stream()
   , have_pat(false)
 {
 	dprintf("()");
-	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	memset(&name, 0, sizeof(name));
 	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
@@ -246,7 +245,6 @@ output_stream::~output_stream()
 output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
-	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
@@ -270,7 +268,6 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	if (this == &cSource)
 		return *this;
 
-	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
