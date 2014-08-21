@@ -677,6 +677,7 @@ int output_stream::set_pids(map_pidtype &new_pids)
 {
 	for (map_pidtype::const_iterator iter = new_pids.begin(); iter != new_pids.end(); ++iter)
 		pids[iter->first] = iter->second;
+	ringbuffer.set_name(name);
 	return 0;
 }
 
