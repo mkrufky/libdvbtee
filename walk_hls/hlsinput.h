@@ -22,17 +22,19 @@
 #define HLSINPUT_H
 
 #include "feed.h"
+#include "curlhttpget.h"
 
-class hlsinput
+
+class hlsinput : public curlhttpget_iface
 {
 public:
 	explicit hlsinput(bool feed_stdout = false);
 	bool get(const char *url);
+
+	void write_data(void *buffer, size_t size, size_t nmemb);
 private:
 	bool b_stdout;
 	feed feeder;
-
-	static void write_feed(void *context, void *buffer, size_t size, size_t nmemb);
 };
 
 #endif // HLSINPUT_H

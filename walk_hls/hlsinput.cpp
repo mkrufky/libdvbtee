@@ -21,28 +21,24 @@
 #include "hlsinput.h"
 #include "hlsfeed.h"
 
-static void write_stdout(void *context, void *buffer, size_t size, size_t nmemb)
-{
-	(void)context;
-	fwrite(buffer, size, nmemb, stdout);
-}
 
-void hlsinput::write_feed(void *context, void *buffer, size_t size, size_t nmemb)
+void hlsinput::write_data(void *buffer, size_t size, size_t nmemb)
 {
-	static_cast<hlsinput*>(context)->feeder.push(size * nmemb, (const uint8_t*)buffer);
+	if (b_stdout)
+		fwrite(buffer, size, nmemb, stdout);
+	else
+		feeder.push(size * nmemb, (const uint8_t*)buffer);
 }
 
 hlsinput::hlsinput(bool feed_stdout)
-  : b_stdout(feed_stdout)
+  : curlhttpget_iface()
+  , b_stdout(feed_stdout)
 {
 }
 
 bool hlsinput::get(const char *url)
 {
-	if (b_stdout)
-		hlsfeed hlsFeeder(url, write_stdout, this);
-	else
-		hlsfeed hlsFeeder(url, write_feed, this);
+	hlsfeed(url, this);
 
 	return true;
 }

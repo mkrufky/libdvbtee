@@ -33,7 +33,7 @@
 /* update version number by updating the LIBDVBTEE_VERSION_FOO fields below */
 #define LIBDVBTEE_VERSION_A 0
 #define LIBDVBTEE_VERSION_B 3
-#define LIBDVBTEE_VERSION_C 1
+#define LIBDVBTEE_VERSION_C 3
 
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
@@ -104,7 +104,12 @@ typedef struct {
 } channel_info_t;
 typedef std::map<uint16_t, channel_info_t> map_channel_info;
 
-typedef void (*addfilter_callback)(void *, uint16_t);
+class tsfilter_iface
+{
+public:
+	virtual void addfilter(uint16_t) = 0;
+};
+
 
 typedef struct {
 	uint16_t lcn;
@@ -119,7 +124,12 @@ typedef struct {
 	unsigned char service_name[256];
 } parsed_channel_info_t;
 
-typedef const char * (*chandump_callback)(void *context, parsed_channel_info_t *c);
+class parse_iface
+{
+public:
+	virtual void chandump(parsed_channel_info_t *) = 0;
+};
+
 
 class parse
 {
@@ -167,7 +177,7 @@ public:
 	int add_stdout(uint16_t);
 	int add_stdout(char*);
 
-	unsigned int xine_dump(chandump_callback chandump_cb = NULL, void* chandump_context = NULL); /* full channel dump  */
+	unsigned int xine_dump(parse_iface *iface = NULL); /* full channel dump  */
 	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
@@ -180,6 +190,7 @@ public:
 	void enable_ett_collection(bool onoff) { dont_collect_ett = !onoff; }
 
 	bool is_pmt_ready(uint16_t id = 0);
+	inline bool is_basic_psip_ready() { return ((has_pat) && (((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit)))); }
 	bool is_psip_ready();
 	bool is_epg_ready();
 
@@ -189,7 +200,7 @@ public:
 
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 
-	void set_addfilter_callback(addfilter_callback cb, void* context) { addfilter_context = context; addfilter_cb = cb; }
+	void set_tsfilter_iface(tsfilter_iface &iface) { m_tsfilter_iface = &iface; }
 
 	output out;
 
@@ -243,9 +254,8 @@ private:
 	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); }
 #endif
 
-	unsigned int xine_dump(uint16_t ts_id, chandump_callback chandump_cb, void* chandump_context)
-	{ return xine_dump(ts_id, &channel_info[ts_id], chandump_cb, chandump_context); }
-	unsigned int xine_dump(uint16_t, channel_info_t*, chandump_callback, void* chandump_context);
+	unsigned int xine_dump(uint16_t ts_id, parse_iface *iface) { return xine_dump(ts_id, &channel_info[ts_id], iface); }
+	unsigned int xine_dump(uint16_t, channel_info_t*, parse_iface *);
 
 	void set_ts_id(uint16_t);
 	void set_service_id(uint16_t id) { service_ids[id] = 0; }
@@ -291,10 +301,9 @@ private:
 	unsigned int tei_count;
 	map_pidtype payload_pids;
 
-	addfilter_callback addfilter_cb;
-	void* addfilter_context;
-	void add_filter(uint16_t pid) { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, pid); }
-	void clear_filters() { if ((addfilter_context) && (addfilter_cb)) addfilter_cb(addfilter_context, 0xffff); }
+	tsfilter_iface *m_tsfilter_iface;
+	void add_filter(uint16_t pid) { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(pid); }
+	void clear_filters() { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(0xffff); }
 	void reset_filters();
 
 	bool enabled;

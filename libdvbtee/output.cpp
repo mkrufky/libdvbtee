@@ -227,7 +227,6 @@ output_stream::output_stream()
   , have_pat(false)
 {
 	dprintf("()");
-	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	memset(&name, 0, sizeof(name));
 	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
@@ -246,7 +245,6 @@ output_stream::~output_stream()
 output_stream::output_stream(const output_stream&)
 {
 	dprintf("(copy)");
-	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
@@ -270,7 +268,6 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	if (this == &cSource)
 		return *this;
 
-	memset(&ringbuffer, 0, sizeof(ringbuffer));
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
@@ -373,6 +370,7 @@ int output_stream::start()
 	}
 	if ((sock < 0) &&
 	    ((stream_method != OUTPUT_STREAM_FUNC) &&
+	     (stream_method != OUTPUT_STREAM_INTF) &&
 	     (stream_method != OUTPUT_STREAM_STDOUT)))
 		return sock;
 
@@ -427,6 +425,7 @@ bool output_stream::check()
 			(stream_method == OUTPUT_STREAM_HTTP) ? "HTTP" :
 			(stream_method == OUTPUT_STREAM_FILE) ? "FILE" :
 			(stream_method == OUTPUT_STREAM_FUNC) ? "FUNC" :
+			(stream_method == OUTPUT_STREAM_INTF) ? "INTF" :
 			(stream_method == OUTPUT_STREAM_STDOUT) ? "STDOUT" : "UNKNOWN",
 			count_in / 188, count_out / 188);
 #if 1//DBG
@@ -523,6 +522,14 @@ int output_stream::stream(uint8_t* p_data, int size)
 			perror("streaming via callback failed");
 		}
 		break;
+	case OUTPUT_STREAM_INTF:
+		if (m_iface)
+			ret = m_iface->stream(p_data, size);
+		if (ret < 0) {
+			stop_without_wait();
+			perror("streaming via interface failed");
+		}
+		break;
 	case OUTPUT_STREAM_STDOUT:
 		ret = write_stdout(p_data, size);
 		if (ret != size) {
@@ -552,6 +559,15 @@ int output_stream::add(void* priv, stream_callback callback, map_pidtype &pids)
 	ringbuffer.reset();
 	stream_method = OUTPUT_STREAM_FUNC;
 	strncpy(name, "FUNC", sizeof(name));
+	return set_pids(pids);
+}
+
+int output_stream::add(output_stream_iface *iface, map_pidtype &pids)
+{
+	m_iface = iface;
+	ringbuffer.reset();
+	stream_method = OUTPUT_STREAM_INTF;
+	strncpy(name, "INTF", sizeof(name));
 	return set_pids(pids);
 }
 
@@ -817,12 +833,6 @@ void* output::output_thread()
 	pthread_exit(NULL);
 }
 
-//static
-void output::add_http_client(void *p_this, int socket)
-{
-	return static_cast<output*>(p_this)->add_http_client(socket);
-}
-
 void output::add_http_client(int socket)
 {
 	if (0 > add(socket, OUTPUT_STREAM_HTTP))
@@ -835,7 +845,7 @@ void output::add_http_client(int socket)
 int output::add_http_server(int port)
 {
 	dprintf("(%d)", port);
-	listener.set_callback(this, add_http_client);
+	listener.set_interface(this);
 	return listener.start(port);
 }
 
@@ -1034,6 +1044,30 @@ int output::add(void* priv, stream_callback callback, map_pidtype &pids)
 	return -1;
 }
 
+int output::add(output_stream_iface *iface, map_pidtype &pids)
+{
+	if (iface) {
+
+		int search_id = search(iface);
+		if (search_id >= 0) {
+			dprintf("target interface already exists #%d", search_id);
+			return search_id;
+		}
+		int target_id = num_targets;
+		/* push data into output buffer */
+		int ret = output_streams[target_id].add(iface, pids);
+		if (ret == 0)
+			num_targets++;
+		else
+			dprintf("failed to add target #%d", target_id);
+
+		dprintf("~(%d->INTF)", target_id);
+
+		return (ret == 0) ? target_id : ret;
+	}
+	return -1;
+}
+
 int output::add(int socket, unsigned int method, map_pidtype &pids)
 {
 	if (socket >= 0) {
@@ -1114,6 +1148,13 @@ int output::search(void* priv, stream_callback callback)
 {
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
 		if (iter->second.verify(priv, callback)) return iter->first;
+	return -1;
+}
+
+int output::search(output_stream_iface *iface)
+{
+	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter)
+		if (iter->second.verify(iface)) return iter->first;
 	return -1;
 }
 

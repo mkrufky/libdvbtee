@@ -58,8 +58,7 @@ feed::feed()
   , feed_thread_prio(100)
   , ringbuffer()
 #endif
-  , pull_cb(NULL)
-  , pull_priv(NULL)
+  , m_pull_iface(NULL)
 {
 	dprintf("()");
 
@@ -86,8 +85,7 @@ feed::feed(const feed&)
 #if FEED_BUFFER
 	feed_thread_prio = 100;
 #endif
-	pull_cb = NULL;
-	pull_priv = NULL;
+	m_pull_iface = NULL;
 }
 
 feed& feed::operator= (const feed& cSource)
@@ -104,8 +102,7 @@ feed& feed::operator= (const feed& cSource)
 #if FEED_BUFFER
 	feed_thread_prio = 100;
 #endif
-	pull_cb = NULL;
-	pull_priv = NULL;
+	m_pull_iface = NULL;
 
 	return *this;
 }
@@ -221,12 +218,11 @@ int feed::push(int size, const uint8_t* data)
 #endif
 }
 
-int feed::pull(void *priv, pull_callback cb)
+int feed::pull(feed_pull_iface *iface)
 {
 	f_kill_thread = false;
 
-	pull_priv = priv;
-	pull_cb = cb;
+	m_pull_iface = iface;
 
 	strncpy(filename, "PULLCALLBACK", sizeof(filename));
 
@@ -422,7 +418,8 @@ void *feed::pull_thread()
 	dprintf("()");
 
 	while (!f_kill_thread)
-		if (0 >= pull_cb(pull_priv))
+		if ((m_pull_iface) &&
+		    (0 >= m_pull_iface->pull()))
 			usleep(50*1000);
 
 	pthread_exit(NULL);
@@ -609,12 +606,6 @@ int feed::start_socket(char* source)
 	return ret;
 }
 
-//static
-void feed::add_tcp_feed(void *p_this, int socket)
-{
-	return static_cast<feed*>(p_this)->add_tcp_feed(socket);
-}
-
 void feed::add_tcp_feed(int socket)
 {
 	struct sockaddr_in tcpsa;
@@ -662,7 +653,7 @@ int feed::start_tcp_listener(uint16_t port_requested)
 
 	fd = -1;
 
-	listener.set_callback(this, add_tcp_feed);
+	listener.set_interface(this);
 
 	return listener.start(port_requested);
 }
@@ -749,8 +740,7 @@ bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_eve
 /*****************************************************************************/
 
 feed_server::feed_server()
-  : connection_notify_cb(NULL)
-  , parent_context(NULL)
+  : m_iface(NULL)
 {
 	dprintf("()");
 
@@ -766,12 +756,6 @@ feed_server::~feed_server()
 	feeders.clear();
 }
 
-//static
-void feed_server::add_tcp_feed(void *p_this, int socket)
-{
-	return static_cast<feed_server*>(p_this)->add_tcp_feed(socket);
-}
-
 void feed_server::add_tcp_feed(int socket)
 {
 	if (socket >= 0) {
@@ -779,33 +763,32 @@ void feed_server::add_tcp_feed(int socket)
 
 		feeders[socket].add_tcp_feed(socket);
 
-		if (connection_notify_cb) connection_notify_cb(parent_context, &feeders[socket]);
+		if (m_iface) m_iface->add_feeder(&feeders[socket]);
 	}
 	return;
 }
 
-int feed_server::start_tcp_listener(uint16_t port_requested, feed_notify_callback notify_cb, void *context)
+int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_iface *iface)
 {
 	dprintf("(%d)", port_requested);
 
 	/* set listener callback to notify us (feed_server) of new connections */
-	listener.set_callback(this, add_tcp_feed);
+	listener.set_interface(this);
 
 	/* set connection notify callback to notify parent server of new feeds */
-	connection_notify_cb = notify_cb;
-	parent_context = context;
+	m_iface = iface;
 
 	return listener.start(port_requested);
 }
 
-int feed_server::start_udp_listener(uint16_t port_requested, feed_notify_callback notify_cb, void *context)
+int feed_server::start_udp_listener(uint16_t port_requested, feed_server_iface *iface)
 {
 	int ret = feeders[0].start_udp_listener(port_requested);
 	if (ret < 0)
 		goto fail;
 
 	/* call connection notify callback to notify parent server of new feed */
-	if (notify_cb) notify_cb(context, &feeders[0]);
+	if (iface) iface->add_feeder(&feeders[0]);
 fail:
 	return ret;
 }

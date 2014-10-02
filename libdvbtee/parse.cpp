@@ -710,8 +710,7 @@ parse::parse()
   , eit_collection_limit(-1)
   , process_err_pkts(false)
   , tei_count(0)
-  , addfilter_cb(NULL)
-  , addfilter_context(NULL)
+  , m_tsfilter_iface(NULL)
   , enabled(true)
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
@@ -896,7 +895,7 @@ inline uint16_t tp_pkt_pid(uint8_t* pkt)
 	return (pkt[0] == 0x47) ? ((uint16_t) (pkt[1] & 0x1f) << 8) + pkt[2] : (uint16_t) - 1;
 }
 
-static const char * xine_chandump(void *context, parsed_channel_info_t *c)
+static const char * xine_chandump(parsed_channel_info_t *c)
 {
 	char channelno[7]; /* XXX.XXX */
 	if (c->major + c->minor > 1)
@@ -964,7 +963,7 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 	}
 }
 
-unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chandump_callback chandump_cb, void* chandump_context)
+unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, parse_iface *iface)
 {
 	parsed_channel_info_t c;
 	c.freq             = channel_info->frequency;
@@ -994,10 +993,10 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 
 		parse_channel_info(ts_id, &iter_pmt->second, decoded_vct, c);
 
-		if (!chandump_cb)
-			chandump_cb = xine_chandump;
-
-		chandump_cb(chandump_context, &c);
+		if (iface)
+			iface->chandump(&c);
+		else
+			xine_chandump(&c);
 		count++;
 	}
 	return count;
@@ -1005,7 +1004,7 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, chan
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
-unsigned int parse::xine_dump(chandump_callback chandump_cb, void* chandump_context)
+unsigned int parse::xine_dump(parse_iface *iface)
 {
 	map_chan_to_ts_id channels;
 	int count = 0;
@@ -1021,7 +1020,7 @@ unsigned int parse::xine_dump(chandump_callback chandump_cb, void* chandump_cont
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		count += xine_dump(iter->second, &channel_info[iter->second], chandump_cb, chandump_context);
+		count += xine_dump(iter->second, &channel_info[iter->second], iface);
 
 	channels.clear();
 #endif
@@ -1104,7 +1103,7 @@ bool parse::is_pmt_ready(uint16_t id)
 
 	for (map_rcvd::const_iterator iter = rcvd_pmt.begin(); iter != rcvd_pmt.end(); ++iter)
 		if ((iter->first) && (!iter->second)) {
-#if 1//DBG
+#if DBG
 			fprintf(stderr, "%s: missing pmt for program %d\n", __func__, iter->first);
 #endif
 			return false;
@@ -1115,9 +1114,7 @@ bool parse::is_pmt_ready(uint16_t id)
 
 bool parse::is_psip_ready()
 {
-	return ((has_pat) &&
-		(((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit))) &&
-		((decoders.count(get_ts_id())) && (is_pmt_ready())));
+	return ((is_basic_psip_ready()) && ((decoders.count(get_ts_id())) && (is_pmt_ready())));
 }
 
 bool parse::is_epg_ready()
@@ -1584,7 +1581,9 @@ static void dvbpsi_message(dvbpsi_t *handle, const dvbpsi_msg_level_t level, con
 dvbpsi_class::dvbpsi_class()
   : handle(dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG))
 {
+#if DBG
 	dprintf("()");
+#endif
 	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
 }
 
@@ -1596,21 +1595,25 @@ dvbpsi_class::~dvbpsi_class()
 	}
 
 	if (handle) dvbpsi_delete(handle);
+#if DBG
 	dprintf("()");
+#endif
 }
 
 dvbpsi_class::dvbpsi_class(const dvbpsi_class&)
 {
+#if DBG
 	dprintf("(copy)");
-
+#endif
 	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
 	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
 }
 
 dvbpsi_class& dvbpsi_class::operator= (const dvbpsi_class& cSource)
 {
+#if DBG
 	dprintf("(operator=)");
-
+#endif
 	if (this == &cSource)
 		return *this;
 
@@ -1622,7 +1625,9 @@ dvbpsi_class& dvbpsi_class::operator= (const dvbpsi_class& cSource)
 
 void dvbpsi_class::purge()
 {
+#if DBG
 	dprintf("()");
+#endif
 	detach_demux();
 	if (handle) dvbpsi_delete(handle);
 	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
@@ -1631,22 +1636,30 @@ void dvbpsi_class::purge()
 
 void dvbpsi_class::detach_tables()
 {
+#if DBG
 	dprintf("()");
+#endif
 	if ((handle) && (tables.size()))
 		for (detach_table_map::iterator iter = tables.begin(); iter != tables.end(); ++iter)
 			if (iter->second.detach_cb) {
+#if DBG
 				dprintf("detaching table: %02x|%04x...", iter->second.table_id, iter->second.table_id_ext);
+#endif
 				iter->second.detach_cb(handle, iter->second.table_id, iter->second.table_id_ext);
 			}
 }
 
 void dvbpsi_class::detach_demux()
 {
+#if DBG
 	dprintf("()");
+#endif
 	if ((handle) && (dvbpsi_decoder_present(handle))) {
 		detach_tables();
 		dvbpsi_DetachDemux(handle);
+#if DBG
 		dprintf("(done)");
+#endif
 	}
 }
 

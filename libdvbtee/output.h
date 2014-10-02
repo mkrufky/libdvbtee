@@ -65,6 +65,12 @@ const char * http_response(enum output_mimetype mimetype);
 
 typedef int (*stream_callback)(void *, const uint8_t *, size_t);
 
+class output_stream_iface
+{
+public:
+	virtual int stream(const uint8_t *, size_t) = 0;
+};
+
 class output_stream
 {
 public:
@@ -88,6 +94,7 @@ public:
 	int add(char*, map_pidtype&);
 	int add(int, unsigned int, map_pidtype&);
 	int add(void*, stream_callback, map_pidtype&);
+	int add(output_stream_iface *iface, map_pidtype &pids);
 	int add_stdout(map_pidtype &);
 
 	bool check();
@@ -96,6 +103,7 @@ public:
 	void reset_pids() { pids.clear(); }
 
 	bool verify(void* priv, stream_callback callback) { return ((priv == stream_cb_priv) && (callback == stream_cb)); }
+	bool verify(output_stream_iface *iface) { return (m_iface == iface); }
 	bool verify(int socket, unsigned int method) { return ((socket == sock) && (method == stream_method)); }
 	bool verify(char* target) { return (strcmp(target, name) == 0); }
 
@@ -122,10 +130,12 @@ private:
 #define OUTPUT_STREAM_FUNC   3
 #define OUTPUT_STREAM_HTTP   4
 #define OUTPUT_STREAM_STDOUT 5
+#define OUTPUT_STREAM_INTF   6
 	unsigned int stream_method;
 
 	unsigned long int count_in, count_out;
 
+	output_stream_iface *m_iface;
 	stream_callback stream_cb;
 	void *stream_cb_priv;
 
@@ -147,7 +157,7 @@ private:
 
 typedef std::map<unsigned int, output_stream> output_stream_map;
 
-class output
+class output : public socket_listen_iface
 {
 public:
 	output();
@@ -166,11 +176,13 @@ public:
 	int add(char* target) { map_pidtype pids; return add(target, pids); }
 	int add(int socket, unsigned int method) { map_pidtype pids; return add(socket, method, pids); }
 	int add(void* priv, stream_callback callback) { map_pidtype pids; return add(priv, callback, pids); }
+	int add(output_stream_iface *iface) { map_pidtype pids; return add(iface, pids); }
 	int add_stdout() { map_pidtype pids; return add_stdout(pids); }
 
 	int add(char* target, map_pidtype &pids);
 	int add(int socket, unsigned int method, map_pidtype &pids);
 	int add(void* priv, stream_callback callback, map_pidtype &pids);
+	int add(output_stream_iface *iface, map_pidtype &pids);
 	int add_stdout(map_pidtype &pids);
 
 	int add_http_server(int);
@@ -181,6 +193,8 @@ public:
 
 	int get_pids(map_pidtype&);
 	void reset_pids(int target_id);
+
+	void accept_socket(int sock) { add_http_client(sock); }
 private:
 	output_stream_map output_streams;
 
@@ -194,7 +208,6 @@ private:
 	static void *output_thread(void*);
 
 	void add_http_client(int);
-	static void add_http_client(void*, int);
 
 	void stop_without_wait() { f_kill_thread = true; }
 
@@ -211,6 +224,7 @@ private:
 	socket_listen listener;
 
 	int search(void* priv, stream_callback callback);
+	int search(output_stream_iface *iface);
 	int search(int socket, unsigned int method);
 	int search(char* target);
 };

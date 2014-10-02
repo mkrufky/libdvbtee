@@ -28,7 +28,11 @@
 #include <string.h>
 #include <unistd.h>
 
-typedef void (*accept_socket_callback)(void *, int);
+class socket_listen_iface
+{
+public:
+	virtual void accept_socket(int) = 0;
+};
 
 class socket_listen
 {
@@ -39,7 +43,7 @@ public:
 	socket_listen(const socket_listen&);
 	socket_listen& operator= (const socket_listen&);
 
-	void set_callback(void *priv, accept_socket_callback cb) { accept_socket_data = priv; accept_socket_cb = cb; }
+	void set_interface(socket_listen_iface *iface) { m_socket_listen_iface = iface; }
 
 	int start(uint16_t port_requested);
 	int start_udp(uint16_t port_requested);
@@ -62,8 +66,7 @@ private:
 	int sock_fd;
 	uint16_t port;
 
-	accept_socket_callback accept_socket_cb;
-	void *accept_socket_data;
+	socket_listen_iface *m_socket_listen_iface;
 };
 
 #endif /* __LISTEN_H__ */

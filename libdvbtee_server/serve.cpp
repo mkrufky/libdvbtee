@@ -108,18 +108,11 @@ static inline const char *data_fmt_str(unsigned int data_fmt)
 	return fmt;
 }
 
-//static
-bool serve::add_feeder(void *p_this, feed *new_feeder)
-{
-	return static_cast<serve*>(p_this)->add_feeder(new_feeder);
-}
-
-bool serve::add_feeder(feed *new_feeder)
+void serve::add_feeder(feed *new_feeder)
 {
 	unsigned int new_id = feeders.size();
 	while (feeders.count(new_id)) new_id++;
 	feeders[new_id] = new_feeder;
-	return true;
 }
 
 bool serve::add_tuner(tune *new_tuner)
@@ -168,7 +161,7 @@ bool serve_client::list_clients()
 	return true;
 }
 
-bool serve::get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+bool serve::get_channels(parse_iface *iface, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
@@ -177,9 +170,9 @@ bool serve::get_channels(chandump_callback chandump_cb, void *chandump_context, 
 	}
 
 	/* channels verified during this session */
-	tuner->get_scan_results(false, chandump_cb, chandump_context);
+	tuner->get_scan_results(false, iface);
 	/* load remaining channels that we saved previously but havent seen during this session */
-	cmd_config_channels_conf_load(tuner, chandump_cb, chandump_context);
+	cmd_config_channels_conf_load(tuner, iface);
 
 	return true;
 }
@@ -206,7 +199,7 @@ bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
 	return true;
 }
 
-bool serve::scan(unsigned int flags, scan_progress_callback progress_cb, void *progress_context, chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id)
+bool serve::scan(unsigned int flags, tune_iface *t_iface, parse_iface *p_iface, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
@@ -214,11 +207,11 @@ bool serve::scan(unsigned int flags, scan_progress_callback progress_cb, void *p
 		return false;
 	}
 
-	bool wait_for_results = (chandump_cb != NULL) ? true : false;
+	bool wait_for_results = (p_iface != NULL) ? true : false;
 
 	dprintf("scanning for services...");
 
-	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, progress_cb, progress_context, chandump_cb, chandump_context);
+	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, t_iface, p_iface);
 }
 
 void serve::set_scan_flags(tune *p_tuner, unsigned int flags)
@@ -497,7 +490,8 @@ void* serve_client::client_thread()
 }
 
 serve::serve()
-  : f_kill_thread(false)
+  : feed_server_iface()
+  , f_kill_thread(false)
   , f_reclaim_resources(true)
   , f_cli_enabled(true)
 {
@@ -729,13 +723,7 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 }
 
 
-//static
-void serve::add_client(void *p_this, int socket)
-{
-	return static_cast<serve*>(p_this)->add_client(socket);
-}
-
-void serve::add_client(int socket)
+void serve::accept_socket(int socket)
 {
 	if (socket < 0) {
 		fprintf(stderr, "not attaching to invalid socket, %d\n", socket);
@@ -759,7 +747,7 @@ int serve::start(uint16_t port_requested)
 {
 	dprintf("(%d)", port_requested);
 
-	listener.set_callback(this, add_client);
+	listener.set_interface(this);
 
 	return listener.start(port_requested);
 }
@@ -883,9 +871,9 @@ void serve_client::cli_print(const char *fmt, ...)
 #define CHAR_CMD_SET "/"
 #endif
 
-#define USE_JSON (data_fmt == SERVE_DATA_FMT_JSON)
-#define USE_HTML (data_fmt == SERVE_DATA_FMT_HTML)
-#define USE_XML  (data_fmt == SERVE_DATA_FMT_XML)
+#define USE_JSON(data_fmt) (data_fmt == SERVE_DATA_FMT_JSON)
+#define USE_HTML(data_fmt) (data_fmt == SERVE_DATA_FMT_HTML)
+#define USE_XML(data_fmt)  (data_fmt == SERVE_DATA_FMT_XML)
 
 bool serve_client::command(char* cmdline)
 {
@@ -903,7 +891,7 @@ bool serve_client::command(char* cmdline)
 
 	if (stream_http_headers) {
 		const char *str;
-		if ((USE_JSON) || (USE_XML))
+		if ((USE_JSON(data_fmt)) || (USE_XML(data_fmt)))
 			str = http_response(MIMETYPE_TEXT_PLAIN);
 		else
 			str = http_response(MIMETYPE_TEXT_HTML);
@@ -936,17 +924,24 @@ exit:
 	return ret;
 }
 
-const char * serve_client::chandump(void *context, parsed_channel_info_t *c)
+class serve_parser_iface : public parse_iface
 {
-	return static_cast<serve_client*>(context)->chandump(false, c);
+public:
+	serve_parser_iface(serve_client&, bool to_disk = false);
+	virtual void chandump(parsed_channel_info_t*);
+private:
+	serve_client& m_serve_client;
+	bool m_to_disk;
+};
+
+serve_parser_iface::serve_parser_iface(serve_client &client, bool to_disk)
+ : m_serve_client(client)
+ , m_to_disk(to_disk)
+{
+	//
 }
 
-const char * serve_client::chandump_to_disk(void *context, parsed_channel_info_t *c)
-{
-	return static_cast<serve_client*>(context)->chandump(true, c);
-}
-
-const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
+void serve_parser_iface::chandump(parsed_channel_info_t *c)
 {
 	const char *str = NULL;
 	char channelno[7] = { 0 }; /* XXX.XXX */
@@ -957,7 +952,7 @@ const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 	else
 		sprintf(channelno, "%d", c->physical_channel);
 
-	cli_print("%s-%s:%d:%s:%d:%d:%d\t tune=%d~%d\n",
+	m_serve_client.cli_print("%s-%s:%d:%s:%d:%d:%d\t tune=%d~%d\n",
 		  channelno,
 		  c->service_name,
 		  c->freq,//iter_vct->second.carrier_freq,
@@ -966,10 +961,10 @@ const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 		  c->physical_channel,
 		  c->program_number);
 
-	if (save_to_disk) {
+	if (m_to_disk) {
 		//char diskbuf[96] = { 0 };
 		//snprintf(diskbuf, 96,
-		fprintf(channels_conf_file,
+		fprintf(m_serve_client.channels_conf_file,
 			"%s-%s:%d:%s:%d:%d:%d\n",
 			channelno,
 			c->service_name,
@@ -980,19 +975,19 @@ const char * serve_client::chandump(bool save_to_disk, parsed_channel_info_t *c)
 		//if (channels_fd >= 0)
 		//	write(channels_fd, (const void *)diskbuf, sizeof(diskbuf));
 	} else
-	if (data_fmt & SERVE_DATA_FMT_TEXT) {
+	if (m_serve_client.data_fmt & SERVE_DATA_FMT_TEXT) {
 
 		str =
-		  (USE_JSON) ?
+		  (USE_JSON(m_serve_client.data_fmt)) ?
 			json_dump_channels(this, c) :
-		  (USE_XML) ?
+		  (USE_XML(m_serve_client.data_fmt)) ?
 			xml_dump_channels(this, c) :
 			html_dump_channels(this, c);
 
-		streamback((const uint8_t *)str, strlen(str));
+		m_serve_client.streamback((const uint8_t *)str, strlen(str));
 	}
 
-	return str;
+	return;
 }
 
 bool serve_client::cmd_tuner_stop()
@@ -1039,16 +1034,15 @@ bool serve_client::cmd_tuner_channel(int channel, unsigned int flags)
 }
 
 bool serve::cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
-			   scan_progress_callback progress_cb, void *progress_context,
-			   chandump_callback chandump_cb, void *chandump_context)
+			   tune_iface *t_iface, parse_iface *p_iface)
 {
 	if (!flags)
 		flags = SCAN_VSB;
 
 	if ((arg) && strlen(arg))
-		tuner->scan_for_services(flags, arg, scanepg, progress_cb, progress_context, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(flags, arg, scanepg, t_iface, p_iface, wait_for_results);
 	else
-		tuner->scan_for_services(flags, 0, 0, scanepg, progress_cb, progress_context, chandump_cb, chandump_context, wait_for_results);
+		tuner->scan_for_services(flags, 0, 0, scanepg, t_iface, p_iface, wait_for_results);
 
 	return true;
 }
@@ -1068,7 +1062,7 @@ static uint16_t derive_physical_channel(uint32_t freq, const char *modulation)
 	return ret;
 }
 
-bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context)
+bool serve::cmd_config_channels_conf_load(tune* tuner, parse_iface *iface)
 {
 	char *homedir = getenv ("HOME");
 	const char *subdir = "/.dvbtee";
@@ -1168,7 +1162,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, chandump_callback chandum
 			}
 			c.lcn = c.major;
 
-			if (chandump_cb) chandump_cb(chandump_context, &c);
+			if (iface) iface->chandump(&c);
 			memset(line, 0, sizeof(line));
 		}
 		fclose(channels_conf);
@@ -1186,6 +1180,7 @@ bool serve_client::cmd_tuner_scan_channels_save()
 	char dir[/*strlen(homedir)+strlen(subdir)*/64] = { 0 };
 	char filepath[/*strlen(dir)+strlen(slashchannelsconf)*/78] = { 0 };
 	struct stat st;
+	serve_parser_iface chandump_disk_iface(*this, true);
 
 	//snprintf(dir, strlen(dir), "%s%s", homedir, subdir);
 	memcpy(dir, homedir, strlen(homedir));
@@ -1214,7 +1209,7 @@ bool serve_client::cmd_tuner_scan_channels_save()
 		return false;
 	}
 	channels_conf_file = fdopen(channels_fd, "w");
-	tuner->get_scan_results(true, chandump_to_disk, this);
+	tuner->get_scan_results(true, &chandump_disk_iface);
 	fclose(channels_conf_file);
 	channels_conf_file = NULL;
 	close(channels_fd);
@@ -1225,6 +1220,7 @@ bool serve_client::cmd_tuner_scan_channels_save()
 bool serve_client::__command(char* cmdline)
 {
 	unsigned int scan_flags = 0;
+	serve_parser_iface parser_iface(*this, false);
 	char *arg, *save;
 	char *cmd = strtok_r(cmdline, CHAR_CMD_SET, &save);
 
@@ -1295,7 +1291,7 @@ bool serve_client::__command(char* cmdline)
 		server->cmd_tuner_scan(tuner, arg,
 				      (strstr(cmd, "scanepg")) ? true : false,
 				      (strstr(cmd, "startscan")) ? false : true,
-				      scan_flags, NULL, NULL, chandump, this);
+				      scan_flags, NULL, &parser_iface);
 
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;
@@ -1381,9 +1377,9 @@ bool serve_client::__command(char* cmdline)
 		}
 
 		/* channels verified during this session */
-		tuner->get_scan_results(false, chandump, this);
+		tuner->get_scan_results(false, &parser_iface);
 		/* load remaining channels that we saved previously but havent seen during this session */
-		server->cmd_config_channels_conf_load(tuner, chandump, this);
+		server->cmd_config_channels_conf_load(tuner, &parser_iface);
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, false, false);
@@ -1460,9 +1456,9 @@ bool serve_client::__command(char* cmdline)
 		streamback((const uint8_t*)str, strlen(str));
 
 		/* channels verified during this session */
-		tuner->get_scan_results(false, chandump, this);
+		tuner->get_scan_results(false, &parser_iface);
 		/* load remaining channels that we saved previously but havent seen during this session */
-		server->cmd_config_channels_conf_load(tuner, chandump, this);
+		server->cmd_config_channels_conf_load(tuner, &parser_iface);
 		/* and finally, the epg data */
 		feeder->parser.epg_dump(reporter);
 
@@ -1502,7 +1498,7 @@ bool serve_client::__command(char* cmdline)
 			}
 
 			streamback_started = true;
-			chandump(false, &c);
+			parser_iface.chandump(&c);
 
 			if (data_fmt == SERVE_DATA_FMT_HTML) {
 				str = html_dump_epg_header_footer_callback(this, true, false);
@@ -1592,10 +1588,10 @@ bool serve_client::__command(char* cmdline)
 			int ret;
 			if (strstr(cmd, "udp")) {
 				cli_print("starting TS listener on UDP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_udp_listener(portnum, server->add_feeder_static, server);
+				ret = server->feed_servers[portnum].start_udp_listener(portnum, server);
 			} else {
 				cli_print("starting TS listener on TCP port %d... ", portnum);
-				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server->add_feeder_static, server);
+				ret = server->feed_servers[portnum].start_tcp_listener(portnum, server);
 			}
 			cli_print("%s!\n", (ret < 0) ? "FAILED" : "SUCCESS");
 		}

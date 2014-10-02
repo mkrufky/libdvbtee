@@ -27,11 +27,15 @@
 #include "parse.h"
 #include "rbuf.h"
 
-typedef int (*pull_callback)(void*);
+class feed_pull_iface
+{
+public:
+	virtual int pull() = 0;
+};
 
 void libdvbtee_set_debug_level(unsigned int debug);
 
-class feed
+class feed : public socket_listen_iface
 {
 public:
 	feed();
@@ -54,7 +58,7 @@ public:
 	/* initialize for feed via functional interface */
 	int setup_feed(int prio);
 	int push(int, const uint8_t*);
-	int pull(void *priv, pull_callback cb);
+	int pull(feed_pull_iface *iface);
 
 	void close_file();
 
@@ -74,6 +78,8 @@ public:
 	inline bool wait_for_epg(unsigned int time_ms) { return wait_for_event_or_timeout(time_ms / 1000, FEED_EVENT_EPG); }
 
 	void add_tcp_feed(int);
+
+	void accept_socket(int sock) { add_tcp_feed(sock); }
 private:
 	pthread_t h_thread;
 	pthread_t h_feed_thread;
@@ -109,33 +115,37 @@ private:
 #endif
 
 	socket_listen listener;
-	static void add_tcp_feed(void*, int);
 
-	pull_callback pull_cb;
-	void *pull_priv;
+	feed_pull_iface *m_pull_iface;
 };
 
 typedef std::map<int, feed> feed_map;
 
-typedef bool (*feed_notify_callback)(void*, feed*);
+class feed_server_iface
+{
+public:
+	virtual ~feed_server_iface() {}
+	virtual void add_feeder(feed*) = 0;
+};
 
-class feed_server
+
+class feed_server : public socket_listen_iface
 {
 public:
 	feed_server();
 	~feed_server();
 
-	int start_tcp_listener(uint16_t port_requested, feed_notify_callback notify_cb = NULL, void *context = NULL);
-	int start_udp_listener(uint16_t port_requested, feed_notify_callback notify_cb = NULL, void *context = NULL);
+	int start_tcp_listener(uint16_t port_requested, feed_server_iface *iface = NULL);
+	int start_udp_listener(uint16_t port_requested, feed_server_iface *iface = NULL);
+
+	void accept_socket(int sock) { add_tcp_feed(sock); }
 private:
 	feed_map feeders;
 	socket_listen listener;
 
-	feed_notify_callback connection_notify_cb;
-	void *parent_context;
+	feed_server_iface *m_iface;
 
 	void add_tcp_feed(int);
-	static void add_tcp_feed(void*, int);
 };
 
 typedef std::map<int, feed_server> feed_server_map;

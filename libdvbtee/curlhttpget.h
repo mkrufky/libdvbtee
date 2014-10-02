@@ -24,7 +24,11 @@
 
 #include <curl/curl.h>
 
-typedef void (*hls_curl_http_get_data_callback)(void *context, void *buffer, size_t size, size_t nmemb);
+class curlhttpget_iface
+{
+public:
+	virtual void write_data(void *buffer, size_t size, size_t nmemb) = 0;
+};
 
 typedef struct {
   double total_time;
@@ -33,14 +37,13 @@ typedef struct {
 class curlhttpget
 {
 public:
-  explicit curlhttpget(const char *url = NULL, hls_curl_http_get_data_callback data_callback = NULL, void *data_context = NULL,
+  explicit curlhttpget(const char *url = NULL, curlhttpget_iface *iface = NULL,
 		       curlhttpget_info_t *info = NULL);
 
 private:
   CURL *curl_handle;
 
-  hls_curl_http_get_data_callback data_cb;
-  void *data_ctxt;
+  curlhttpget_iface *m_iface;
 
   void getinfo(curlhttpget_info_t *info);
 

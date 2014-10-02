@@ -65,7 +65,11 @@ typedef enum {
 	DVBTEE_FE_HAS_LOCK   = 4,
 } dvbtee_fe_status_t;
 
-typedef void (*scan_progress_callback)(void *context, scan_progress_t *p);
+class tune_iface
+{
+public:
+	virtual void scan_progress(scan_progress_t *p) = 0;
+};
 
 #if 0
 #define vrtdbg fprintf(stderr, "%s: virtual function undefined!\n", __func__)
@@ -100,13 +104,13 @@ public:
 
 #define SCAN_VSB 1
 #define SCAN_QAM 2
-	int scan_for_services(unsigned int, char *, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
-	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL, chandump_callback chandump_cb = NULL, void* chandump_context = NULL, bool wait_for_results = true);
+	int scan_for_services(unsigned int, char *, bool epg = false, tune_iface *t_iface = NULL, parse_iface *p_iface = NULL, bool wait_for_results = true);
+	int scan_for_services(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *t_iface = NULL, parse_iface *p_iface = NULL, bool wait_for_results = true);
 	/* FIXME: deprecate start_scan & move to private */
-	int start_scan(unsigned int, char *, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL);
-	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, scan_progress_callback progress_cb = NULL, void* progress_context = NULL);
+	int start_scan(unsigned int, char *, bool epg = false, tune_iface *iface = NULL);
+	int start_scan(unsigned int, unsigned int, unsigned int, bool epg = false, tune_iface *iface = NULL);
 	void wait_for_scan_complete() { while (!scan_complete) usleep(20*1000); }
-	unsigned int get_scan_results(bool wait = true, chandump_callback chandump_cb = NULL, void* chandump_context = NULL);
+	unsigned int get_scan_results(bool wait = true, parse_iface *iface = NULL);
 	void stop_scan() { f_kill_thread = true; }
 
 	feed feeder;
@@ -148,10 +152,9 @@ private:
 #if 0
 	uint16_t get_snr();
 #endif
-	int start_scan(unsigned int, bool epg, scan_progress_callback, void*);
+	int start_scan(unsigned int, bool epg, tune_iface*);
 
-	scan_progress_callback scan_progress_cb;
-	void* scan_progress_context;
+	tune_iface *m_iface;
 };
 
 #endif /*__TUNE_H__ */

@@ -37,6 +37,7 @@ class serve;
 
 class serve_client
 {
+	friend class serve_parser_iface;
 public:
 	serve_client();
 	~serve_client();
@@ -120,7 +121,7 @@ struct libdvbtee_server_config {
 	bool cli_disabled;
 };
 
-class serve
+class serve : public feed_server_iface, public socket_listen_iface
 {
 public:
 	serve();
@@ -131,25 +132,24 @@ public:
 	void stop();
 
 	bool add_tuner(tune *new_tuner);
-	bool add_feeder(feed *new_feeder);
-	static bool add_feeder(void*, feed*);
-	static bool add_feeder_static(void *v, feed *f) { return add_feeder(v, f); }
+	void add_feeder(feed *new_feeder);
 
 	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
-	bool get_channels(chandump_callback chandump_cb, void *chandump_context, unsigned int tuner_id = 0);
+	bool get_channels(parse_iface *iface, unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
-		  scan_progress_callback progress_cb = NULL, void* progress_context = NULL,
-		  chandump_callback chandump_cb = NULL, void *chandump_context = NULL,
+		  tune_iface *t_iface = NULL,
+		  parse_iface *p_iface = NULL,
 		  unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
-		  chandump_callback chandump_cb, void *chandump_context,
+		  parse_iface *iface,
 		  unsigned int tuner_id = 0)
-		{ return scan(flags, NULL, NULL, chandump_cb, chandump_context, tuner_id); }
+		{ return scan(flags, NULL, iface, tuner_id); }
 	bool scan(unsigned int flags,
-		  scan_progress_callback progress_cb, void *progress_context,
+		  tune_iface *iface,
 		  unsigned int tuner_id = 0)
-		{ return scan(flags, progress_cb, progress_context, NULL, NULL, tuner_id); }
+		{ return scan(flags, iface, NULL, tuner_id); }
+
 
 	void set_scan_flags(tune* p_tuner, unsigned int flags);
 	unsigned int get_scan_flags(tune* p_tuner);
@@ -165,13 +165,14 @@ public:
 
 	/* FIXME: move to private */
 	bool cmd_tuner_scan(tune* tuner, char *arg, bool scanepg, bool wait_for_results, unsigned int flags,
-			    scan_progress_callback progress_cb, void *progress_context,
-			    chandump_callback chandump_cb, void *chandump_context);
-	bool cmd_config_channels_conf_load(tune* tuner, chandump_callback chandump_cb, void *chandump_context);
+			    tune_iface *t_iface, parse_iface *p_iface);
+	bool cmd_config_channels_conf_load(tune* tuner, parse_iface *iface);
 
 	feed_server_map feed_servers;
 
 	serve_client_map* get_client_map() { return &client_map; }
+
+	void accept_socket(int);
 private:
 	socket_listen listener;
 	serve_client_map client_map;
@@ -184,9 +185,6 @@ private:
 
 	int start_monitor();
 	void stop_monitor() { f_kill_thread = true; }
-
-	void add_client(int);
-	static void add_client(void*, int);
 
 	std::map<tune*, unsigned int> scan_flags;
 

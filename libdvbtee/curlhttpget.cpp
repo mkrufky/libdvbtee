@@ -21,11 +21,9 @@
 
 #include "curlhttpget.h"
 
-curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_callback, void *data_context,
-			 curlhttpget_info_t *info)
+curlhttpget::curlhttpget(const char *url, curlhttpget_iface *iface, curlhttpget_info_t *info)
   : curl_handle(curl_easy_init())
-  , data_cb(data_callback)
-  , data_ctxt(data_context)
+  , m_iface(iface)
 {
   curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 //curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1L);
@@ -33,7 +31,7 @@ curlhttpget::curlhttpget(const char *url, hls_curl_http_get_data_callback data_c
   curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libdvbtee");
 
-  if (data_cb) {
+  if (m_iface) {
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, this);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
   }
@@ -66,6 +64,6 @@ size_t curlhttpget::write_data(void *buffer, size_t size, size_t nmemb, void *us
 
 size_t curlhttpget::__write_data(void *buffer, size_t size, size_t nmemb)
 {
-  if (data_cb) data_cb(data_ctxt, buffer, size, nmemb);
+  if (m_iface) m_iface->write_data(buffer, size, nmemb);
   return size * nmemb;
 }

@@ -33,7 +33,7 @@ static map_chan_to_ts_id channels;
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
 typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 
-class linuxtv_tuner: public tune
+class linuxtv_tuner: public tune, public tsfilter_iface
 {
 public:
 	linuxtv_tuner();
@@ -53,9 +53,10 @@ public:
 	bool __tune_channel(dvbtee_fe_modulation_t, unsigned int);
 
 	bool check();
+
+	void addfilter(uint16_t);
 private:
 	void add_filter(uint16_t);
-	static void add_filter(void *, uint16_t);
 	void clear_filters();
 	static void clear_filters(void *);
 

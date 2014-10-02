@@ -145,39 +145,43 @@ int start_server(struct dvbtee_context* context, unsigned int flags, int port, i
 	return context->server->start(port);
 }
 
-
-//FIXME: we return const char * for no reason - this will be converted to bool, int or void
-const char * chandump(void *context, parsed_channel_info_t *c)
+class server_parse_iface : public parse_iface
 {
-	char channelno[7]; /* XXX.XXX */
-	if (c->major + c->minor > 1)
-		sprintf(channelno, "%d.%d", c->major, c->minor);
-	else if (c->lcn)
-		sprintf(channelno, "%d", c->lcn);
-	else
-		sprintf(channelno, "%d", c->physical_channel);
+public:
+	virtual void chandump(parsed_channel_info_t *c)
+	{
+		char channelno[7]; /* XXX.XXX */
+		if (c->major + c->minor > 1)
+			sprintf(channelno, "%d.%d", c->major, c->minor);
+		else if (c->lcn)
+			sprintf(channelno, "%d", c->lcn);
+		else
+			sprintf(channelno, "%d", c->physical_channel);
 
-	/* xine format */
-	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
-		channelno,
-		c->service_name,
-		c->freq,//iter_vct->second.carrier_freq,
-		c->modulation,
-		c->vpid, c->apid, c->program_number);
+		/* xine format */
+		fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+			channelno,
+			c->service_name,
+			c->freq,//iter_vct->second.carrier_freq,
+			c->modulation,
+			c->vpid, c->apid, c->program_number);
 
-	/* link to http stream */
-	fprintf(stdout, "<a href='/tune=%d+%d&stream/here'>%s: %s</a>",
-		c->physical_channel, c->program_number, channelno, c->service_name);
+		/* link to http stream */
+		fprintf(stdout, "<a href='/tune=%d+%d&stream/here'>%s: %s</a>",
+			c->physical_channel, c->program_number, channelno, c->service_name);
 
-	return NULL;
-}
+		return;
+	}
+};
 
 bool list_channels(serve *server)
 {
 	if (!server)
 		return false;
 
-	return server->get_channels(chandump, NULL);
+	server_parse_iface iface;
+
+	return server->get_channels(&iface);
 }
 
 bool start_async_channel_scan(serve *server, unsigned int flags = 0)
@@ -187,7 +191,9 @@ bool start_async_channel_scan(serve *server, unsigned int flags = 0)
 
 bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 {
-	return server->scan(flags, chandump, NULL);
+	server_parse_iface iface;
+
+	return server->scan(flags, &iface);
 }
 
 

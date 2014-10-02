@@ -48,11 +48,10 @@ inline double convertToDouble(std::string const& s)
   return x;
 }
 
-hlsfeed::hlsfeed(const char *url, hls_curl_http_get_data_callback data_pump_callback, void *data_pump_context)
+hlsfeed::hlsfeed(const char *url, curlhttpget_iface *iface)
   : toplevel(url)
   , Url(url)
-  , datapump_cb(data_pump_callback)
-  , datapump_ctxt(data_pump_context)
+  , m_iface(iface)
   , push_buffer()
   , walk_buffer()
   , f_kill_thread(false)
@@ -83,6 +82,29 @@ hlsfeed::hlsfeed(const char *url, hls_curl_http_get_data_callback data_pump_call
 #endif
 }
 
+class pushwalk_iface : public curlhttpget_iface
+{
+public:
+#define PUSHWALK_WALK 0
+#define PUSHWALK_PUSH 1
+	pushwalk_iface(hlsfeed &parent, int pushwalk) : curlhttpget_iface(), m_parent(parent), m_pushwalk(pushwalk) {}
+
+	void write_data(void *buffer, size_t size, size_t nmemb)
+	{
+		switch(m_pushwalk) {
+		case PUSHWALK_WALK:
+			m_parent.walk((uint8_t*)buffer, size, nmemb);
+			break;
+		case PUSHWALK_PUSH:
+			m_parent.push((uint8_t*)buffer, size, nmemb);
+			break;
+		}
+	}
+private:
+	hlsfeed &m_parent;
+	int m_pushwalk;
+};
+
 void hlsfeed::walk(uint8_t *buffer)
 {
   char *save;
@@ -90,6 +112,9 @@ void hlsfeed::walk(uint8_t *buffer)
   char *line = strtok_r(playlist, "\n", &save);
   double duration;
   curlhttpget_info_t info = { 0 };
+  pushwalk_iface push_iface(*this, PUSHWALK_PUSH);
+  pushwalk_iface walk_iface(*this, PUSHWALK_WALK);
+
   while (line) {
     //if (line[0] == '#')
     if (strstr(line, "#EXTINF:")) {
@@ -104,11 +129,11 @@ void hlsfeed::walk(uint8_t *buffer)
 	duration = 0;
       }
       fprintf(stderr, "%s: playback duration: %f\n", __func__, duration);
-    } else if (strstr(line, ".ts"))
-      curlhttpget Curl(line, curl_push_callback, this, &info);
-    else if (strstr(line, ".m3u8"))
-      curlhttpget Curl(line, curl_walk_callback, this);
-    else if (!strstr(line, "#EXT"))
+    } else if (strstr(line, ".ts")) {
+      curlhttpget(line, &push_iface, &info);
+    } else if (strstr(line, ".m3u8")) {
+      curlhttpget(line, &walk_iface);
+    } else if (!strstr(line, "#EXT"))
       fprintf(stderr, "%s: invalid line: '%s'\n", __func__, line);
 
     line = strtok_r(NULL, "\n", &save);
@@ -145,9 +170,7 @@ void* hlsfeed::push_thread()
 		buf_size /= 188;
 		buf_size *= 188;
 
-		if (datapump_cb)
-			datapump_cb(datapump_ctxt, data, 188, buf_size / 188);
-
+		if (m_iface) m_iface->write_data(data, 188, buf_size / 188);
 
 		push_buffer.put_read_ptr(buf_size);
 	}
@@ -210,14 +233,4 @@ void hlsfeed::walk(uint8_t *buffer, size_t size, size_t nmemb)
 #else
   walk(buffer);
 #endif
-}
-
-void hlsfeed::curl_push_callback(void *context, void *buffer, size_t size, size_t nmemb)
-{
-  return static_cast<hlsfeed*>(context)->push((uint8_t*)buffer, size, nmemb);
-}
-
-void hlsfeed::curl_walk_callback(void *context, void *buffer, size_t size, size_t nmemb)
-{
-  return static_cast<hlsfeed*>(context)->walk((uint8_t*)buffer, size, nmemb);
 }
