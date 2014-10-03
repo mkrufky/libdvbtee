@@ -57,6 +57,8 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ld
 else:symbian: LIBS += -ldvbtee
 else:unix: LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
 
+macx: LIBS += -L/opt/local/lib/ -lhdhomerun
+
 INCLUDEPATH += $$PWD/../libdvbtee
 DEPENDPATH += $$PWD/../libdvbtee
 
