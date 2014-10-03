@@ -4,7 +4,7 @@
 #include <QPushButton>
 
 #ifdef USE_JSONCPP
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #else
 #include <QJsonDocument>
 #endif
