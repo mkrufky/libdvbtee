@@ -120,7 +120,7 @@ int feed::open_file()
 
 	fd = -1;
 
-	if ((fd = open(filename, O_RDONLY )) < 0)
+	if ((fd = open(filename, O_RDONLY|O_NONBLOCK )) < 0)
 		fprintf(stderr, "failed to open %s\n", filename);
 	else
 		fprintf(stderr, "%s: using %s\n", __func__, filename);
