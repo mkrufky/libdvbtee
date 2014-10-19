@@ -44,7 +44,7 @@ public:
 	feed(const feed&);
 	feed& operator= (const feed&);
 
-	int open_file(char* new_file) { set_filename(new_file); return open_file(); }
+	int open_file(char* new_file, int flags = 0) { set_filename(new_file); return _open_file(flags); }
 	int open_file(int new_fd) { fd = new_fd; return fd; } /* assumes already open */
 
 	void stop_without_wait() { f_kill_thread = true; }
@@ -109,7 +109,7 @@ private:
 	static void            *pull_thread(void*);
 
 	void set_filename(char*);
-	int  open_file();
+	int  _open_file(int flags);
 #if FEED_BUFFER
 	int start_feed();
 #endif
