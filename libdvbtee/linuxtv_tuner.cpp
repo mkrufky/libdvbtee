@@ -354,10 +354,10 @@ int linuxtv_tuner::start_feed()
 	sleep(1); // FIXME
 
 	sprintf(filename, "/dev/dvb/adapter%i/dvr%i", adap_id, dvr_id);
-	if (feeder.open_file(filename) < 0) {
+	if (feeder.open_file(filename, O_NONBLOCK) < 0) {
 		// try flat dvb dev structure if this fails
 		sprintf(filename, "/dev/dvb%i.dvr%i", adap_id, dvr_id);
-		if (feeder.open_file(filename) < 0) {
+		if (feeder.open_file(filename, O_NONBLOCK) < 0) {
 			fprintf(stderr, "failed to open %s\n", filename);
 			goto fail_dvr;
 		}
