@@ -114,13 +114,13 @@ void feed::set_filename(char* new_file)
 	strncpy(filename, new_file, sizeof(filename));
 }
 
-int feed::open_file()
+int feed::_open_file(int flags)
 {
 	dprintf("()");
 
 	fd = -1;
 
-	if ((fd = open(filename, O_RDONLY|O_NONBLOCK )) < 0)
+	if ((fd = open(filename, O_RDONLY|flags )) < 0)
 		fprintf(stderr, "failed to open %s\n", filename);
 	else
 		fprintf(stderr, "%s: using %s\n", __func__, filename);
