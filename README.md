@@ -27,7 +27,7 @@ and press enter.
 
 This README file is a work-in-progress... I'll expand on this more soon.
 
-Michael Ira Krufky
+Michael Ira Krufky  
 mkrufky at linuxtv dot org
 
 **Command line arguments:**
