@@ -345,8 +345,6 @@ typedef struct
 
 typedef void (*dump_epg_event_callback)(void * context, decoded_event_t *e);
 
-typedef void (*dump_epg_streamback_callback)(void *, const char *);
-
 typedef void (*print_callback)(void *, const char *, ...);
 
 class decode_report
