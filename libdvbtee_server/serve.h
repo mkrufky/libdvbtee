@@ -91,8 +91,6 @@ private:
 	bool list_clients();
 
 	void streamback(const uint8_t*, size_t);
-	static void streamback(void*, const uint8_t*, size_t);
-	static void streamback(void*, const char*);
 
 	bool streamback_started;
 	bool streamback_newchannel;

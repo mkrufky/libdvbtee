@@ -553,18 +553,6 @@ void* serve::monitor_thread()
 }
 
 
-//static
-void serve_client::streamback(void *p_this, const char *str)
-{
-	return static_cast<serve_client*>(p_this)->streamback((uint8_t *)str, strlen(str));
-}
-
-//static
-void serve_client::streamback(void *p_this, const uint8_t *str, size_t length)
-{
-	return static_cast<serve_client*>(p_this)->streamback(str, length);
-}
-
 void serve_client::streamback(const uint8_t *str, size_t length)
 {
 	stream_http_chunk(sock_fd, str, length);
