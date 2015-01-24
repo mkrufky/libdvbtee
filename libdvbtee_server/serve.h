@@ -104,10 +104,6 @@ private:
 	static void epg_header_footer_callback(void * context, bool header, bool channel);
 	static void epg_event_callback(void * context, decoded_event_t *e);
 
-	const char * chandump(bool save_to_disk, parsed_channel_info_t *c);
-	static const char * chandump(void *context, parsed_channel_info_t *c);
-	static const char * chandump_to_disk(void *context, parsed_channel_info_t *c);
-
 	void cli_print(const char *, ...);
 	static void cli_print(void *, const char *, ...);
 
