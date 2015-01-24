@@ -5,7 +5,7 @@
 libdvbtee is a stream parser and service information aggregator library for
 MPEG2 transport streams. The library includes a program service information
 (PSI) parser and support for various network streaming methods and is aware
-of the linux-dvb kernel API.
+of the linux-dvb kernel API as well as HDHomeRun network streaming APIs.
 
 The library contains enough functionality to power a full featured television
 middleware application, including the ability to acquire and stream data
@@ -25,7 +25,7 @@ When accessing the server via http, precede commands by / and arguments by =.
 When accessing the server via telnet, enter in the form 'command=argument'
 and press enter.
 
-This README file is a work-in-progress... I'll expand on this more soon.
+This README file is a work-in-progress.
 
 Michael Ira Krufky  
 mkrufky at linuxtv dot org
