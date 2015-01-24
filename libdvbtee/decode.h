@@ -323,10 +323,6 @@ typedef std::map<uint16_t, decode_network> map_network_decoder;
 
 void clear_decoded_networks();
 
-typedef void (*dump_epg_header_footer_callback)(void */* context */,
-						bool/* true = header / false = footer*/,
-						bool/* true = channel / false = body*/);
-
 typedef struct
 {
 	std::string channel_name;
@@ -343,21 +339,13 @@ typedef struct
 } decoded_event_t;
 
 
-typedef void (*dump_epg_event_callback)(void * context, decoded_event_t *e);
-
-typedef void (*print_callback)(void *, const char *, ...);
-
 class decode_report
 {
 public:
 	decode_report();
 	~decode_report();
 
-	void set_dump_epg_cb(void* ctxt, dump_epg_header_footer_callback hf_cb, dump_epg_event_callback ev_cb) { dump_epg_header_footer_cb = hf_cb; dump_epg_event_cb = ev_cb; context = ctxt; }
-	void set_print_cb(void* ctxt, print_callback cb) { print_cb = cb; context = ctxt; }
-
-	void dump_epg_header_footer(bool a, bool b) { if (dump_epg_header_footer_cb) dump_epg_header_footer_cb(context, a, b); }
-	void dump_epg_event(const char * channel_name,
+	void epg_event(const char * channel_name,
 			    uint16_t chan_major,
 			    uint16_t chan_minor,
 			    uint16_t chan_physical,
@@ -368,12 +356,10 @@ public:
 			    uint32_t length_sec,
 			    const char * name,
 			    const char * text);
-	void print(const char *fmt, ...);
-private:
-	void *context;
-	dump_epg_header_footer_callback dump_epg_header_footer_cb;
-	dump_epg_event_callback dump_epg_event_cb;
-	print_callback print_cb;
+
+	virtual void epg_header_footer(bool, bool) = 0; // {}
+	virtual void epg_event(decoded_event_t&) = 0;
+	virtual void print(const char *, ...) = 0;
 };
 
 class decode

@@ -35,7 +35,7 @@ typedef std::map<unsigned int, feed*> feeder_map;
 
 class serve;
 
-class serve_client
+class serve_client : public decode_report
 {
 	friend class serve_parser_iface;
 public:
@@ -90,8 +90,6 @@ private:
 	bool list_tuners();
 	bool list_clients();
 
-	decode_report *reporter;
-
 	void streamback(const uint8_t*, size_t);
 	static void streamback(void*, const uint8_t*, size_t);
 	static void streamback(void*, const char*);
@@ -99,13 +97,11 @@ private:
 	bool streamback_started;
 	bool streamback_newchannel;
 
-	void epg_header_footer_callback(bool header, bool channel);
-	void epg_event_callback(decoded_event_t *e);
-	static void epg_header_footer_callback(void * context, bool header, bool channel);
-	static void epg_event_callback(void * context, decoded_event_t *e);
+	virtual void epg_header_footer(bool header, bool channel);
+	virtual void epg_event(decoded_event_t &e);
+	virtual void print(const char *, ...);
 
 	void cli_print(const char *, ...);
-	static void cli_print(void *, const char *, ...);
 
 	std::string services;
 };
@@ -130,8 +126,7 @@ public:
 	bool add_tuner(tune *new_tuner);
 	void add_feeder(feed *new_feeder);
 
-	bool get_epg(dump_epg_header_footer_callback epg_signal_cb,
-		     dump_epg_event_callback epg_event_cb, void *epgdump_context);
+	bool get_epg(decode_report *iface);
 	bool get_channels(parse_iface *iface, unsigned int tuner_id = 0);
 	bool scan(unsigned int flags,
 		  tune_iface *t_iface = NULL,

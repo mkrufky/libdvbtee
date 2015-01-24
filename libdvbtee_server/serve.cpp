@@ -177,8 +177,7 @@ bool serve::get_channels(parse_iface *iface, unsigned int tuner_id)
 	return true;
 }
 
-bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
-		    dump_epg_event_callback epg_event_cb, void *epgdump_context)
+bool serve::get_epg(decode_report *iface)
 {
 	unsigned int tuner_id = 0; // FIXME
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
@@ -187,14 +186,7 @@ bool serve::get_epg(dump_epg_header_footer_callback epg_signal_cb,
 		return false;
 	}
 
-	decode_report *reporter = new decode_report;
-
-	reporter->set_dump_epg_cb(epgdump_context, epg_signal_cb, epg_event_cb);
-
-	tuner->feeder.parser.epg_dump(reporter);
-
-	delete reporter;
-	reporter = NULL;
+	tuner->feeder.parser.epg_dump(iface);
 
 	return true;
 }
@@ -301,7 +293,6 @@ serve_client::serve_client()
   , sock_fd(-1)
   , channels_conf_file(NULL)
   , data_fmt(SERVE_DATA_FMT_NONE)
-  , reporter(NULL)
   , streamback_started(false)
   , streamback_newchannel(false)
 {
@@ -327,7 +318,6 @@ serve_client::serve_client(const serve_client&)
 	sock_fd = -1;
 	channels_conf_file = NULL;
 	data_fmt = SERVE_DATA_FMT_NONE;
-	reporter = NULL;
 	streamback_started = false;
 	streamback_newchannel = false;
 	services.clear();
@@ -348,7 +338,6 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 	sock_fd = -1;
 	channels_conf_file = NULL;
 	data_fmt = SERVE_DATA_FMT_NONE;
-	reporter = NULL;
 	streamback_started = false;
 	streamback_newchannel = false;
 	services.clear();
@@ -581,13 +570,8 @@ void serve_client::streamback(const uint8_t *str, size_t length)
 	stream_http_chunk(sock_fd, str, length);
 }
 
-void serve_client::epg_header_footer_callback(void *context, bool header, bool channel)
-{
-	return static_cast<serve_client*>(context)->epg_header_footer_callback(header, channel);
-}
 
-
-void serve_client::epg_header_footer_callback(bool header, bool channel)
+void serve_client::epg_header_footer(bool header, bool channel)
 {
 	dprintf("()");
 	if ((header) && (!channel)) streamback_started = true;
@@ -611,11 +595,6 @@ void serve_client::epg_header_footer_callback(bool header, bool channel)
 	}
 	if ((!header) && (!channel)) fflush(stdout);
 	return;
-}
-
-void serve_client::epg_event_callback(void * context, decoded_event_t *e)
-{
-	return static_cast<serve_client*>(context)->epg_event_callback(e);
 }
 
 static inline const char *month(int x)
@@ -653,24 +632,24 @@ static inline const char *weekday(int x)
 	return ret;
 }
 
-void serve_client::epg_event_callback(decoded_event_t *e)
+void serve_client::epg_event(decoded_event_t &e)
 {
 	dprintf("()");
 	if (!streamback_started) return;
 #if 1
 	if (streamback_newchannel) {
 		if (data_fmt == SERVE_DATA_FMT_CLI)
-			cli_print("\n%d.%d-%s\n", e->chan_major, e->chan_minor, e->channel_name.c_str());
+			cli_print("\n%d.%d-%s\n", e.chan_major, e.chan_minor, e.channel_name.c_str());
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			decoded_event_t ee;
 			//memset(&ee, 0, sizeof(ee));
 			ee.name.clear();
 			ee.text.clear();
-			ee.channel_name.assign(e->channel_name);
-			ee.chan_major    = e->chan_major;
-			ee.chan_minor    = e->chan_minor;
-			ee.chan_physical = e->chan_physical;
-			ee.chan_svc_id   = e->chan_svc_id;
+			ee.channel_name.assign(e.channel_name);
+			ee.chan_major    = e.chan_major;
+			ee.chan_minor    = e.chan_minor;
+			ee.chan_physical = e.chan_physical;
+			ee.chan_svc_id   = e.chan_svc_id;
 			//const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
 			const char *str = html_dump_epg_event_callback(this, &ee);
 			streamback((const uint8_t *)str, strlen(str));
@@ -680,8 +659,8 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 	}
 #endif
 	if (data_fmt == SERVE_DATA_FMT_CLI) {
-		time_t end_time = e->start_time + e->length_sec;
-		struct tm tms = *localtime( &e->start_time );
+		time_t end_time = e.start_time + e.length_sec;
+		struct tm tms = *localtime( &e.start_time );
 		struct tm tme = *localtime( &end_time );
 
 		char time_str[26] = { 0 };
@@ -691,18 +670,18 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			 tms.tm_hour, tms.tm_min,
 			 tme.tm_hour, tme.tm_min);
 
-		cli_print("%s\t %s\n", time_str, e->name.c_str());
+		cli_print("%s\t %s\n", time_str, e.name.c_str());
 	}
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
 		decoded_event_t ee;
 		//memset(&ee, 0, sizeof(ee));
 		ee.name.clear();
 		ee.text.clear();
-		ee.event_id = e->event_id;
-		ee.start_time = e->start_time;
-		ee.length_sec = e->length_sec;
-		ee.name.assign(e->name);
-		ee.text.assign(e->text);
+		ee.event_id = e.event_id;
+		ee.start_time = e.start_time;
+		ee.length_sec = e.length_sec;
+		ee.name.assign(e.name);
+		ee.text.assign(e.text);
 
 		const char *str;
 		switch (data_fmt) {
@@ -711,10 +690,10 @@ void serve_client::epg_event_callback(decoded_event_t *e)
 			str = html_dump_epg_event_callback(this, &ee);
 			break;
 		case SERVE_DATA_FMT_JSON:
-			str = json_dump_epg_event_callback(this, e);
+			str = json_dump_epg_event_callback(this, &e);
 			break;
 		case SERVE_DATA_FMT_XML:
-			str = xml_dump_epg_event_callback(this, e);
+			str = xml_dump_epg_event_callback(this, &e);
 			break;
 		}
 		streamback((const uint8_t *)str, strlen(str));
@@ -827,14 +806,15 @@ bool serve::check()
 }
 
 
-//static
-void serve_client::cli_print(void *p_this, const char *fmt, ...)
+void serve_client::print(const char *fmt, ...)
 {
+	if (data_fmt != SERVE_DATA_FMT_CLI) return;
+
 	va_list args;
 
 	va_start(args, fmt);
 
-	static_cast<serve_client*>(p_this)->cli_print(fmt, args);
+	cli_print(fmt, args);
 
 	va_end(args);
 }
@@ -882,12 +862,8 @@ bool serve_client::command(char* cmdline)
 	char *item = strtok_r(cmdline, CHAR_CMD_SEP, &save);
 	bool stream_http_headers = (data_fmt & SERVE_DATA_FMT_TEXT) ? true : false;
 #if 1
-	reporter = new decode_report;
 	streamback_newchannel = false;
 	streamback_started = false;
-	reporter->set_dump_epg_cb(this,
-			epg_header_footer_callback,
-			epg_event_callback);
 
 	if (stream_http_headers) {
 		const char *str;
@@ -896,9 +872,6 @@ bool serve_client::command(char* cmdline)
 		else
 			str = http_response(MIMETYPE_TEXT_HTML);
 		socket_send(sock_fd, str, strlen(str), 0);
-	} else
-	if (data_fmt == SERVE_DATA_FMT_CLI) {
-		reporter->set_print_cb(this, cli_print);
 	}
 #endif
 	if (item) while (item) {
@@ -918,8 +891,6 @@ exit:
 //		close_socket();
 	}
 
-	delete reporter;
-	reporter = NULL;
 #endif
 	return ret;
 }
@@ -1437,7 +1408,7 @@ bool serve_client::__command(char* cmdline)
 			streamback((const uint8_t*)str, strlen(str));
 		}
 
-		feeder->parser.epg_dump(reporter);
+		feeder->parser.epg_dump(this);
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, false, false);
@@ -1460,7 +1431,7 @@ bool serve_client::__command(char* cmdline)
 		/* load remaining channels that we saved previously but havent seen during this session */
 		server->cmd_config_channels_conf_load(tuner, &parser_iface);
 		/* and finally, the epg data */
-		feeder->parser.epg_dump(reporter);
+		feeder->parser.epg_dump(this);
 
 		str = xml_dump_epg_header_footer_callback(this, false, false);
 		streamback((const uint8_t*)str, strlen(str));
@@ -1505,7 +1476,7 @@ bool serve_client::__command(char* cmdline)
 				streamback((const uint8_t*)str, strlen(str));
 			}
 
-			epg_event_callback(&e[0]);
+			epg_event(e[0]);
 
 			if (data_fmt == SERVE_DATA_FMT_HTML) {
 				str = html_dump_epg_header_footer_callback(this, false, false);
@@ -1518,7 +1489,7 @@ bool serve_client::__command(char* cmdline)
 				streamback((const uint8_t*)str, strlen(str));
 			}
 
-			epg_event_callback(&e[1]);
+			epg_event(e[1]);
 
 			if (data_fmt == SERVE_DATA_FMT_HTML) {
 				str = html_dump_epg_header_footer_callback(this, false, false);
