@@ -599,12 +599,12 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(filename)) {
+		int ret = context._file_feeder.open_file(filename);
 		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
-			context._file_feeder.open_file(filename);
 			context.server->add_feeder(&context._file_feeder);
 			goto exit;
 		} else {
-			if (0 <= context._file_feeder.open_file(filename)) {
+			if (0 <= ret) {
 				if (0 == context._file_feeder.start()) {
 					context._file_feeder.wait_for_streaming_or_timeout(timeout);
 					context._file_feeder.stop();
@@ -619,18 +619,19 @@ int main(int argc, char **argv)
 		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
 			write_feed iface(context);
 			hlsfeed(tcpipfeedurl, &iface);
-		} else
-		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
-			context._file_feeder.start_socket(tcpipfeedurl);
-			context.server->add_feeder(&context._file_feeder);
-			goto exit;
 		} else {
-			if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
-				context._file_feeder.wait_for_streaming_or_timeout(timeout);
-				context._file_feeder.stop();
-				context._file_feeder.close_file();
+			int ret = context._file_feeder.start_socket(tcpipfeedurl);
+			if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
+				context.server->add_feeder(&context._file_feeder);
+				goto exit;
+			} else {
+				if (0 <= ret) {
+					context._file_feeder.wait_for_streaming_or_timeout(timeout);
+					context._file_feeder.stop();
+					context._file_feeder.close_file();
+				}
+				goto exit;
 			}
-			goto exit;
 		}
 	}
 
@@ -678,13 +679,13 @@ int main(int argc, char **argv)
 	}
 	else
 	if (0 == context._file_feeder.parser.get_fed_pkt_count()) {
+		fprintf(stderr, "reading from STDIN\n");
+		int ret = context._file_feeder.start_stdin();
 		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
-			context._file_feeder.start_stdin();
 			context.server->add_feeder(&context._file_feeder);
 			goto exit;
 		}
-		fprintf(stderr, "reading from STDIN\n");
-		if (0 == context._file_feeder.start_stdin()) {
+		if (0 == ret) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);
 			context._file_feeder.stop();
 		}
