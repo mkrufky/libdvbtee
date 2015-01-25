@@ -664,9 +664,10 @@ int main(int argc, char **argv)
 	if ((tuner) && b_READ_TUNER) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
+		int ret = tuner->start_feed();
 		if (b_serve) goto exit;
 		else {
-			if (0 == tuner->start_feed()) {
+			if (0 == ret) {
 				tuner->feeder.wait_for_event_or_timeout(timeout, wait_event);
 				tuner->stop_feed();
 			}
