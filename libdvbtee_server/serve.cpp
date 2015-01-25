@@ -1261,9 +1261,9 @@ bool serve_client::__command(char* cmdline)
 			if (strstr(cmd, "opensock")) {
 				feeder->start_socket(arg);
 			} else if (strstr(cmd, "opensock")) {
-				cli_print("ERROR: http stream not yet supported in this mode");
+				cli_print("ERROR: http stream not yet supported in this mode\n");
 			} else
-			cli_print("ERROR: don't know how to open %s. Try opensock / openfile", arg);
+			cli_print("ERROR: don't know how to open %s. Try opensock / openfile\n", arg);
 		}
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;
