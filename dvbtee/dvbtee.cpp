@@ -192,6 +192,9 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 {
 	context->server = new serve;
 
+	if (!context->tuners.size())
+		context->server->add_feeder(&context->_file_feeder);
+
 	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 		context->server->add_tuner(iter->second);
 		context->server->set_scan_flags(iter->second, flags >> 2);
@@ -600,10 +603,8 @@ int main(int argc, char **argv)
 
 	if (strlen(filename)) {
 		int ret = context._file_feeder.open_file(filename);
-		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
-			context.server->add_feeder(&context._file_feeder);
-			goto exit;
-		} else {
+		if (b_serve) goto exit;
+		else {
 			if (0 <= ret) {
 				if (0 == context._file_feeder.start()) {
 					context._file_feeder.wait_for_streaming_or_timeout(timeout);
@@ -621,10 +622,8 @@ int main(int argc, char **argv)
 			hlsfeed(tcpipfeedurl, &iface);
 		} else {
 			int ret = context._file_feeder.start_socket(tcpipfeedurl);
-			if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
-				context.server->add_feeder(&context._file_feeder);
-				goto exit;
-			} else {
+			if (b_serve) goto exit;
+			else {
 				if (0 <= ret) {
 					context._file_feeder.wait_for_streaming_or_timeout(timeout);
 					context._file_feeder.stop();
@@ -665,10 +664,8 @@ int main(int argc, char **argv)
 	if ((tuner) && b_READ_TUNER) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
-		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
-			tuner->start_feed();
-			goto exit;
-		} else {
+		if (b_serve) goto exit;
+		else {
 			if (0 == tuner->start_feed()) {
 				tuner->feeder.wait_for_event_or_timeout(timeout, wait_event);
 				tuner->stop_feed();
@@ -681,10 +678,7 @@ int main(int argc, char **argv)
 	if (0 == context._file_feeder.parser.get_fed_pkt_count()) {
 		fprintf(stderr, "reading from STDIN\n");
 		int ret = context._file_feeder.start_stdin();
-		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
-			context.server->add_feeder(&context._file_feeder);
-			goto exit;
-		}
+		if (b_serve) goto exit;
 		if (0 == ret) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);
 			context._file_feeder.stop();
