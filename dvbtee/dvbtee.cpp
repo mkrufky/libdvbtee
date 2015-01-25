@@ -634,9 +634,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (b_serve)
-		goto exit;
-
 	if ((tuner) && (channel)) {
 		fprintf(stderr, "TUNE to channel %d...\n", channel);
 		int fe_fd = tuner->open_fe();
@@ -667,9 +664,10 @@ int main(int argc, char **argv)
 	if ((tuner) && b_READ_TUNER) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
-		if (b_serve) /* if we're running in server mode, we dont wait, stop or close */
+		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
 			tuner->start_feed();
-		else {
+			goto exit;
+		} else {
 			if (0 == tuner->start_feed()) {
 				tuner->feeder.wait_for_event_or_timeout(timeout, wait_event);
 				tuner->stop_feed();
@@ -680,12 +678,21 @@ int main(int argc, char **argv)
 	}
 	else
 	if (0 == context._file_feeder.parser.get_fed_pkt_count()) {
+		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
+			context._file_feeder.start_stdin();
+			context.server->add_feeder(&context._file_feeder);
+			goto exit;
+		}
 		fprintf(stderr, "reading from STDIN\n");
 		if (0 == context._file_feeder.start_stdin()) {
 			context._file_feeder.wait_for_streaming_or_timeout(timeout);
 			context._file_feeder.stop();
 		}
 	}
+
+	if (b_serve)
+		goto exit;
+
 	if ((tuner) && (b_scan)) // scan channel mode, normal scan would have goto'd to exit
 		tuner->feeder.parser.xine_dump();
 	if ((tuner) && (scan_epg))
