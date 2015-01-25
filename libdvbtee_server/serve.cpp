@@ -1252,6 +1252,19 @@ bool serve_client::__command(char* cmdline)
 				      (strstr(cmd, "startscan")) ? false : true,
 				      scan_flags, NULL, &parser_iface);
 
+	} else if (strstr(cmd, "open")) {
+		if ((arg) && strlen(arg)) {
+			cli_print("opening %s...", arg);
+			if (strstr(cmd, "openfile")) {
+				feeder->open_file(arg);
+			} else
+			if (strstr(cmd, "opensock")) {
+				feeder->start_socket(arg);
+			} else if (strstr(cmd, "opensock")) {
+				cli_print("ERROR: http stream not yet supported in this mode");
+			} else
+			cli_print("ERROR: don't know how to open %s. Try opensock / openfile", arg);
+		}
 	} else if (strstr(cmd, "tune")) {
 		char *cmdtune, *ser = NULL;
 		unsigned int phy = 0;
