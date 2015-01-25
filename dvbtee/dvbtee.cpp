@@ -602,18 +602,16 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(filename)) {
-		int ret = context._file_feeder.open_file(filename);
-		if (b_serve) goto exit;
-		else {
-			if (0 <= ret) {
-				if (0 == context._file_feeder.start()) {
-					context._file_feeder.wait_for_streaming_or_timeout(timeout);
-					context._file_feeder.stop();
-				}
-				context._file_feeder.close_file();
+		if (0 <= context._file_feeder.open_file(filename)) {
+			int ret = context._file_feeder.start();
+			if (b_serve) goto exit;
+			if (0 == ret) {
+				context._file_feeder.wait_for_streaming_or_timeout(timeout);
+				context._file_feeder.stop();
 			}
-			goto exit;
+			context._file_feeder.close_file();
 		}
+		goto exit;
 	}
 
 	if (strlen(tcpipfeedurl)) {
