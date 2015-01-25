@@ -1257,6 +1257,7 @@ bool serve_client::__command(char* cmdline)
 			cli_print("opening %s...", arg);
 			if (strstr(cmd, "openfile")) {
 				feeder->open_file(arg);
+				feeder->start();
 			} else
 			if (strstr(cmd, "opensock")) {
 				feeder->start_socket(arg);
