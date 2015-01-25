@@ -621,15 +621,13 @@ int main(int argc, char **argv)
 		} else {
 			int ret = context._file_feeder.start_socket(tcpipfeedurl);
 			if (b_serve) goto exit;
-			else {
-				if (0 <= ret) {
-					context._file_feeder.wait_for_streaming_or_timeout(timeout);
-					context._file_feeder.stop();
-					context._file_feeder.close_file();
-				}
-				goto exit;
+			if (0 <= ret) {
+				context._file_feeder.wait_for_streaming_or_timeout(timeout);
+				context._file_feeder.stop();
+				context._file_feeder.close_file();
 			}
 		}
+		goto exit;
 	}
 
 	if ((tuner) && (channel)) {
