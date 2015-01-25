@@ -598,18 +598,21 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
-	if (b_serve)
-		goto exit;
-
 	if (strlen(filename)) {
-		if (0 <= context._file_feeder.open_file(filename)) {
-			if (0 == context._file_feeder.start()) {
-				context._file_feeder.wait_for_streaming_or_timeout(timeout);
-				context._file_feeder.stop();
+		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
+			context._file_feeder.open_file(filename);
+			context.server->add_feeder(&context._file_feeder);
+			goto exit;
+		} else {
+			if (0 <= context._file_feeder.open_file(filename)) {
+				if (0 == context._file_feeder.start()) {
+					context._file_feeder.wait_for_streaming_or_timeout(timeout);
+					context._file_feeder.stop();
+				}
+				context._file_feeder.close_file();
 			}
-			context._file_feeder.close_file();
+			goto exit;
 		}
-		goto exit;
 	}
 
 	if (strlen(tcpipfeedurl)) {
@@ -617,13 +620,22 @@ int main(int argc, char **argv)
 			write_feed iface(context);
 			hlsfeed(tcpipfeedurl, &iface);
 		} else
-		if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
-			context._file_feeder.wait_for_streaming_or_timeout(timeout);
-			context._file_feeder.stop();
-			context._file_feeder.close_file();
+		if (b_serve) { /* if we're running in server mode, we dont wait, stop or close */
+			context._file_feeder.start_socket(tcpipfeedurl);
+			context.server->add_feeder(&context._file_feeder);
+			goto exit;
+		} else {
+			if (0 <= context._file_feeder.start_socket(tcpipfeedurl)) {
+				context._file_feeder.wait_for_streaming_or_timeout(timeout);
+				context._file_feeder.stop();
+				context._file_feeder.close_file();
+			}
+			goto exit;
 		}
-		goto exit;
 	}
+
+	if (b_serve)
+		goto exit;
 
 	if ((tuner) && (channel)) {
 		fprintf(stderr, "TUNE to channel %d...\n", channel);
