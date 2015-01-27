@@ -12,10 +12,10 @@ TEMPLATE = lib
 
 DEFINES += DVBTEE_LIBRARY
 
+include ( libdvbtee.pri )
+
 SOURCES += channels.cpp \
-    decode.cpp \
     demux.cpp \
-    desc.cpp \
     feed.cpp \
     functions.cpp \
     listen.cpp \
@@ -31,9 +31,7 @@ SOURCES += channels.cpp \
 
 HEADERS += atsctext.h \
     channels.h \
-    decode.h \
     demux.h \
-    desc.h \
     feed.h \
     functions.h \
     listen.h \

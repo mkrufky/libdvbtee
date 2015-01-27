@@ -17,6 +17,8 @@ TEMPLATE = app
 SOURCES += \
     server.cpp
 
+include ( ../libdvbtee/libdvbtee_include.pri )
+
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee/release/ -ldvbtee
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ldvbtee
 else:symbian: LIBS += -ldvbtee
