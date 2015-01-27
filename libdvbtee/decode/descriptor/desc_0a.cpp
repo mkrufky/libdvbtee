@@ -19,44 +19,42 @@
  *
  *****************************************************************************/
 
-#ifndef __DESCRIPTOR_H__
-#define __DESCRIPTOR_H__
+#include "desc_0a.h"
 
-#include "decoder.h"
-#include "dvbpsi/descriptor.h"
+#include "dvbpsi/dr_0a.h" /* ISO639 language descriptor */
 
-#include "log.h"
+#define CLASS_MODULE "desc_0a"
 
-#define desc_check_tag(t, e) \
-({ \
-	bool __ret = (t == e); \
-	if (!__ret) \
-		__dprintf(DBG_DESC, "FAIL: 0x%02x != 0x%02x", t, e); \
-	__ret; \
-})
+#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 
-#define desc_dr_failed(dr) \
-({ \
-	bool __ret = !dr; \
-	if (__ret) dprintf("decoder failed!"); \
-	__ret; \
-})
+using namespace dvbtee::decode;
 
 
-namespace dvbtee {
+desc_0a::desc_0a(Decoder &parent, dvbpsi_descriptor_t *p_descriptor)
+ : Descriptor(parent, p_descriptor)
+{
+	desc_check_tag(m_tag, 0x0a);
 
-namespace decode {
+	dvbpsi_iso639_dr_t* dr = dvbpsi_DecodeISO639Dr(p_descriptor);
+	if (desc_dr_failed(dr)) return;
 
-class Descriptor: public Decoder {
-public:
-	Descriptor(Decoder &, dvbpsi_descriptor_t*);
-	virtual ~Descriptor();
-protected:
-	uint8_t m_tag;
-};
+	for (int i = 0; i < dr->i_code_count; ++i) {
+		language_t &lang = map_lang[i];
 
+		lang.audio_type = dr->code[i].i_audio_type;
+		lang.iso_639_code[0] = dr->code[i].iso_639_code[0];
+		lang.iso_639_code[1] = dr->code[i].iso_639_code[1];
+		lang.iso_639_code[2] = dr->code[i].iso_639_code[2];
+
+		dprintf("%c%c%c %x",
+			dr->code[i].iso_639_code[0],
+			dr->code[i].iso_639_code[1],
+			dr->code[i].iso_639_code[2],
+			dr->code[i].i_audio_type);
+	}
 }
 
+desc_0a::~desc_0a()
+{
+	//
 }
-
-#endif /* __DESCRIPTOR_H__ */

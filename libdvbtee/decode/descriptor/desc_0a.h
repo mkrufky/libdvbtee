@@ -19,44 +19,36 @@
  *
  *****************************************************************************/
 
-#ifndef __DESCRIPTOR_H__
-#define __DESCRIPTOR_H__
+#ifndef __0A_H__
+#define __0A_H__
 
-#include "decoder.h"
-#include "dvbpsi/descriptor.h"
+#include <map>
 
-#include "log.h"
-
-#define desc_check_tag(t, e) \
-({ \
-	bool __ret = (t == e); \
-	if (!__ret) \
-		__dprintf(DBG_DESC, "FAIL: 0x%02x != 0x%02x", t, e); \
-	__ret; \
-})
-
-#define desc_dr_failed(dr) \
-({ \
-	bool __ret = !dr; \
-	if (__ret) dprintf("decoder failed!"); \
-	__ret; \
-})
-
+#include "descriptor.h"
 
 namespace dvbtee {
 
 namespace decode {
 
-class Descriptor: public Decoder {
+/* ISO639 language descriptor */
+
+class desc_0a: public Descriptor {
 public:
-	Descriptor(Decoder &, dvbpsi_descriptor_t*);
-	virtual ~Descriptor();
-protected:
-	uint8_t m_tag;
+	desc_0a(Decoder &, dvbpsi_descriptor_t*);
+	virtual ~desc_0a();
+
+	typedef struct language_s {
+		uint8_t       audio_type;
+		unsigned char iso_639_code[3];
+	} language_t;
+
+	typedef std::map<uint8_t, language_t> lang_map_t;
+
+	lang_map_t map_lang;
 };
 
 }
 
 }
 
-#endif /* __DESCRIPTOR_H__ */
+#endif /* __0A_H__ */
