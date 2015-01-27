@@ -22,11 +22,18 @@
 #ifndef __DESCRIPTOR_H__
 #define __DESCRIPTOR_H__
 
-#include <stdio.h>
-#include <stdint.h>
-#include "dvbpsi/dvbpsi.h"
-#include "dvbpsi/descriptor.h"
 #include "decoder.h"
+#include "dvbpsi/descriptor.h"
+
+#include "log.h"
+
+#define desc_check_tag(t, e) \
+({ \
+	bool __ret = (t == e); \
+	if (!__ret) \
+		__dprintf(DBG_DESC, "FAIL: 0x%02x != 0x%02x", t, e); \
+	__ret; \
+})
 
 namespace dvbtee {
 

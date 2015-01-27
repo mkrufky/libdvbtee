@@ -22,6 +22,11 @@
 #ifndef __DECODER_H__
 #define __DECODER_H__
 
+#include <stdio.h>
+#include <stdint.h>
+
+#include "dvbpsi/dvbpsi.h"
+
 namespace dvbtee {
 
 namespace decode {
