@@ -40,6 +40,8 @@ protected:
 	Decoder& m_parent;
 };
 
+static Decoder dummyDecoder;
+
 }
 
 }

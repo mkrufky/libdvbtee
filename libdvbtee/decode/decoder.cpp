@@ -23,6 +23,7 @@
 
 using namespace dvbtee::decode;
 
+Decoder dummyDecoder;
 
 Decoder::Decoder()
   : m_parent(*this)

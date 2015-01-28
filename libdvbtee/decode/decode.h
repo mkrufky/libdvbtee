@@ -26,9 +26,11 @@
 #include <string.h>
 #include <time.h>
 
-#include "dvbpsi/dvbpsi.h"
+#include "desc.h"
+
+//#include "dvbpsi/dvbpsi.h"
 #include "dvbpsi/pat.h"
-#include "dvbpsi/descriptor.h"
+//#include "dvbpsi/descriptor.h"
 #include "dvbpsi/pmt.h"
 #include "dvbpsi/demux.h"
 #include "dvbpsi/sdt.h"
@@ -43,8 +45,6 @@
 #ifdef RRT
 #include "dvbpsi/atsc_rrt.h"
 #endif
-
-#include "desc.h"
 
 #include <map>
 

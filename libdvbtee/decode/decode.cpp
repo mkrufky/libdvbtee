@@ -479,7 +479,10 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 
 		std::string languages;
 
-		for (map_dr0a::const_iterator iter_dr0a = local_descriptors._0a.begin(); iter_dr0a != local_descriptors._0a.end(); ++iter_dr0a) {
+		if (local_descriptors._0a)
+		for (dvbtee::decode::desc_0a::lang_map_t::const_iterator iter_dr0a = local_descriptors._0a->map_lang.begin();
+		     iter_dr0a != local_descriptors._0a->map_lang.end();
+		     ++iter_dr0a) {
 			if (!languages.empty()) languages.append(", ");
 			if (iter_dr0a->second.iso_639_code[0]) {
 				for (int i=0; i<3; i++) languages.push_back(iter_dr0a->second.iso_639_code[i]);

@@ -27,6 +27,7 @@ using namespace dvbtee::decode;
 Descriptor::Descriptor(Decoder &parent, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
  : Decoder(parent)
  , m_tag(0xff)
+ , m_valid(false)
 {
 	if (p_dvbpsi_descriptor) m_tag = p_dvbpsi_descriptor->i_tag;
 }

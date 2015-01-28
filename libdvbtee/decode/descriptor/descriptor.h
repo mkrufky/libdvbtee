@@ -51,8 +51,11 @@ class Descriptor: public Decoder {
 public:
 	Descriptor(Decoder &, dvbpsi_descriptor_t*);
 	virtual ~Descriptor();
+
+	bool isValid() { return m_valid; }
 protected:
 	uint8_t m_tag;
+	bool m_valid;
 };
 
 }

@@ -69,6 +69,7 @@
   })
 
 desc::desc()
+ : _0a(NULL)
 //  : f_kill_thread(false)
 {
 	dprintf("()");
@@ -77,6 +78,7 @@ desc::desc()
 desc::~desc()
 {
 	dprintf("()");
+	if (_0a) delete _0a;
 }
 
 bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
@@ -84,23 +86,8 @@ bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_ISO639Language)
 		return false;
 
-	dvbpsi_iso639_dr_t* dr = dvbpsi_DecodeISO639Dr(p_descriptor);
-	if (desc_dr_failed(dr)) return false;
-
-	for (int i = 0; i < dr->i_code_count; ++i) {
-		dr0a_t *dr0a = &_0a[i];
-
-		dr0a->audio_type = dr->code[i].i_audio_type;
-		dr0a->iso_639_code[0] = dr->code[i].iso_639_code[0];
-		dr0a->iso_639_code[1] = dr->code[i].iso_639_code[1];
-		dr0a->iso_639_code[2] = dr->code[i].iso_639_code[2];
-
-		dprintf("%c%c%c %x",
-			dr->code[i].iso_639_code[0],
-			dr->code[i].iso_639_code[1],
-			dr->code[i].iso_639_code[2],
-			dr->code[i].i_audio_type);
-	}
+	if (_0a) delete _0a;
+	_0a = new dvbtee::decode::desc_0a(dvbtee::decode::dummyDecoder, p_descriptor);
 
 	return true;
 }

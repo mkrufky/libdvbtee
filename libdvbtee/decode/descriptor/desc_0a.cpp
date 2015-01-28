@@ -33,7 +33,7 @@ using namespace dvbtee::decode;
 desc_0a::desc_0a(Decoder &parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, p_descriptor)
 {
-	desc_check_tag(m_tag, 0x0a);
+	if (!desc_check_tag(m_tag, 0x0a)) return;
 
 	dvbpsi_iso639_dr_t* dr = dvbpsi_DecodeISO639Dr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
@@ -52,6 +52,7 @@ desc_0a::desc_0a(Decoder &parent, dvbpsi_descriptor_t *p_descriptor)
 			dr->code[i].iso_639_code[2],
 			dr->code[i].i_audio_type);
 	}
+	m_valid = true;
 }
 
 desc_0a::~desc_0a()
