@@ -92,7 +92,7 @@ macx: LIBS += -L/opt/local/lib/ -lhdhomerun
 else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
 
 # some distros use a different location for libhdhomerun headers :-/
-INCLUDEPATH += /opt/local/include/
+INCLUDEPATH += /opt/local/include
 INCLUDEPATH += /usr/include/libhdhomerun
 INCLUDEPATH += /usr/lib/libhdhomerun
 DEPENDPATH += /usr/lib/libhdhomerun

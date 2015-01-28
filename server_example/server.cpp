@@ -196,26 +196,34 @@ bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 	return server->scan(flags, &iface);
 }
 
-
-void epg_header_footer(void *context, bool header, bool channel)
+class server_decode_report : public decode_report
 {
-	const char *noun = (channel) ? "channel" : "epg table";
-	const char *adj  = (header)  ? "start" : "end";
-	fprintf(stdout, "receiving %s of %s\n", adj, noun);
-}
+public:
+	virtual void epg_header_footer(bool header, bool channel)
+	{
+		const char *noun = (channel) ? "channel" : "epg table";
+		const char *adj  = (header)  ? "start" : "end";
+		fprintf(stdout, "receiving %s of %s\n", adj, noun);
+	}
 
-void epg_event(void *context, decoded_event_t *e)
-{
-	fprintf(stdout, "received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
-		e->event_id, e->channel_name.c_str(), e->chan_major, e->chan_minor, e->chan_physical, e->chan_svc_id, e->name.c_str(), e->text.c_str(), e->start_time, e->length_sec);
-}
+	virtual void epg_event(decoded_event_t &e)
+	{
+		fprintf(stdout, "received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
+			e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
+	}
+
+	virtual void print(const char *, ...) {}
+};
+
 
 bool request_epg(serve *server)
 {
 	if (!server)
 		return false;
 
-	return server->get_epg(epg_header_footer, epg_event, NULL);
+	server_decode_report reporter;
+
+	return server->get_epg(&reporter);
 }
 
 

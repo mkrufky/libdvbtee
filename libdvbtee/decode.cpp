@@ -48,10 +48,6 @@ do {								\
 } while (0)
 
 decode_report::decode_report()
-  : context(NULL)
-  , dump_epg_header_footer_cb(NULL)
-  , dump_epg_event_cb(NULL)
-  , print_cb(NULL)
 {
 #if DBG
 	dprintf("()");
@@ -63,16 +59,6 @@ decode_report::~decode_report()
 #if DBG
 	dprintf("()");
 #endif
-}
-
-void decode_report::print(const char *fmt, ...)
-{
-	if ((!print_cb) || (!context))
-		return;
-	va_list args;
-	va_start(args, fmt);
-	print_cb(context, fmt, args);
-	va_end(args);
 }
 
 static map_network_decoder   networks;
@@ -1045,7 +1031,7 @@ static bool _get_epg_event(decoded_event_t *e,
 	return true;
 }
 
-void decode_report::dump_epg_event(const char * channel_name,
+void decode_report::epg_event(const char * channel_name,
 				   uint16_t chan_major,
 				   uint16_t chan_minor,
 				   uint16_t chan_physical,
@@ -1057,9 +1043,6 @@ void decode_report::dump_epg_event(const char * channel_name,
 				   const char * name,
 				   const char * text)
 {
-	if (!dump_epg_event_cb)
-		return;
-
 	decoded_event_t e;
 	_get_epg_event(&e, channel_name,
 		      chan_major, chan_minor,
@@ -1067,7 +1050,7 @@ void decode_report::dump_epg_event(const char * channel_name,
 		      event_id, start_time, length_sec,
 		      name, text);
 
-	dump_epg_event_cb(context, &e);
+	epg_event(e);
 }
 
 
@@ -1097,7 +1080,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 
 	if (reporter) {
 		unsigned char message[512];
-		reporter->dump_epg_event((const char *)service_name,
+		reporter->epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
 					 physical_channel, channel->program,
 					 event->event_id,
@@ -1126,7 +1109,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, event->name.c_str()/*, iter_eit->second.text.c_str()*/ );
 
 	if (reporter)
-		reporter->dump_epg_event((const char *)service->service_name,
+		reporter->epg_event((const char *)service->service_name,
 					 get_lcn(service->service_id), 0,
 					 physical_channel, service->service_id,
 					 event->event_id,
@@ -1458,25 +1441,25 @@ void decode::dump_epg_dvb(decode_report *reporter, uint16_t service_id)
 
 void decode::dump_epg(decode_report *reporter)
 {
-	if (reporter) reporter->dump_epg_header_footer(true, false);
+	if (reporter) reporter->epg_header_footer(true, false);
 
 	if (decoded_vct.channels.size()) {
 	map_decoded_vct_channels::const_iterator iter_vct;
 	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct) {
-		if (reporter) reporter->dump_epg_header_footer(true, true);
+		if (reporter) reporter->epg_header_footer(true, true);
 		/*epg_str = */dump_epg_atsc(reporter, iter_vct->second.source_id);
-		if (reporter) reporter->dump_epg_header_footer(false, true);
+		if (reporter) reporter->epg_header_footer(false, true);
 	}} else {
 	map_decoded_sdt_services::const_iterator iter_sdt;
 	const decoded_sdt_t *decoded_sdt = get_decoded_sdt();
 	if (decoded_sdt) for (iter_sdt = decoded_sdt->services.begin(); iter_sdt != decoded_sdt->services.end(); ++iter_sdt)
 	if (iter_sdt->second.f_eit_present) {
-		if (reporter) reporter->dump_epg_header_footer(true, true);
+		if (reporter) reporter->epg_header_footer(true, true);
 		/*epg_str = */dump_epg_dvb(reporter, iter_sdt->second.service_id);
-		if (reporter) reporter->dump_epg_header_footer(false, true);
+		if (reporter) reporter->epg_header_footer(false, true);
 	}}
 
-	if (reporter) reporter->dump_epg_header_footer(false, false);
+	if (reporter) reporter->epg_header_footer(false, false);
 
 	return;
 }
