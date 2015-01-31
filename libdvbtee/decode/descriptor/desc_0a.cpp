@@ -52,7 +52,7 @@ desc_0a::desc_0a(Decoder &parent, dvbpsi_descriptor_t *p_descriptor)
 			dr->code[i].iso_639_code[2],
 			dr->code[i].i_audio_type);
 	}
-	m_valid = true;
+	setValid(true);
 }
 
 desc_0a::~desc_0a()

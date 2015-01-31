@@ -55,7 +55,10 @@ protected:
 	Descriptor(Decoder &, dvbpsi_descriptor_t*);
 	virtual ~Descriptor();
 
+	void setValid(bool v) { m_valid = v; }
+
 	uint8_t m_tag;
+private:
 	bool m_valid;
 };
 
