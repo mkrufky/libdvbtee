@@ -59,3 +59,5 @@ desc_0a::~desc_0a()
 {
 	//
 }
+
+REGISTER_DESCRIPTOR_FACTORY(0x0a, desc_0a);

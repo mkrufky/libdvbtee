@@ -22,6 +22,10 @@
 #ifndef __DESCRIPTOR_H__
 #define __DESCRIPTOR_H__
 
+#include <assert.h>
+#include <map>
+#include <pthread.h>
+
 #include "decoder.h"
 #include "dvbpsi/descriptor.h"
 
@@ -61,6 +65,47 @@ protected:
 private:
 	bool m_valid;
 };
+
+class DescriptorBaseFactory {
+public:
+	virtual Descriptor* create(Decoder &, dvbpsi_descriptor_t*) = 0;
+protected:
+	DescriptorBaseFactory() {}
+	~DescriptorBaseFactory() {}
+};
+
+class DescriptorRegistry {
+public:
+	static DescriptorRegistry& instance();
+
+	bool registerFactory(uint8_t, DescriptorBaseFactory*);
+	DescriptorBaseFactory *getFactory(uint8_t);
+private:
+	DescriptorRegistry();
+	~DescriptorRegistry();
+
+	pthread_mutex_t m_mutex;
+	static std::map <uint8_t, DescriptorBaseFactory*> m_factories;
+};
+
+template <uint8_t TAG, class T>
+class DescriptorFactory : public DescriptorBaseFactory {
+public:
+	static DescriptorFactory<TAG, T>& instance()
+	{
+		static DescriptorFactory<TAG, T> INSTANCE;
+		return INSTANCE;
+	}
+	virtual T *create(Decoder &parent, dvbpsi_descriptor_t *p_descriptor) { return new T(parent, p_descriptor); }
+private:
+	DescriptorFactory() {
+		bool descriptorFactoryRegistration = DescriptorRegistry::instance().registerFactory(TAG, this);
+		assert(descriptorFactoryRegistration);
+	}
+	~DescriptorFactory() {}
+};
+
+#define REGISTER_DESCRIPTOR_FACTORY(tag, decoder) static DescriptorFactory<tag, decoder> &__DescFactory = DescriptorFactory<tag, decoder>::instance()
 
 }
 

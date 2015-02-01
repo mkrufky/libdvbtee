@@ -36,3 +36,60 @@ Descriptor::~Descriptor()
 {
 	//
 }
+
+
+std::map <uint8_t, DescriptorBaseFactory*> DescriptorRegistry::m_factories;
+
+
+bool DescriptorRegistry::registerFactory(uint8_t tag, DescriptorBaseFactory *factory)
+{
+	pthread_mutex_lock(&m_mutex);
+
+	if (m_factories.count(tag)) {
+		pthread_mutex_unlock(&m_mutex);
+		return false;
+	}
+
+	//m_factories[tag] = factory;
+	m_factories.insert( std::pair<uint8_t, DescriptorBaseFactory*>(tag,factory) );
+
+	fprintf(stderr, "inserted 0x%02x, %p, %ld decoders present\n", tag, factory, m_factories.size());
+
+	pthread_mutex_unlock(&m_mutex);
+	return true;
+}
+
+DescriptorBaseFactory *DescriptorRegistry::getFactory(uint8_t tag)
+{
+	pthread_mutex_lock(&m_mutex);
+
+	if (!m_factories.count(tag)) {
+		pthread_mutex_unlock(&m_mutex);
+		return NULL;
+	}
+
+	DescriptorBaseFactory* ret = m_factories[tag];
+
+	pthread_mutex_unlock(&m_mutex);
+
+	return ret;
+}
+
+DescriptorRegistry::DescriptorRegistry()
+{
+	pthread_mutex_init(&m_mutex, 0);
+	pthread_mutex_lock(&m_mutex);
+	m_factories.clear();
+	pthread_mutex_unlock(&m_mutex);
+}
+
+DescriptorRegistry::~DescriptorRegistry()
+{
+	pthread_mutex_destroy(&m_mutex);
+}
+
+DescriptorRegistry &DescriptorRegistry::instance()
+{
+	static DescriptorRegistry INSTANCE;
+	return INSTANCE;
+}
