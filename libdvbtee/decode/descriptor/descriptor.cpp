@@ -38,9 +38,6 @@ Descriptor::~Descriptor()
 }
 
 
-std::map <uint8_t, DescriptorBaseFactory*> DescriptorRegistry::m_factories;
-
-
 bool DescriptorRegistry::registerFactory(uint8_t tag, DescriptorBaseFactory *factory)
 {
 	pthread_mutex_lock(&m_mutex);
@@ -78,9 +75,6 @@ DescriptorBaseFactory *DescriptorRegistry::getFactory(uint8_t tag)
 DescriptorRegistry::DescriptorRegistry()
 {
 	pthread_mutex_init(&m_mutex, 0);
-	pthread_mutex_lock(&m_mutex);
-	m_factories.clear();
-	pthread_mutex_unlock(&m_mutex);
 }
 
 DescriptorRegistry::~DescriptorRegistry()

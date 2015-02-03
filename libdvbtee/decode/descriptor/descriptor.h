@@ -85,7 +85,7 @@ private:
 	~DescriptorRegistry();
 
 	pthread_mutex_t m_mutex;
-	static std::map <uint8_t, DescriptorBaseFactory*> m_factories;
+	std::map <uint8_t, DescriptorBaseFactory*> m_factories;
 };
 
 template <uint8_t TAG, class T>
