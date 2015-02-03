@@ -28,6 +28,7 @@
 #include <map>
 
 #include "desc_0a.h"
+#include "desc_48.h"
 
 typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 
@@ -59,13 +60,12 @@ public:
 	map_lcn lcn;
 
 	dvbtee::decode::desc_0a *_0a;
+	dvbtee::decode::desc_48 *_48;
 
 	dr4d_t _4d;
 
 	map_dra1 _a1;
 
-	unsigned char provider_name[256];
-	unsigned char service_name[256];
 private:
 	bool iso639language(dvbpsi_descriptor_t*);
 	bool service(dvbpsi_descriptor_t*);

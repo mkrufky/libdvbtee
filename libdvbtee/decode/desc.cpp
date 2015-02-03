@@ -70,6 +70,7 @@
 
 desc::desc()
  : _0a(NULL)
+ , _48(NULL)
 //  : f_kill_thread(false)
 {
 	dprintf("()");
@@ -79,6 +80,7 @@ desc::~desc()
 {
 	dprintf("()");
 	if (_0a) delete _0a;
+	if (_48) delete _48;
 }
 
 bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
@@ -97,13 +99,8 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_Service)
 		return false;
 
-	dvbpsi_service_dr_t* dr = dvbpsi_DecodeServiceDr(p_descriptor);
-	if (desc_dr_failed(dr)) return false;
-
-	get_descriptor_text(dr->i_service_provider_name, dr->i_service_provider_name_length, provider_name);
-	get_descriptor_text(dr->i_service_name,          dr->i_service_name_length,          service_name);
-
-	dprintf("%s, %s", provider_name, service_name);
+	if (_48) delete _48;
+	_48 = new dvbtee::decode::desc_48(dvbtee::decode::dummyDecoder, p_descriptor);
 
 	return true;
 }
