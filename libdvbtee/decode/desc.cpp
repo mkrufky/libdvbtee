@@ -76,6 +76,8 @@ desc::desc()
 	dprintf("()");
 }
 
+using namespace dvbtee::decode;
+
 desc::~desc()
 {
 	dprintf("()");
@@ -89,7 +91,7 @@ bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_0a) delete _0a;
-	_0a = new dvbtee::decode::desc_0a(dvbtee::decode::dummyDecoder, p_descriptor);
+	_0a = (desc_0a*) DescriptorRegistry::instance().getFactory(p_descriptor->i_tag)->create(dummyDecoder, p_descriptor);
 
 	return true;
 }
@@ -100,7 +102,7 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_48) delete _48;
-	_48 = new dvbtee::decode::desc_48(dvbtee::decode::dummyDecoder, p_descriptor);
+	_48 = (desc_48*) DescriptorRegistry::instance().getFactory(p_descriptor->i_tag)->create(dummyDecoder, p_descriptor);
 
 	return true;
 }
@@ -111,7 +113,7 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_4d) delete _4d;
-	_4d = new dvbtee::decode::desc_4d(dvbtee::decode::dummyDecoder, p_descriptor);
+	_4d = (desc_4d*) DescriptorRegistry::instance().getFactory(p_descriptor->i_tag)->create(dummyDecoder, p_descriptor);
 
 	return true;
 }
