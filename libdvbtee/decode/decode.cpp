@@ -885,8 +885,8 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descrip
 
 		descriptors->decode(p_event->p_first_descriptor);
 
-		cur_event.name.assign((const char *)descriptors->_4d.name);
-		cur_event.text.assign((const char *)descriptors->_4d.text);
+		cur_event.name.assign((const char *)descriptors->_4d->name);
+		cur_event.text.assign((const char *)descriptors->_4d->text);
 #if DBG
 		time_t start = datetime_utc(cur_event.start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(cur_event.start_time + cur_event.length_sec /*+ (60 * tz_offset)*/);

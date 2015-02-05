@@ -29,15 +29,9 @@
 
 #include "desc_0a.h"
 #include "desc_48.h"
+#include "desc_4d.h"
 
 typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
-
-typedef struct
-{
-	unsigned char lang[4];
-	unsigned char name[256];
-	unsigned char text[256];
-} dr4d_t;
 
 typedef struct
 {
@@ -61,8 +55,7 @@ public:
 
 	dvbtee::decode::desc_0a *_0a;
 	dvbtee::decode::desc_48 *_48;
-
-	dr4d_t _4d;
+	dvbtee::decode::desc_4d *_4d;
 
 	map_dra1 _a1;
 

@@ -110,14 +110,8 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_ShortEvent)
 		return false;
 
-	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
-	if (desc_dr_failed(dr)) return false;
-
-	memcpy(_4d.lang, dr->i_iso_639_code, 3);
-	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, _4d.name);
-	get_descriptor_text(dr->i_text, dr->i_text_length, _4d.text);
-
-	dprintf("%s, %s, %s", _4d.lang, _4d.name, _4d.text);
+	if (_4d) delete _4d;
+	_4d = new dvbtee::decode::desc_4d(dvbtee::decode::dummyDecoder, p_descriptor);
 
 	return true;
 }
