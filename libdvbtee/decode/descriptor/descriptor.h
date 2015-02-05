@@ -81,6 +81,8 @@ public:
 	bool registerFactory(uint8_t, DescriptorBaseFactory*);
 	DescriptorBaseFactory *getFactory(uint8_t);
 	DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t *);
+
+	Descriptor *create(Decoder &, dvbpsi_descriptor_t*);
 private:
 	DescriptorRegistry();
 	~DescriptorRegistry();
