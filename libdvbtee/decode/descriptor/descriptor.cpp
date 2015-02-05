@@ -72,6 +72,11 @@ DescriptorBaseFactory *DescriptorRegistry::getFactory(uint8_t tag)
 	return ret;
 }
 
+DescriptorBaseFactory *DescriptorRegistry::getFactory(dvbpsi_descriptor_t *d)
+{
+	return getFactory(d->i_tag);
+}
+
 DescriptorRegistry::DescriptorRegistry()
 {
 	pthread_mutex_init(&m_mutex, 0);
