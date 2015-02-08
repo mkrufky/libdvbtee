@@ -93,7 +93,7 @@ bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_0a) delete _0a;
-	_0a = (desc_0a*) DescriptorRegistry::instance().create(NULL, p_descriptor);
+	_0a = (desc_0a*) DescriptorRegistry::instance().create(this, p_descriptor);
 
 	return true;
 }
@@ -104,7 +104,7 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_48) delete _48;
-	_48 = (desc_48*) DescriptorRegistry::instance().create(NULL, p_descriptor);
+	_48 = (desc_48*) DescriptorRegistry::instance().create(this, p_descriptor);
 
 	return true;
 }
@@ -115,7 +115,7 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_4d) delete _4d;
-	_4d = (desc_4d*) DescriptorRegistry::instance().create(NULL, p_descriptor);
+	_4d = (desc_4d*) DescriptorRegistry::instance().create(this, p_descriptor);
 
 	return true;
 }
@@ -126,7 +126,7 @@ bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_FrequencyList)
 		return false;
 
-	delete (desc_62*) DescriptorRegistry::instance().create(NULL, p_descriptor);
+	delete (desc_62*) DescriptorRegistry::instance().create(this, p_descriptor);
 
 	return true;
 }
@@ -137,7 +137,7 @@ bool desc::ac3_audio(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_Ac3Audio)
 		return false;
 
-	delete (desc_81*) DescriptorRegistry::instance().create(NULL, p_descriptor);
+	delete (desc_81*) DescriptorRegistry::instance().create(this, p_descriptor);
 #endif
 	return true;
 }
@@ -200,7 +200,7 @@ bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_ExtendedChannelName)
 		return false;
 
-	delete (desc_a0*) DescriptorRegistry::instance().create(NULL, p_descriptor);
+	delete (desc_a0*) DescriptorRegistry::instance().create(this, p_descriptor);
 #endif
 	return true;
 }

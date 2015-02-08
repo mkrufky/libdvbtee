@@ -46,7 +46,7 @@ typedef struct
 
 typedef std::map<uint16_t, dra1_t> map_dra1;
 
-class desc
+class desc : public dvbtee::decode::Decoder
 {
 public:
 	desc();
