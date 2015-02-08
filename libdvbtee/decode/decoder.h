@@ -22,6 +22,8 @@
 #ifndef __DECODER_H__
 #define __DECODER_H__
 
+#include <map>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdint.h>
 
@@ -37,10 +39,19 @@ public:
 	Decoder(Decoder*);
 	virtual ~Decoder();
 
+	int registerChild(Decoder *d);
+	int unregisterChild(int);
+
 protected:
+	virtual int getMapIndex() { return -1; }
+	Decoder *getParent() { return m_parent; }
 
 private:
 	Decoder *m_parent;
+	pthread_mutex_t m_mutex;
+	std::map<unsigned int, Decoder*> m_children;
+
+	int registerChild(int, Decoder*);
 };
 
 }

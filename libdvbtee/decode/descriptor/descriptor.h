@@ -91,6 +91,28 @@ private:
 	std::map <uint8_t, DescriptorBaseFactory*> m_factories;
 };
 
+template <class T>
+class DescriptorContainer : public T {
+public:
+	DescriptorContainer(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
+	 : T(parent, p_descriptor)
+	 , m_registeredIndex(-1)
+	 , m_parent(parent)
+	{
+		if (parent)
+			m_registeredIndex = parent->registerChild(this);
+	}
+
+	~DescriptorContainer()
+	{
+		if (m_parent) m_parent->unregisterChild(m_registeredIndex);
+	}
+
+private:
+	int m_registeredIndex;
+	Decoder* m_parent;
+};
+
 template <uint8_t TAG, class T>
 class DescriptorFactory : public DescriptorBaseFactory {
 public:
@@ -99,7 +121,7 @@ public:
 		static DescriptorFactory<TAG, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor) { return new T(parent, p_descriptor); }
+	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor) { return new DescriptorContainer<T>(parent, p_descriptor); }
 private:
 	DescriptorFactory() {
 		bool descriptorFactoryRegistration = DescriptorRegistry::instance().registerFactory(TAG, this);
