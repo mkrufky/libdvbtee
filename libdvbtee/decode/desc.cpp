@@ -124,16 +124,8 @@ bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_FrequencyList)
 		return false;
 
-	dvbpsi_frequency_list_dr_t* dr = dvbpsi_DecodeFrequencyListDr(p_descriptor);
-	if (desc_dr_failed(dr)) return false;
+	delete (desc_62*) DescriptorRegistry::instance().create(NULL, p_descriptor);
 
-	for (int i = 0; i < dr->i_number_of_frequencies; ++i) {
-#if 0
-		= dr->p_center_frequencies[i]
-#else
-		dprintf("%d", dr->p_center_frequencies[i]);
-#endif
-	}
 	return true;
 }
 

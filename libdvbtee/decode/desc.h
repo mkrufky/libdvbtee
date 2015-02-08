@@ -31,6 +31,7 @@
 #include "desc_0a.h"
 #include "desc_48.h"
 #include "desc_4d.h"
+#include "desc_62.h"
 
 typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 
