@@ -71,6 +71,7 @@
 desc::desc()
  : _0a(NULL)
  , _48(NULL)
+ , _4d(NULL)
 //  : f_kill_thread(false)
 {
 	dprintf("()");
@@ -83,6 +84,7 @@ desc::~desc()
 	dprintf("()");
 	if (_0a) delete _0a;
 	if (_48) delete _48;
+	if (_4d) delete _4d;
 }
 
 bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
