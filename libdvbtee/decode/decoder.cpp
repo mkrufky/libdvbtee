@@ -41,6 +41,12 @@ Decoder::Decoder(Decoder *parent)
 
 Decoder::~Decoder()
 {
+	//for (std::map<int, Decoder*>::iterator iter = m_children.begin(); iter != m_children.end(); ++iter)
+	while (m_children.size()) {
+		Decoder *child = m_children.begin()->second;
+		m_children.begin()->second = NULL;
+		if (child) delete child;
+	}
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_destroy(&m_mutex);
 #endif
