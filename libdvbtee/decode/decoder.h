@@ -36,7 +36,10 @@ public:
 	Decoder();
 	Decoder(Decoder*);
 	virtual ~Decoder();
+
 protected:
+
+private:
 	Decoder *m_parent;
 };
 
