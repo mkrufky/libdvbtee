@@ -56,7 +56,7 @@ public:
 	bool isValid() { return m_valid; }
 
 protected:
-	Descriptor(Decoder &, dvbpsi_descriptor_t*);
+	Descriptor(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~Descriptor();
 
 	void setValid(bool v) { m_valid = v; }
@@ -68,7 +68,7 @@ private:
 
 class DescriptorBaseFactory {
 public:
-	virtual Descriptor* create(Decoder &, dvbpsi_descriptor_t*) = 0;
+	virtual Descriptor* create(Decoder *, dvbpsi_descriptor_t*) = 0;
 protected:
 	DescriptorBaseFactory() {}
 	~DescriptorBaseFactory() {}
@@ -80,9 +80,9 @@ public:
 
 	bool registerFactory(uint8_t, DescriptorBaseFactory*);
 	DescriptorBaseFactory *getFactory(uint8_t);
-	DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t *);
+	DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t*);
 
-	Descriptor *create(Decoder &, dvbpsi_descriptor_t*);
+	Descriptor *create(Decoder*, dvbpsi_descriptor_t*);
 private:
 	DescriptorRegistry();
 	~DescriptorRegistry();
@@ -99,7 +99,7 @@ public:
 		static DescriptorFactory<TAG, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder &parent, dvbpsi_descriptor_t *p_descriptor) { return new T(parent, p_descriptor); }
+	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor) { return new T(parent, p_descriptor); }
 private:
 	DescriptorFactory() {
 		bool descriptorFactoryRegistration = DescriptorRegistry::instance().registerFactory(TAG, this);

@@ -24,7 +24,7 @@
 using namespace dvbtee::decode;
 
 
-Descriptor::Descriptor(Decoder &parent, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
+Descriptor::Descriptor(Decoder *parent, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
  : Decoder(parent)
  , m_tag(0xff)
  , m_valid(false)
@@ -77,7 +77,7 @@ DescriptorBaseFactory *DescriptorRegistry::getFactory(dvbpsi_descriptor_t *d)
 	return getFactory(d->i_tag);
 }
 
-Descriptor *DescriptorRegistry::create(Decoder &parent, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
+Descriptor *DescriptorRegistry::create(Decoder *parent, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
 {
 	DescriptorBaseFactory *Factory = getFactory(p_dvbpsi_descriptor);
 	if (!Factory)

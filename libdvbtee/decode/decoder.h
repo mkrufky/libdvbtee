@@ -34,13 +34,11 @@ namespace decode {
 class Decoder {
 public:
 	Decoder();
-	Decoder(Decoder&);
+	Decoder(Decoder*);
 	virtual ~Decoder();
 protected:
-	Decoder& m_parent;
+	Decoder *m_parent;
 };
-
-static Decoder dummyDecoder;
 
 }
 

@@ -32,7 +32,7 @@
 using namespace dvbtee::decode;
 
 
-desc_48::desc_48(Decoder &parent, dvbpsi_descriptor_t *p_descriptor)
+desc_48::desc_48(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, p_descriptor)
 {
 	if (!desc_check_tag(m_tag, 0x48)) return;

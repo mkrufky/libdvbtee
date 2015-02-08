@@ -23,15 +23,13 @@
 
 using namespace dvbtee::decode;
 
-Decoder dummyDecoder;
-
 Decoder::Decoder()
-  : m_parent(*this)
+ : m_parent(NULL)
 {
 	//
 }
 
-Decoder::Decoder(Decoder &parent)
+Decoder::Decoder(Decoder *parent)
  : m_parent(parent)
 {
 	//

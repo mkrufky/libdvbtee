@@ -34,7 +34,7 @@ namespace decode {
 
 class desc_48: public Descriptor {
 public:
-	desc_48(Decoder &, dvbpsi_descriptor_t*);
+	desc_48(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_48();
 
 	unsigned char provider_name[256];

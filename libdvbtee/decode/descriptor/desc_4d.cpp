@@ -32,7 +32,7 @@
 using namespace dvbtee::decode;
 
 
-desc_4d::desc_4d(Decoder &parent, dvbpsi_descriptor_t *p_descriptor)
+desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, p_descriptor)
 {
 	if (!desc_check_tag(m_tag, 0x4d)) return;

@@ -34,7 +34,7 @@ namespace decode {
 
 class desc_0a: public Descriptor {
 public:
-	desc_0a(Decoder &, dvbpsi_descriptor_t*);
+	desc_0a(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_0a();
 
 	typedef struct language_s {

@@ -30,7 +30,7 @@
 using namespace dvbtee::decode;
 
 
-desc_0a::desc_0a(Decoder &parent, dvbpsi_descriptor_t *p_descriptor)
+desc_0a::desc_0a(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, p_descriptor)
 {
 	if (!desc_check_tag(m_tag, 0x0a)) return;

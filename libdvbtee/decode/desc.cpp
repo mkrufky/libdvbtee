@@ -91,7 +91,7 @@ bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_0a) delete _0a;
-	_0a = (desc_0a*) DescriptorRegistry::instance().create(dummyDecoder, p_descriptor);
+	_0a = (desc_0a*) DescriptorRegistry::instance().create(NULL, p_descriptor);
 
 	return true;
 }
@@ -102,7 +102,7 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_48) delete _48;
-	_48 = (desc_48*) DescriptorRegistry::instance().create(dummyDecoder, p_descriptor);
+	_48 = (desc_48*) DescriptorRegistry::instance().create(NULL, p_descriptor);
 
 	return true;
 }
@@ -113,7 +113,7 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 		return false;
 
 	if (_4d) delete _4d;
-	_4d = (desc_4d*) DescriptorRegistry::instance().create(dummyDecoder, p_descriptor);
+	_4d = (desc_4d*) DescriptorRegistry::instance().create(NULL, p_descriptor);
 
 	return true;
 }

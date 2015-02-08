@@ -34,7 +34,7 @@ namespace decode {
 
 class desc_4d: public Descriptor {
 public:
-	desc_4d(Decoder &, dvbpsi_descriptor_t*);
+	desc_4d(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_4d();
 
 	unsigned char lang[4];
