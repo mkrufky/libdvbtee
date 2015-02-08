@@ -47,6 +47,7 @@ int Decoder::registerChild(Decoder *d)
 
 int Decoder::unregisterChild(int idx)
 {
+	if (!m_children.count(idx)) return -1;
 	pthread_mutex_lock(&m_mutex);
 	m_children.erase(idx);
 	pthread_mutex_unlock(&m_mutex);
