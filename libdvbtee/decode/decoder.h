@@ -53,7 +53,7 @@ private:
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_t m_mutex;
 #endif
-	std::map<unsigned int, Decoder*> m_children;
+	std::map<int, Decoder*> m_children;
 
 	int linkChild(int, Decoder*);
 };
