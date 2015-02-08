@@ -23,7 +23,9 @@
 #define __DECODER_H__
 
 #include <map>
+#if LOCK_DECODER_CHILDREN
 #include <pthread.h>
+#endif
 #include <stdio.h>
 #include <stdint.h>
 
@@ -48,7 +50,9 @@ protected:
 
 private:
 	Decoder *m_parent;
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_t m_mutex;
+#endif
 	std::map<unsigned int, Decoder*> m_children;
 
 	int registerChild(int, Decoder*);

@@ -26,18 +26,24 @@ using namespace dvbtee::decode;
 Decoder::Decoder()
  : m_parent(NULL)
 {
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_init(&m_mutex, 0);
+#endif
 }
 
 Decoder::Decoder(Decoder *parent)
  : m_parent(parent)
 {
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_init(&m_mutex, 0);
+#endif
 }
 
 Decoder::~Decoder()
 {
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_destroy(&m_mutex);
+#endif
 }
 
 int Decoder::registerChild(Decoder *d)
@@ -48,26 +54,36 @@ int Decoder::registerChild(Decoder *d)
 int Decoder::unregisterChild(int idx)
 {
 	if (!m_children.count(idx)) return -1;
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_lock(&m_mutex);
+#endif
 	m_children.erase(idx);
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_unlock(&m_mutex);
+#endif
 }
 
 int Decoder::registerChild(int idx, Decoder *d)
 {
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_lock(&m_mutex);
+#endif
 
 	if (idx < 0)
 	    idx = m_children.size();
 
 	if (m_children.count(idx)) {
+#if LOCK_DECODER_CHILDREN
 		pthread_mutex_unlock(&m_mutex);
+#endif
 		return -1;
 	}
 
 	m_children.insert( std::pair<unsigned int, Decoder*>(idx, d) );
 
+#if LOCK_DECODER_CHILDREN
 	pthread_mutex_unlock(&m_mutex);
+#endif
 
 	return idx;
 
