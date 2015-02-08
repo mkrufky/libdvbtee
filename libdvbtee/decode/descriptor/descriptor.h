@@ -97,7 +97,6 @@ public:
 	DescriptorContainer(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	 : T(parent, p_descriptor)
 	 , m_registeredIndex(-1)
-	 , m_parent(parent)
 	{
 		if (parent)
 			m_registeredIndex = parent->registerChild(this);
@@ -105,12 +104,12 @@ public:
 
 	~DescriptorContainer()
 	{
-		if (m_parent) m_parent->unregisterChild(m_registeredIndex);
+		Decoder *parent = T::getParent();
+		if (parent) parent->unregisterChild(m_registeredIndex);
 	}
 
 private:
 	int m_registeredIndex;
-	Decoder* m_parent;
 };
 
 template <uint8_t TAG, class T>
