@@ -54,6 +54,7 @@ namespace decode {
 class Descriptor: public Decoder {
 public:
 	bool isValid() { return m_valid; }
+	uint8_t getTag() { return m_tag; }
 
 protected:
 	Descriptor(Decoder *, dvbpsi_descriptor_t*);
