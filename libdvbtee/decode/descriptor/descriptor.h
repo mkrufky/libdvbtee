@@ -92,24 +92,23 @@ private:
 };
 
 template <class T>
-class DescriptorContainer : public T {
+class LinkedDescriptor : public T {
 public:
-	DescriptorContainer(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
+	LinkedDescriptor(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	 : T(parent, p_descriptor)
-	 , m_registeredIndex(-1)
+	 , m_linkedIdx(-1)
 	{
-		if (parent)
-			m_registeredIndex = parent->registerChild(this);
+		if (parent) m_linkedIdx = parent->linkChild(this);
 	}
 
-	~DescriptorContainer()
+	~LinkedDescriptor()
 	{
 		Decoder *parent = T::getParent();
-		if (parent) parent->unregisterChild(m_registeredIndex);
+		if (parent) parent->unlinkChild(m_linkedIdx);
 	}
 
 private:
-	int m_registeredIndex;
+	int m_linkedIdx;
 };
 
 template <uint8_t TAG, class T>
@@ -120,7 +119,7 @@ public:
 		static DescriptorFactory<TAG, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor) { return new DescriptorContainer<T>(parent, p_descriptor); }
+	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor) { return new LinkedDescriptor<T>(parent, p_descriptor); }
 private:
 	DescriptorFactory() {
 		bool descriptorFactoryRegistration = DescriptorRegistry::instance().registerFactory(TAG, this);

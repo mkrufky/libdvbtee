@@ -41,8 +41,8 @@ public:
 	Decoder(Decoder*);
 	virtual ~Decoder();
 
-	int registerChild(Decoder *d);
-	int unregisterChild(int);
+	int linkChild(Decoder *d);
+	bool unlinkChild(int);
 
 protected:
 	virtual int getMapIndex() { return -1; }
@@ -55,7 +55,7 @@ private:
 #endif
 	std::map<unsigned int, Decoder*> m_children;
 
-	int registerChild(int, Decoder*);
+	int linkChild(int, Decoder*);
 };
 
 }

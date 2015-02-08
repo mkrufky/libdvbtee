@@ -46,14 +46,14 @@ Decoder::~Decoder()
 #endif
 }
 
-int Decoder::registerChild(Decoder *d)
+int Decoder::linkChild(Decoder *d)
 {
-	return registerChild(d->getMapIndex(), d);
+	return linkChild(d->getMapIndex(), d);
 }
 
-int Decoder::unregisterChild(int idx)
+bool Decoder::unlinkChild(int idx)
 {
-	if (!m_children.count(idx)) return -1;
+	if (!m_children.count(idx)) return false;
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_lock(&m_mutex);
 #endif
@@ -61,9 +61,10 @@ int Decoder::unregisterChild(int idx)
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_unlock(&m_mutex);
 #endif
+	return true;
 }
 
-int Decoder::registerChild(int idx, Decoder *d)
+int Decoder::linkChild(int idx, Decoder *d)
 {
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_lock(&m_mutex);
