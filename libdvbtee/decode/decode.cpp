@@ -479,9 +479,10 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 
 		std::string languages;
 
-		if (local_descriptors._0a)
-		for (dvbtee::decode::desc_0a::lang_map_t::const_iterator iter_dr0a = local_descriptors._0a->map_lang.begin();
-		     iter_dr0a != local_descriptors._0a->map_lang.end();
+		dvbtee::decode::desc_0a* _0a = (dvbtee::decode::desc_0a*)local_descriptors.lastDesc(0x0a);
+		if (_0a)
+		for (dvbtee::decode::desc_0a::lang_map_t::const_iterator iter_dr0a = _0a->map_lang.begin();
+		     iter_dr0a != _0a->map_lang.end();
 		     ++iter_dr0a) {
 			if (!languages.empty()) languages.append(", ");
 			if (iter_dr0a->second.iso_639_code[0]) {
@@ -795,12 +796,13 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 		memset((void*)cur_service.provider_name, 0, sizeof(cur_service.provider_name));
 		memset((void*)cur_service.service_name, 0, sizeof(cur_service.service_name));
 
-		if (descriptors->_48) {
+		dvbtee::decode::desc_48* _48 = (dvbtee::decode::desc_48*)descriptors->lastDesc(0x48);
+		if (_48) {
 			strncpy((char*)cur_service.provider_name,
-				(const char*)descriptors->_48->provider_name,
+				(const char*)_48->provider_name,
 				sizeof(cur_service.provider_name));
 			strncpy((char*)cur_service.service_name,
-				(const char*)descriptors->_48->service_name,
+				(const char*)_48->service_name,
 				sizeof(cur_service.service_name));
 		}
 
@@ -885,8 +887,9 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descrip
 
 		descriptors->decode(p_event->p_first_descriptor);
 
-		cur_event.name.assign((const char *)descriptors->_4d->name);
-		cur_event.text.assign((const char *)descriptors->_4d->text);
+		dvbtee::decode::desc_4d* _4d = (dvbtee::decode::desc_4d*)descriptors->lastDesc(0x4d);
+		cur_event.name.assign((const char *)_4d->name);
+		cur_event.text.assign((const char *)_4d->text);
 #if DBG
 		time_t start = datetime_utc(cur_event.start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(cur_event.start_time + cur_event.length_sec /*+ (60 * tz_offset)*/);

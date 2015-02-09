@@ -57,21 +57,15 @@ public:
 	//FIXME:	const map_lcn* get_lcn() { return &lcn; };
 	map_lcn lcn;
 
-	dvbtee::decode::desc_0a *_0a;
-	dvbtee::decode::desc_48 *_48;
-	dvbtee::decode::desc_4d *_4d;
+	dvbtee::decode::DescriptorStore store;
+
+	dvbtee::decode::Descriptor *lastDesc(uint8_t);
 
 	map_dra1 _a1;
 
 private:
-	bool iso639language(dvbpsi_descriptor_t*);
-	bool service(dvbpsi_descriptor_t*);
-	bool short_event(dvbpsi_descriptor_t*);
-	bool freq_list(dvbpsi_descriptor_t*);
-	bool ac3_audio(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
 	bool caption_service(dvbpsi_descriptor_t*);
-	bool extended_channel_name(dvbpsi_descriptor_t*);
 	bool service_location(dvbpsi_descriptor_t*);
 };
 

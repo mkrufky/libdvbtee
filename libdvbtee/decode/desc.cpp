@@ -69,10 +69,7 @@
   })
 
 desc::desc()
- : _0a(NULL)
- , _48(NULL)
- , _4d(NULL)
-//  : f_kill_thread(false)
+ : store(this)
 {
 	dprintf("()");
 }
@@ -82,64 +79,6 @@ using namespace dvbtee::decode;
 desc::~desc()
 {
 	dprintf("()");
-	if (_0a) delete _0a;
-	if (_48) delete _48;
-	if (_4d) delete _4d;
-}
-
-bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
-{
-	if (p_descriptor->i_tag != DT_ISO639Language)
-		return false;
-
-	if (_0a) delete _0a;
-	_0a = (desc_0a*) DescriptorRegistry::instance().create(this, p_descriptor);
-
-	return true;
-}
-
-bool desc::service(dvbpsi_descriptor_t* p_descriptor)
-{
-	if (p_descriptor->i_tag != DT_Service)
-		return false;
-
-	if (_48) delete _48;
-	_48 = (desc_48*) DescriptorRegistry::instance().create(this, p_descriptor);
-
-	return true;
-}
-
-bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
-{
-	if (p_descriptor->i_tag != DT_ShortEvent)
-		return false;
-
-	if (_4d) delete _4d;
-	_4d = (desc_4d*) DescriptorRegistry::instance().create(this, p_descriptor);
-
-	return true;
-}
-
-
-bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
-{
-	if (p_descriptor->i_tag != DT_FrequencyList)
-		return false;
-
-	delete (desc_62*) DescriptorRegistry::instance().create(this, p_descriptor);
-
-	return true;
-}
-
-bool desc::ac3_audio(dvbpsi_descriptor_t* p_descriptor)
-{
-#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
-	if (p_descriptor->i_tag != DT_Ac3Audio)
-		return false;
-
-	delete (desc_81*) DescriptorRegistry::instance().create(this, p_descriptor);
-#endif
-	return true;
 }
 
 bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
@@ -194,17 +133,6 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
-{
-#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
-	if (p_descriptor->i_tag != DT_ExtendedChannelName)
-		return false;
-
-	delete (desc_a0*) DescriptorRegistry::instance().create(this, p_descriptor);
-#endif
-	return true;
-}
-
 bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 {
 #if DVBPSI_SUPPORTS_DR_81_86_A0_A1
@@ -236,38 +164,43 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
 	while (p_descriptor) {
-		switch (p_descriptor->i_tag) {
+		bool ret = store.add(p_descriptor);
+		if (!ret) switch (p_descriptor->i_tag) {
 		case DT_ISO639Language:
-			iso639language(p_descriptor);
-			break;
 		case DT_Service:
-			service(p_descriptor);
-			break;
 		case DT_ShortEvent:
-			short_event(p_descriptor);
-			break;
 		case DT_FrequencyList:
-			freq_list(p_descriptor);
-			break;
 		case DT_Ac3Audio:
-			ac3_audio(p_descriptor);
+			ret = store.add(p_descriptor);
 			break;
 		case DT_LogicalChannelNumber:
-			_lcn(p_descriptor);
+			ret = _lcn(p_descriptor);
 			break;
 		case DT_CaptionService:
-			caption_service(p_descriptor);
+			ret = caption_service(p_descriptor);
 			break;
 		case DT_ExtendedChannelName:
-			extended_channel_name(p_descriptor);
+			ret = store.add(p_descriptor);
 			break;
 		case DT_ServiceLocation:
-			service_location(p_descriptor);
+			ret = service_location(p_descriptor);
 			break;
 		default:
 			dprintf("unknown descriptor tag: %02x", p_descriptor->i_tag);
+			ret = false;
 			break;
 		}
+		if (!ret)
+			dprintf("failed to decode descriptor! tag: %02x", p_descriptor->i_tag);
+
 		p_descriptor = p_descriptor->p_next;
 	}
+}
+
+Descriptor *desc::lastDesc(uint8_t tag)
+{
+	std::vector<Descriptor*> D = store.get(tag);
+	ssize_t s = D.size();
+	if (s) return D[s-1];
+	return NULL;
 }
