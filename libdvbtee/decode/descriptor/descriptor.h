@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <map>
 #include <pthread.h>
+#include <vector>
 
 #include "decoder.h"
 #include "dvbpsi/descriptor.h"
@@ -65,6 +66,20 @@ protected:
 	uint8_t m_tag;
 private:
 	bool m_valid;
+};
+
+class DescriptorStore {
+public:
+	DescriptorStore(Decoder *);
+	~DescriptorStore();
+
+	bool add(dvbpsi_descriptor_t*);
+
+	std::vector<Descriptor*> get(uint8_t);
+
+private:
+	Decoder *m_parent;
+	std::multimap<uint8_t, Descriptor*> m_store;
 };
 
 class DescriptorBaseFactory {

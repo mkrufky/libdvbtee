@@ -101,3 +101,36 @@ DescriptorRegistry &DescriptorRegistry::instance()
 	static DescriptorRegistry INSTANCE;
 	return INSTANCE;
 }
+
+
+DescriptorStore::DescriptorStore(Decoder *parent)
+ : m_parent(parent)
+{
+	//
+}
+
+DescriptorStore::~DescriptorStore()
+{
+	//
+}
+
+bool DescriptorStore::add(dvbpsi_descriptor_t *p_descriptor)
+{
+	Descriptor *d = NULL;
+	if (p_descriptor) d = DescriptorRegistry::instance().create(m_parent, p_descriptor);
+	if (d) m_store.insert( std::pair<uint8_t, Descriptor*>(d->getTag(), d) );
+	return (d != NULL);
+}
+
+std::vector<Descriptor *> DescriptorStore::get(uint8_t tag)
+{
+	std::vector<Descriptor *> ret;
+	std::pair <std::multimap<uint8_t, Descriptor*>::iterator, std::multimap<uint8_t, Descriptor*>::iterator> range;
+
+	range = m_store.equal_range(tag);
+
+	for (std::multimap<uint8_t, Descriptor*>::iterator it=range.first; it!=range.second; ++it)
+		ret.push_back(it->second);
+
+	return ret;
+}
