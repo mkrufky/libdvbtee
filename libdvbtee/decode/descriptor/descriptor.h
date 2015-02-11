@@ -123,6 +123,8 @@ public:
 		if (parent) parent->unlinkChild(m_linkedIdx);
 	}
 
+	virtual int getMapIndex() { return m_linkedIdx; }
+
 private:
 	int m_linkedIdx;
 };
