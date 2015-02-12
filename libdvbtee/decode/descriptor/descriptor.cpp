@@ -122,6 +122,15 @@ bool DescriptorStore::add(dvbpsi_descriptor_t *p_descriptor)
 	return (d != NULL);
 }
 
+void DescriptorStore::decode(dvbpsi_descriptor_t *p_descriptor)
+{
+	while (p_descriptor) {
+		if (!add(p_descriptor))
+			fprintf(stderr, "failed to decode descriptor! tag: %02x", p_descriptor->i_tag);
+		p_descriptor = p_descriptor->p_next;
+	}
+}
+
 std::vector<Descriptor *> DescriptorStore::get(uint8_t tag)
 {
 	std::vector<Descriptor *> ret;

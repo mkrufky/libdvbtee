@@ -74,6 +74,7 @@ public:
 	~DescriptorStore();
 
 	bool add(dvbpsi_descriptor_t*);
+	void decode(dvbpsi_descriptor_t*);
 
 	std::vector<Descriptor*> get(uint8_t);
 

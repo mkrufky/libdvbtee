@@ -76,6 +76,7 @@ desc::~desc()
 
 void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
+#if 0
 	while (p_descriptor) {
 		bool ret = store.add(p_descriptor);
 		if (!ret) switch (p_descriptor->i_tag) {
@@ -100,6 +101,9 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 
 		p_descriptor = p_descriptor->p_next;
 	}
+#else
+	store.decode(p_descriptor);
+#endif
 }
 
 Descriptor *desc::lastDesc(uint8_t tag)
