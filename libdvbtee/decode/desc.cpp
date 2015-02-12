@@ -106,6 +106,7 @@ Descriptor *desc::lastDesc(uint8_t tag)
 {
 	std::vector<Descriptor*> D = store.get(tag);
 	ssize_t s = D.size();
+	if (s > 1) dprintf("tag: %02x, %ld collected, returning last", tag, s);
 	if (s) return D[s-1];
 	return NULL;
 }
