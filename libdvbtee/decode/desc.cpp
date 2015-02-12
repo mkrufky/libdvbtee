@@ -102,37 +102,6 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
-{
-#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
-	if (p_descriptor->i_tag != DT_CaptionService)
-		return false;
-
-	dvbpsi_caption_service_dr_t* dr = dvbpsi_DecodeCaptionServiceDr(p_descriptor);
-	if (desc_dr_failed(dr)) return false;
-
-	for (int i = 0; i < dr->i_number_of_services; i ++) {
-		dvbpsi_caption_service_t *service = &dr->services[0];
-		if (!service) {
-			dprintf("error!");
-			break;
-		}
-		dprintf("%d / %04x, %s line21 field: %d %d %s%s%c%c%c",
-			service->i_caption_service_number,
-			service->i_caption_service_number,
-			(service->b_digital_cc) ? "708" : "608",
-			service->b_line21_field,
-			(service->b_digital_cc) ? service->i_caption_service_number : 0,
-			(service->b_easy_reader) ? "easy reader " : "",
-			(service->b_wide_aspect_ratio) ? "wide aspect ratio " : "",
-			service->i_iso_639_code[0],
-			service->i_iso_639_code[1],
-			service->i_iso_639_code[2]);
-	}
-#endif
-	return true;
-}
-
 bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 {
 #if DVBPSI_SUPPORTS_DR_81_86_A0_A1
@@ -177,8 +146,6 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 			ret = _lcn(p_descriptor);
 			break;
 		case DT_CaptionService:
-			ret = caption_service(p_descriptor);
-			break;
 		case DT_ExtendedChannelName:
 			ret = store.add(p_descriptor);
 			break;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2015 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -19,53 +19,27 @@
  *
  *****************************************************************************/
 
-#ifndef __DESC_H__
-#define __DESC_H__
+#ifndef __86_H__
+#define __86_H__
 
-#include <stdint.h>
-//#include "dvbpsi/descriptor.h"
-
-#include <map>
+#include <vector>
 
 #include "descriptor.h"
-#include "desc_0a.h"
-#include "desc_48.h"
-#include "desc_4d.h"
-#include "desc_62.h"
-#include "desc_81.h"
-#include "desc_a0.h"
 
-typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
+namespace dvbtee {
 
-typedef struct
-{
-	uint8_t       stream_type;
-	uint16_t      elementary_pid;
-	unsigned char iso_639_code[3];
-} dra1_t;
+namespace decode {
 
-typedef std::map<uint16_t, dra1_t> map_dra1;
+/* caption service descriptor */
 
-class desc : public dvbtee::decode::Decoder
-{
+class desc_86: public Descriptor {
 public:
-	desc();
-	~desc();
-
-	void decode(dvbpsi_descriptor_t*);
-
-	//FIXME:	const map_lcn* get_lcn() { return &lcn; };
-	map_lcn lcn;
-
-	dvbtee::decode::DescriptorStore store;
-
-	dvbtee::decode::Descriptor *lastDesc(uint8_t);
-
-	map_dra1 _a1;
-
-private:
-	bool _lcn(dvbpsi_descriptor_t*);
-	bool service_location(dvbpsi_descriptor_t*);
+	desc_86(Decoder *, dvbpsi_descriptor_t*);
+	virtual ~desc_86();
 };
 
-#endif /* __DECODE_H__ */
+}
+
+}
+
+#endif /* __86_H__ */
