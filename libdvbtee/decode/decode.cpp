@@ -1655,7 +1655,13 @@ const decode_network* decode::get_decoded_network()
 
 uint16_t decode::get_lcn(uint16_t service_id)
 {
-	return networks.count(network_id) ? networks[network_id].descriptors.lcn[service_id]: 0;
+	uint16_t lcn = 0;
+
+	if (networks.count(network_id)) {
+		dvbtee::decode::desc_83* _83 = (dvbtee::decode::desc_83*)networks[network_id].descriptors.lastDesc(0x83);
+		if (_83) lcn = _83->lcn[service_id];
+	}
+	return lcn;
 }
 
 const map_decoded_eit* decode::get_decoded_eit()

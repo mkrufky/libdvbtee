@@ -6,6 +6,7 @@ SOURCES += \
     $$PWD/desc_4d.cpp \
     $$PWD/desc_62.cpp \
     $$PWD/desc_81.cpp \
+    $$PWD/desc_83.cpp \
     $$PWD/desc_86.cpp \
     $$PWD/desc_a0.cpp \
     $$PWD/desc_a1.cpp \
@@ -17,6 +18,7 @@ HEADERS += \
     $$PWD/desc_4d.h \
     $$PWD/desc_62.h \
     $$PWD/desc_81.h \
+    $$PWD/desc_83.h \
     $$PWD/desc_86.h \
     $$PWD/desc_a0.h \
     $$PWD/desc_a1.h \

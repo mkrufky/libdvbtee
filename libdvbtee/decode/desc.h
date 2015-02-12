@@ -33,10 +33,10 @@
 #include "desc_4d.h"
 #include "desc_62.h"
 #include "desc_81.h"
+#include "desc_83.h"
 #include "desc_a0.h"
 #include "desc_a1.h"
 
-typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 
 class desc : public dvbtee::decode::Decoder
 {
@@ -46,15 +46,9 @@ public:
 
 	void decode(dvbpsi_descriptor_t*);
 
-	//FIXME:	const map_lcn* get_lcn() { return &lcn; };
-	map_lcn lcn;
-
 	dvbtee::decode::DescriptorStore store;
 
 	dvbtee::decode::Descriptor *lastDesc(uint8_t);
-
-private:
-	bool _lcn(dvbpsi_descriptor_t*);
 };
 
 #endif /* __DECODE_H__ */

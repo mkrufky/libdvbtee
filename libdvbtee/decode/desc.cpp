@@ -60,12 +60,6 @@
 #define DT_ExtendedChannelName        0xa0
 #define DT_ServiceLocation            0xa1
 
-#define desc_dr_failed(dr)			\
-  ({						\
-    bool __ret = !dr;				\
-    if (__ret) dprintf("decoder failed!");	\
-    __ret;					\
-  })
 
 desc::desc()
  : store(this)
@@ -80,27 +74,6 @@ desc::~desc()
 	dprintf("()");
 }
 
-bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
-{
-	if (p_descriptor->i_tag != DT_LogicalChannelNumber)
-		return false;
-
-	dvbpsi_lcn_dr_t* dr = dvbpsi_DecodeLCNDr(p_descriptor);
-	if (desc_dr_failed(dr)) return false;
-
-	for (int i = 0; i < dr->i_number_of_entries; i ++) {
-#if 0
-		= lcn->p_entries[i].i_service_id;
-		= lcn->p_entries[i].i_logical_channel_number;
-#else
-		lcn[dr->p_entries[i].i_service_id] = dr->p_entries[i].i_logical_channel_number;
-		dprintf("%d, %d", dr->p_entries[i].i_service_id, lcn[dr->p_entries[i].i_service_id]);
-#endif
-	}
-
-	return true;
-}
-
 void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
 	while (p_descriptor) {
@@ -111,11 +84,7 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 		case DT_ShortEvent:
 		case DT_FrequencyList:
 		case DT_Ac3Audio:
-			ret = store.add(p_descriptor);
-			break;
 		case DT_LogicalChannelNumber:
-			ret = _lcn(p_descriptor);
-			break;
 		case DT_CaptionService:
 		case DT_ExtendedChannelName:
 		case DT_ServiceLocation:
