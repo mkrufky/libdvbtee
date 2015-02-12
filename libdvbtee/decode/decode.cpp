@@ -570,7 +570,9 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 
 		std::string languages;
 
-		for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
+		dvbtee::decode::desc_a1* _a1 = (dvbtee::decode::desc_a1*)local_descriptors.lastDesc(0xa1);
+		if (_a1)
+		for (dvbtee::decode::desc_a1::svcloc_map_t::const_iterator iter_dra1 = _a1->map_svcloc.begin(); iter_dra1 != _a1->map_svcloc.end(); ++iter_dra1) {
 #ifdef COPY_DRA1_FROM_VCT_TO_PMT // disabled, to be deleted
 			//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
 			if (decoded_pmt.count(p_channel->i_program_number)) {

@@ -8,6 +8,7 @@ SOURCES += \
     $$PWD/desc_81.cpp \
     $$PWD/desc_86.cpp \
     $$PWD/desc_a0.cpp \
+    $$PWD/desc_a1.cpp \
     $$PWD/descriptor.cpp
 
 HEADERS += \
@@ -18,4 +19,5 @@ HEADERS += \
     $$PWD/desc_81.h \
     $$PWD/desc_86.h \
     $$PWD/desc_a0.h \
+    $$PWD/desc_a1.h \
     $$PWD/descriptor.h

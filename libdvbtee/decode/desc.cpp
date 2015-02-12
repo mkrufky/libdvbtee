@@ -23,7 +23,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "functions.h"
 #include "log.h"
@@ -102,34 +101,6 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 	return true;
 }
 
-bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
-{
-#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
-	if (p_descriptor->i_tag != DT_ServiceLocation)
-		return false;
-
-	dvbpsi_service_location_dr_t* dr = dvbpsi_DecodeServiceLocationDr(p_descriptor);
-	if (desc_dr_failed(dr)) return false;
-
-	for (int i = 0; i < dr->i_number_elements; i ++) {
-		dvbpsi_service_location_element_t *element = &dr->elements[i];
-		if (!element) {
-			dprintf("error!");
-			break;
-		}
-		_a1[element->i_elementary_pid].elementary_pid = element->i_elementary_pid;
-		_a1[element->i_elementary_pid].stream_type    = element->i_stream_type;
-		memcpy(_a1[element->i_elementary_pid].iso_639_code, element->i_iso_639_code, 3);
-		dprintf("pid: 0x%04x, type %02x: %s, %c%c%c", element->i_elementary_pid,
-			element->i_stream_type, streamtype_name(element->i_stream_type),
-			element->i_iso_639_code[0],
-			element->i_iso_639_code[1],
-			element->i_iso_639_code[2]);
-	}
-#endif
-	return true;
-}
-
 void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 {
 	while (p_descriptor) {
@@ -147,10 +118,8 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 			break;
 		case DT_CaptionService:
 		case DT_ExtendedChannelName:
-			ret = store.add(p_descriptor);
-			break;
 		case DT_ServiceLocation:
-			ret = service_location(p_descriptor);
+			ret = store.add(p_descriptor);
 			break;
 		default:
 			dprintf("unknown descriptor tag: %02x", p_descriptor->i_tag);
