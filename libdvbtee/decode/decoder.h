@@ -56,6 +56,8 @@ private:
 	std::map<int, Decoder*> m_children;
 
 	int linkChild(int, Decoder*);
+	int __genMapIdx;
+	int genMapIndex();
 };
 
 }

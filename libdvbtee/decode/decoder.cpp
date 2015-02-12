@@ -25,6 +25,7 @@ using namespace dvbtee::decode;
 
 Decoder::Decoder()
  : m_parent(NULL)
+ , __genMapIdx(0)
 {
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_init(&m_mutex, 0);
@@ -33,6 +34,7 @@ Decoder::Decoder()
 
 Decoder::Decoder(Decoder *parent)
  : m_parent(parent)
+ , __genMapIdx(0)
 {
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_init(&m_mutex, 0);
@@ -77,7 +79,7 @@ int Decoder::linkChild(int idx, Decoder *d)
 #endif
 
 	if (idx < 0)
-	    idx = m_children.size();
+	    idx = genMapIndex();
 
 	if (m_children.count(idx)) {
 #if LOCK_DECODER_CHILDREN
@@ -94,4 +96,12 @@ int Decoder::linkChild(int idx, Decoder *d)
 
 	return idx;
 
+}
+
+int Decoder::genMapIndex()
+{
+	int idx = __genMapIdx++;
+	if (m_children.count(idx))
+		return genMapIndex();
+	return idx;
 }
