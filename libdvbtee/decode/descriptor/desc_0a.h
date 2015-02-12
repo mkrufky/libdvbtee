@@ -37,7 +37,7 @@ public:
 	desc_0a(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_0a();
 
-	typedef struct language_s {
+	typedef struct {
 		uint8_t       audio_type;
 		unsigned char iso_639_code[3];
 	} language_t;
