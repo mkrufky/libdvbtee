@@ -23,7 +23,7 @@
 
 #include "dvbpsi/dr_86.h" /* caption service */
 
-#define CLASS_MODULE "desc_86"
+#define CLASS_MODULE "[caption service]"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 

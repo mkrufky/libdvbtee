@@ -23,7 +23,8 @@
 
 #include "dvbpsi/dr_0a.h" /* ISO639 language descriptor */
 
-#define CLASS_MODULE "desc_0a"
+#define CLASS_MODULE "[iso639 lang]"
+//#define CLASS_MODULE "desc_0a"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 

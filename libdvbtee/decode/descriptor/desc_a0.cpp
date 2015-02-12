@@ -27,7 +27,7 @@
 
 #include "functions.h"
 
-#define CLASS_MODULE "desc_a0"
+#define CLASS_MODULE "[ext channel name]"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 

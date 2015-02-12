@@ -23,7 +23,7 @@
 
 #include "dvbpsi/dr_62.h" /* Frequency List descriptor */
 
-#define CLASS_MODULE "desc_62"
+#define CLASS_MODULE "[freq list]"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 

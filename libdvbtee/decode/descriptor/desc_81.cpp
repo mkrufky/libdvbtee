@@ -23,7 +23,7 @@
 
 #include "dvbpsi/dr_81.h" /* AC-3 Audio descriptor */
 
-#define CLASS_MODULE "desc_81"
+#define CLASS_MODULE "[ac-3 audio]"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 

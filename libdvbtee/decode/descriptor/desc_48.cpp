@@ -25,7 +25,7 @@
 
 #include "functions.h"
 
-#define CLASS_MODULE "desc_48"
+#define CLASS_MODULE "[service]"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 

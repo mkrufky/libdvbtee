@@ -25,7 +25,7 @@
 
 #include "functions.h"
 
-#define CLASS_MODULE "desc_4d"
+#define CLASS_MODULE "[short event]"
 
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 
