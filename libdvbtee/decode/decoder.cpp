@@ -25,6 +25,7 @@ using namespace dvbtee::decode;
 
 Decoder::Decoder()
  : m_parent(NULL)
+ , m_valid(false)
  , __genMapIdx(0)
 {
 #if LOCK_DECODER_CHILDREN

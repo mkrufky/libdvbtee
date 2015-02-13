@@ -41,15 +41,19 @@ public:
 	Decoder(Decoder*);
 	virtual ~Decoder();
 
+	bool isValid() { return m_valid; }
+
 	int linkChild(Decoder *d);
 	bool unlinkChild(int);
 
 protected:
 	virtual int getMapIndex() { return -1; }
 	Decoder *getParent() { return m_parent; }
+	void setValid(bool v) { m_valid = v; }
 
 private:
 	Decoder *m_parent;
+	bool m_valid;
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_t m_mutex;
 #endif

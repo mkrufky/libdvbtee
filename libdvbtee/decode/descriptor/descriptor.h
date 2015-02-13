@@ -54,18 +54,13 @@ namespace decode {
 
 class Descriptor: public Decoder {
 public:
-	bool isValid() { return m_valid; }
 	uint8_t getTag() { return m_tag; }
 
 protected:
 	Descriptor(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~Descriptor();
 
-	void setValid(bool v) { m_valid = v; }
-
 	uint8_t m_tag;
-private:
-	bool m_valid;
 };
 
 class DescriptorStore {
