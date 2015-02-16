@@ -688,6 +688,9 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, desc* de
 
 		p_ts = p_ts->p_next;
 	}
+
+	descriptors->decode(p_nit->p_first_descriptor);
+
 	return true;
 }
 
