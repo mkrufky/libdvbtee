@@ -391,6 +391,8 @@ bool decode::take_tot(dvbpsi_tot_t* p_tot)
 
 	dbg_time("%s", ctime(&stream_time));
 
+	descriptors.decode(p_tot->p_first_descriptor);
+
 	return true;
 }
 
