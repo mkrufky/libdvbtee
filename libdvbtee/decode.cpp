@@ -380,6 +380,8 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 
 	dbg_time("%s", ctime(&stream_time));
 
+	descriptors.decode(p_stt->p_first_descriptor);
+
 	return true;
 }
 
