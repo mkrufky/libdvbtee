@@ -22,17 +22,50 @@
 #ifndef __TABLE_H__
 #define __TABLE_H__
 
+#include <string>
+
 #include "decoder.h"
+#include "descriptor.h"
 
 namespace dvbtee {
 
 namespace decode {
 
-class Table: public Decoder {
+
+class TableWatcher {
 public:
-	Table();
+	TableWatcher() {}
+	virtual ~TableWatcher() {}
+
+	virtual void updateTable(uint8_t tId) = 0;
+};
+
+
+class TableComponent: public Decoder {
+public:
+	TableComponent(Decoder*);
+	virtual ~TableComponent();
+
+	dvbtee::decode::DescriptorStore descriptors;
+};
+
+
+class TableBase: public TableComponent {
+public:
+	TableBase(Decoder*);
+	TableBase(Decoder*, TableWatcher*);
+	virtual ~TableBase();
+protected:
+	TableWatcher *m_watcher;
+};
+
+class Table: public TableBase {
+public:
+	Table(Decoder*);
+	Table(Decoder*, TableWatcher*);
 	virtual ~Table();
 };
+
 
 }
 

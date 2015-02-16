@@ -19,56 +19,47 @@
  *
  *****************************************************************************/
 
+#ifndef _STT_H__
+#define _STT_H__
+
 #include "table.h"
 
-using namespace dvbtee::decode;
+#include "dvbpsi/atsc_stt.h"
 
-TableComponent::TableComponent(Decoder *parent)
- : Decoder(parent)
- , descriptors(this)
-{
-	//
+namespace dvbtee {
+
+namespace decode {
+
+/* System Time Table (ATSC) */
+
+class STT_Watcher;
+
+class stt: public Table/*<dvbpsi_atsc_stt_t>*/ {
+public:
+	stt(Decoder *);
+	stt(Decoder *, STT_Watcher*);
+	stt(Decoder *, STT_Watcher*, dvbpsi_atsc_stt_t*);
+	stt(Decoder *, dvbpsi_atsc_stt_t*);
+	virtual ~stt();
+
+	const time_t& getTime() const { return m_time; }
+
+	void store(dvbpsi_atsc_stt_t*);
+private:
+	time_t m_time;
+};
+
+class STT_Watcher: public TableWatcher/*<0xcd, stt>*/ {
+public:
+	STT_Watcher() {}
+	virtual ~STT_Watcher() {}
+
+	//virtual void updateTable(uint8_t tId);
+	virtual void updateSTT(stt&) = 0;
+};
+
 }
 
-TableComponent::~TableComponent()
-{
-	//
 }
 
-
-TableBase::TableBase(Decoder *parent)
- : TableComponent(parent)
- , m_watcher(NULL)
-{
-	//
-}
-
-TableBase::TableBase(Decoder *parent, TableWatcher *watcher)
- : TableComponent(parent)
- , m_watcher(watcher)
-{
-
-}
-
-TableBase::~TableBase()
-{
-	//
-}
-
-
-Table::Table(Decoder *parent)
- : TableBase(parent)
-{
-	//
-}
-
-Table::Table(Decoder *parent, TableWatcher *watcher)
- : TableBase(parent, watcher)
-{
-	//
-}
-
-Table::~Table()
-{
-	//
-}
+#endif /* _STT_H__ */

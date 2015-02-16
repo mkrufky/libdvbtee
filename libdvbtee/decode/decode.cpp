@@ -284,7 +284,8 @@ decode::~decode()
 	decoded_ett.clear();
 }
 
-decode::decode(const decode&)
+decode::decode(const decode& d)
+ : Decoder(NULL)
 {
 	dprintf("(copy)");
 
@@ -373,26 +374,50 @@ decode& decode::operator= (const decode& cSource)
 	return *this;
 }
 
+/* TableWatcher */
+void decode::updateTable(uint8_t tId)
+{
+	dprintf("\n\n\n\n\n0x%02x", tId);
+}
+
+/* TOT_Watcher */
+void decode::updateTOT(dvbtee::decode::tot &table)
+{
+	stream_time = table.getTime();
+}
+
+/* STT_Watcher */
+void decode::updateSTT(dvbtee::decode::stt &table)
+{
+	stream_time = table.getTime();
+}
+
 /* -- STREAM TIME -- */
 bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 {
+#if 0
 	stream_time = atsc_datetime_utc(p_stt->i_system_time);
 
 	dbg_time("%s", ctime(&stream_time));
 
 	descriptors.decode(p_stt->p_first_descriptor);
-
+#else
+	dvbtee::decode::stt(this, this, p_stt);
+#endif
 	return true;
 }
 
 bool decode::take_tot(dvbpsi_tot_t* p_tot)
 {
+#if 0
 	stream_time = datetime_utc(p_tot->i_utc_time);
 
 	dbg_time("%s", ctime(&stream_time));
 
 	descriptors.decode(p_tot->p_first_descriptor);
-
+#else
+	dvbtee::decode::tot(this, this, p_tot);
+#endif
 	return true;
 }
 

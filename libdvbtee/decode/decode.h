@@ -48,6 +48,10 @@
 
 #include <map>
 
+
+#include "tabl_stt.h"
+#include "tabl_tot.h"
+
 #if (DVBPSI_VERSION_INT < ((1<<16)+(0<<8)+0))
 #define USING_DVBPSI_VERSION_0 1
 #else
@@ -362,7 +366,7 @@ public:
 	virtual void print(const char *, ...) = 0;
 };
 
-class decode
+class decode : public dvbtee::decode::Decoder, dvbtee::decode::STT_Watcher, dvbtee::decode::TOT_Watcher
 {
 public:
 	decode();
@@ -370,6 +374,15 @@ public:
 
 	decode(const decode&);
 	decode& operator= (const decode&);
+
+	/* TableWatcher */
+	void updateTable(uint8_t tId);
+
+	/* TOT_Watcher */
+	void updateTOT(dvbtee::decode::tot& table);
+
+	/* STT_Watcher */
+	void updateSTT(dvbtee::decode::stt& table);
 
 	bool take_pat(dvbpsi_pat_t*);
 	bool take_pmt(dvbpsi_pmt_t*);

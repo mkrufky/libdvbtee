@@ -19,56 +19,49 @@
  *
  *****************************************************************************/
 
+#ifndef _TOT_H__
+#define _TOT_H__
+
 #include "table.h"
 
-using namespace dvbtee::decode;
+#ifndef _DVBPSI_TOT_H_
+#include "dvbpsi/tot.h"
+#endif
 
-TableComponent::TableComponent(Decoder *parent)
- : Decoder(parent)
- , descriptors(this)
-{
-	//
+namespace dvbtee {
+
+namespace decode {
+
+/* TDT (Time and Date Table)/TOT (Time Offset Table) */
+
+class TOT_Watcher;
+
+class tot: public Table/*<dvbpsi_tot_t>*/ {
+public:
+	tot(Decoder *);
+	tot(Decoder *, TOT_Watcher*);
+	tot(Decoder *, TOT_Watcher*, dvbpsi_tot_t*);
+	tot(Decoder *, dvbpsi_tot_t*);
+	virtual ~tot();
+
+	const time_t& getTime() const { return m_time; }
+
+	void store(dvbpsi_tot_t*);
+private:
+	time_t m_time;
+};
+
+class TOT_Watcher: public TableWatcher/*<0xcd, tot>*/ {
+public:
+	TOT_Watcher() {}
+	virtual ~TOT_Watcher() {}
+
+	//virtual void updateTable(uint8_t tId);
+	virtual void updateTOT(tot&) = 0;
+};
+
 }
 
-TableComponent::~TableComponent()
-{
-	//
 }
 
-
-TableBase::TableBase(Decoder *parent)
- : TableComponent(parent)
- , m_watcher(NULL)
-{
-	//
-}
-
-TableBase::TableBase(Decoder *parent, TableWatcher *watcher)
- : TableComponent(parent)
- , m_watcher(watcher)
-{
-
-}
-
-TableBase::~TableBase()
-{
-	//
-}
-
-
-Table::Table(Decoder *parent)
- : TableBase(parent)
-{
-	//
-}
-
-Table::Table(Decoder *parent, TableWatcher *watcher)
- : TableBase(parent, watcher)
-{
-	//
-}
-
-Table::~Table()
-{
-	//
-}
+#endif /* _TOT_H__ */
