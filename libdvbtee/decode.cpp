@@ -1519,6 +1519,9 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 
 	fprintf(stderr, "%s: v%d, ID: %d: %s\n", __func__,
 		p_ett->i_version, p_ett->i_etm_id, message);
+
+	descriptors.decode(p_ett->p_first_descriptor);
+
 	return true;
 }
 
