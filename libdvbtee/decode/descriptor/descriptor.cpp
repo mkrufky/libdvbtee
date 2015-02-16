@@ -125,7 +125,7 @@ void DescriptorStore::decode(dvbpsi_descriptor_t *p_descriptor)
 {
 	while (p_descriptor) {
 		if (!add(p_descriptor))
-			fprintf(stderr, "failed to decode descriptor! tag: %02x", p_descriptor->i_tag);
+			fprintf(stderr, "failed to decode descriptor! tag: %02x\n", p_descriptor->i_tag);
 		p_descriptor = p_descriptor->p_next;
 	}
 }
