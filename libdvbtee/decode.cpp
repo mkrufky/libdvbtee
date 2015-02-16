@@ -1004,6 +1004,9 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 
 		p_event = p_event->p_next;
 	}
+
+	descriptors.decode(p_eit->p_first_descriptor);
+
 	return true;
 }
 
