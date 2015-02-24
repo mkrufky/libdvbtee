@@ -47,9 +47,7 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 	descriptors.decode(p_stt->p_first_descriptor);
 
 	if ((o_time != m_time) && (m_watcher)) {
-		STT_Watcher *watcher = (STT_Watcher*)m_watcher;
-		watcher->updateSTT(*this);
-		watcher->updateTable(TABLEID, (Table*)this);
+		m_watcher->updateTable(TABLEID, (Table*)this);
 	}
 }
 
@@ -61,14 +59,14 @@ stt::stt(Decoder *parent)
 	//store table later (probably repeatedly)
 }
 
-stt::stt(Decoder *parent, STT_Watcher *watcher)
+stt::stt(Decoder *parent, TableWatcher *watcher)
  : Table(parent, watcher)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
-stt::stt(Decoder *parent, STT_Watcher *watcher, dvbpsi_atsc_stt_t *p_stt)
+stt::stt(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_stt_t *p_stt)
  : Table(parent, watcher)
  , m_time(-1)
 {

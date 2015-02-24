@@ -366,7 +366,7 @@ public:
 	virtual void print(const char *, ...) = 0;
 };
 
-class decode : public dvbtee::decode::Decoder, dvbtee::decode::STT_Watcher, dvbtee::decode::TOT_Watcher
+class decode : public dvbtee::decode::Decoder, dvbtee::decode::TableWatcher
 {
 public:
 	decode();
@@ -377,12 +377,6 @@ public:
 
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
-
-	/* TOT_Watcher */
-	void updateTOT(dvbtee::decode::tot& table);
-
-	/* STT_Watcher */
-	void updateSTT(dvbtee::decode::stt& table);
 
 	bool take_pat(dvbpsi_pat_t*);
 	bool take_pmt(dvbpsi_pmt_t*);

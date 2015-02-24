@@ -47,9 +47,7 @@ void tot::store(dvbpsi_tot_t *p_tot)
 	descriptors.decode(p_tot->p_first_descriptor);
 
 	if ((o_time != m_time) && (m_watcher)) {
-		TOT_Watcher *watcher = (TOT_Watcher*)m_watcher;
-		watcher->updateTOT(*this);
-		watcher->updateTable(TABLEID, (Table*)this);
+		m_watcher->updateTable(TABLEID, (Table*)this);
 	}
 }
 
@@ -60,14 +58,14 @@ tot::tot(Decoder *parent)
 	//store table later (probably repeatedly)
 }
 
-tot::tot(Decoder *parent, TOT_Watcher *watcher)
+tot::tot(Decoder *parent, TableWatcher *watcher)
  : Table(parent, watcher)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
-tot::tot(Decoder *parent, TOT_Watcher *watcher, dvbpsi_tot_t *p_tot)
+tot::tot(Decoder *parent, TableWatcher *watcher, dvbpsi_tot_t *p_tot)
  : Table(parent, watcher)
  , m_time(-1)
 {

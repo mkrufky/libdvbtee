@@ -34,13 +34,11 @@ namespace decode {
 
 /* TDT (Time and Date Table)/TOT (Time Offset Table) */
 
-class TOT_Watcher;
-
 class tot: public Table/*<dvbpsi_tot_t>*/ {
 public:
 	tot(Decoder *);
-	tot(Decoder *, TOT_Watcher*);
-	tot(Decoder *, TOT_Watcher*, dvbpsi_tot_t*);
+	tot(Decoder *, TableWatcher*);
+	tot(Decoder *, TableWatcher*, dvbpsi_tot_t*);
 	tot(Decoder *, dvbpsi_tot_t*);
 	virtual ~tot();
 
@@ -49,15 +47,6 @@ public:
 	void store(dvbpsi_tot_t*);
 private:
 	time_t m_time;
-};
-
-class TOT_Watcher: public TableWatcher/*<0xcd, tot>*/ {
-public:
-	TOT_Watcher() {}
-	virtual ~TOT_Watcher() {}
-
-	//virtual void updateTable(uint8_t tId, Table*);
-	virtual void updateTOT(tot&) = 0;
 };
 
 }

@@ -377,19 +377,18 @@ decode& decode::operator= (const decode& cSource)
 /* TableWatcher */
 void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 {
-	dprintf("\n\n\n\n\n0x%02x", tId);
-}
+	dprintf("0x%02x", tId);
 
-/* TOT_Watcher */
-void decode::updateTOT(dvbtee::decode::tot &table)
-{
-	stream_time = table.getTime();
-}
-
-/* STT_Watcher */
-void decode::updateSTT(dvbtee::decode::stt &table)
-{
-	stream_time = table.getTime();
+	switch (tId) {
+	case 0x14:
+		stream_time = ((dvbtee::decode::tot*)table)->getTime();
+		break;
+	case 0xcd:
+		stream_time = ((dvbtee::decode::stt*)table)->getTime();
+		break;
+	default:
+		break;
+	}
 }
 
 /* -- STREAM TIME -- */

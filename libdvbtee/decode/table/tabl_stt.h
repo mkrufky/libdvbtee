@@ -32,13 +32,11 @@ namespace decode {
 
 /* System Time Table (ATSC) */
 
-class STT_Watcher;
-
 class stt: public Table/*<dvbpsi_atsc_stt_t>*/ {
 public:
 	stt(Decoder *);
-	stt(Decoder *, STT_Watcher*);
-	stt(Decoder *, STT_Watcher*, dvbpsi_atsc_stt_t*);
+	stt(Decoder *, TableWatcher*);
+	stt(Decoder *, TableWatcher*, dvbpsi_atsc_stt_t*);
 	stt(Decoder *, dvbpsi_atsc_stt_t*);
 	virtual ~stt();
 
@@ -47,15 +45,6 @@ public:
 	void store(dvbpsi_atsc_stt_t*);
 private:
 	time_t m_time;
-};
-
-class STT_Watcher: public TableWatcher/*<0xcd, stt>*/ {
-public:
-	STT_Watcher() {}
-	virtual ~STT_Watcher() {}
-
-	//virtual void updateTable(uint8_t tId, Table*);
-	virtual void updateSTT(stt&) = 0;
 };
 
 }
