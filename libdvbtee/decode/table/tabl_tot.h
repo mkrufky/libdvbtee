@@ -56,7 +56,7 @@ public:
 	TOT_Watcher() {}
 	virtual ~TOT_Watcher() {}
 
-	//virtual void updateTable(uint8_t tId);
+	//virtual void updateTable(uint8_t tId, Table*);
 	virtual void updateTOT(tot&) = 0;
 };
 

@@ -49,7 +49,7 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 	if ((o_time != m_time) && (m_watcher)) {
 		STT_Watcher *watcher = (STT_Watcher*)m_watcher;
 		watcher->updateSTT(*this);
-		watcher->updateTable(TABLEID);
+		watcher->updateTable(TABLEID, (Table*)this);
 	}
 }
 

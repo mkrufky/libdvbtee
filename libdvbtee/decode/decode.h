@@ -376,7 +376,7 @@ public:
 	decode& operator= (const decode&);
 
 	/* TableWatcher */
-	void updateTable(uint8_t tId);
+	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 
 	/* TOT_Watcher */
 	void updateTOT(dvbtee::decode::tot& table);

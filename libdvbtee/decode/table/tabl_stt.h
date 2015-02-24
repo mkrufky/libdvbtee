@@ -54,7 +54,7 @@ public:
 	STT_Watcher() {}
 	virtual ~STT_Watcher() {}
 
-	//virtual void updateTable(uint8_t tId);
+	//virtual void updateTable(uint8_t tId, Table*);
 	virtual void updateSTT(stt&) = 0;
 };
 

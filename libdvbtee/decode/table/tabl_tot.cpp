@@ -49,7 +49,7 @@ void tot::store(dvbpsi_tot_t *p_tot)
 	if ((o_time != m_time) && (m_watcher)) {
 		TOT_Watcher *watcher = (TOT_Watcher*)m_watcher;
 		watcher->updateTOT(*this);
-		watcher->updateTable(TABLEID);
+		watcher->updateTable(TABLEID, (Table*)this);
 	}
 }
 

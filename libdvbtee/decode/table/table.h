@@ -32,14 +32,7 @@ namespace dvbtee {
 namespace decode {
 
 
-class TableWatcher {
-public:
-	TableWatcher() {}
-	virtual ~TableWatcher() {}
-
-	virtual void updateTable(uint8_t tId) = 0;
-};
-
+class TableWatcher;
 
 class TableComponent: public Decoder {
 public:
@@ -64,6 +57,14 @@ public:
 	Table(Decoder*);
 	Table(Decoder*, TableWatcher*);
 	virtual ~Table();
+};
+
+class TableWatcher {
+public:
+	TableWatcher() {}
+	virtual ~TableWatcher() {}
+
+	virtual void updateTable(uint8_t tId, Table*) = 0;
 };
 
 

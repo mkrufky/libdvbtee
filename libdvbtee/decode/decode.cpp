@@ -375,7 +375,7 @@ decode& decode::operator= (const decode& cSource)
 }
 
 /* TableWatcher */
-void decode::updateTable(uint8_t tId)
+void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 {
 	dprintf("\n\n\n\n\n0x%02x", tId);
 }
