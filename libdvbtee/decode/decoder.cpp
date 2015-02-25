@@ -48,6 +48,7 @@ Decoder::~Decoder()
 	while (m_children.size()) {
 		Decoder *child = m_children.begin()->second;
 		m_children.begin()->second = NULL;
+		/* child calls unlinkChild on its parent inside its destructor */
 		if (child) delete child;
 	}
 #if LOCK_DECODER_CHILDREN
