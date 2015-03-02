@@ -53,28 +53,28 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 
 
 stt::stt(Decoder *parent)
- : Table(parent)
+ : Table(parent, TABLEID)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 stt::stt(Decoder *parent, TableWatcher *watcher)
- : Table(parent, watcher)
+ : Table(parent, TABLEID, watcher)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 stt::stt(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_stt_t *p_stt)
- : Table(parent, watcher)
+ : Table(parent, TABLEID, watcher)
  , m_time(-1)
 {
 	store(p_stt);
 }
 
 stt::stt(Decoder *parent, dvbpsi_atsc_stt_t *p_stt)
- : Table(parent/*, p_stt*/)
+ : Table(parent, TABLEID)
  , m_time(-1)
 {
 	store(p_stt);
@@ -85,4 +85,4 @@ stt::~stt()
 	//
 }
 
-//REGISTER_TABLE_FACTORY("stt", stt);
+REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_atsc_stt_t, stt);

@@ -52,28 +52,28 @@ void tot::store(dvbpsi_tot_t *p_tot)
 }
 
 tot::tot(Decoder *parent)
- : Table(parent)
+ : Table(parent, TABLEID)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 tot::tot(Decoder *parent, TableWatcher *watcher)
- : Table(parent, watcher)
+ : Table(parent, TABLEID, watcher)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 tot::tot(Decoder *parent, TableWatcher *watcher, dvbpsi_tot_t *p_tot)
- : Table(parent, watcher)
+ : Table(parent, TABLEID, watcher)
  , m_time(-1)
 {
 	store(p_tot);
 }
 
 tot::tot(Decoder *parent, dvbpsi_tot_t *p_tot)
- : Table(parent/*, p_tot*/)
+ : Table(parent, TABLEID)
  , m_time(-1)
 {
 	store(p_tot);
@@ -84,4 +84,4 @@ tot::~tot()
 	//
 }
 
-//REGISTER_TABLE_FACTORY("tot", tot);
+REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_tot_t, tot);
