@@ -142,24 +142,24 @@ TableStore::~TableStore()
 	//
 }
 
-bool TableStore::add(uint8_t id, PsiTable *p_table)
+bool TableStore::add(uint8_t id, PsiTable &p_table)
 {
 	Table *t = NULL;
-	if (p_table) {
-		TableBaseFactory* f = TableRegistry::instance().getFactory(id);
-		if (f) t = f->create(m_parent, p_table);
-	}
+
+	TableBaseFactory* f = TableRegistry::instance().getFactory(id);
+	if (f) t = f->create(m_parent, p_table);
+
 	if (t) m_store.insert( std::pair<uint8_t, Table*>(t->getTableid(), t) );
 	return (t != NULL);
 }
 
-bool TableStore::add(uint8_t id, PsiTable *p_table, TableWatcher *watcher)
+bool TableStore::add(uint8_t id, PsiTable &inTable, TableWatcher *watcher)
 {
 	Table *t = NULL;
-	if (p_table) {
-		TableBaseFactory* f = TableRegistry::instance().getFactory(id);
-		if (f) t = f->create(m_parent, watcher, p_table);
-	}
+
+	TableBaseFactory* f = TableRegistry::instance().getFactory(id);
+	if (f) t = f->create(m_parent, inTable, watcher);
+
 	if (t) m_store.insert( std::pair<uint8_t, Table*>(t->getTableid(), t) );
 	return (t != NULL);
 }

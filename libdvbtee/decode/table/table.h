@@ -84,12 +84,8 @@ private:
 };
 
 struct PsiTable {
-    //template<typename T> PsiTable(TableTypeCarrier<T> inT) { m_priv = &inT; }
     template<typename T> void Set(TableTypeCarrier<T> inT) { m_priv = &inT; }
-
-    //template<typename T> T* Get() { TableTypeCarrier<T> *t = (TableTypeCarrier<T>*)m_priv; return t->Get(); }
     template<typename T> T* Get() { return ((TableTypeCarrier<T>*)m_priv)->Get(); }
-
 private:
     TableTypeCarrierBase* m_priv;
 };
@@ -99,8 +95,8 @@ public:
 	TableStore(Decoder *);
 	~TableStore();
 
-	bool add(uint8_t, PsiTable*);
-	bool add(uint8_t, PsiTable*, TableWatcher*);
+	bool add(uint8_t, PsiTable&);
+	bool add(uint8_t, PsiTable&, TableWatcher*);
 
 	std::vector<Table*> get(uint8_t);
 
@@ -126,15 +122,15 @@ public:
 		linkParent(parent);
 	}
 
-	LinkedTable(Decoder *parent, TableWatcher *watcher, PsiTable *p_Table)
-	 : T(parent, watcher, p_Table->Get<S>())
+	LinkedTable(Decoder *parent, PsiTable& inTable, TableWatcher *watcher)
+	 : T(parent, watcher, inTable.Get<S>())
 	 , m_linkedIdx(-1)
 	{
 		linkParent(parent);
 	}
 
-	LinkedTable(Decoder *parent, PsiTable *p_Table)
-	 : T(parent, p_Table->Get<S>())
+	LinkedTable(Decoder *parent, PsiTable& inTable)
+	 : T(parent, inTable.Get<S>())
 	 , m_linkedIdx(-1)
 	{
 		linkParent(parent);
@@ -158,8 +154,8 @@ class TableBaseFactory {
 public:
 	virtual Table *create(Decoder *parent) = 0;
 	virtual Table *create(Decoder *parent, TableWatcher *watcher) = 0;
-	virtual Table *create(Decoder *parent, TableWatcher *watcher, PsiTable *p_Table) = 0;
-	virtual Table *create(Decoder *parent, PsiTable *p_Table) = 0;
+	virtual Table *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher) = 0;
+	virtual Table *create(Decoder *parent, PsiTable& inTable) = 0;
 protected:
 	TableBaseFactory() {}
 	~TableBaseFactory() {}
@@ -196,13 +192,13 @@ public:
 	{
 		return new LinkedTable<TABLEID,T,S>(parent, watcher);
 	}
-	virtual T *create(Decoder *parent, TableWatcher *watcher, PsiTable *p_Table)
+	virtual T *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher)
 	{
-		return new LinkedTable<TABLEID,T,S>(parent, watcher, p_Table);
+		return new LinkedTable<TABLEID,T,S>(parent, inTable, watcher);
 	}
-	virtual T *create(Decoder *parent, PsiTable *p_Table)
+	virtual T *create(Decoder *parent, PsiTable& inTable)
 	{
-		return new LinkedTable<TABLEID,T,S>(parent, p_Table);
+		return new LinkedTable<TABLEID,T,S>(parent, inTable);
 	}
 private:
 	TableFactory() {
