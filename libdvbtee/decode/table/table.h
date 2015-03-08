@@ -112,7 +112,17 @@ public:
 #else
 	bool add(uint8_t, PsiTable&);
 	bool add(uint8_t, PsiTable&, TableWatcher*);
+
+	template<typename T>
+	bool add(uint8_t tableid, T* p_table) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable); }
+	template<typename T>
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable, watcher); }
 #endif
+
+	template <typename T>
+	bool add(T*);
+	template <typename T>
+	bool add(T*, TableWatcher*);
 
 	std::vector<Table*> get(uint8_t);
 
@@ -224,10 +234,18 @@ private:
 	~TableFactory() {}
 };
 
-#define REGISTER_TABLE_FACTORY(tableid, psitable, decoder) static TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance()
-
-
-
+#define REGISTER_TABLE_FACTORY(tableid, psitable, decoder) \
+	namespace dvbtee {\
+	namespace decode {\
+	\
+	template <>\
+	bool TableStore::add<psitable>(psitable *p) { return add(tableid, p); }\
+	template <>\
+	bool TableStore::add<psitable>(psitable *p, TableWatcher *w) { return add(tableid, p, w); }\
+	\
+	}}\
+	\
+	static TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance()
 }
 
 }
