@@ -121,7 +121,11 @@ tune            tune to a channel or service, ie:
 channels        list channels
 channel         tune physical channel (unsafe - use tune instead)
 service         select service (unsafe - use tune instead)
-stream          add output file / tcp / udp / http stream
+stream          add output file / tcp / udp / http stream, ie:
+                stream=udp:192.168.1.100:1234
+                stream=tcp:192.168.1.200:5555
+                stream=file:output.ts
+                stream (over http with no arg will begin streaming to current socket)
 epg             dump collected EPG data
 xmltv           dump collected EPG data in XMLTV format
 stop            stop the tuner

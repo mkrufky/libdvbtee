@@ -380,6 +380,8 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 
 	dbg_time("%s", ctime(&stream_time));
 
+	descriptors.decode(p_stt->p_first_descriptor);
+
 	return true;
 }
 
@@ -388,6 +390,8 @@ bool decode::take_tot(dvbpsi_tot_t* p_tot)
 	stream_time = datetime_utc(p_tot->i_utc_time);
 
 	dbg_time("%s", ctime(&stream_time));
+
+	descriptors.decode(p_tot->p_first_descriptor);
 
 	return true;
 }
@@ -684,6 +688,9 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, desc* de
 
 		p_ts = p_ts->p_next;
 	}
+
+	descriptors->decode(p_nit->p_first_descriptor);
+
 	return true;
 }
 
@@ -997,6 +1004,9 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 
 		p_event = p_event->p_next;
 	}
+
+	descriptors.decode(p_eit->p_first_descriptor);
+
 	return true;
 }
 
@@ -1509,6 +1519,9 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 
 	fprintf(stderr, "%s: v%d, ID: %d: %s\n", __func__,
 		p_ett->i_version, p_ett->i_etm_id, message);
+
+	descriptors.decode(p_ett->p_first_descriptor);
+
 	return true;
 }
 
