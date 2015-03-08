@@ -142,7 +142,11 @@ TableStore::~TableStore()
 	//
 }
 
+#if PsiTable_CONSTRUCTORTEMPLATE
+bool TableStore::add(uint8_t id, PsiTable p_table)
+#else
 bool TableStore::add(uint8_t id, PsiTable &p_table)
+#endif
 {
 	Table *t = NULL;
 
@@ -153,7 +157,11 @@ bool TableStore::add(uint8_t id, PsiTable &p_table)
 	return (t != NULL);
 }
 
+#if PsiTable_CONSTRUCTORTEMPLATE
+bool TableStore::add(uint8_t id, PsiTable inTable, TableWatcher *watcher)
+#else
 bool TableStore::add(uint8_t id, PsiTable &inTable, TableWatcher *watcher)
+#endif
 {
 	Table *t = NULL;
 

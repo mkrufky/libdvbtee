@@ -83,9 +83,15 @@ private:
 	T* m_p;
 };
 
+#define PsiTable_CONSTRUCTORTEMPLATE 1
 struct PsiTable {
+#if PsiTable_CONSTRUCTORTEMPLATE
+    template<typename T> PsiTable(TableTypeCarrier<T> inT) { m_priv = &inT; }
+#else
     template<typename T> void Set(TableTypeCarrier<T> inT) { m_priv = &inT; }
+#endif
     template<typename T> T* Get() { return ((TableTypeCarrier<T>*)m_priv)->Get(); }
+
 private:
     TableTypeCarrierBase* m_priv;
 };
@@ -95,8 +101,18 @@ public:
 	TableStore(Decoder *);
 	~TableStore();
 
+#if PsiTable_CONSTRUCTORTEMPLATE
+	bool add(uint8_t, PsiTable);
+	bool add(uint8_t, PsiTable, TableWatcher*);
+
+	template<typename T>
+	bool add(uint8_t tableid, T* p_table) { return add(tableid, PsiTable(TableTypeCarrier<T>(p_table))); }
+	template<typename T>
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher) { return add(tableid, PsiTable(TableTypeCarrier<T>(p_table)), watcher); }
+#else
 	bool add(uint8_t, PsiTable&);
 	bool add(uint8_t, PsiTable&, TableWatcher*);
+#endif
 
 	std::vector<Table*> get(uint8_t);
 
