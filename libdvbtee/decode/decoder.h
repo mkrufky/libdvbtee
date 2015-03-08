@@ -23,6 +23,7 @@
 #define __DECODER_H__
 
 #include <map>
+#include <string>
 #if LOCK_DECODER_CHILDREN
 #include <pthread.h>
 #endif
@@ -38,7 +39,7 @@ namespace decode {
 class Decoder {
 public:
 	Decoder();
-	Decoder(Decoder*);
+	Decoder(Decoder*, std::string&);
 	virtual ~Decoder();
 
 	bool isValid() { return m_valid; }
@@ -53,6 +54,7 @@ protected:
 
 private:
 	Decoder *m_parent;
+	std::string m_name;
 	bool m_valid;
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_t m_mutex;

@@ -57,7 +57,7 @@ public:
 	uint8_t getTag() { return m_tag; }
 
 protected:
-	Descriptor(Decoder *, dvbpsi_descriptor_t*);
+	Descriptor(Decoder *, std::string&, dvbpsi_descriptor_t*);
 	virtual ~Descriptor();
 
 	uint8_t m_tag;

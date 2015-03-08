@@ -36,6 +36,8 @@
 
 using namespace dvbtee::decode;
 
+static std::string TABLE_NAME = "TOT[14]";
+
 void tot::store(dvbpsi_tot_t *p_tot)
 {
 	time_t o_time = m_time;
@@ -52,28 +54,28 @@ void tot::store(dvbpsi_tot_t *p_tot)
 }
 
 tot::tot(Decoder *parent)
- : Table(parent, TABLEID)
+ : Table(parent, TABLE_NAME, TABLEID)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 tot::tot(Decoder *parent, TableWatcher *watcher)
- : Table(parent, TABLEID, watcher)
+ : Table(parent, TABLE_NAME, TABLEID, watcher)
  , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 tot::tot(Decoder *parent, TableWatcher *watcher, dvbpsi_tot_t *p_tot)
- : Table(parent, TABLEID, watcher)
+ : Table(parent, TABLE_NAME, TABLEID, watcher)
  , m_time(-1)
 {
 	store(p_tot);
 }
 
 tot::tot(Decoder *parent, dvbpsi_tot_t *p_tot)
- : Table(parent, TABLEID)
+ : Table(parent, TABLE_NAME, TABLEID)
  , m_time(-1)
 {
 	store(p_tot);

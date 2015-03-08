@@ -36,7 +36,7 @@ class TableWatcher;
 
 class TableComponent: public Decoder {
 public:
-	TableComponent(Decoder*);
+	TableComponent(Decoder*, std::string&);
 	virtual ~TableComponent();
 
 	dvbtee::decode::DescriptorStore descriptors;
@@ -45,8 +45,8 @@ public:
 
 class TableBase: public TableComponent {
 public:
-	TableBase(Decoder*, uint8_t);
-	TableBase(Decoder*, uint8_t, TableWatcher*);
+	TableBase(Decoder*, std::string&, uint8_t);
+	TableBase(Decoder*, std::string&, uint8_t, TableWatcher*);
 	virtual ~TableBase();
 
 	uint8_t getTableid();
@@ -58,8 +58,8 @@ private:
 
 class Table: public TableBase {
 public:
-	Table(Decoder*, uint8_t);
-	Table(Decoder*, uint8_t, TableWatcher*);
+	Table(Decoder*, std::string&, uint8_t);
+	Table(Decoder*, std::string&, uint8_t, TableWatcher*);
 	virtual ~Table();
 };
 

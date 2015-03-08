@@ -23,8 +23,8 @@
 
 using namespace dvbtee::decode;
 
-TableComponent::TableComponent(Decoder *parent)
- : Decoder(parent)
+TableComponent::TableComponent(Decoder *parent, std::string &name)
+ : Decoder(parent, name)
  , descriptors(this)
 {
 	//
@@ -36,16 +36,16 @@ TableComponent::~TableComponent()
 }
 
 
-TableBase::TableBase(Decoder *parent, uint8_t tableid)
- : TableComponent(parent)
+TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid)
+ : TableComponent(parent, name)
  , m_watcher(NULL)
  , m_tableid(tableid)
 {
 	//
 }
 
-TableBase::TableBase(Decoder *parent, uint8_t tableid, TableWatcher *watcher)
- : TableComponent(parent)
+TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid, TableWatcher *watcher)
+ : TableComponent(parent, name)
  , m_watcher(watcher)
  , m_tableid(tableid)
 {
@@ -63,14 +63,14 @@ uint8_t TableBase::getTableid()
 }
 
 
-Table::Table(Decoder *parent, uint8_t tableid)
- : TableBase(parent, tableid)
+Table::Table(Decoder *parent, std::string &name, uint8_t tableid)
+ : TableBase(parent, name, tableid)
 {
 	//
 }
 
-Table::Table(Decoder *parent, uint8_t tableid, TableWatcher *watcher)
- : TableBase(parent, tableid, watcher)
+Table::Table(Decoder *parent, std::string &name, uint8_t tableid, TableWatcher *watcher)
+ : TableBase(parent, name, tableid, watcher)
 {
 	//
 }

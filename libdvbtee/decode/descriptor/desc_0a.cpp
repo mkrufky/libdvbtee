@@ -30,9 +30,10 @@
 
 using namespace dvbtee::decode;
 
+static std::string DESC_NAME = "DR[0A]";
 
 desc_0a::desc_0a(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
- : Descriptor(parent, p_descriptor)
+ : Descriptor(parent, DESC_NAME, p_descriptor)
 {
 	if (!desc_check_tag(m_tag, 0x0a)) return;
 

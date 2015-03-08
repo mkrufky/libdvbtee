@@ -285,7 +285,7 @@ decode::~decode()
 }
 
 decode::decode(const decode& d)
- : Decoder(NULL)
+ : Decoder()
 {
 	dprintf("(copy)");
 

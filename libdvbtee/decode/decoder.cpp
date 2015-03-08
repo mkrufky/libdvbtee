@@ -25,6 +25,7 @@ using namespace dvbtee::decode;
 
 Decoder::Decoder()
  : m_parent(NULL)
+ , m_name("dvbtee")
  , m_valid(false)
  , __genMapIdx(0)
 {
@@ -33,8 +34,9 @@ Decoder::Decoder()
 #endif
 }
 
-Decoder::Decoder(Decoder *parent)
+Decoder::Decoder(Decoder *parent, std::string &name)
  : m_parent(parent)
+ , m_name(name)
  , __genMapIdx(0)
 {
 #if LOCK_DECODER_CHILDREN

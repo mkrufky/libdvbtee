@@ -29,12 +29,14 @@
 
 using namespace dvbtee::decode;
 
+static std::string DESC_NAME = "DR[81]";
+
 static const char *num_channels(uint8_t num_channels_code);
 static const char *surround_mode(uint8_t surround_mode_code);
 static const char *sample_rate(uint8_t sample_rate_code);
 
 desc_81::desc_81(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
- : Descriptor(parent, p_descriptor)
+ : Descriptor(parent, DESC_NAME, p_descriptor)
 {
 	if (!desc_check_tag(m_tag, 0x81)) return;
 
