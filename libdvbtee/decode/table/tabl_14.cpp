@@ -26,7 +26,7 @@
 
 #include "functions.h"
 
-#include "tabl_tot.h"
+#include "tabl_14.h"
 
 #define TABLEID 0x14
 

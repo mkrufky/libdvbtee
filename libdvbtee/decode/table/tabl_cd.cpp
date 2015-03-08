@@ -26,7 +26,7 @@
 
 #include "functions.h"
 
-#include "tabl_stt.h"
+#include "tabl_cd.h"
 
 #define TABLEID 0xcd
 
