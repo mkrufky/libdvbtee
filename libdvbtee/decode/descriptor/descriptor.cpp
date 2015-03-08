@@ -46,10 +46,9 @@ bool DescriptorRegistry::registerFactory(uint8_t tag, DescriptorBaseFactory *fac
 		return false;
 	}
 
-	//m_factories[tag] = factory;
 	m_factories.insert( std::pair<uint8_t, DescriptorBaseFactory*>(tag,factory) );
 
-	fprintf(stderr, "inserted 0x%02x, %p, %ld decoders present\n", tag, factory, m_factories.size());
+	fprintf(stderr, "inserted 0x%02x, %p, %ld descriptor decoders present\n", tag, factory, m_factories.size());
 
 	pthread_mutex_unlock(&m_mutex);
 	return true;
