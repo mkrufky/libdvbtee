@@ -49,6 +49,7 @@
 #include <map>
 
 
+#include "tabl_00.h"
 #include "tabl_14.h"
 #include "tabl_cd.h"
 
