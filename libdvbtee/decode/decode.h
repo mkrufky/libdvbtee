@@ -433,6 +433,8 @@ public:
 
 	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e);
 private:
+	dvbtee::decode::TableStore store;
+
 	uint16_t orig_network_id;
 	uint16_t      network_id;
 

@@ -217,7 +217,8 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 }
 
 decode::decode()
-  : orig_network_id(0)
+  : store(this)
+  , orig_network_id(0)
   , network_id(0)
   , stream_time((time_t)0)
   , eit_x(0)
@@ -286,6 +287,7 @@ decode::~decode()
 
 decode::decode(const decode& d)
  : Decoder()
+ , store(this)
 {
 	dprintf("(copy)");
 
@@ -330,6 +332,8 @@ decode::decode(const decode& d)
 decode& decode::operator= (const decode& cSource)
 {
 	dprintf("(operator=)");
+
+	//store?
 
 	if (this == &cSource)
 		return *this;
@@ -400,10 +404,11 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 	dbg_time("%s", ctime(&stream_time));
 
 	descriptors.decode(p_stt->p_first_descriptor);
-#else
-	dvbtee::decode::stt(this, this, p_stt);
-#endif
+
 	return true;
+#else
+	return store.add(p_stt, this);
+#endif
 }
 
 bool decode::take_tot(dvbpsi_tot_t* p_tot)
@@ -414,10 +419,11 @@ bool decode::take_tot(dvbpsi_tot_t* p_tot)
 	dbg_time("%s", ctime(&stream_time));
 
 	descriptors.decode(p_tot->p_first_descriptor);
-#else
-	dvbtee::decode::tot(this, this, p_tot);
-#endif
+
 	return true;
+#else
+	return store.add(p_tot, this);
+#endif
 }
 
 /* -- TABLE HANDLERS -- */
