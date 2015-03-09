@@ -119,10 +119,58 @@ public:
 	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable, watcher); }
 #endif
 
-	template <typename T>
-	bool add(T*);
-	template <typename T>
-	bool add(T*, TableWatcher*);
+	template <typename T> bool add(T*);
+	template <typename T> bool add(T*, TableWatcher*);
+
+	template<typename T, class C>
+	bool update(uint8_t tableid, T* p_table)
+	{
+		std::vector<Table*> V = get(tableid);
+		ssize_t s = V.size();
+		if (s > 1) printf("TABLE: %02x %ld collected, something is wrong", tableid, s);
+		if (s) {
+			printf("UPDATING TABLE %02x", tableid);
+			C *t = (C*)V[s-1];
+			t->store(p_table);
+			return true;
+		}
+		return false;
+	}
+
+#if PsiTable_CONSTRUCTORTEMPLATE
+	template<typename T, class C>
+	bool setOnly(uint8_t tableid, T* p_table)
+	{
+		return (update<T,C>(tableid, p_table)) ? true : add(p_table);
+	}
+	template<typename T, class C>
+	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher)
+	{
+		return (update<T,C>(tableid, p_table)) ? true : add(p_table, watcher);
+	}
+#else
+	template<typename T, class C>
+	bool setOnly(uint8_t tableid, T* p_table)
+	{
+		if (update<T,C>(tableid, p_table)) return true;
+
+		PsiTable psiTable;
+		psiTable.Set<T>(p_table);
+		return add(tableid, psiTable);
+	}
+	template<typename T, class C>
+	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher)
+	{
+		if (update<T,C>(tableid, p_table)) return true;
+
+		PsiTable psiTable;
+		psiTable.Set<T>(p_table);
+		return add(tableid, psiTable, watcher);
+	}
+#endif
+
+	template <typename T> bool setOnly(T*);
+	template <typename T> bool setOnly(T*, TableWatcher*);
 
 	std::vector<Table*> get(uint8_t);
 
@@ -242,6 +290,11 @@ private:
 	bool TableStore::add<psitable>(psitable *p) { return add(tableid, p); }\
 	template <>\
 	bool TableStore::add<psitable>(psitable *p, TableWatcher *w) { return add(tableid, p, w); }\
+	\
+	template <>\
+	bool TableStore::setOnly<psitable>(psitable *p) { return setOnly<psitable, decoder>(tableid, p); }\
+	template <>\
+	bool TableStore::setOnly<psitable>(psitable *p, TableWatcher *w) { return setOnly<psitable, decoder>(tableid, p, w); }\
 	\
 	}}\
 	\
