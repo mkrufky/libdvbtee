@@ -385,9 +385,13 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 
 	switch (tId) {
 	case 0x00:
-		decoded_pat.ts_id    = ((dvbtee::decode::pat*)table)->getTsId();
-		decoded_pat.version  = ((dvbtee::decode::pat*)table)->getVersion();
-		decoded_pat.programs = ((dvbtee::decode::pat*)table)->getPrograms();
+	{
+		dvbtee::decode::pat *patTable = (dvbtee::decode::pat*)table;
+
+		decoded_pat.ts_id    = patTable->getTsId();
+		decoded_pat.version  = patTable->getVersion();
+		decoded_pat.programs = patTable->getPrograms();
+
 		printf("tsid %04x, ver %02x, %lu programs\n", decoded_pat.ts_id, decoded_pat.version, decoded_pat.programs.size());
 
 		for (map_decoded_pat_programs::const_iterator iter = decoded_pat.programs.begin();
@@ -397,6 +401,7 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 			rcvd_pmt[iter->first] = false;
 		}
 		break;
+	}
 	case 0x14:
 		stream_time = ((dvbtee::decode::tot*)table)->getTime();
 		break;
