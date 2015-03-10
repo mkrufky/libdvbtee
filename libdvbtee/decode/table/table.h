@@ -172,6 +172,22 @@ public:
 	template <typename T> bool setOnly(T*);
 	template <typename T> bool setOnly(T*, TableWatcher*);
 
+
+	template<typename T, class C>
+	bool ingest(T *p_table)
+	{
+		return C::ingest(this, p_table);
+	}
+
+	template<typename T, class C>
+	bool ingest(T *p_table, TableWatcher *watcher)
+	{
+		return C::ingest(this, p_table, watcher);
+	}
+
+	template <typename T> bool ingest(T*);
+	template <typename T> bool ingest(T*, TableWatcher*);
+
 	std::vector<Table*> get(uint8_t);
 
 private:
@@ -295,6 +311,11 @@ private:
 	bool TableStore::setOnly<psitable>(psitable *p) { return setOnly<psitable, decoder>(tableid, p); }\
 	template <>\
 	bool TableStore::setOnly<psitable>(psitable *p, TableWatcher *w) { return setOnly<psitable, decoder>(tableid, p, w); }\
+	\
+	template <>\
+	bool TableStore::ingest<psitable>(psitable *p) { return ingest<psitable, decoder>(p); }\
+	template <>\
+	bool TableStore::ingest<psitable>(psitable *p, TableWatcher *w) { return ingest<psitable, decoder>(p, w); }\
 	\
 	}}\
 	\

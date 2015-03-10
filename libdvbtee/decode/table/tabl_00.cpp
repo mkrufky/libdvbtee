@@ -67,6 +67,12 @@ void pat::store(dvbpsi_pat_t *p_pat)
 	}
 }
 
+bool pat::ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w)
+{
+	return s->setOnly<dvbpsi_pat_t, pat>(TABLEID, t, w);
+}
+
+
 pat::pat(Decoder *parent)
  : Table(parent, TABLE_NAME, TABLEID)
  , m_ts_id(0xffff)

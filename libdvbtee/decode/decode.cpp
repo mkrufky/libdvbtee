@@ -425,7 +425,7 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 
 	return true;
 #else
-	return store.setOnly(p_stt, this);
+	return store.ingest(p_stt, this);
 #endif
 }
 
@@ -440,7 +440,7 @@ bool decode::take_tot(dvbpsi_tot_t* p_tot)
 
 	return true;
 #else
-	return store.setOnly(p_tot, this);
+	return store.ingest(p_tot, this);
 #endif
 }
 
@@ -479,7 +479,7 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 	}
 	return true;
 #else
-	return store.setOnly(p_pat, this);
+	return store.ingest(p_pat, this);
 #endif
 }
 

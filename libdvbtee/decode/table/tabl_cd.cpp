@@ -53,6 +53,11 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 	}
 }
 
+bool stt::ingest(TableStore *s, dvbpsi_atsc_stt_t *t, TableWatcher *w)
+{
+	return s->setOnly<dvbpsi_atsc_stt_t, stt>(TABLEID, t, w);
+}
+
 
 stt::stt(Decoder *parent)
  : Table(parent, TABLE_NAME, TABLEID)

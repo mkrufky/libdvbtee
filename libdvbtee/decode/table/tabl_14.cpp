@@ -53,6 +53,12 @@ void tot::store(dvbpsi_tot_t *p_tot)
 	}
 }
 
+bool tot::ingest(TableStore *s, dvbpsi_tot_t *t, TableWatcher *w)
+{
+	return s->setOnly<dvbpsi_tot_t, tot>(TABLEID, t, w);
+}
+
+
 tot::tot(Decoder *parent)
  : Table(parent, TABLE_NAME, TABLEID)
  , m_time(-1)
