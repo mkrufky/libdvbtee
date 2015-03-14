@@ -24,6 +24,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace dvbtee {
 
@@ -37,9 +38,10 @@ public:
 		BOOLEAN,
 		DOUBLE,
 		OBJECT,
+		ARRAY,
 	};
 
-	ValueBase(Type, std::string);
+	ValueBase(Type, std::string = "");
 	virtual ~ValueBase();
 
 	const Type type;
@@ -52,6 +54,12 @@ class Value : public ValueBase {
 public:
 	Value(std::string& n, T& v)
 	 : ValueBase(TYPE, n)
+	{
+		pValue = new T(v);
+	}
+
+	Value(T& v)
+	 : ValueBase(TYPE)
 	{
 		pValue = new T(v);
 	}
@@ -76,6 +84,8 @@ private:
 };
 
 typedef std::map<std::string, ValueBase*> KeyValueMap;
+
+class Array;
 
 class Object {
 public:
@@ -118,6 +128,11 @@ public:
 		return set<ValueBase::OBJECT, Object>(key, val);
 	}
 
+	inline void set(std::string key, Array& val)
+	{
+		return set<ValueBase::ARRAY, Array>(key, val);
+	}
+
 	void set(ValueBase*);
 
 	ValueBase* get(std::string key);
@@ -144,6 +159,59 @@ private:
 	void badType(ValueBase::Type, ValueBase*);
 
 	KeyValueMap map;
+};
+
+typedef std::vector<ValueBase*> KeyValueVector;
+
+class Array {
+public:
+	Array();
+	~Array();
+
+	Array(const Array&);
+
+	void push(ValueBase*);
+
+	template <ValueBase::Type TYPE, typename T>
+	void push(T& val)
+	{
+		push(new Value<TYPE, T>(val));
+	}
+
+	inline void push(int val)
+	{
+		push<ValueBase::INTEGER, int>(val);
+	}
+
+	inline void push(std::string val)
+	{
+		push<ValueBase::STRING, std::string>(val);
+	}
+
+	inline void push(bool val)
+	{
+		push<ValueBase::BOOLEAN, bool>(val);
+	}
+
+	inline void push(double val)
+	{
+		push<ValueBase::DOUBLE, double>(val);
+	}
+
+	inline void push(Object& val)
+	{
+		push<ValueBase::OBJECT, Object>(val);
+	}
+
+	inline void push(Array& val)
+	{
+		push<ValueBase::ARRAY, Array>(val);
+	}
+
+	std::string toJson();
+
+private:
+	KeyValueVector vector;
 };
 
 }

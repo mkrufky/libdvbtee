@@ -38,11 +38,13 @@ ValueBase::~ValueBase()
 
 Object::Object()
 {
+	fprintf(stderr, "%s\n", __func__);
 	//map.clear();
 }
 
 Object::~Object()
 {
+	fprintf(stderr, "%s\n", __func__);
 	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
 		//Value<TYPE, T> *value = (Value<TYPE, T>*)map[key];
 		delete it->second;
@@ -54,6 +56,8 @@ Object::Object(const Object &obj)
 	for (KeyValueMap::const_iterator it = obj.map.begin(); it != obj.map.end(); ++it) {
 		set(it->second);
 	}
+
+	fprintf(stderr, "%s(copy) %lu\n", __func__, map.size());
 }
 
 ValueBase *Object::get(std::string key)
@@ -62,6 +66,34 @@ ValueBase *Object::get(std::string key)
 		return map[key];
 
 	return NULL;
+}
+
+std::string _toJson(ValueBase* val)
+{
+	std::stringstream s;
+
+	switch(val->type) {
+	case ValueBase::INTEGER:
+		s << ((Value<ValueBase::INTEGER, int>*)val)->get();
+		break;
+	case ValueBase::STRING:
+		s << "'" << ((Value<ValueBase::STRING, std::string>*)val)->get() << "'";
+		break;
+	case ValueBase::BOOLEAN:
+		s << (((Value<ValueBase::BOOLEAN, bool>*)val)->get() ? "true" : "false");
+		break;
+	case ValueBase::DOUBLE:
+		s << ((Value<ValueBase::DOUBLE, double>*)val)->get();
+		break;
+	case ValueBase::OBJECT:
+		s << ((Value<ValueBase::OBJECT, Object>*)val)->get().toJson().c_str();
+		break;
+	case ValueBase::ARRAY:
+		s << ((Value<ValueBase::ARRAY, Array>*)val)->get().toJson().c_str();
+		break;
+	}
+
+	return s.str();
 }
 
 std::string Object::toJson()
@@ -76,23 +108,8 @@ std::string Object::toJson()
 		if (count) s << ", ";
 		s << "'" << it->first << "': ";
 
-		switch(val->type) {
-		case ValueBase::INTEGER:
-			s << ((Value<ValueBase::INTEGER, int>*)val)->get();
-			break;
-		case ValueBase::STRING:
-			s << "'" << ((Value<ValueBase::STRING, std::string>*)val)->get() << "'";
-			break;
-		case ValueBase::BOOLEAN:
-			s << (((Value<ValueBase::BOOLEAN, bool>*)val)->get() ? "true" : "false");
-			break;
-		case ValueBase::DOUBLE:
-			s << ((Value<ValueBase::DOUBLE, double>*)val)->get();
-			break;
-		case ValueBase::OBJECT:
-			s << ((Value<ValueBase::OBJECT, Object>*)val)->get().toJson().c_str();
-			break;
-		}
+		s << _toJson(val);
+
 		count++;
 	}
 	s << " }";
@@ -138,6 +155,13 @@ Object& Object::get<Object>(std::string key)
 	return get<ValueBase::OBJECT, Object>(key, def);
 }
 
+template <>
+Array& Object::get<Array>(std::string key)
+{
+	Array def;
+	return get<ValueBase::ARRAY, Array>(key, def);
+}
+
 }}
 
 void Object::set(ValueBase *val)
@@ -158,7 +182,52 @@ void Object::set(ValueBase *val)
 	case ValueBase::OBJECT:
 		set(val->name, ((Value<ValueBase::OBJECT, Object>*)val)->get());
 		break;
+	case ValueBase::ARRAY:
+		set(val->name, ((Value<ValueBase::ARRAY, Array>*)val)->get());
+		break;
 	}
+}
+
+Array::Array()
+{
+
+}
+
+Array::~Array()
+{
+
+}
+
+Array::Array(const Array &obj)
+{
+	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
+		vector.push_back(*it);
+	}
+}
+
+void Array::push(ValueBase *v)
+{
+	vector.push_back(v);
+}
+
+std::string Array::toJson()
+{
+	std::stringstream s;
+	int count = 0;
+
+	s << "[ ";
+
+	for (KeyValueVector::const_iterator it = vector.begin(); it != vector.end(); ++it) {
+		if (count) s << ", ";
+
+		s << _toJson(*it);
+
+		count++;
+	}
+	s << " ]";
+
+	return s.str();
+
 }
 
 void Object::badType(ValueBase::Type typeRequested, ValueBase *val)
