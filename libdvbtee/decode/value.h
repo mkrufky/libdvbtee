@@ -113,7 +113,7 @@ public:
 		return set<ValueBase::DOUBLE, double>(key, val);
 	}
 
-	inline void set(std::string key, Object val)
+	inline void set(std::string key, Object& val)
 	{
 		return set<ValueBase::OBJECT, Object>(key, val);
 	}
