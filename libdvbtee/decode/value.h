@@ -50,7 +50,7 @@ public:
 template <ValueBase::Type TYPE, typename T>
 class Value : public ValueBase {
 public:
-	Value(std::string n, T v)
+	Value(std::string& n, T& v)
 	 : ValueBase(TYPE, n)
 	{
 		pValue = new T(v);
@@ -66,7 +66,7 @@ public:
 		return *pValue;
 	}
 
-	void set(T v)
+	void set(T& v)
 	{
 		*pValue = v;
 	}
@@ -83,7 +83,7 @@ public:
 	~Object();
 
 	template <ValueBase::Type TYPE, typename T>
-	void set(std::string key, T val)
+	void set(std::string& key, T& val)
 	{
 		if (map.count(key))
 			delete map[key];
@@ -111,10 +111,15 @@ public:
 		return set<ValueBase::DOUBLE, double>(key, val);
 	}
 
+	inline void set(std::string key, Object val)
+	{
+		return set<ValueBase::OBJECT, Object>(key, val);
+	}
+
 	ValueBase* get(std::string key);
 
 	template <ValueBase::Type TYPE, typename T>
-	T& get(std::string key, T& def)
+	T& get(std::string& key, T& def)
 	{
 		if (map.count(key)) {
 			Value<TYPE, T> *val = (Value<TYPE, T>*)map[key];
