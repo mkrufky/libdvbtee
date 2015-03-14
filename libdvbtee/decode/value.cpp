@@ -20,6 +20,7 @@
  *****************************************************************************/
 
 #include <stdio.h>
+#include <sstream>
 #include "value.h"
 
 using namespace dvbtee::decode;
@@ -61,6 +62,42 @@ ValueBase *Object::get(std::string key)
 		return map[key];
 
 	return NULL;
+}
+
+std::string Object::toJson()
+{
+	std::stringstream s;
+	int count = 0;
+
+	s << "{ ";
+	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
+		ValueBase *val = it->second;
+
+		if (count) s << ", ";
+		s << "'" << it->first << "': ";
+
+		switch(val->type) {
+		case ValueBase::INTEGER:
+			s << ((Value<ValueBase::INTEGER, int>*)val)->get();
+			break;
+		case ValueBase::STRING:
+			s << "'" << ((Value<ValueBase::STRING, std::string>*)val)->get() << "'";
+			break;
+		case ValueBase::BOOLEAN:
+			s << (((Value<ValueBase::BOOLEAN, bool>*)val)->get() ? "true" : "false");
+			break;
+		case ValueBase::DOUBLE:
+			s << ((Value<ValueBase::DOUBLE, double>*)val)->get();
+			break;
+		case ValueBase::OBJECT:
+			s << ((Value<ValueBase::OBJECT, Object>*)val)->get().toJson().c_str();
+			break;
+		}
+		count++;
+	}
+	s << " }";
+
+	return s.str();
 }
 
 namespace dvbtee {

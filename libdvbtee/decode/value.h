@@ -138,6 +138,8 @@ public:
 
 	template <typename T> T& get(std::string key);
 
+	std::string toJson();
+
 private:
 	void badType(ValueBase::Type, ValueBase*);
 
