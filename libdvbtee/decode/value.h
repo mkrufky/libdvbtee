@@ -82,6 +82,8 @@ public:
 	Object();
 	~Object();
 
+	Object(const Object&);
+
 	template <ValueBase::Type TYPE, typename T>
 	void set(std::string& key, T& val)
 	{
@@ -115,6 +117,8 @@ public:
 	{
 		return set<ValueBase::OBJECT, Object>(key, val);
 	}
+
+	void set(ValueBase*);
 
 	ValueBase* get(std::string key);
 

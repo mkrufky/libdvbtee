@@ -19,6 +19,7 @@
  *
  *****************************************************************************/
 
+#include <stdio.h>
 #include "value.h"
 
 using namespace dvbtee::decode;
@@ -44,6 +45,13 @@ Object::~Object()
 	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
 		//Value<TYPE, T> *value = (Value<TYPE, T>*)map[key];
 		delete it->second;
+	}
+}
+
+Object::Object(const Object &obj)
+{
+	for (KeyValueMap::const_iterator it = obj.map.begin(); it != obj.map.end(); ++it) {
+		set(it->second);
 	}
 }
 
@@ -86,9 +94,35 @@ double& Object::get<double>(std::string key)
 	return get<ValueBase::DOUBLE, double>(key, def);
 }
 
+template <>
+Object& Object::get<Object>(std::string key)
+{
+	Object def;
+	return get<ValueBase::OBJECT, Object>(key, def);
+}
+
 }}
 
-#include <stdio.h>
+void Object::set(ValueBase *val)
+{
+	switch(val->type) {
+	case ValueBase::INTEGER:
+		set(val->name, ((Value<ValueBase::INTEGER, int>*)val)->get());
+		break;
+	case ValueBase::STRING:
+		set(val->name, ((Value<ValueBase::STRING, std::string>*)val)->get());
+		break;
+	case ValueBase::BOOLEAN:
+		set(val->name, ((Value<ValueBase::BOOLEAN, bool>*)val)->get());
+		break;
+	case ValueBase::DOUBLE:
+		set(val->name, ((Value<ValueBase::DOUBLE, double>*)val)->get());
+		break;
+	case ValueBase::OBJECT:
+		set(val->name, ((Value<ValueBase::OBJECT, Object>*)val)->get());
+		break;
+	}
+}
 
 void Object::badType(ValueBase::Type typeRequested, ValueBase *val)
 {
