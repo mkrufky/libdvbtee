@@ -52,6 +52,9 @@ public:
 		push(new Value<TYPE, T>(val));
 	}
 
+#if 0
+	template <typename T> void push(T val);
+#else
 	inline void push(int val)
 	{
 		push<ValueBase::INTEGER, int>(val);
@@ -81,6 +84,7 @@ public:
 	{
 		push<ValueBase::DOUBLE, double>(val);
 	}
+#endif
 
 	inline void push(Object& val)
 	{

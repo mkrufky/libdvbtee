@@ -25,29 +25,6 @@
 
 using namespace dvbtee::decode;
 
-#if 0
-namespace dvbtee {
-namespace decode {
-
-template <>
-Array& Object::get<Array>(std::string key)
-{
-	Array def;
-	return get<ValueBase::ARRAY, Array>(key, def);
-}
-
-#if 0
-template <>
-void Object::set<Array>(std::string key, Array val)
-{
-	return set<ValueBase::ARRAY, Array>(key, val);
-}
-#endif
-
-}}
-#endif
-
-
 Array::Array()
 {
 	fprintf(stderr, "%s\n", __func__);
@@ -95,3 +72,63 @@ std::string Array::toJson()
 	return s.str();
 
 }
+
+#if 0
+namespace dvbtee {
+namespace decode {
+
+#if 0
+template <>
+Array& Object::get<Array>(std::string key)
+{
+	Array def;
+	return get<ValueBase::ARRAY, Array>(key, def);
+}
+
+#if 0
+template <>
+void Object::set<Array>(std::string key, Array val)
+{
+	return set<ValueBase::ARRAY, Array>(key, val);
+}
+#endif
+#endif
+
+template <>
+void Array::push<int>(int val)
+{
+	push<ValueBase::INTEGER, int>(val);
+}
+
+template <>
+void Array::push<unsigned short>(unsigned short val)
+{
+	push<ValueBase::UNSIGNEDSHORT, unsigned short>(val);
+}
+
+template <>
+void Array::push<unsigned char>(unsigned char val)
+{
+	push<ValueBase::UNSIGNEDCHAR, unsigned char>(val);
+}
+
+template <>
+void Array::push<std::string>(std::string val)
+{
+	push<ValueBase::STRING, std::string>(val);
+}
+
+template <>
+void Array::push<bool>(bool val)
+{
+	push<ValueBase::BOOLEAN, bool>(val);
+}
+
+template <>
+void Array::push<double>(double val)
+{
+	push<ValueBase::DOUBLE, double>(val);
+}
+
+}}
+#endif
