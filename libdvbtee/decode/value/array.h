@@ -49,42 +49,10 @@ public:
 	template <ValueBase::Type TYPE, typename T>
 	void push(T& val)
 	{
-		push(new Value<TYPE, T>(val));
+		vector.push_back(new Value<TYPE, T>(val));
 	}
 
-#if 0
 	template <typename T> void push(T val);
-#else
-	inline void push(int val)
-	{
-		push<ValueBase::INTEGER, int>(val);
-	}
-
-	inline void push(unsigned short val)
-	{
-		push<ValueBase::UNSIGNEDSHORT, unsigned short>(val);
-	}
-
-	inline void push(unsigned char val)
-	{
-		push<ValueBase::UNSIGNEDCHAR, unsigned char>(val);
-	}
-
-	inline void push(std::string val)
-	{
-		push<ValueBase::STRING, std::string>(val);
-	}
-
-	inline void push(bool val)
-	{
-		push<ValueBase::BOOLEAN, bool>(val);
-	}
-
-	inline void push(double val)
-	{
-		push<ValueBase::DOUBLE, double>(val);
-	}
-#endif
 
 	inline void push(Object& val)
 	{
