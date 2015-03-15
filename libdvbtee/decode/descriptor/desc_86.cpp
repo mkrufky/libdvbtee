@@ -54,24 +54,17 @@ desc_86::desc_86(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 		obj.set("line21field", service->b_line21_field ? true : false);
 		obj.set("easyReader", service->b_easy_reader ? true : false);
 		obj.set("wideAspectRatio", service->b_wide_aspect_ratio ? true : false);
-		obj.set("iso639", std::string(service->i_iso_639_code));
+
+		char lang[4] = { 0 };
+		for (unsigned int i = 0; i < 3; i++) lang[i] = service->i_iso_639_code[i];
+		obj.set("iso639lang", std::string(lang));
+
 		captionService.push(obj);
-		dprintf("%d / %04x, %s line21 field: %d %d %s%s%c%c%c",
-			service->i_caption_service_number,
-			service->i_caption_service_number,
-			(service->b_digital_cc) ? "708" : "608",
-			service->b_line21_field,
-			(service->b_digital_cc) ? service->i_caption_service_number : 0,
-			(service->b_easy_reader) ? "easy reader " : "",
-			(service->b_wide_aspect_ratio) ? "wide aspect ratio " : "",
-			service->i_iso_639_code[0],
-			service->i_iso_639_code[1],
-			service->i_iso_639_code[2]);
 	}
 
 	set("CaptionService", captionService);
 
-	printf("%s\n", toJson().c_str());
+	dprintf("%s", toJson().c_str());
 
 	setValid(true);
 }
