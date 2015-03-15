@@ -42,7 +42,7 @@ desc_81::desc_81(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	dvbpsi_ac3_audio_dr_t* dr = dvbpsi_DecodeAc3AudioDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
-
+#if 0
 	dprintf("sample rate: %s", sample_rate(dr->i_sample_rate_code));
 	dprintf("bsid: %02x", dr->i_bsid);
 	dprintf("bit rate code: %02x", dr->i_bit_rate_code);
@@ -61,6 +61,27 @@ desc_81::desc_81(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 			dr->language_2[0],
 			dr->language_2[1],
 			dr->language_2[2]);
+#endif
+	set("sampleRate", std::string(sample_rate(dr->i_sample_rate_code)));
+	set("bsid", dr->i_bsid);
+	set("bitRateCode", dr->i_bit_rate_code);
+	set("surroundMode", std::string(surround_mode(dr->i_surround_mode)));
+	set("bsmod", dr->i_bsmod);
+	set("numChannels", std::string(num_channels(dr->i_num_channels)));
+	set("fullSvc", (dr->b_full_svc) ? true : false);
+	set("description", std::string((const char*)dr->text));
+	if (dr->b_language_flag) {
+		char lang[4] = { 0 };
+		for (unsigned int i = 0; i < 3; i++) lang[i] = dr->language[i];
+		set("language", std::string(lang));
+	}
+	if (dr->b_language_flag_2) {
+		char lang[4] = { 0 };
+		for (unsigned int i = 0; i < 3; i++) lang[i] = dr->language_2[i];
+		set("language2", std::string(lang));
+	}
+
+	dprintf("%s", toJson().c_str());
 
 	setValid(true);
 }
