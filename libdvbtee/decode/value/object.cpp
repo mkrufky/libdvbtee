@@ -94,6 +94,20 @@ int& Object::get<int>(std::string key)
 }
 
 template <>
+unsigned short& Object::get<unsigned short>(std::string key)
+{
+	unsigned short def = 0;
+	return get<ValueBase::UNSIGNEDSHORT, unsigned short>(key, def);
+}
+
+template <>
+unsigned char& Object::get<unsigned char>(std::string key)
+{
+	unsigned char def = 0;
+	return get<ValueBase::UNSIGNEDCHAR, unsigned char>(key, def);
+}
+
+template <>
 std::string& Object::get<std::string>(std::string key)
 {
 	std::string def = "";
@@ -138,33 +152,16 @@ void Object::set<int>(std::string key, int val)
 }
 
 template <>
-void Object::set<unsigned int>(std::string key, unsigned int val)
-{
-	int intval = (int)val;
-	return set<ValueBase::INTEGER, int>(key, intval);
-}
-
-template <>
-void Object::set<short>(std::string key, short val)
-{
-	int intval = (int)val;
-	return set<ValueBase::INTEGER, int>(key, intval);
-}
-
-template <>
 void Object::set<unsigned short>(std::string key, unsigned short val)
 {
-	int intval = (int)val;
-	return set<ValueBase::INTEGER, int>(key, intval);
+	return set<ValueBase::UNSIGNEDSHORT, unsigned short>(key, val);
 }
 
 template <>
 void Object::set<unsigned char>(std::string key, unsigned char val)
 {
-	int intval = (int)val;
-	return set<ValueBase::INTEGER, int>(key, intval);
+	return set<ValueBase::UNSIGNEDCHAR, unsigned char>(key, val);
 }
-
 
 template <>
 void Object::set<std::string>(std::string key, std::string val)
@@ -207,6 +204,12 @@ void Object::set(ValueBase *val)
 	switch(val->type) {
 	case ValueBase::INTEGER:
 		set(val->name, ((Value<ValueBase::INTEGER, int>*)val)->get());
+		break;
+	case ValueBase::UNSIGNEDSHORT:
+		set(val->name, ((Value<ValueBase::UNSIGNEDSHORT, unsigned short>*)val)->get());
+		break;
+	case ValueBase::UNSIGNEDCHAR:
+		set(val->name, ((Value<ValueBase::UNSIGNEDCHAR, unsigned char>*)val)->get());
 		break;
 	case ValueBase::STRING:
 		set(val->name, ((Value<ValueBase::STRING, std::string>*)val)->get());

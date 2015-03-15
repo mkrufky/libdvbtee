@@ -54,27 +54,7 @@ public:
 	}
 
 	template<typename T> void set(std::string key, T val);
-#if 0
-	inline void set(std::string key, int val)
-	{
-		return set<ValueBase::INTEGER, int>(key, val);
-	}
 
-	inline void set(std::string key, std::string val)
-	{
-		return set<ValueBase::STRING, std::string>(key, val);
-	}
-
-	inline void set(std::string key, bool val)
-	{
-		return set<ValueBase::BOOLEAN, bool>(key, val);
-	}
-
-	inline void set(std::string key, double val)
-	{
-		return set<ValueBase::DOUBLE, double>(key, val);
-	}
-#endif
 	inline void set(std::string key, Object& val)
 	{
 		return set<ValueBase::OBJECT, Object>(key, val);

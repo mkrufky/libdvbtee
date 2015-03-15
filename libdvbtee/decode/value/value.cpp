@@ -45,6 +45,12 @@ std::string ValueBase::toJson()
 	case ValueBase::INTEGER:
 		s << ((Value<ValueBase::INTEGER, int>*)this)->get();
 		break;
+	case ValueBase::UNSIGNEDSHORT:
+		s << ((Value<ValueBase::UNSIGNEDSHORT, unsigned short>*)this)->get();
+		break;
+	case ValueBase::UNSIGNEDCHAR:
+		s << (unsigned int)((Value<ValueBase::UNSIGNEDCHAR, unsigned char>*)this)->get();
+		break;
 	case ValueBase::STRING:
 		s << "'" << ((Value<ValueBase::STRING, std::string>*)this)->get() << "'";
 		break;

@@ -34,6 +34,8 @@ class ValueBase {
 public:
 	enum Type {
 		INTEGER,
+		UNSIGNEDSHORT,
+		UNSIGNEDCHAR,
 		STRING,
 		BOOLEAN,
 		DOUBLE,

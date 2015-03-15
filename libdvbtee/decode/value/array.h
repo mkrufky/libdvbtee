@@ -57,6 +57,16 @@ public:
 		push<ValueBase::INTEGER, int>(val);
 	}
 
+	inline void push(unsigned short val)
+	{
+		push<ValueBase::UNSIGNEDSHORT, unsigned short>(val);
+	}
+
+	inline void push(unsigned char val)
+	{
+		push<ValueBase::UNSIGNEDCHAR, unsigned char>(val);
+	}
+
 	inline void push(std::string val)
 	{
 		push<ValueBase::STRING, std::string>(val);
