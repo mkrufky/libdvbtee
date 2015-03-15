@@ -35,6 +35,34 @@ ValueBase::~ValueBase()
 {
 }
 
+std::string ValueBase::toJson()
+{
+	std::stringstream s;
+
+	switch(type) {
+	case ValueBase::INTEGER:
+		s << ((Value<ValueBase::INTEGER, int>*)this)->get();
+		break;
+	case ValueBase::STRING:
+		s << "'" << ((Value<ValueBase::STRING, std::string>*)this)->get() << "'";
+		break;
+	case ValueBase::BOOLEAN:
+		s << (((Value<ValueBase::BOOLEAN, bool>*)this)->get() ? "true" : "false");
+		break;
+	case ValueBase::DOUBLE:
+		s << ((Value<ValueBase::DOUBLE, double>*)this)->get();
+		break;
+	case ValueBase::OBJECT:
+		s << ((Value<ValueBase::OBJECT, Object>*)this)->get().toJson().c_str();
+		break;
+	case ValueBase::ARRAY:
+		s << ((Value<ValueBase::ARRAY, Array>*)this)->get().toJson().c_str();
+		break;
+	}
+
+	return s.str();
+}
+
 
 Object::Object()
 {
@@ -68,34 +96,6 @@ ValueBase *Object::get(std::string key)
 	return NULL;
 }
 
-std::string _toJson(ValueBase* val)
-{
-	std::stringstream s;
-
-	switch(val->type) {
-	case ValueBase::INTEGER:
-		s << ((Value<ValueBase::INTEGER, int>*)val)->get();
-		break;
-	case ValueBase::STRING:
-		s << "'" << ((Value<ValueBase::STRING, std::string>*)val)->get() << "'";
-		break;
-	case ValueBase::BOOLEAN:
-		s << (((Value<ValueBase::BOOLEAN, bool>*)val)->get() ? "true" : "false");
-		break;
-	case ValueBase::DOUBLE:
-		s << ((Value<ValueBase::DOUBLE, double>*)val)->get();
-		break;
-	case ValueBase::OBJECT:
-		s << ((Value<ValueBase::OBJECT, Object>*)val)->get().toJson().c_str();
-		break;
-	case ValueBase::ARRAY:
-		s << ((Value<ValueBase::ARRAY, Array>*)val)->get().toJson().c_str();
-		break;
-	}
-
-	return s.str();
-}
-
 std::string Object::toJson()
 {
 	std::stringstream s;
@@ -108,7 +108,7 @@ std::string Object::toJson()
 		if (count) s << ", ";
 		s << "'" << it->first << "': ";
 
-		s << _toJson(val);
+		s << val->toJson();
 
 		count++;
 	}
@@ -265,7 +265,7 @@ std::string Array::toJson()
 	for (KeyValueVector::const_iterator it = vector.begin(); it != vector.end(); ++it) {
 		if (count) s << ", ";
 
-		s << _toJson(*it);
+		s << (*it)->toJson();
 
 		count++;
 	}
