@@ -43,7 +43,7 @@ Array::~Array()
 Array::Array(const Array &obj)
 {
 	vector.clear();
-	if (vector.size()) for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
+	if (obj.vector.size()) for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
 		vector.push_back(*it);
 	}
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
