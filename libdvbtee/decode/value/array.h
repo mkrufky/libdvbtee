@@ -19,48 +19,77 @@
  *
  *****************************************************************************/
 
-#include <stdio.h>
-#include <sstream>
+#ifndef __ARRAY_H__
+#define __ARRAY_H__
+
+#include <map>
+#include <string>
+#include <vector>
+
 #include "value.h"
-#include "array.h"
 #include "object.h"
 
-using namespace dvbtee::decode;
+namespace dvbtee {
 
-ValueBase::ValueBase(Type type, std::string name)
- : type(type)
- , name(name)
-{
-}
+namespace decode {
 
-ValueBase::~ValueBase()
-{
-}
+typedef std::vector<ValueBase*> KeyValueVector;
 
-std::string ValueBase::toJson()
-{
-	std::stringstream s;
+class Object;
 
-	switch(type) {
-	case ValueBase::INTEGER:
-		s << ((Value<ValueBase::INTEGER, int>*)this)->get();
-		break;
-	case ValueBase::STRING:
-		s << "'" << ((Value<ValueBase::STRING, std::string>*)this)->get() << "'";
-		break;
-	case ValueBase::BOOLEAN:
-		s << (((Value<ValueBase::BOOLEAN, bool>*)this)->get() ? "true" : "false");
-		break;
-	case ValueBase::DOUBLE:
-		s << ((Value<ValueBase::DOUBLE, double>*)this)->get();
-		break;
-	case ValueBase::OBJECT:
-		s << ((Value<ValueBase::OBJECT, Object>*)this)->get().toJson().c_str();
-		break;
-	case ValueBase::ARRAY:
-		s << ((Value<ValueBase::ARRAY, Array>*)this)->get().toJson().c_str();
-		break;
+class Array {
+public:
+	Array();
+	~Array();
+
+	Array(const Array&);
+
+	void push(ValueBase*);
+
+	template <ValueBase::Type TYPE, typename T>
+	void push(T& val)
+	{
+		push(new Value<TYPE, T>(val));
 	}
 
-	return s.str();
+	inline void push(int val)
+	{
+		push<ValueBase::INTEGER, int>(val);
+	}
+
+	inline void push(std::string val)
+	{
+		push<ValueBase::STRING, std::string>(val);
+	}
+
+	inline void push(bool val)
+	{
+		push<ValueBase::BOOLEAN, bool>(val);
+	}
+
+	inline void push(double val)
+	{
+		push<ValueBase::DOUBLE, double>(val);
+	}
+
+	inline void push(Object& val)
+	{
+		push<ValueBase::OBJECT, Object>(val);
+	}
+
+	inline void push(Array& val)
+	{
+		push<ValueBase::ARRAY, Array>(val);
+	}
+
+	std::string toJson();
+
+private:
+	KeyValueVector vector;
+};
+
 }
+
+}
+
+#endif /* __ARRAY_H__ */

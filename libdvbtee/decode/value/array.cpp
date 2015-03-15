@@ -21,46 +21,77 @@
 
 #include <stdio.h>
 #include <sstream>
-#include "value.h"
 #include "array.h"
-#include "object.h"
 
 using namespace dvbtee::decode;
 
-ValueBase::ValueBase(Type type, std::string name)
- : type(type)
- , name(name)
+#if 0
+namespace dvbtee {
+namespace decode {
+
+template <>
+Array& Object::get<Array>(std::string key)
 {
+	Array def;
+	return get<ValueBase::ARRAY, Array>(key, def);
 }
 
-ValueBase::~ValueBase()
+#if 0
+template <>
+void Object::set<Array>(std::string key, Array val)
 {
+	return set<ValueBase::ARRAY, Array>(key, val);
+}
+#endif
+
+}}
+#endif
+
+
+Array::Array()
+{
+	fprintf(stderr, "%s\n", __func__);
 }
 
-std::string ValueBase::toJson()
+Array::~Array()
+{
+	fprintf(stderr, "%s\n", __func__);
+#if 0
+	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
+		delete *it;
+	}
+#endif
+}
+
+Array::Array(const Array &obj)
+{
+	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
+		vector.push_back(*it);
+	}
+	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
+}
+
+void Array::push(ValueBase *v)
+{
+	vector.push_back(v);
+}
+
+std::string Array::toJson()
 {
 	std::stringstream s;
+	int count = 0;
 
-	switch(type) {
-	case ValueBase::INTEGER:
-		s << ((Value<ValueBase::INTEGER, int>*)this)->get();
-		break;
-	case ValueBase::STRING:
-		s << "'" << ((Value<ValueBase::STRING, std::string>*)this)->get() << "'";
-		break;
-	case ValueBase::BOOLEAN:
-		s << (((Value<ValueBase::BOOLEAN, bool>*)this)->get() ? "true" : "false");
-		break;
-	case ValueBase::DOUBLE:
-		s << ((Value<ValueBase::DOUBLE, double>*)this)->get();
-		break;
-	case ValueBase::OBJECT:
-		s << ((Value<ValueBase::OBJECT, Object>*)this)->get().toJson().c_str();
-		break;
-	case ValueBase::ARRAY:
-		s << ((Value<ValueBase::ARRAY, Array>*)this)->get().toJson().c_str();
-		break;
+	s << "[ ";
+
+	for (KeyValueVector::const_iterator it = vector.begin(); it != vector.end(); ++it) {
+		if (count) s << ", ";
+
+		s << (*it)->toJson();
+
+		count++;
 	}
+	s << " ]";
 
 	return s.str();
+
 }
