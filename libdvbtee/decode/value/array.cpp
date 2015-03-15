@@ -27,22 +27,23 @@ using namespace dvbtee::decode;
 
 Array::Array()
 {
+	vector.clear();
 	fprintf(stderr, "%s\n", __func__);
 }
 
 Array::~Array()
 {
 	fprintf(stderr, "%s\n", __func__);
-#if 0
-	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
+	if (vector.size()) for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
 		delete *it;
 	}
-#endif
+	vector.clear();
 }
 
 Array::Array(const Array &obj)
 {
-	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
+	vector.clear();
+	if (vector.size()) for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
 		vector.push_back(*it);
 	}
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());

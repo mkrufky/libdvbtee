@@ -28,21 +28,23 @@ using namespace dvbtee::decode;
 Object::Object()
 {
 	fprintf(stderr, "%s\n", __func__);
-	//map.clear();
+	map.clear();
 }
 
 Object::~Object()
 {
 	fprintf(stderr, "%s\n", __func__);
-	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
+	if (map.size()) for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
 		//Value<TYPE, T> *value = (Value<TYPE, T>*)map[key];
 		delete it->second;
 	}
+	map.clear();
 }
 
 Object::Object(const Object &obj)
 {
-	for (KeyValueMap::const_iterator it = obj.map.begin(); it != obj.map.end(); ++it) {
+	map.clear();
+	if (obj.map.size()) for (KeyValueMap::const_iterator it = obj.map.begin(); it != obj.map.end(); ++it) {
 		set(it->second);
 	}
 
