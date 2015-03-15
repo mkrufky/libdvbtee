@@ -170,6 +170,27 @@ void Object::set<int>(std::string key, int val)
 }
 
 template <>
+void Object::set<unsigned int>(std::string key, unsigned int val)
+{
+	int intval = (int)val;
+	return set<ValueBase::INTEGER, int>(key, intval);
+}
+
+template <>
+void Object::set<short>(std::string key, short val)
+{
+	int intval = (int)val;
+	return set<ValueBase::INTEGER, int>(key, intval);
+}
+
+template <>
+void Object::set<unsigned short>(std::string key, unsigned short val)
+{
+	int intval = (int)val;
+	return set<ValueBase::INTEGER, int>(key, intval);
+}
+
+template <>
 void Object::set<std::string>(std::string key, std::string val)
 {
 	return set<ValueBase::STRING, std::string>(key, val);
