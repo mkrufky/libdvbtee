@@ -229,12 +229,17 @@ void Object::set(ValueBase *val)
 
 Array::Array()
 {
-
+	fprintf(stderr, "%s\n", __func__);
 }
 
 Array::~Array()
 {
-
+	fprintf(stderr, "%s\n", __func__);
+#if 0
+	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
+		delete *it;
+	}
+#endif
 }
 
 Array::Array(const Array &obj)
@@ -242,6 +247,7 @@ Array::Array(const Array &obj)
 	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
 		vector.push_back(*it);
 	}
+	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
 }
 
 void Array::push(ValueBase *v)
