@@ -44,7 +44,38 @@ Array::Array(const Array &obj)
 {
 	vector.clear();
 	if (obj.vector.size()) for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
-		vector.push_back(*it);
+#if 0
+		push(*it);
+#else
+		ValueBase *val = (*it);
+
+		switch(val->type) {
+		case ValueBase::INTEGER:
+			push(((Value<ValueBase::INTEGER, int>*)val)->get());
+			break;
+		case ValueBase::UNSIGNEDSHORT:
+			push(((Value<ValueBase::UNSIGNEDSHORT, unsigned short>*)val)->get());
+			break;
+		case ValueBase::UNSIGNEDCHAR:
+			push(((Value<ValueBase::UNSIGNEDCHAR, unsigned char>*)val)->get());
+			break;
+		case ValueBase::STRING:
+			push(((Value<ValueBase::STRING, std::string>*)val)->get());
+			break;
+		case ValueBase::BOOLEAN:
+			push(((Value<ValueBase::BOOLEAN, bool>*)val)->get());
+			break;
+		case ValueBase::DOUBLE:
+			push(((Value<ValueBase::DOUBLE, double>*)val)->get());
+			break;
+		case ValueBase::OBJECT:
+			push(((Value<ValueBase::OBJECT, Object>*)val)->get());
+			break;
+		case ValueBase::ARRAY:
+			push(((Value<ValueBase::ARRAY, Array>*)val)->get());
+			break;
+		}
+#endif
 	}
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
 }
