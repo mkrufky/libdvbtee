@@ -30,7 +30,7 @@ namespace dvbtee {
 
 namespace decode {
 
-/* ISO639 language descriptor */
+/* service descriptor */
 
 class desc_48: public Descriptor {
 public:
