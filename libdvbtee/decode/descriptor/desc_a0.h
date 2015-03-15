@@ -36,8 +36,6 @@ class desc_a0: public Descriptor {
 public:
 	desc_a0(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_a0();
-
-	unsigned char m_name[256];
 };
 
 }
