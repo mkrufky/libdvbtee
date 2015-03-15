@@ -103,6 +103,8 @@ public:
 		map[key] = new Value<TYPE, T>(key, val);
 	}
 
+	template<typename T> void set(std::string key, T val);
+#if 0
 	inline void set(std::string key, int val)
 	{
 		return set<ValueBase::INTEGER, int>(key, val);
@@ -122,7 +124,7 @@ public:
 	{
 		return set<ValueBase::DOUBLE, double>(key, val);
 	}
-
+#endif
 	inline void set(std::string key, Object& val)
 	{
 		return set<ValueBase::OBJECT, Object>(key, val);

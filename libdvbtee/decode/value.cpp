@@ -162,6 +162,45 @@ Array& Object::get<Array>(std::string key)
 	return get<ValueBase::ARRAY, Array>(key, def);
 }
 
+
+template <>
+void Object::set<int>(std::string key, int val)
+{
+	return set<ValueBase::INTEGER, int>(key, val);
+}
+
+template <>
+void Object::set<std::string>(std::string key, std::string val)
+{
+	return set<ValueBase::STRING, std::string>(key, val);
+}
+
+template <>
+void Object::set<bool>(std::string key, bool val)
+{
+	return set<ValueBase::BOOLEAN, bool>(key, val);
+}
+
+template <>
+void Object::set<double>(std::string key, double val)
+{
+	return set<ValueBase::DOUBLE, double>(key, val);
+}
+
+#if 0
+template <>
+void Object::set<Object>(std::string key, Object val)
+{
+	return set<ValueBase::OBJECT, Object>(key, val);
+}
+
+template <>
+void Object::set<Array>(std::string key, Array val)
+{
+	return set<ValueBase::ARRAY, Array>(key, val);
+}
+#endif
+
 }}
 
 void Object::set(ValueBase *val)
