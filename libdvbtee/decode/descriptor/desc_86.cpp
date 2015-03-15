@@ -39,12 +39,23 @@ desc_86::desc_86(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	dvbpsi_caption_service_dr_t* dr = dvbpsi_DecodeCaptionServiceDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
+	Array captionService;
+
 	for (int i = 0; i < dr->i_number_of_services; i ++) {
 		dvbpsi_caption_service_t *service = &dr->services[0];
 		if (!service) {
 			dprintf("error!");
 			break;
 		}
+		Object obj;
+
+		obj.set("serviceNumber", service->i_caption_service_number);
+		obj.set("digital_cc", std::string((service->b_digital_cc) ? "708" : "608"));
+		obj.set("line21field", service->b_line21_field ? true : false);
+		obj.set("easyReader", service->b_easy_reader ? true : false);
+		obj.set("wideAspectRatio", service->b_wide_aspect_ratio ? true : false);
+		obj.set("iso639", std::string(service->i_iso_639_code));
+		captionService.push(obj);
 		dprintf("%d / %04x, %s line21 field: %d %d %s%s%c%c%c",
 			service->i_caption_service_number,
 			service->i_caption_service_number,
@@ -57,6 +68,10 @@ desc_86::desc_86(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 			service->i_iso_639_code[1],
 			service->i_iso_639_code[2]);
 	}
+
+	set("CaptionService", captionService);
+
+	printf("%s\n", toJson().c_str());
 
 	setValid(true);
 }
