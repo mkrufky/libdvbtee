@@ -49,6 +49,37 @@ public:
 	const std::string name;
 };
 
+#if 1
+template <ValueBase::Type TYPE, typename T>
+class Value : public ValueBase {
+public:
+	Value(std::string& n, T& v)
+	 : ValueBase(TYPE, n)
+	 , m_value(v)
+	{}
+
+	Value(T& v)
+	 : ValueBase(TYPE)
+	 , m_value(v)
+	{}
+
+	~Value()
+	{}
+
+	T& get()
+	{
+		return m_value;
+	}
+
+	void set(T& v)
+	{
+		m_value = v;
+	}
+
+private:
+	T m_value;
+};
+#else
 template <ValueBase::Type TYPE, typename T>
 class Value : public ValueBase {
 public:
@@ -82,6 +113,7 @@ public:
 private:
 	T *pValue;
 };
+#endif
 
 typedef std::map<std::string, ValueBase*> KeyValueMap;
 
