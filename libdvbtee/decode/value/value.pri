@@ -8,4 +8,5 @@ SOURCES += \
 HEADERS += \
     $$PWD/array.h \
     $$PWD/object.h \
+    $$PWD/value-macros.h \
     $$PWD/value.h

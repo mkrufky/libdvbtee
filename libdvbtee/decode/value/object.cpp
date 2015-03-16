@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <sstream>
 #include "object.h"
+#include "value-macros.h"
 
 using namespace dvbtee::decode;
 
