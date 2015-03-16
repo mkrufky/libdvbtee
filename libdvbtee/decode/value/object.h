@@ -45,40 +45,24 @@ public:
 	Object(const Object&);
 
 	template <typename T>
+	void setByRef(std::string& key, T& val)
+	{
+		if (map.count(key))
+			delete map[key];
+
+		//map[key] = new Value<T>(key, val);
+		map.insert( std::pair<std::string, ValueBase*>(key, new Value<T>(key, val)) );
+	}
+
+	template <typename T>
 	void set(std::string key, T val)
 	{
-		if (map.count(key))
-			delete map[key];
-
-		map[key] = new Value<T>(key, val);
+		setByRef<T>(key, val);
 	}
 
-	template <typename T>
-	void set(std::string key, T* val)
-	{
-		if (map.count(key))
-			delete map[key];
-
-		map[key] = new Value<T>(key, *val);
-	}
-
-	template <typename T>
-	void set(std::string& key, T val)
-	{
-		if (map.count(key))
-			delete map[key];
-
-		map[key] = new Value<T>(key, val);
-	}
-
-	template <typename T>
-	void set(std::string& key, T* val)
-	{
-		if (map.count(key))
-			delete map[key];
-
-		map[key] = new Value<T>(key, *val);
-	}
+	inline void set(std::string key, std::string& val)	{ setByRef<std::string>(key, val); }
+	inline void set(std::string key, Array& val)		{ setByRef<Array>(key, val); }
+	inline void set(std::string key, Object& val)		{ setByRef<Object>(key, val); }
 
 	void set(ValueBase*);
 
