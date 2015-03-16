@@ -84,67 +84,6 @@ const std::string Object::toJson()
 	return s.str();
 }
 
-namespace dvbtee {
-namespace decode {
-
-template <>
-int& Object::get<int>(std::string key)
-{
-	int def = 0;
-	return get<int>(key, def);
-}
-
-template <>
-unsigned short& Object::get<unsigned short>(std::string key)
-{
-	unsigned short def = 0;
-	return get<unsigned short>(key, def);
-}
-
-template <>
-unsigned char& Object::get<unsigned char>(std::string key)
-{
-	unsigned char def = 0;
-	return get<unsigned char>(key, def);
-}
-
-template <>
-std::string& Object::get<std::string>(std::string key)
-{
-	std::string def = "";
-	return get<std::string>(key, def);
-}
-
-template <>
-bool& Object::get<bool>(std::string key)
-{
-	bool def = false;
-	return get<bool>(key, def);
-}
-
-template <>
-double& Object::get<double>(std::string key)
-{
-	double def = 0.0;
-	return get<double>(key, def);
-}
-
-template <>
-Object& Object::get<Object>(std::string key)
-{
-	Object def;
-	return get<Object>(key, def);
-}
-
-template <>
-Array& Object::get<Array>(std::string key)
-{
-	Array def;
-	return get<Array>(key, def);
-}
-
-}}
-
 void Object::set(ValueBase *val)
 {
 	     if (val->type == typeid(int))		set(val->name, ((Value<int>*)val)->get());
@@ -156,3 +95,17 @@ void Object::set(ValueBase *val)
 	else if (val->type == typeid(Object))		set(val->name, ((Value<Object>*)val)->get());
 	else if (val->type == typeid(Array))		set(val->name, ((Value<Array>*)val)->get());
 }
+
+namespace dvbtee {
+namespace decode {
+
+GET_DEFAULT_VALUE(Object, std::string, int, 0)
+GET_DEFAULT_VALUE(Object, std::string, unsigned short, 0)
+GET_DEFAULT_VALUE(Object, std::string, unsigned char, 0)
+GET_DEFAULT_VALUE(Object, std::string, std::string, "")
+GET_DEFAULT_VALUE(Object, std::string, bool, false)
+GET_DEFAULT_VALUE(Object, std::string, double, 0.0)
+GET_DEFAULT(Object, std::string, Array)
+GET_DEFAULT(Object, std::string, Object)
+
+}}

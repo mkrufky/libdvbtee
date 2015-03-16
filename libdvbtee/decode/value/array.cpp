@@ -87,67 +87,6 @@ ValueBase *Array::get(unsigned int idx)
 	return NULL;
 }
 
-namespace dvbtee {
-namespace decode {
-
-template <>
-int& Array::get<int>(unsigned int idx)
-{
-	int def = 0;
-	return get<int>(idx, def);
-}
-
-template <>
-unsigned short& Array::get<unsigned short>(unsigned int idx)
-{
-	unsigned short def = 0;
-	return get<unsigned short>(idx, def);
-}
-
-template <>
-unsigned char& Array::get<unsigned char>(unsigned int idx)
-{
-	unsigned char def = 0;
-	return get<unsigned char>(idx, def);
-}
-
-template <>
-std::string& Array::get<std::string>(unsigned int idx)
-{
-	std::string def = "";
-	return get<std::string>(idx, def);
-}
-
-template <>
-bool& Array::get<bool>(unsigned int idx)
-{
-	bool def = false;
-	return get<bool>(idx, def);
-}
-
-template <>
-double& Array::get<double>(unsigned int idx)
-{
-	double def = 0.0;
-	return get<double>(idx, def);
-}
-
-template <>
-Object& Array::get<Object>(unsigned int idx)
-{
-	Object def;
-	return get<Object>(idx, def);
-}
-
-template <>
-Array& Array::get<Array>(unsigned int idx)
-{
-	Array def;
-	return get<Array>(idx, def);
-}
-
-}}
-
 void Array::push(ValueBase *val)
 {
 	     if (val->type == typeid(int))		push(((Value<int>*)val)->get());
@@ -159,3 +98,17 @@ void Array::push(ValueBase *val)
 	else if (val->type == typeid(Object))		push(((Value<Object>*)val)->get());
 	else if (val->type == typeid(Array))		push(((Value<Array>*)val)->get());
 }
+
+namespace dvbtee {
+namespace decode {
+
+GET_DEFAULT_VALUE(Array, unsigned int, int, 0)
+GET_DEFAULT_VALUE(Array, unsigned int, unsigned short, 0)
+GET_DEFAULT_VALUE(Array, unsigned int, unsigned char, 0)
+GET_DEFAULT_VALUE(Array, unsigned int, std::string, "")
+GET_DEFAULT_VALUE(Array, unsigned int, bool, false)
+GET_DEFAULT_VALUE(Array, unsigned int, double, 0.0)
+GET_DEFAULT(Array, unsigned int, Array)
+GET_DEFAULT(Array, unsigned int, Object)
+
+}}

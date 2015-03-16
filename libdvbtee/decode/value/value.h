@@ -111,6 +111,20 @@ private:
 };
 #endif
 
+#define GET_DEFAULT(CLASS, IN, OUT) \
+template <> OUT& CLASS::get<OUT>(IN in) \
+{ \
+	OUT def; \
+	return get<OUT>(in, def); \
+}
+
+#define GET_DEFAULT_VALUE(CLASS, IN, OUT, DEFAULT) \
+template <> OUT& CLASS::get<OUT>(IN in) \
+{ \
+	OUT def = DEFAULT; \
+	return get<OUT>(in, def); \
+}
+
 }
 
 }
