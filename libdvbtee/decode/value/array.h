@@ -47,10 +47,20 @@ public:
 	void push(ValueBase*);
 
 	template <typename T>
-	void push(T& val)
+	void pushByRef(T& val)
 	{
 		vector.push_back(new Value<T>(val));
 	}
+
+	template <typename T>
+	void push(T val)
+	{
+		pushByRef<T>(val);
+	}
+
+	inline void push(std::string& val)	{ pushByRef<std::string>(val); }
+	inline void push(Array& val)		{ pushByRef<Array>(val); }
+	inline void push(Object& val)		{ pushByRef<Object>(val); }
 
 	ValueBase* get(unsigned int idx);
 
