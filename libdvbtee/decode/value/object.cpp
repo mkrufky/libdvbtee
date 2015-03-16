@@ -96,16 +96,4 @@ void Object::set(ValueBase *val)
 	else if (val->type == typeid(Array))		set(val->name, ((Value<Array>*)val)->get());
 }
 
-namespace dvbtee {
-namespace decode {
-
-GET_DEFAULT_VALUE(Object, std::string, int, 0)
-GET_DEFAULT_VALUE(Object, std::string, unsigned short, 0)
-GET_DEFAULT_VALUE(Object, std::string, unsigned char, 0)
-GET_DEFAULT_VALUE(Object, std::string, std::string, "")
-GET_DEFAULT_VALUE(Object, std::string, bool, false)
-GET_DEFAULT_VALUE(Object, std::string, double, 0.0)
-GET_DEFAULT(Object, std::string, Array)
-GET_DEFAULT(Object, std::string, Object)
-
-}}
+DEFINE_DEFAULT_GETTERS(Object, std::string)

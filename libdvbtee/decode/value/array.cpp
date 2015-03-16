@@ -99,16 +99,4 @@ void Array::push(ValueBase *val)
 	else if (val->type == typeid(Array))		push(((Value<Array>*)val)->get());
 }
 
-namespace dvbtee {
-namespace decode {
-
-GET_DEFAULT_VALUE(Array, unsigned int, int, 0)
-GET_DEFAULT_VALUE(Array, unsigned int, unsigned short, 0)
-GET_DEFAULT_VALUE(Array, unsigned int, unsigned char, 0)
-GET_DEFAULT_VALUE(Array, unsigned int, std::string, "")
-GET_DEFAULT_VALUE(Array, unsigned int, bool, false)
-GET_DEFAULT_VALUE(Array, unsigned int, double, 0.0)
-GET_DEFAULT(Array, unsigned int, Array)
-GET_DEFAULT(Array, unsigned int, Object)
-
-}}
+DEFINE_DEFAULT_GETTERS(Array, unsigned int)

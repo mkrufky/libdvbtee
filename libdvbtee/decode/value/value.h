@@ -125,6 +125,19 @@ template <> OUT& CLASS::get<OUT>(IN in) \
 	return get<OUT>(in, def); \
 }
 
+#define DEFINE_DEFAULT_GETTERS(CLASS, IN) \
+namespace dvbtee { \
+namespace decode { \
+	GET_DEFAULT_VALUE(CLASS, IN, int, 0) \
+	GET_DEFAULT_VALUE(CLASS, IN, unsigned short, 0) \
+	GET_DEFAULT_VALUE(CLASS, IN, unsigned char, 0) \
+	GET_DEFAULT_VALUE(CLASS, IN, std::string, "") \
+	GET_DEFAULT_VALUE(CLASS, IN, bool, false) \
+	GET_DEFAULT_VALUE(CLASS, IN, double, 0.0) \
+	GET_DEFAULT(CLASS, IN, Array) \
+	GET_DEFAULT(CLASS, IN, Object) \
+}}
+
 }
 
 }
