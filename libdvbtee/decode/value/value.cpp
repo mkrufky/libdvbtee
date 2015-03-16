@@ -48,7 +48,7 @@ const std::string ValueBase::toJson()
 
 	     if (type == typeid(int))			s << ((Value<int>*)this)->get();
 	else if (type == typeid(unsigned short))	s << ((Value<unsigned short>*)this)->get();
-	else if (type == typeid(unsigned char))		s << ((Value<unsigned char>*)this)->get();
+	else if (type == typeid(unsigned char))		s << (unsigned int)((Value<unsigned char>*)this)->get();
 	else if (type == typeid(std::string))		s << "'" << ((Value<std::string>*)this)->get() << "'";
 	else if (type == typeid(bool))			s << (((Value<bool>*)this)->get() ? "true" : "false");
 	else if (type == typeid(double))		s << ((Value<double>*)this)->get();
