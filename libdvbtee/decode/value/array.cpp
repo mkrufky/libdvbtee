@@ -25,6 +25,8 @@
 
 using namespace dvbtee::decode;
 
+#define DBG 0
+
 Array::Array()
 {
 #if DBG
@@ -52,7 +54,7 @@ Array::Array(const Array &obj)
 #endif
 }
 
-std::string Array::toJson()
+const std::string Array::toJson()
 {
 	std::stringstream s;
 	int count = 0;

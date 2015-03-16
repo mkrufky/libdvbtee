@@ -84,7 +84,7 @@ public:
 
 	template <typename T> T& get(std::string key);
 
-	std::string toJson();
+	const std::string toJson();
 
 private:
 	KeyValueMap map;

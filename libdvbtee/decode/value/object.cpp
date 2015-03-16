@@ -25,6 +25,8 @@
 
 using namespace dvbtee::decode;
 
+#define DBG 0
+
 Object::Object()
 {
 #if DBG
@@ -61,7 +63,7 @@ ValueBase *Object::get(std::string key)
 	return NULL;
 }
 
-std::string Object::toJson()
+const std::string Object::toJson()
 {
 	std::stringstream s;
 	int count = 0;

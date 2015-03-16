@@ -82,7 +82,7 @@ public:
 
 	size_t size();
 
-	std::string toJson();
+	const std::string toJson();
 
 private:
 	KeyValueVector vector;

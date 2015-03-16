@@ -38,7 +38,7 @@ public:
 
 	void badType(const std::type_info &);
 
-	std::string toJson();
+	const std::string toJson();
 
 	const std::type_info& type;
 

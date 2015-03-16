@@ -42,7 +42,7 @@ void ValueBase::badType(const std::type_info& typeRequested)
 	fprintf(stderr, "Incorrect type requested for %s, requested %s, should be %s\n", name.length() ? name.c_str() : "[anonymous]", typeRequested.name(), typeid(type).name());
 }
 
-std::string ValueBase::toJson()
+const std::string ValueBase::toJson()
 {
 	std::stringstream s;
 
