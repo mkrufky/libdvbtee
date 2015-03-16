@@ -46,35 +46,23 @@ public:
 
 	void push(ValueBase*);
 
-	template <ValueBase::Type TYPE, typename T>
+	template <typename T>
 	void push(T& val)
 	{
-		vector.push_back(new Value<TYPE, T>(val));
-	}
-
-	template <typename T> void push(T val);
-
-	inline void push(Object& val)
-	{
-		push<ValueBase::OBJECT, Object>(val);
-	}
-
-	inline void push(Array& val)
-	{
-		push<ValueBase::ARRAY, Array>(val);
+		vector.push_back(new Value<T>(val));
 	}
 
 	ValueBase* get(unsigned int idx);
 
-	template <ValueBase::Type TYPE, typename T>
+	template <typename T>
 	T& get(unsigned int &idx, T& def)
 	{
 		if (idx <= vector.size()) {
-			Value<TYPE, T> *val = (Value<TYPE, T>*)vector[idx];
-			if (TYPE == val->type)
+			Value<T> *val = (Value<T>*)vector[idx];
+			if (typeid(T) == val->type)
 				return val->get();
 
-			val->badType(TYPE);
+			val->badType(typeid(T));
 		}
 
 		return def;

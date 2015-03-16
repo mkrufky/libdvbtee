@@ -44,40 +44,55 @@ public:
 
 	Object(const Object&);
 
-	template <ValueBase::Type TYPE, typename T>
-	void set(std::string& key, T& val)
+	template <typename T>
+	void set(std::string key, T val)
 	{
 		if (map.count(key))
 			delete map[key];
 
-		map[key] = new Value<TYPE, T>(key, val);
+		map[key] = new Value<T>(key, val);
 	}
 
-	template<typename T> void set(std::string key, T val);
-
-	inline void set(std::string key, Object& val)
+	template <typename T>
+	void set(std::string key, T* val)
 	{
-		return set<ValueBase::OBJECT, Object>(key, val);
+		if (map.count(key))
+			delete map[key];
+
+		map[key] = new Value<T>(key, *val);
 	}
 
-	inline void set(std::string key, Array& val)
+	template <typename T>
+	void set(std::string& key, T val)
 	{
-		return set<ValueBase::ARRAY, Array>(key, val);
+		if (map.count(key))
+			delete map[key];
+
+		map[key] = new Value<T>(key, val);
+	}
+
+	template <typename T>
+	void set(std::string& key, T* val)
+	{
+		if (map.count(key))
+			delete map[key];
+
+		map[key] = new Value<T>(key, *val);
 	}
 
 	void set(ValueBase*);
 
 	ValueBase* get(std::string key);
 
-	template <ValueBase::Type TYPE, typename T>
+	template <typename T>
 	T& get(std::string& key, T& def)
 	{
 		if (map.count(key)) {
-			Value<TYPE, T> *val = (Value<TYPE, T>*)map[key];
-			if (TYPE == val->type)
+			Value<T> *val = (Value<T>*)map[key];
+			if (typeid(T) == val->type)
 				return val->get();
 
-			val->badType(TYPE);
+			val->badType(typeid(T));
 		}
 
 		return def;

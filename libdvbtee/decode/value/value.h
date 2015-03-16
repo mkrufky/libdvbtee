@@ -25,6 +25,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <typeinfo>
 
 namespace dvbtee {
 
@@ -32,40 +33,29 @@ namespace decode {
 
 class ValueBase {
 public:
-	enum Type {
-		INTEGER,
-		UNSIGNEDSHORT,
-		UNSIGNEDCHAR,
-		STRING,
-		BOOLEAN,
-		DOUBLE,
-		OBJECT,
-		ARRAY,
-	};
-
-	ValueBase(Type, std::string = "");
+	ValueBase(const std::type_info&, std::string = "");
 	virtual ~ValueBase();
 
-	void badType(ValueBase::Type);
+	void badType(const std::type_info &);
 
 	std::string toJson();
 
-	const Type type;
+	const std::type_info& type;
 
 	const std::string name;
 };
 
 #if 1
-template <ValueBase::Type TYPE, typename T>
+template <typename T>
 class Value : public ValueBase {
 public:
 	Value(std::string& n, T& v)
-	 : ValueBase(TYPE, n)
+	 : ValueBase(typeid(T), n)
 	 , m_value(v)
 	{}
 
 	Value(T& v)
-	 : ValueBase(TYPE)
+	 : ValueBase(typeid(T))
 	 , m_value(v)
 	{}
 
@@ -86,7 +76,7 @@ private:
 	T m_value;
 };
 #else
-template <ValueBase::Type TYPE, typename T>
+template <typename T>
 class Value : public ValueBase {
 public:
 	Value(std::string& n, T& v)
