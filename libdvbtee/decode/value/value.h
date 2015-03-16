@@ -80,13 +80,13 @@ template <typename T>
 class Value : public ValueBase {
 public:
 	Value(std::string& n, T& v)
-	 : ValueBase(TYPE, n)
+	 : ValueBase(typeid(T), n)
 	{
 		pValue = new T(v);
 	}
 
 	Value(T& v)
-	 : ValueBase(TYPE)
+	 : ValueBase(typeid(T))
 	{
 		pValue = new T(v);
 	}
