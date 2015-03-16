@@ -82,6 +82,8 @@ public:
 
 	template <typename T> T& get(unsigned int idx);
 
+	size_t size();
+
 	std::string toJson();
 
 private:

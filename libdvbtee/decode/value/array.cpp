@@ -72,6 +72,11 @@ std::string Array::toJson()
 
 }
 
+size_t Array::size()
+{
+	return vector.size();
+}
+
 ValueBase *Array::get(unsigned int idx)
 {
 	if (idx <= vector.size())
