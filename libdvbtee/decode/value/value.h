@@ -46,6 +46,8 @@ public:
 	ValueBase(Type, std::string = "");
 	virtual ~ValueBase();
 
+	void badType(ValueBase::Type);
+
 	std::string toJson();
 
 	const Type type;

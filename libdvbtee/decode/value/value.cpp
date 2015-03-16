@@ -37,6 +37,11 @@ ValueBase::~ValueBase()
 {
 }
 
+void ValueBase::badType(ValueBase::Type typeRequested)
+{
+	fprintf(stderr, "Incorrect type requested for %s, requested %d, should be %d\n", name.length() ? name.c_str() : "[anonymous]", typeRequested, (int)type);
+}
+
 std::string ValueBase::toJson()
 {
 	std::stringstream s;

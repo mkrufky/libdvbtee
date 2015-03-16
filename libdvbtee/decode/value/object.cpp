@@ -82,11 +82,6 @@ std::string Object::toJson()
 	return s.str();
 }
 
-void Object::badType(ValueBase::Type typeRequested, ValueBase *val)
-{
-	fprintf(stderr, "Incorrect type requested for %s, requested %d, should be %d\n", val->name.c_str(), typeRequested, (int)val->type);
-}
-
 namespace dvbtee {
 namespace decode {
 

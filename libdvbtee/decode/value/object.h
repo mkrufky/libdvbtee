@@ -77,7 +77,7 @@ public:
 			if (TYPE == val->type)
 				return val->get();
 
-			badType(TYPE, val);
+			val->badType(TYPE);
 		}
 
 		return def;
@@ -88,8 +88,6 @@ public:
 	std::string toJson();
 
 private:
-	void badType(ValueBase::Type, ValueBase*);
-
 	KeyValueMap map;
 };
 
