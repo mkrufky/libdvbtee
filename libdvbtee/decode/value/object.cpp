@@ -27,14 +27,17 @@ using namespace dvbtee::decode;
 
 Object::Object()
 {
+#if DBG
 	fprintf(stderr, "%s\n", __func__);
+#endif
 }
 
 Object::~Object()
 {
+#if DBG
 	fprintf(stderr, "%s\n", __func__);
+#endif
 	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
-		//Value<TYPE, T> *value = (Value<TYPE, T>*)map[key];
 		delete it->second;
 	}
 }
@@ -45,7 +48,9 @@ Object::Object(const Object &obj)
 		set(it->second);
 	}
 
+#if DBG
 	fprintf(stderr, "%s(copy) %lu\n", __func__, map.size());
+#endif
 }
 
 ValueBase *Object::get(std::string key)

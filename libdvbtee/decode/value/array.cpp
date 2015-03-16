@@ -27,12 +27,16 @@ using namespace dvbtee::decode;
 
 Array::Array()
 {
+#if DBG
 	fprintf(stderr, "%s\n", __func__);
+#endif
 }
 
 Array::~Array()
 {
+#if DBG
 	fprintf(stderr, "%s\n", __func__);
+#endif
 	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
 		delete *it;
 	}
@@ -43,7 +47,9 @@ Array::Array(const Array &obj)
 	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
 		push(*it);
 	}
+#if DBG
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
+#endif
 }
 
 std::string Array::toJson()
