@@ -72,8 +72,75 @@ std::string Array::toJson()
 
 }
 
+ValueBase *Array::get(unsigned int idx)
+{
+	if (idx <= vector.size())
+		return vector[idx];
+
+	return NULL;
+}
+
 namespace dvbtee {
 namespace decode {
+
+template <>
+int& Array::get<int>(unsigned int idx)
+{
+	int def = 0;
+	return get<ValueBase::INTEGER, int>(idx, def);
+}
+
+template <>
+unsigned short& Array::get<unsigned short>(unsigned int idx)
+{
+	unsigned short def = 0;
+	return get<ValueBase::UNSIGNEDSHORT, unsigned short>(idx, def);
+}
+
+template <>
+unsigned char& Array::get<unsigned char>(unsigned int idx)
+{
+	unsigned char def = 0;
+	return get<ValueBase::UNSIGNEDCHAR, unsigned char>(idx, def);
+}
+
+template <>
+std::string& Array::get<std::string>(unsigned int idx)
+{
+	std::string def = "";
+	return get<ValueBase::STRING, std::string>(idx, def);
+}
+
+template <>
+bool& Array::get<bool>(unsigned int idx)
+{
+	bool def = false;
+	return get<ValueBase::BOOLEAN, bool>(idx, def);
+}
+
+template <>
+double& Array::get<double>(unsigned int idx)
+{
+	double def = 0.0;
+	return get<ValueBase::DOUBLE, double>(idx, def);
+}
+
+template <>
+Object& Array::get<Object>(unsigned int idx)
+{
+	Object def;
+	return get<ValueBase::OBJECT, Object>(idx, def);
+}
+
+#if 1
+template <>
+Array& Array::get<Array>(unsigned int idx)
+{
+	Array def;
+	return get<ValueBase::ARRAY, Array>(idx, def);
+}
+#endif
+
 
 #if 0
 template <>

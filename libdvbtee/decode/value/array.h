@@ -64,6 +64,24 @@ public:
 		push<ValueBase::ARRAY, Array>(val);
 	}
 
+	ValueBase* get(unsigned int idx);
+
+	template <ValueBase::Type TYPE, typename T>
+	T& get(unsigned int &idx, T& def)
+	{
+		if (idx <= vector.size()) {
+			Value<TYPE, T> *val = (Value<TYPE, T>*)vector[idx];
+			if (TYPE == val->type)
+				return val->get();
+
+			val->badType(TYPE);
+		}
+
+		return def;
+	}
+
+	template <typename T> T& get(unsigned int idx);
+
 	std::string toJson();
 
 private:
