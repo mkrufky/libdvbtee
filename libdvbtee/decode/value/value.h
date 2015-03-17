@@ -37,79 +37,69 @@ public:
 	virtual ~ValueBase();
 
 	void badType(const std::type_info &);
-
 	const std::string toJson();
 
 	const std::type_info& type;
-
 	const std::string name;
 };
 
-#if 1
+#define VALUEBASE_POINTER 0
 template <typename T>
 class Value : public ValueBase {
 public:
 	Value(std::string& n, T& v)
 	 : ValueBase(typeid(T), n)
+#if !VALUEBASE_POINTER
 	 , m_value(v)
-	{}
+#endif
+	{
+#if VALUEBASE_POINTER
+		m_value = new T(v);
+#endif
+	}
 
 	Value(T& v)
 	 : ValueBase(typeid(T))
+#if !VALUEBASE_POINTER
 	 , m_value(v)
-	{}
+#endif
+	{
+#if VALUEBASE_POINTER
+		m_value = new T(v);
+#endif
+	}
 
 	~Value()
-	{}
+	{
+#if VALUEBASE_POINTER
+		delete m_value;
+#endif
+	}
 
 	T& get()
 	{
-		return m_value;
+		return
+#if VALUEBASE_POINTER
+		*
+#endif
+		m_value;
 	}
 
 	void set(T& v)
 	{
+#if VALUEBASE_POINTER
+		*
+#endif
 		m_value = v;
 	}
 
 private:
-	T m_value;
-};
-#else
-template <typename T>
-class Value : public ValueBase {
-public:
-	Value(std::string& n, T& v)
-	 : ValueBase(typeid(T), n)
-	{
-		pValue = new T(v);
-	}
-
-	Value(T& v)
-	 : ValueBase(typeid(T))
-	{
-		pValue = new T(v);
-	}
-
-	~Value()
-	{
-		delete pValue;
-	}
-
-	T& get()
-	{
-		return *pValue;
-	}
-
-	void set(T& v)
-	{
-		*pValue = v;
-	}
-
-private:
-	T *pValue;
-};
+	T
+#if VALUEBASE_POINTER
+	*
 #endif
+	m_value;
+};
 
 }
 
