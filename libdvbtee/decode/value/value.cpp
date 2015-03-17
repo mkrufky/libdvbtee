@@ -28,8 +28,8 @@
 using namespace dvbtee::decode;
 
 ValueBase::ValueBase(const std::type_info& type, std::string name)
- : type(type)
- , name(name)
+ : m_type(type)
+ , m_name(name)
 {
 }
 
@@ -37,10 +37,20 @@ ValueBase::~ValueBase()
 {
 }
 
+const std::type_info& ValueBase::getType()
+{
+	return m_type;
+}
+
+const std::string& ValueBase::getName()
+{
+	return m_name;
+}
+
 bool ValueBase::checkType(const std::type_info& typeRequested)
 {
-	bool ret = (typeRequested == type);
-	if (!ret) fprintf(stderr, "Incorrect type requested for %s, requested %s, should be %s\n", name.length() ? name.c_str() : "[anonymous]", typeRequested.name(), typeid(type).name());
+	bool ret = (typeRequested == m_type);
+	if (!ret) fprintf(stderr, "Incorrect type requested for %s, requested %s, should be %s\n", m_name.length() ? m_name.c_str() : "[anonymous]", typeRequested.name(), typeid(m_type).name());
 	return ret;
 }
 
@@ -48,14 +58,14 @@ const std::string ValueBase::toJson()
 {
 	std::stringstream s;
 
-	     if (type == typeid(int))			s << ((Value<int>*)this)->get();
-	else if (type == typeid(unsigned short))	s << ((Value<unsigned short>*)this)->get();
-	else if (type == typeid(unsigned char))		s << (unsigned int)((Value<unsigned char>*)this)->get();
-	else if (type == typeid(std::string))		s << "'" << ((Value<std::string>*)this)->get() << "'";
-	else if (type == typeid(bool))			s << (((Value<bool>*)this)->get() ? "true" : "false");
-	else if (type == typeid(double))		s << ((Value<double>*)this)->get();
-	else if (type == typeid(Object))		s << ((Value<Object>*)this)->get().toJson().c_str();
-	else if (type == typeid(Array))			s << ((Value<Array>*)this)->get().toJson().c_str();
+	     if (m_type == typeid(int))			s << ((Value<int>*)this)->get();
+	else if (m_type == typeid(unsigned short))	s << ((Value<unsigned short>*)this)->get();
+	else if (m_type == typeid(unsigned char))	s << (unsigned int)((Value<unsigned char>*)this)->get();
+	else if (m_type == typeid(std::string))		s << "'" << ((Value<std::string>*)this)->get() << "'";
+	else if (m_type == typeid(bool))		s << (((Value<bool>*)this)->get() ? "true" : "false");
+	else if (m_type == typeid(double))		s << ((Value<double>*)this)->get();
+	else if (m_type == typeid(Object))		s << ((Value<Object>*)this)->get().toJson().c_str();
+	else if (m_type == typeid(Array))		s << ((Value<Array>*)this)->get().toJson().c_str();
 
 	return s.str();
 }

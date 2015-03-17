@@ -90,14 +90,14 @@ ValueBase *Array::get(unsigned int idx)
 
 void Array::push(ValueBase *val)
 {
-	     if (val->type == typeid(int))		push(((Value<int>*)val)->get());
-	else if (val->type == typeid(unsigned short))	push(((Value<unsigned short>*)val)->get());
-	else if (val->type == typeid(unsigned char))	push(((Value<unsigned char>*)val)->get());
-	else if (val->type == typeid(std::string))	push(((Value<std::string>*)val)->get());
-	else if (val->type == typeid(bool))		push(((Value<bool>*)val)->get());
-	else if (val->type == typeid(double))		push(((Value<double>*)val)->get());
-	else if (val->type == typeid(Object))		push(((Value<Object>*)val)->get());
-	else if (val->type == typeid(Array))		push(((Value<Array>*)val)->get());
+	     if (val->getType() == typeid(int))			push(((Value<int>*)val)->get());
+	else if (val->getType() == typeid(unsigned short))	push(((Value<unsigned short>*)val)->get());
+	else if (val->getType() == typeid(unsigned char))	push(((Value<unsigned char>*)val)->get());
+	else if (val->getType() == typeid(std::string))		push(((Value<std::string>*)val)->get());
+	else if (val->getType() == typeid(bool))		push(((Value<bool>*)val)->get());
+	else if (val->getType() == typeid(double))		push(((Value<double>*)val)->get());
+	else if (val->getType() == typeid(Object))		push(((Value<Object>*)val)->get());
+	else if (val->getType() == typeid(Array))		push(((Value<Array>*)val)->get());
 }
 
 DEFINE_DEFAULT_GETTERS(Array, unsigned int)

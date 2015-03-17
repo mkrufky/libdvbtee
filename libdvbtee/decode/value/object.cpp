@@ -87,14 +87,14 @@ const std::string Object::toJson()
 
 void Object::set(ValueBase *val)
 {
-	     if (val->type == typeid(int))		set(val->name, ((Value<int>*)val)->get());
-	else if (val->type == typeid(unsigned short))	set(val->name, ((Value<unsigned short>*)val)->get());
-	else if (val->type == typeid(unsigned char))	set(val->name, ((Value<unsigned char>*)val)->get());
-	else if (val->type == typeid(std::string))	set(val->name, ((Value<std::string>*)val)->get());
-	else if (val->type == typeid(bool))		set(val->name, ((Value<bool>*)val)->get());
-	else if (val->type == typeid(double))		set(val->name, ((Value<double>*)val)->get());
-	else if (val->type == typeid(Object))		set(val->name, ((Value<Object>*)val)->get());
-	else if (val->type == typeid(Array))		set(val->name, ((Value<Array>*)val)->get());
+	     if (val->getType() == typeid(int))			set(val->getName(), ((Value<int>*)val)->get());
+	else if (val->getType() == typeid(unsigned short))	set(val->getName(), ((Value<unsigned short>*)val)->get());
+	else if (val->getType() == typeid(unsigned char))	set(val->getName(), ((Value<unsigned char>*)val)->get());
+	else if (val->getType() == typeid(std::string))		set(val->getName(), ((Value<std::string>*)val)->get());
+	else if (val->getType() == typeid(bool))		set(val->getName(), ((Value<bool>*)val)->get());
+	else if (val->getType() == typeid(double))		set(val->getName(), ((Value<double>*)val)->get());
+	else if (val->getType() == typeid(Object))		set(val->getName(), ((Value<Object>*)val)->get());
+	else if (val->getType() == typeid(Array))		set(val->getName(), ((Value<Array>*)val)->get());
 }
 
 DEFINE_DEFAULT_GETTERS(Object, std::string)

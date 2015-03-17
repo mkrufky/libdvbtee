@@ -39,8 +39,12 @@ public:
 	bool checkType(const std::type_info&);
 	const std::string toJson();
 
-	const std::type_info& type;
-	const std::string name;
+	const std::type_info& getType();
+	const std::string& getName();
+
+private:
+	const std::type_info& m_type;
+	const std::string m_name;
 };
 
 #define VALUEBASE_POINTER 0
