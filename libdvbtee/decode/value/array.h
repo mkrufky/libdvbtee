@@ -69,12 +69,9 @@ public:
 	{
 		if (idx <= vector.size()) {
 			Value<T> *val = (Value<T>*)vector[idx];
-			if (typeid(T) == val->type)
+			if (val->checkType(typeid(T)))
 				return val->get();
-
-			val->badType(typeid(T));
 		}
-
 		return def;
 	}
 

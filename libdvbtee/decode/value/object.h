@@ -73,12 +73,9 @@ public:
 	{
 		if (map.count(key)) {
 			Value<T> *val = (Value<T>*)map[key];
-			if (typeid(T) == val->type)
+			if (val->checkType(typeid(T)))
 				return val->get();
-
-			val->badType(typeid(T));
 		}
-
 		return def;
 	}
 

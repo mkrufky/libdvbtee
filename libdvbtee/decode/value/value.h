@@ -36,7 +36,7 @@ public:
 	ValueBase(const std::type_info&, std::string = "");
 	virtual ~ValueBase();
 
-	void badType(const std::type_info &);
+	bool checkType(const std::type_info&);
 	const std::string toJson();
 
 	const std::type_info& type;
@@ -78,6 +78,7 @@ public:
 
 	T& get()
 	{
+		if (!checkType(typeid(T))) {}
 		return
 #if VALUEBASE_POINTER
 		*

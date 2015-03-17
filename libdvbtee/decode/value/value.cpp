@@ -37,9 +37,11 @@ ValueBase::~ValueBase()
 {
 }
 
-void ValueBase::badType(const std::type_info& typeRequested)
+bool ValueBase::checkType(const std::type_info& typeRequested)
 {
-	fprintf(stderr, "Incorrect type requested for %s, requested %s, should be %s\n", name.length() ? name.c_str() : "[anonymous]", typeRequested.name(), typeid(type).name());
+	bool ret = (typeRequested == type);
+	if (!ret) fprintf(stderr, "Incorrect type requested for %s, requested %s, should be %s\n", name.length() ? name.c_str() : "[anonymous]", typeRequested.name(), typeid(type).name());
+	return ret;
 }
 
 const std::string ValueBase::toJson()
