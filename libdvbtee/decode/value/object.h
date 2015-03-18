@@ -50,8 +50,8 @@ public:
 		if (map.count(key))
 			delete map[key];
 
-		//map[key] = new Value<T>(key, val);
-		map.insert( std::pair<std::string, ValueBase*>(key, new Value<T>(key, val)) );
+		map[key] = new Value<T>(key, val);
+		//map.insert( std::pair<std::string, ValueBase*>(key, new Value<T>(key, val)) );
 	}
 
 	template <typename T>
