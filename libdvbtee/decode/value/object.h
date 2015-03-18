@@ -60,6 +60,8 @@ public:
 		setByRef<T>(key, val);
 	}
 
+	inline void set(std::string key,       char* val)	{ set<std::string>(key, std::string(val)); }
+	inline void set(std::string key, const char* val)	{ set<std::string>(key, std::string(val)); }
 	inline void set(std::string key, std::string& val)	{ setByRef<std::string>(key, val); }
 	inline void set(std::string key, Array& val)		{ setByRef<Array>(key, val); }
 	inline void set(std::string key, Object& val)		{ setByRef<Object>(key, val); }

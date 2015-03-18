@@ -58,6 +58,8 @@ public:
 		pushByRef<T>(val);
 	}
 
+	inline void push(      char* val)	{ push<std::string>(std::string(val)); }
+	inline void push(const char* val)	{ push<std::string>(std::string(val)); }
 	inline void push(std::string& val)	{ pushByRef<std::string>(val); }
 	inline void push(Array& val)		{ pushByRef<Array>(val); }
 	inline void push(Object& val)		{ pushByRef<Object>(val); }
