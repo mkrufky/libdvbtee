@@ -33,7 +33,6 @@ namespace decode {
 
 class ValueBase {
 public:
-	ValueBase(const std::type_info&, std::string = "");
 	virtual ~ValueBase();
 
 	bool checkType(const std::type_info&);
@@ -41,6 +40,9 @@ public:
 
 	const std::type_info& getType();
 	const std::string& getName();
+
+protected:
+	ValueBase(const std::type_info&, std::string = "");
 
 private:
 	const std::type_info& m_type;
