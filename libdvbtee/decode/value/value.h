@@ -75,6 +75,17 @@ public:
 #endif
 	}
 
+	Value(const Value<T>& o)
+	 : ValueBase(typeid(T), o.getName())
+#if !VALUEBASE_POINTER
+	 , m_value(o.get())
+#endif
+	{
+#if VALUEBASE_POINTER
+		m_value = new T(o.get());
+#endif
+	}
+
 	~Value()
 	{
 #if VALUEBASE_POINTER
