@@ -25,6 +25,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "value.h"
 #include "array.h"
@@ -65,6 +66,14 @@ public:
 	inline void set(std::string key, std::string& val)	{ setByRef<std::string>(key, val); }
 	inline void set(std::string key, Array& val)		{ setByRef<Array>(key, val); }
 	inline void set(std::string key, Object& val)		{ setByRef<Object>(key, val); }
+
+	template <typename T>
+	void set(int key, T val)
+	{
+		std::stringstream s;
+		s << key;
+		set(s.str(), val);
+	}
 
 	void set(ValueBase*);
 
