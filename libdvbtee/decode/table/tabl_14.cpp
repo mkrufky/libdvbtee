@@ -48,7 +48,7 @@ void tot::store(dvbpsi_tot_t *p_tot)
 
 	descriptors.decode(p_tot->p_first_descriptor);
 
-	set("descriptors", descriptors);
+	set<Array>("descriptors", descriptors);
 
 	set("time", m_time);
 

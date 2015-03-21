@@ -48,7 +48,7 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 
 	descriptors.decode(p_stt->p_first_descriptor);
 
-	set("descriptors", descriptors);
+	set<Array>("descriptors", descriptors);
 
 	set("time", m_time);
 
