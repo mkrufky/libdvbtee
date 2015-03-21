@@ -81,6 +81,9 @@ void Object::clear()
 const std::string Object::toJson()
 {
 	std::stringstream s;
+
+	if (!map.size()) return "{}";
+
 	int count = 0;
 
 	s << "{ ";
