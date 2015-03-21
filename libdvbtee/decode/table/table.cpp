@@ -41,7 +41,7 @@ TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid)
  , m_watcher(NULL)
  , m_tableid(tableid)
 {
-	//
+	set("tableId", m_tableid);
 }
 
 TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid, TableWatcher *watcher)
@@ -49,7 +49,7 @@ TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid, TableW
  , m_watcher(watcher)
  , m_tableid(tableid)
 {
-
+	set("tableId", m_tableid);
 }
 
 TableBase::~TableBase()
