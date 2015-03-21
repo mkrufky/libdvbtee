@@ -69,5 +69,8 @@ const std::string ValueBase::toJson()
 	else if (m_type == typeid(time_t))		s << (unsigned long)((Value<time_t>*)this)->get();
 	else if (m_type == typeid(size_t))		s << (unsigned long)((Value<time_t>*)this)->get();
 
-	return s.str();
+	if (s.str().length())
+		return s.str();
+
+	return "undefined";
 }
