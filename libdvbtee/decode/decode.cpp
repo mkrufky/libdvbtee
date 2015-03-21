@@ -847,13 +847,13 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* de
 		memset((void*)cur_service.provider_name, 0, sizeof(cur_service.provider_name));
 		memset((void*)cur_service.service_name, 0, sizeof(cur_service.service_name));
 
-		dvbtee::decode::desc_48* _48 = (dvbtee::decode::desc_48*)descriptors->lastDesc(0x48);
-		if (_48) {
+		dvbtee::decode::Descriptor *d = descriptors->lastDesc(0x48);
+		if (d) {
 			strncpy((char*)cur_service.provider_name,
-				(const char*)_48->provider_name,
+				d->get<std::string>("providerName").c_str(),
 				sizeof(cur_service.provider_name));
 			strncpy((char*)cur_service.service_name,
-				(const char*)_48->service_name,
+				d->get<std::string>("serviceName").c_str(),
 				sizeof(cur_service.service_name));
 		}
 

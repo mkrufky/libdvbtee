@@ -40,10 +40,9 @@ desc_48::desc_48(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	dvbpsi_service_dr_t* dr = dvbpsi_DecodeServiceDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
-#if 0
+
 	unsigned char provider_name[256] = { 0 };
 	unsigned char service_name[256] = { 0 };
-#endif
 
 	get_descriptor_text(dr->i_service_provider_name, dr->i_service_provider_name_length, provider_name);
 	get_descriptor_text(dr->i_service_name,          dr->i_service_name_length,          service_name);
