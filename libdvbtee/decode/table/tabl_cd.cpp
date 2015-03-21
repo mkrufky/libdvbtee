@@ -48,6 +48,12 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 
 	descriptors.decode(p_stt->p_first_descriptor);
 
+	set("descriptors", descriptors);
+
+	set("time", m_time);
+
+	dprintf("%s", toJson().c_str());
+
 	if ((o_time != m_time) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
 	}
