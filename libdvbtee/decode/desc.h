@@ -28,10 +28,7 @@
 #include <map>
 
 #include "descriptor.h"
-#include "desc_62.h"
-#include "desc_81.h"
 #include "desc_83.h"
-#include "desc_a0.h"
 #include "desc_a1.h"
 
 
