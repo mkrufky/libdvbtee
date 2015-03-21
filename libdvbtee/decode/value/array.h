@@ -63,6 +63,8 @@ public:
 	inline void push(std::string& val)	{ pushByRef<std::string>(val); }
 	inline void push(Array& val)		{ pushByRef<Array>(val); }
 	inline void push(Object& val)		{ pushByRef<Object>(val); }
+	inline void push(Array* val)		{ pushByRef<Array>(*val); }
+	inline void push(Object* val)		{ pushByRef<Object>(*val); }
 
 	ValueBase* get(unsigned int idx);
 
