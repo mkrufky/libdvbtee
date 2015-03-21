@@ -74,6 +74,13 @@ public:
 
 	void set(ValueBase*);
 
+	void unSet(std::string key);
+
+	inline void unSet(int key)
+	{
+		unSet(intToStr(key));
+	}
+
 	ValueBase* get(std::string key);
 
 	template <typename T>

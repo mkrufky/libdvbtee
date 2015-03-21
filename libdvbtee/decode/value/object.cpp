@@ -64,6 +64,14 @@ ValueBase *Object::get(std::string key)
 	return NULL;
 }
 
+void Object::unSet(std::string key)
+{
+	if (map.count(key)) {
+		delete map[key];
+		map.erase(key);
+	}
+}
+
 const std::string Object::toJson()
 {
 	std::stringstream s;
