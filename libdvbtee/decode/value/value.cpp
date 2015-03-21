@@ -66,6 +66,8 @@ const std::string ValueBase::toJson()
 	else if (m_type == typeid(double))		s << ((Value<double>*)this)->get();
 	else if (m_type == typeid(Object))		s << ((Value<Object>*)this)->get().toJson().c_str();
 	else if (m_type == typeid(Array))		s << ((Value<Array>*)this)->get().toJson().c_str();
+	else if (m_type == typeid(time_t))		s << (unsigned long)((Value<time_t>*)this)->get();
+	else if (m_type == typeid(size_t))		s << (unsigned long)((Value<time_t>*)this)->get();
 
 	return s.str();
 }
