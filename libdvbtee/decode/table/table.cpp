@@ -67,6 +67,12 @@ uint8_t TableBase::getTableid()
 	return m_tableid;
 }
 
+void TableBase::reset()
+{
+	clear();
+	init();
+}
+
 
 Table::Table(Decoder *parent, std::string &name, uint8_t tableid)
  : TableBase(parent, name, tableid)

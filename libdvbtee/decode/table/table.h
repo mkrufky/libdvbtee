@@ -50,8 +50,11 @@ public:
 	virtual ~TableBase();
 
 	uint8_t getTableid();
+	void reset();
+
 protected:
 	TableWatcher *m_watcher;
+
 private:
 	const uint8_t m_tableid;
 
@@ -133,6 +136,7 @@ public:
 		if (s) {
 			printf("UPDATING TABLE %02x", tableid);
 			C *t = (C*)V[s-1];
+			t->reset();
 			t->store(p_table);
 			return true;
 		}
