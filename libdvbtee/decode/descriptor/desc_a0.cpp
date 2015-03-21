@@ -43,12 +43,12 @@ desc_a0::desc_a0(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_ExtendedChannelNameDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
-	unsigned char name[256];
-	memset(name, 0, sizeof(name));
+	unsigned char name[256] = { 0 };
 	decode_multiple_string(dr->i_long_channel_name, dr->i_long_channel_name_length, name, sizeof(name));
 
 	set("extChannelName", std::string((const char *)name));
-	dprintf("%s", get<std::string>("extChannelName").c_str());
+
+	dprintf("%s", toJson().c_str());
 
 	setValid(true);
 }
