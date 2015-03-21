@@ -29,6 +29,7 @@ Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *
  , m_tag(0xff)
 {
 	if (p_dvbpsi_descriptor) m_tag = p_dvbpsi_descriptor->i_tag;
+	set("descriptorTag", m_tag);
 }
 
 Descriptor::~Descriptor()
