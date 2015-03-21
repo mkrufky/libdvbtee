@@ -124,8 +124,7 @@ bool DescriptorStore::add(dvbpsi_descriptor_t *p_descriptor)
 	if (p_descriptor) d = DescriptorRegistry::instance().create(m_parent, p_descriptor);
 	if (d) {
 		m_store.insert( std::pair<uint8_t, Descriptor*>(d->getTag(), d) );
-		Object *o = (Object*)d;
-		push(*o);
+		push((Object*)d);
 	}
 	return (d != NULL);
 }
