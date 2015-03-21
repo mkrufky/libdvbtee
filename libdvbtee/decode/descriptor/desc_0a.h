@@ -36,7 +36,7 @@ class desc_0a: public Descriptor {
 public:
 	desc_0a(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_0a();
-
+#if 1
 	typedef struct {
 		uint8_t       audio_type;
 		unsigned char iso_639_code[3];
@@ -45,6 +45,7 @@ public:
 	typedef std::map<uint8_t, language_t> lang_map_t;
 
 	lang_map_t map_lang;
+#endif
 };
 
 }
