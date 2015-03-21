@@ -89,6 +89,17 @@ public:
 
 	template <typename T> T& get(std::string key);
 
+	inline ValueBase* get(int key)
+	{
+		return get(intToStr(key));
+	}
+
+	template <typename T>
+	T& get(int key)
+	{
+		return get<T>(intToStr(key));
+	}
+
 	const std::string toJson();
 
 private:
