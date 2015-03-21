@@ -36,10 +36,11 @@ class desc_4d: public Descriptor {
 public:
 	desc_4d(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_4d();
-
+#if 1
 	unsigned char lang[4];
 	unsigned char name[256];
 	unsigned char text[256];
+#endif
 };
 
 }
