@@ -938,9 +938,11 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descrip
 
 		descriptors->decode(p_event->p_first_descriptor);
 
-		dvbtee::decode::desc_4d* _4d = (dvbtee::decode::desc_4d*)descriptors->lastDesc(0x4d);
-		cur_event.name.assign((const char *)_4d->name);
-		cur_event.text.assign((const char *)_4d->text);
+		dvbtee::decode::Descriptor *d = descriptors->lastDesc(0x4d);
+		if (d) {
+			cur_event.name.assign(d->get<std::string>("name").c_str());
+			cur_event.text.assign(d->get<std::string>("text").c_str());
+		}
 #if DBG
 		time_t start = datetime_utc(cur_event.start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(cur_event.start_time + cur_event.length_sec /*+ (60 * tz_offset)*/);

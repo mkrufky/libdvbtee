@@ -40,13 +40,10 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
-#if 0
-	unsigned char lang[4] = { 0 };
+
 	unsigned char name[256];
 	unsigned char text[256];
-#else
-	lang[3] = 0;
-#endif
+	unsigned char lang[4] = { 0 };
 
 	for (unsigned int i = 0; i < 3; i++) lang[i] = dr->i_iso_639_code[i];
 	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, name);
