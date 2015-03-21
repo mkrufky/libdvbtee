@@ -61,6 +61,9 @@ protected:
 	virtual ~Descriptor();
 
 	uint8_t m_tag;
+
+private:
+	void init();
 };
 
 class DescriptorStore {
