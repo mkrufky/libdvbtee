@@ -56,6 +56,9 @@ Array::Array(const Array &obj)
 const std::string Array::toJson()
 {
 	std::stringstream s;
+
+	if (!vector.size()) return "[]";
+
 	int count = 0;
 
 	s << "[ ";
