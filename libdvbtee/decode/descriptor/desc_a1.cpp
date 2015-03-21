@@ -50,15 +50,26 @@ desc_a1::desc_a1(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 			dprintf("error!");
 			break;
 		}
+#if 1
 		map_svcloc[element->i_elementary_pid].elementary_pid = element->i_elementary_pid;
 		map_svcloc[element->i_elementary_pid].stream_type    = element->i_stream_type;
 		memcpy(map_svcloc[element->i_elementary_pid].iso_639_code, element->i_iso_639_code, 3);
-		dprintf("pid: 0x%04x, type %02x: %s, %c%c%c", element->i_elementary_pid,
-			element->i_stream_type, streamtype_name(element->i_stream_type),
-			element->i_iso_639_code[0],
-			element->i_iso_639_code[1],
-			element->i_iso_639_code[2]);
+#endif
+		Object svcloc;
+
+		char __lang[4] = { 0 };
+		for (unsigned int j = 0; j < 3; j++) __lang[j] = element->i_iso_639_code[j];
+		std::string lang(__lang);
+
+		if (lang.length()) svcloc.set("lang", lang);
+		svcloc.set("esPid", element->i_elementary_pid);
+		svcloc.set("streamType", element->i_stream_type);
+		svcloc.set("streamTypeString", streamtype_name(element->i_stream_type));
+		set(element->i_elementary_pid, svcloc);
 	}
+
+	dprintf("%s", toJson().c_str());
+
 	setValid(true);
 }
 
