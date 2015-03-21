@@ -1709,8 +1709,8 @@ uint16_t decode::get_lcn(uint16_t service_id)
 	uint16_t lcn = 0;
 
 	if (networks.count(network_id)) {
-		dvbtee::decode::desc_83* _83 = (dvbtee::decode::desc_83*)networks[network_id].descriptors.lastDesc(0x83);
-		if (_83) lcn = _83->lcn[service_id];
+		dvbtee::decode::Descriptor *d = networks[network_id].descriptors.lastDesc(0x83);
+		if (d) lcn = d->get<uint16_t>(service_id);
 	}
 	return lcn;
 }

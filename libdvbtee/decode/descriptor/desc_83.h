@@ -36,11 +36,9 @@ class desc_83: public Descriptor {
 public:
 	desc_83(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_83();
-#if 1
-	typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 
-	map_lcn lcn;
-#endif
+	/* uint16_t& lcn = d->get<uint16_t>(service_id);
+	 */
 };
 
 }
