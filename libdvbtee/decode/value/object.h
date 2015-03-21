@@ -25,7 +25,6 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include "value.h"
 #include "array.h"
@@ -70,9 +69,7 @@ public:
 	template <typename T>
 	void set(int key, T val)
 	{
-		std::stringstream s;
-		s << key;
-		set(s.str(), val);
+		set(intToStr(key), val);
 	}
 
 	void set(ValueBase*);
@@ -96,6 +93,8 @@ public:
 
 private:
 	KeyValueMap map;
+
+	std::string intToStr(int);
 };
 
 }

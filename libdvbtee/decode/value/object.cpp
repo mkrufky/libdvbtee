@@ -85,6 +85,13 @@ const std::string Object::toJson()
 	return s.str();
 }
 
+std::string Object::intToStr(int i)
+{
+	std::stringstream s;
+	s << i;
+	return s.str();
+}
+
 void Object::set(ValueBase *val)
 {
 	     if (val->getType() == typeid(int))			set(val->getName(), ((Value<int>*)val)->get());
