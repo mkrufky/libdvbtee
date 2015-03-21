@@ -54,6 +54,8 @@ protected:
 	TableWatcher *m_watcher;
 private:
 	const uint8_t m_tableid;
+
+	void init();
 };
 
 class Table: public TableBase {
