@@ -36,16 +36,15 @@ class desc_0a: public Descriptor {
 public:
 	desc_0a(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_0a();
-#if 1
-	typedef struct {
-		uint8_t       audio_type;
-		unsigned char iso_639_code[3];
-	} language_t;
 
-	typedef std::map<uint8_t, language_t> lang_map_t;
-
-	lang_map_t map_lang;
-#endif
+	/* Array& a  = this->get<Array>("ISO639Lang");
+	 *
+	 * for (unsigned int i = 0; i < a.size(); i++) {
+	 *	Object& o = a->get<Object>(i);
+	 *	std::string& language = o.get<std::string>("language");
+	 *	uint8_t audioType = o.get<uint8_t>("audioType");
+	 * }
+	 */
 };
 
 }

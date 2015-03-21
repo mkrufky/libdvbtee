@@ -43,19 +43,12 @@ desc_0a::desc_0a(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	Array languages;
 
 	for (int i = 0; i < dr->i_code_count; ++i) {
-		language_t &lang = map_lang[i];
-#if 1
-		lang.audio_type = dr->code[i].i_audio_type;
-		lang.iso_639_code[0] = dr->code[i].iso_639_code[0];
-		lang.iso_639_code[1] = dr->code[i].iso_639_code[1];
-		lang.iso_639_code[2] = dr->code[i].iso_639_code[2];
-#endif
 		Object entry;
 
-		char __lang[4] = { 0 };
-		for (unsigned int j = 0; j < 3; j++) __lang[j] = dr->code[i].iso_639_code[j];
+		char lang[4] = { 0 };
+		for (unsigned int j = 0; j < 3; j++) lang[j] = dr->code[i].iso_639_code[j];
 
-		entry.set("language", std::string(__lang));
+		entry.set("language", std::string(lang));
 		entry.set("audioType", dr->code[i].i_audio_type);
 
 		languages.push(entry);

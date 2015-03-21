@@ -529,31 +529,28 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 		desc local_descriptors;
 		local_descriptors.decode(p_es->p_first_descriptor);
 
-		std::string languages;
+		dvbtee::decode::Descriptor *d = local_descriptors.lastDesc(0x0a);
+		if (d) {
+			dvbtee::decode::Array &a = d->get<dvbtee::decode::Array>("ISO639Lang");
+			for (unsigned int i = 0; i < a.size(); i++) {
 
-		dvbtee::decode::desc_0a* _0a = (dvbtee::decode::desc_0a*)local_descriptors.lastDesc(0x0a);
-		if (_0a)
-		for (dvbtee::decode::desc_0a::lang_map_t::const_iterator iter_dr0a = _0a->map_lang.begin();
-		     iter_dr0a != _0a->map_lang.end();
-		     ++iter_dr0a) {
-			if (!languages.empty()) languages.append(", ");
-			if (iter_dr0a->second.iso_639_code[0]) {
-				for (int i=0; i<3; i++) languages.push_back(iter_dr0a->second.iso_639_code[i]);
+				Object &entry(a.get<Object>(i));
+				std::string &lang(entry.get<std::string>("language"));
+
+				if (!lang.length())
+					continue;
 
 				memcpy(cur_es.iso_639_code,
-				       iter_dr0a->second.iso_639_code,
-				       sizeof(iter_dr0a->second.iso_639_code));
+				       lang.c_str(),
+				       sizeof(cur_es.iso_639_code));
+				cur_es.iso_639_code[3] = 0;
 			}
 		}
 #if PMT_DBG
 		fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
 			cur_es.pid, cur_es.type,
 			streamtype_name(cur_es.type),
-#if 1 //def COPY_DRA1_FROM_VCT_TO_PMT // FIXME
 			cur_es.iso_639_code);
-#else
-			languages.c_str());
-#endif
 #endif
 		p_es = p_es->p_next;
 	}
