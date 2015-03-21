@@ -66,7 +66,7 @@ private:
 	void init();
 };
 
-class DescriptorStore {
+class DescriptorStore : public Array {
 public:
 	DescriptorStore(Decoder *);
 	~DescriptorStore();
