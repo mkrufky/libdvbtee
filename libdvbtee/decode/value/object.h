@@ -81,6 +81,8 @@ public:
 		unSet(intToStr(key));
 	}
 
+	void clear();
+
 	ValueBase* get(std::string key);
 
 	template <typename T>

@@ -79,6 +79,8 @@ public:
 
 	template <typename T> T& get(unsigned int idx);
 
+	void clear();
+
 	const size_t size();
 
 	const std::string toJson();

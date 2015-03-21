@@ -40,9 +40,7 @@ Object::~Object()
 #if DBG
 	fprintf(stderr, "%s\n", __func__);
 #endif
-	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
-		delete it->second;
-	}
+	clear();
 }
 
 Object::Object(const Object &obj)
@@ -70,6 +68,14 @@ void Object::unSet(std::string key)
 		delete map[key];
 		map.erase(key);
 	}
+}
+
+void Object::clear()
+{
+	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
+		delete it->second;
+	}
+	map.clear();
 }
 
 const std::string Object::toJson()

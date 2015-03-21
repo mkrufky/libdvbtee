@@ -40,9 +40,7 @@ Array::~Array()
 #if DBG
 	fprintf(stderr, "%s\n", __func__);
 #endif
-	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
-		delete *it;
-	}
+	clear();
 }
 
 Array::Array(const Array &obj)
@@ -86,6 +84,14 @@ ValueBase *Array::get(unsigned int idx)
 		return vector[idx];
 
 	return NULL;
+}
+
+void Array::clear()
+{
+	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
+		delete *it;
+	}
+	vector.clear();
 }
 
 void Array::push(ValueBase *val)
