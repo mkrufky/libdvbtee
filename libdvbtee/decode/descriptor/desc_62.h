@@ -36,15 +36,6 @@ class desc_62: public Descriptor {
 public:
 	desc_62(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_62();
-
-	enum CodingType {
-		CODINGTYPE_SATELLITE   = 1,
-		CODINGTYPE_CABLE       = 2,
-		CODINGTYPE_TERRESTRIAL = 3,
-	};
-
-	CodingType codingType;
-	std::vector<uint32_t> centerFrequencies;
 };
 
 }

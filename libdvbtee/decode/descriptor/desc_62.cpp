@@ -39,15 +39,24 @@ desc_62::desc_62(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	dvbpsi_frequency_list_dr_t* dr = dvbpsi_DecodeFrequencyListDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
-	codingType = (CodingType)dr->i_coding_type;
+//	enum CodingType {
+//		CODINGTYPE_SATELLITE   = 1,
+//		CODINGTYPE_CABLE       = 2,
+//		CODINGTYPE_TERRESTRIAL = 3,
+//	};
 
-	dprintf("coding type %d, frequencies: %d", codingType, dr->i_number_of_frequencies);
+	set("codingType", dr->i_coding_type);
+
+	Array freqs;
 
 	for (int i = 0; i < dr->i_number_of_frequencies; ++i) {
-		centerFrequencies.push_back(dr->p_center_frequencies[i]);
-
-		dprintf("%d", dr->p_center_frequencies[i]);
+		freqs.push(dr->p_center_frequencies[i]);
 	}
+
+	set("centerFrequencies", freqs);
+
+	dprintf("%s", toJson().c_str());
+
 	setValid(true);
 }
 
