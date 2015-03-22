@@ -52,6 +52,24 @@ public:
 		return push<T>(val, "");
 	}
 
+	template <typename T>
+	ValueBase* set(std::string key, T val)
+	{
+		if (!key.length()) return NULL;
+		ValueBase* v = push<T>(val, key);
+		if (v) updateIndex(key, v);
+		return v;
+	}
+
+	template <typename T>
+	ValueBase* set(int key, T val)
+	{
+		return set<T>(intToStr(key), val);
+	}
+
+	ValueBase* getByName(std::string idx);
+	ValueBase* getByName(unsigned int idx);
+
 	ValueBase* get(unsigned int idx);
 
 	template <typename T> T& get(unsigned int idx);
@@ -64,6 +82,7 @@ public:
 
 private:
 	KeyValueVector vector;
+	std::map<std::string, ValueBase*> indices;
 
 	template <typename T>
 	ValueBase* pushByRef(T& val, std::string idx)
@@ -97,6 +116,10 @@ private:
 		}
 		return def;
 	}
+
+	void updateIndex(std::string, ValueBase*);
+
+	std::string intToStr(int);
 };
 
 }

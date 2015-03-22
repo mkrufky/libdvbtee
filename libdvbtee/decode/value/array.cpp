@@ -46,7 +46,10 @@ Array::~Array()
 Array::Array(const Array &obj)
 {
 	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
-		push(*it);
+		ValueBase *v = *it;
+		push(v);
+		const std::string& n = v->getName();
+		if (n.length()) updateIndex(n, v);
 	}
 #if DBG
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
@@ -89,12 +92,37 @@ ValueBase *Array::get(unsigned int idx)
 	return NULL;
 }
 
+void Array::updateIndex(std::string key, ValueBase *val)
+{
+	indices[key] = val;
+}
+
+ValueBase *Array::getByName(std::string idx)
+{
+	if (!indices.count(idx)) return NULL;
+
+	return indices[idx];
+}
+
+ValueBase *Array::getByName(unsigned int idx)
+{
+	return getByName(intToStr(idx));
+}
+
 void Array::clear()
 {
 	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
 		delete *it;
 	}
 	vector.clear();
+	indices.clear();
+}
+
+std::string Array::intToStr(int i)
+{
+	std::stringstream s;
+	s << i;
+	return s.str();
 }
 
 ValueBase* Array::push(ValueBase *val)
