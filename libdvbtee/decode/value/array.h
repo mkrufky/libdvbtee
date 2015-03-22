@@ -39,12 +39,15 @@ class Object;
 
 class Array {
 public:
-	Array();
+	Array(std::string idx = "");
 	~Array();
 
 	Array(const Array&);
 
 	ValueBase* push(ValueBase*);
+
+	ValueBase* push(Object&);
+	ValueBase* push(Object*);
 
 	template <typename T>
 	ValueBase* push(T val)
@@ -83,6 +86,7 @@ public:
 private:
 	KeyValueVector vector;
 	std::map<std::string, ValueBase*> indices;
+	std::string idxField;
 
 	template <typename T>
 	ValueBase* pushByRef(T& val, std::string idx)
@@ -91,6 +95,8 @@ private:
 		vector.push_back(v);
 		return v;
 	}
+
+	ValueBase* pushObject(Object& val, std::string idx);
 
 	template <typename T>
 	ValueBase* push(T val, std::string idx)
@@ -102,9 +108,7 @@ private:
 	inline ValueBase* push(const char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
 	inline ValueBase* push(std::string& val, std::string idx)	{ return pushByRef<std::string>(val, idx); }
 	inline ValueBase* push(Array& val, std::string idx)		{ return pushByRef<Array>(val, idx); }
-	inline ValueBase* push(Object& val, std::string idx)		{ return pushByRef<Object>(val, idx); }
 	inline ValueBase* push(Array* val, std::string idx)		{ return pushByRef<Array>(*val, idx); }
-	inline ValueBase* push(Object* val, std::string idx)		{ return pushByRef<Object>(*val, idx); }
 
 	template <typename T>
 	T& get(unsigned int &idx, T& def)
@@ -118,6 +122,7 @@ private:
 	}
 
 	void updateIndex(std::string, ValueBase*);
+	std::string& assignIndex(Object&, std::string&);
 
 	std::string intToStr(int);
 };

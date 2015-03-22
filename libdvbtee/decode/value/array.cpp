@@ -28,7 +28,8 @@ using namespace dvbtee::decode;
 
 #define DBG 0
 
-Array::Array()
+Array::Array(std::string idx)
+ : idxField(idx)
 {
 #if DBG
 	fprintf(stderr, "%s\n", __func__);
@@ -94,7 +95,18 @@ ValueBase *Array::get(unsigned int idx)
 
 void Array::updateIndex(std::string key, ValueBase *val)
 {
-	indices[key] = val;
+	if (key.length()) indices[key] = val;
+}
+
+std::string &Array::assignIndex(Object &obj, std::string &index)
+{
+	if (idxField.length()) {
+		ValueBase *val = obj.get(idxField);
+		index = (typeid(std::string) == val->getType()) ?
+			obj.get<std::string>(idxField) : index = val->toJson();
+	}
+
+	return index;
 }
 
 ValueBase *Array::getByName(std::string idx)
@@ -123,6 +135,29 @@ std::string Array::intToStr(int i)
 	std::stringstream s;
 	s << i;
 	return s.str();
+}
+
+ValueBase* Array::pushObject(Object &val, std::string idx)
+{
+	bool extractIndex = (!idx.length());
+
+	if (extractIndex) assignIndex(val, idx);
+
+	ValueBase *v = pushByRef<Object>(val, idx);
+
+	if (extractIndex) updateIndex(idx, v);
+
+	return v;
+}
+
+ValueBase *Array::push(Object &o)
+{
+	return pushObject(o, "");
+}
+
+ValueBase *Array::push(Object *o)
+{
+	return push(*o);
 }
 
 ValueBase* Array::push(ValueBase *val)
