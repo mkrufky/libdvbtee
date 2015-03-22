@@ -54,17 +54,6 @@ public:
 
 	ValueBase* get(unsigned int idx);
 
-	template <typename T>
-	T& get(unsigned int &idx, T& def)
-	{
-		if (idx <= vector.size()) {
-			Value<T> *val = (Value<T>*)vector[idx];
-			if (val->checkType(typeid(T)))
-				return val->get();
-		}
-		return def;
-	}
-
 	template <typename T> T& get(unsigned int idx);
 
 	void clear();
@@ -97,6 +86,17 @@ private:
 	inline ValueBase* push(Object& val, std::string idx)		{ return pushByRef<Object>(val, idx); }
 	inline ValueBase* push(Array* val, std::string idx)		{ return pushByRef<Array>(*val, idx); }
 	inline ValueBase* push(Object* val, std::string idx)		{ return pushByRef<Object>(*val, idx); }
+
+	template <typename T>
+	T& get(unsigned int &idx, T& def)
+	{
+		if (idx <= vector.size()) {
+			Value<T> *val = (Value<T>*)vector[idx];
+			if (val->checkType(typeid(T)))
+				return val->get();
+		}
+		return def;
+	}
 };
 
 }
