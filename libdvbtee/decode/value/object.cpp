@@ -109,16 +109,23 @@ std::string Object::intToStr(int i)
 	return s.str();
 }
 
-void Object::set(ValueBase *val)
+ValueBase* Object::set(ValueBase *val)
 {
-	     if (val->getType() == typeid(int))			set(val->getName(), ((Value<int>*)val)->get());
-	else if (val->getType() == typeid(unsigned short))	set(val->getName(), ((Value<unsigned short>*)val)->get());
-	else if (val->getType() == typeid(unsigned char))	set(val->getName(), ((Value<unsigned char>*)val)->get());
-	else if (val->getType() == typeid(std::string))		set(val->getName(), ((Value<std::string>*)val)->get());
-	else if (val->getType() == typeid(bool))		set(val->getName(), ((Value<bool>*)val)->get());
-	else if (val->getType() == typeid(double))		set(val->getName(), ((Value<double>*)val)->get());
-	else if (val->getType() == typeid(Object))		set(val->getName(), ((Value<Object>*)val)->get());
-	else if (val->getType() == typeid(Array))		set(val->getName(), ((Value<Array>*)val)->get());
+	     if (val->getType() == typeid(int))			return set(val->getName(), ((Value<int>*)val)->get());
+	else if (val->getType() == typeid(unsigned short))	return set(val->getName(), ((Value<unsigned short>*)val)->get());
+	else if (val->getType() == typeid(unsigned char))	return set(val->getName(), ((Value<unsigned char>*)val)->get());
+	else if (val->getType() == typeid(std::string))		return set(val->getName(), ((Value<std::string>*)val)->get());
+	else if (val->getType() == typeid(bool))		return set(val->getName(), ((Value<bool>*)val)->get());
+	else if (val->getType() == typeid(double))		return set(val->getName(), ((Value<double>*)val)->get());
+	else if (val->getType() == typeid(Object))		return set(val->getName(), ((Value<Object>*)val)->get());
+	else if (val->getType() == typeid(Array))		return set(val->getName(), ((Value<Array>*)val)->get());
+	else {
+#if 1
+		fprintf(stderr, "%s unable to set %s, unknown type: %s !!!\n", __func__, val->getName().c_str(), val->getType().name());
+#endif
+		return NULL;
+	}
+
 }
 
 DEFINE_DEFAULT_GETTERS(Object, std::string)

@@ -45,37 +45,41 @@ public:
 	Object(const Object&);
 
 	template <typename T>
-	void setByRef(std::string& key, T& val)
+	ValueBase* setByRef(std::string& key, T& val)
 	{
 		if (map.count(key))
 			delete map[key];
 
-		map[key] = new Value<T>(key, val);
-		//map.insert( std::pair<std::string, ValueBase*>(key, new Value<T>(key, val)) );
+		Value<T> *v = new Value<T>(key, val);
+
+		map[key] = v;
+		//map.insert( std::pair<std::string, ValueBase*>(key, v) );
+
+		return v;
 	}
 
 	template <typename T>
-	void set(std::string key, T val)
+	ValueBase* set(std::string key, T val)
 	{
-		setByRef<T>(key, val);
+		return setByRef<T>(key, val);
 	}
 
-	inline void set(std::string key,       char* val)	{ set<std::string>(key, std::string(val)); }
-	inline void set(std::string key, const char* val)	{ set<std::string>(key, std::string(val)); }
-	inline void set(std::string key, std::string& val)	{ setByRef<std::string>(key, val); }
-	inline void set(std::string key, Array& val)		{ setByRef<Array>(key, val); }
-	inline void set(std::string key, Object& val)		{ setByRef<Object>(key, val); }
-	inline void set(std::string key, Array* val)		{ setByRef<Array>(key, *val); }
-	inline void set(std::string key, Object* val)		{ setByRef<Object>(key, *val); }
+	inline ValueBase* set(std::string key,       char* val)	{ return set<std::string>(key, std::string(val)); }
+	inline ValueBase* set(std::string key, const char* val)	{ return set<std::string>(key, std::string(val)); }
+	inline ValueBase* set(std::string key, std::string& val)	{ return setByRef<std::string>(key, val); }
+	inline ValueBase* set(std::string key, Array& val)		{ return setByRef<Array>(key, val); }
+	inline ValueBase* set(std::string key, Object& val)		{ return setByRef<Object>(key, val); }
+	inline ValueBase* set(std::string key, Array* val)		{ return setByRef<Array>(key, *val); }
+	inline ValueBase* set(std::string key, Object* val)		{ return setByRef<Object>(key, *val); }
 
 
 	template <typename T>
-	void set(int key, T val)
+	ValueBase* set(int key, T val)
 	{
-		set(intToStr(key), val);
+		return set(intToStr(key), val);
 	}
 
-	void set(ValueBase*);
+	ValueBase* set(ValueBase*);
 
 	void unSet(std::string key);
 
