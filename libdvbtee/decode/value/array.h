@@ -47,26 +47,10 @@ public:
 	ValueBase* push(ValueBase*);
 
 	template <typename T>
-	ValueBase* pushByRef(T& val)
-	{
-		Value<T> *v = new Value<T>(val);
-		vector.push_back(v);
-		return v;
-	}
-
-	template <typename T>
 	ValueBase* push(T val)
 	{
-		return pushByRef<T>(val);
+		return push<T>(val, "");
 	}
-
-	inline ValueBase* push(      char* val)	{ return push<std::string>(std::string(val)); }
-	inline ValueBase* push(const char* val)	{ return push<std::string>(std::string(val)); }
-	inline ValueBase* push(std::string& val)	{ return pushByRef<std::string>(val); }
-	inline ValueBase* push(Array& val)		{ return pushByRef<Array>(val); }
-	inline ValueBase* push(Object& val)		{ return pushByRef<Object>(val); }
-	inline ValueBase* push(Array* val)		{ return pushByRef<Array>(*val); }
-	inline ValueBase* push(Object* val)		{ return pushByRef<Object>(*val); }
 
 	ValueBase* get(unsigned int idx);
 
@@ -91,6 +75,28 @@ public:
 
 private:
 	KeyValueVector vector;
+
+	template <typename T>
+	ValueBase* pushByRef(T& val, std::string idx)
+	{
+		Value<T> *v = new Value<T>(idx, val);
+		vector.push_back(v);
+		return v;
+	}
+
+	template <typename T>
+	ValueBase* push(T val, std::string idx)
+	{
+		return pushByRef<T>(val, idx);
+	}
+
+	inline ValueBase* push(      char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
+	inline ValueBase* push(const char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
+	inline ValueBase* push(std::string& val, std::string idx)	{ return pushByRef<std::string>(val, idx); }
+	inline ValueBase* push(Array& val, std::string idx)		{ return pushByRef<Array>(val, idx); }
+	inline ValueBase* push(Object& val, std::string idx)		{ return pushByRef<Object>(val, idx); }
+	inline ValueBase* push(Array* val, std::string idx)		{ return pushByRef<Array>(*val, idx); }
+	inline ValueBase* push(Object* val, std::string idx)		{ return pushByRef<Object>(*val, idx); }
 };
 
 }

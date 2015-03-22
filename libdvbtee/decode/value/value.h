@@ -42,7 +42,7 @@ public:
 	const std::string& getName();
 
 protected:
-	ValueBase(const std::type_info&, std::string = "");
+	ValueBase(const std::type_info&, std::string);
 
 private:
 	const std::type_info& m_type;
@@ -55,17 +55,6 @@ class Value : public ValueBase {
 public:
 	Value(std::string& n, T& v)
 	 : ValueBase(typeid(T), n)
-#if !VALUEBASE_POINTER
-	 , m_value(v)
-#endif
-	{
-#if VALUEBASE_POINTER
-		m_value = new T(v);
-#endif
-	}
-
-	Value(T& v)
-	 : ValueBase(typeid(T))
 #if !VALUEBASE_POINTER
 	 , m_value(v)
 #endif
