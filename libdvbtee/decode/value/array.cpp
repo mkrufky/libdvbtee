@@ -97,16 +97,22 @@ void Array::clear()
 	vector.clear();
 }
 
-void Array::push(ValueBase *val)
+ValueBase* Array::push(ValueBase *val)
 {
-	     if (val->getType() == typeid(int))			push(((Value<int>*)val)->get());
-	else if (val->getType() == typeid(unsigned short))	push(((Value<unsigned short>*)val)->get());
-	else if (val->getType() == typeid(unsigned char))	push(((Value<unsigned char>*)val)->get());
-	else if (val->getType() == typeid(std::string))		push(((Value<std::string>*)val)->get());
-	else if (val->getType() == typeid(bool))		push(((Value<bool>*)val)->get());
-	else if (val->getType() == typeid(double))		push(((Value<double>*)val)->get());
-	else if (val->getType() == typeid(Object))		push(((Value<Object>*)val)->get());
-	else if (val->getType() == typeid(Array))		push(((Value<Array>*)val)->get());
+	     if (val->getType() == typeid(int))			return push(((Value<int>*)val)->get());
+	else if (val->getType() == typeid(unsigned short))	return push(((Value<unsigned short>*)val)->get());
+	else if (val->getType() == typeid(unsigned char))	return push(((Value<unsigned char>*)val)->get());
+	else if (val->getType() == typeid(std::string))		return push(((Value<std::string>*)val)->get());
+	else if (val->getType() == typeid(bool))		return push(((Value<bool>*)val)->get());
+	else if (val->getType() == typeid(double))		return push(((Value<double>*)val)->get());
+	else if (val->getType() == typeid(Object))		return push(((Value<Object>*)val)->get());
+	else if (val->getType() == typeid(Array))		return push(((Value<Array>*)val)->get());
+	else {
+#if 1
+		fprintf(stderr, "%s unable to push unknown type: %s !!!\n", __func__, val->getType().name());
+#endif
+		return NULL;
+	}
 }
 
 DEFINE_DEFAULT_GETTERS(Array, unsigned int)

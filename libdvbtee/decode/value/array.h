@@ -44,27 +44,29 @@ public:
 
 	Array(const Array&);
 
-	void push(ValueBase*);
+	ValueBase* push(ValueBase*);
 
 	template <typename T>
-	void pushByRef(T& val)
+	ValueBase* pushByRef(T& val)
 	{
-		vector.push_back(new Value<T>(val));
+		Value<T> *v = new Value<T>(val);
+		vector.push_back(v);
+		return v;
 	}
 
 	template <typename T>
-	void push(T val)
+	ValueBase* push(T val)
 	{
-		pushByRef<T>(val);
+		return pushByRef<T>(val);
 	}
 
-	inline void push(      char* val)	{ push<std::string>(std::string(val)); }
-	inline void push(const char* val)	{ push<std::string>(std::string(val)); }
-	inline void push(std::string& val)	{ pushByRef<std::string>(val); }
-	inline void push(Array& val)		{ pushByRef<Array>(val); }
-	inline void push(Object& val)		{ pushByRef<Object>(val); }
-	inline void push(Array* val)		{ pushByRef<Array>(*val); }
-	inline void push(Object* val)		{ pushByRef<Object>(*val); }
+	inline ValueBase* push(      char* val)	{ return push<std::string>(std::string(val)); }
+	inline ValueBase* push(const char* val)	{ return push<std::string>(std::string(val)); }
+	inline ValueBase* push(std::string& val)	{ return pushByRef<std::string>(val); }
+	inline ValueBase* push(Array& val)		{ return pushByRef<Array>(val); }
+	inline ValueBase* push(Object& val)		{ return pushByRef<Object>(val); }
+	inline ValueBase* push(Array* val)		{ return pushByRef<Array>(*val); }
+	inline ValueBase* push(Object* val)		{ return pushByRef<Object>(*val); }
 
 	ValueBase* get(unsigned int idx);
 
