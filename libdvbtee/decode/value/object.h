@@ -45,6 +45,49 @@ public:
 	Object(const Object&);
 
 	template <typename T>
+	ValueBase* set(std::string key, T val)
+	{
+		return setByRef<T>(key, val);
+	}
+
+	inline ValueBase* set(std::string key,       char* val)	{ return set<std::string>(key, std::string(val)); }
+	inline ValueBase* set(std::string key, const char* val)	{ return set<std::string>(key, std::string(val)); }
+	inline ValueBase* set(std::string key, std::string& val)	{ return setByRef<std::string>(key, val); }
+	inline ValueBase* set(std::string key, Array& val)		{ return setByRef<Array>(key, val); }
+	inline ValueBase* set(std::string key, Object& val)		{ return setByRef<Object>(key, val); }
+	inline ValueBase* set(std::string key, Array* val)		{ return setByRef<Array>(key, *val); }
+	inline ValueBase* set(std::string key, Object* val)		{ return setByRef<Object>(key, *val); }
+
+	template <typename T>
+	ValueBase* set(int key, T val)
+	{
+		return set(intToStr(key), val);
+	}
+
+	ValueBase* set(ValueBase*);
+
+	void unSet(std::string key);
+	void unSet(int key);
+
+	void clear();
+
+	ValueBase* get(std::string key);
+	ValueBase* get(int key);
+
+	template <typename T> T& get(std::string key);
+
+	template <typename T>
+	T& get(int key)
+	{
+		return get<T>(intToStr(key));
+	}
+
+	const std::string toJson();
+
+private:
+	KeyValueMap map;
+
+	template <typename T>
 	ValueBase* setByRef(std::string& key, T& val)
 	{
 		if (map.count(key))
@@ -59,40 +102,6 @@ public:
 	}
 
 	template <typename T>
-	ValueBase* set(std::string key, T val)
-	{
-		return setByRef<T>(key, val);
-	}
-
-	inline ValueBase* set(std::string key,       char* val)	{ return set<std::string>(key, std::string(val)); }
-	inline ValueBase* set(std::string key, const char* val)	{ return set<std::string>(key, std::string(val)); }
-	inline ValueBase* set(std::string key, std::string& val)	{ return setByRef<std::string>(key, val); }
-	inline ValueBase* set(std::string key, Array& val)		{ return setByRef<Array>(key, val); }
-	inline ValueBase* set(std::string key, Object& val)		{ return setByRef<Object>(key, val); }
-	inline ValueBase* set(std::string key, Array* val)		{ return setByRef<Array>(key, *val); }
-	inline ValueBase* set(std::string key, Object* val)		{ return setByRef<Object>(key, *val); }
-
-
-	template <typename T>
-	ValueBase* set(int key, T val)
-	{
-		return set(intToStr(key), val);
-	}
-
-	ValueBase* set(ValueBase*);
-
-	void unSet(std::string key);
-
-	inline void unSet(int key)
-	{
-		unSet(intToStr(key));
-	}
-
-	void clear();
-
-	ValueBase* get(std::string key);
-
-	template <typename T>
 	T& get(std::string& key, T& def)
 	{
 		if (map.count(key)) {
@@ -102,24 +111,6 @@ public:
 		}
 		return def;
 	}
-
-	template <typename T> T& get(std::string key);
-
-	inline ValueBase* get(int key)
-	{
-		return get(intToStr(key));
-	}
-
-	template <typename T>
-	T& get(int key)
-	{
-		return get<T>(intToStr(key));
-	}
-
-	const std::string toJson();
-
-private:
-	KeyValueMap map;
 
 	std::string intToStr(int);
 };

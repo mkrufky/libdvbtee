@@ -62,12 +62,22 @@ ValueBase *Object::get(std::string key)
 	return NULL;
 }
 
+ValueBase *Object::get(int key)
+{
+	return get(intToStr(key));
+}
+
 void Object::unSet(std::string key)
 {
 	if (map.count(key)) {
 		delete map[key];
 		map.erase(key);
 	}
+}
+
+void Object::unSet(int key)
+{
+	unSet(intToStr(key));
 }
 
 void Object::clear()
