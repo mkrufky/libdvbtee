@@ -42,7 +42,7 @@ const std::type_info& ValueBase::getType()
 	return m_type;
 }
 
-const std::string& ValueBase::getName()
+const std::string& ValueBase::getName() const
 {
 	return m_name;
 }
@@ -69,9 +69,31 @@ const std::string ValueBase::toJson()
 	else if (m_type == typeid(Array))		s << ((Value<Array>*)this)->get().toJson().c_str();
 	else if (m_type == typeid(time_t))		s << (unsigned long)((Value<time_t>*)this)->get();
 	else if (m_type == typeid(size_t))		s << (unsigned long)((Value<time_t>*)this)->get();
+	else if (m_type == typeid(void))		s << ((ValueUndefined*)this)->get();
+	// else // FIXME
 
 	if (s.str().length())
 		return s.str();
 
+	return "undefined";
+}
+
+
+ValueUndefined::ValueUndefined(std::string n)
+	: ValueBase(typeid(void), n)
+{
+}
+
+ValueUndefined::ValueUndefined(const ValueUndefined &v)
+	: ValueBase(typeid(void), v.getName())
+{
+}
+
+ValueUndefined::~ValueUndefined()
+{
+}
+
+std::string ValueUndefined::get()
+{
 	return "undefined";
 }

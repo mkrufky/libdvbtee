@@ -28,6 +28,8 @@ using namespace dvbtee::decode;
 
 #define DBG 0
 
+static ValueUndefined valueUndefined;
+
 Object::Object()
 {
 #if DBG
@@ -59,7 +61,7 @@ ValueBase *Object::get(std::string key)
 	if (map.count(key))
 		return map[key];
 
-	return NULL;
+	return &valueUndefined;
 }
 
 ValueBase *Object::get(int key)
@@ -131,10 +133,15 @@ ValueBase* Object::set(ValueBase *val)
 	else if (val->getType() == typeid(Object))		return set(val->getName(), ((Value<Object>*)val)->get());
 	else if (val->getType() == typeid(Array))		return set(val->getName(), ((Value<Array>*)val)->get());
 	else {
-#if 1
 		fprintf(stderr, "%s unable to set %s, unknown type: %s !!!\n", __func__, val->getName().c_str(), val->getType().name());
-#endif
-		return NULL;
+
+		const std::string& key = val->getName();
+		if (map.count(key))
+			delete map[key];
+
+		ValueBase *v = new ValueUndefined(key);
+		map[key] = v;
+		return v;
 	}
 
 }

@@ -39,7 +39,7 @@ public:
 	const std::string toJson();
 
 	const std::type_info& getType();
-	const std::string& getName();
+	const std::string& getName() const;
 
 protected:
 	ValueBase(const std::type_info&, std::string);
@@ -106,6 +106,14 @@ private:
 	*
 #endif
 	m_value;
+};
+
+class ValueUndefined : public ValueBase {
+public:
+	ValueUndefined(std::string n = "");
+	ValueUndefined(const ValueUndefined&);
+	~ValueUndefined();
+	std::string get();
 };
 
 }

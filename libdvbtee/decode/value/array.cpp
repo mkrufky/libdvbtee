@@ -28,6 +28,8 @@ using namespace dvbtee::decode;
 
 #define DBG 0
 
+static ValueUndefined valueUndefined;
+
 Array::Array(std::string idx)
  : idxField(idx)
 {
@@ -90,7 +92,7 @@ ValueBase *Array::get(unsigned int idx)
 	if (idx <= vector.size())
 		return vector[idx];
 
-	return NULL;
+	return &valueUndefined;
 }
 
 void Array::updateIndex(std::string key, ValueBase *val)
@@ -111,7 +113,7 @@ std::string &Array::assignIndex(Object &obj, std::string &index)
 
 ValueBase *Array::getByName(std::string idx)
 {
-	if (!indices.count(idx)) return NULL;
+	if (!indices.count(idx)) return &valueUndefined;
 
 	return indices[idx];
 }
@@ -172,10 +174,11 @@ ValueBase* Array::push(ValueBase *val)
 	else if (val->getType() == typeid(Object))		return push(((Value<Object>*)val)->get(), val->getName());
 	else if (val->getType() == typeid(Array))		return push(((Value<Array>*)val)->get(), val->getName());
 	else {
-#if 1
 		fprintf(stderr, "%s unable to push unknown type: %s !!!\n", __func__, val->getType().name());
-#endif
-		return NULL;
+
+		ValueBase *v = new ValueUndefined(val->getName());
+		vector.push_back(v);
+		return v;
 	}
 }
 
