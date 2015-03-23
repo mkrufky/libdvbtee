@@ -59,6 +59,7 @@ const std::string ValueBase::toJson()
 	std::stringstream s;
 
 	     if (m_type == typeid(int))			s << ((Value<int>*)this)->get();
+	else if (m_type == typeid(long))		s << ((Value<long>*)this)->get();
 	else if (m_type == typeid(unsigned short))	s << ((Value<unsigned short>*)this)->get();
 	else if (m_type == typeid(unsigned char))	s << (unsigned int)((Value<unsigned char>*)this)->get();
 	else if (m_type == typeid(std::string))		s << "'" << ((Value<std::string>*)this)->get() << "'";

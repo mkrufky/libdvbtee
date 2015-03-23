@@ -122,6 +122,7 @@ std::string Object::intToStr(int i)
 ValueBase* Object::set(ValueBase *val)
 {
 	     if (val->getType() == typeid(int))			return set(val->getName(), ((Value<int>*)val)->get());
+	else if (val->getType() == typeid(long))		return set(val->getName(), ((Value<long>*)val)->get());
 	else if (val->getType() == typeid(unsigned short))	return set(val->getName(), ((Value<unsigned short>*)val)->get());
 	else if (val->getType() == typeid(unsigned char))	return set(val->getName(), ((Value<unsigned char>*)val)->get());
 	else if (val->getType() == typeid(std::string))		return set(val->getName(), ((Value<std::string>*)val)->get());

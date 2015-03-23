@@ -40,6 +40,7 @@ template <> OUT& CLASS::get<OUT>(IN in) \
 namespace dvbtee { \
 namespace decode { \
 	GET_DEFAULT_VALUE(CLASS, IN, int, 0) \
+	GET_DEFAULT_VALUE(CLASS, IN, long, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, unsigned short, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, unsigned char, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, std::string, "") \

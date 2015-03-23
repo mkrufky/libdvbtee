@@ -163,6 +163,7 @@ ValueBase *Array::push(Object *o)
 ValueBase* Array::push(ValueBase *val)
 {
 	     if (val->getType() == typeid(int))			return push(((Value<int>*)val)->get(), val->getName());
+	else if (val->getType() == typeid(long))		return push(((Value<long>*)val)->get(), val->getName());
 	else if (val->getType() == typeid(unsigned short))	return push(((Value<unsigned short>*)val)->get(), val->getName());
 	else if (val->getType() == typeid(unsigned char))	return push(((Value<unsigned char>*)val)->get(), val->getName());
 	else if (val->getType() == typeid(std::string))		return push(((Value<std::string>*)val)->get(), val->getName());
