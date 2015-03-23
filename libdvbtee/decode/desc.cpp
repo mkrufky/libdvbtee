@@ -106,7 +106,7 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 #endif
 }
 
-Descriptor *desc::lastDesc(uint8_t tag)
+Descriptor *desc::last(uint8_t tag)
 {
 	return store.last(tag);
 }

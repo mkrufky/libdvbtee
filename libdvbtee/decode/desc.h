@@ -40,7 +40,7 @@ public:
 
 	dvbtee::decode::DescriptorStore store;
 
-	dvbtee::decode::Descriptor *lastDesc(uint8_t);
+	dvbtee::decode::Descriptor *last(uint8_t);
 };
 
 #endif /* __DECODE_H__ */
