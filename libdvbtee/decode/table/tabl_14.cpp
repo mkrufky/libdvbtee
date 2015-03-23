@@ -40,9 +40,9 @@ static std::string TABLE_NAME = "TOT[14]";
 
 void tot::store(dvbpsi_tot_t *p_tot)
 {
-	time_t o_time = m_time;
+	time_t o_time = get<time_t>("time");
 
-	m_time = datetime_utc(p_tot->i_utc_time);
+	time_t m_time = datetime_utc(p_tot->i_utc_time);
 
 	//dbg_time("%s", ctime(&stream_time));
 
@@ -67,28 +67,24 @@ bool tot::ingest(TableStore *s, dvbpsi_tot_t *t, TableWatcher *w)
 
 tot::tot(Decoder *parent)
  : Table(parent, TABLE_NAME, TABLEID)
- , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 tot::tot(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 tot::tot(Decoder *parent, TableWatcher *watcher, dvbpsi_tot_t *p_tot)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_time(-1)
 {
 	store(p_tot);
 }
 
 tot::tot(Decoder *parent, dvbpsi_tot_t *p_tot)
  : Table(parent, TABLE_NAME, TABLEID)
- , m_time(-1)
 {
 	store(p_tot);
 }

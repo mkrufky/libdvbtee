@@ -42,13 +42,9 @@ public:
 	tot(Decoder *, dvbpsi_tot_t*);
 	virtual ~tot();
 
-	const time_t& getTime() const { return m_time; }
-
 	void store(dvbpsi_tot_t*);
 
 	static bool ingest(TableStore *s, dvbpsi_tot_t *t, TableWatcher *w = NULL);
-private:
-	time_t m_time;
 };
 
 }

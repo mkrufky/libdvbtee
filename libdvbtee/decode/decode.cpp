@@ -403,10 +403,9 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 		break;
 	}
 	case 0x14:
-		stream_time = ((dvbtee::decode::tot*)table)->getTime();
-		break;
 	case 0xcd:
-		stream_time = ((dvbtee::decode::stt*)table)->getTime();
+		stream_time = table->get<time_t>("time");
+		dbg_time("%s", ctime(&stream_time));
 		break;
 	default:
 		break;

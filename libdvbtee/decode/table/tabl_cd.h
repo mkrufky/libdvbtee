@@ -40,13 +40,9 @@ public:
 	stt(Decoder *, dvbpsi_atsc_stt_t*);
 	virtual ~stt();
 
-	const time_t& getTime() const { return m_time; }
-
 	void store(dvbpsi_atsc_stt_t*);
 
 	static bool ingest(TableStore *s, dvbpsi_atsc_stt_t *t, TableWatcher *w = NULL);
-private:
-	time_t m_time;
 };
 
 }

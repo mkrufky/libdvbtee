@@ -50,8 +50,6 @@
 
 
 #include "tabl_00.h"
-#include "tabl_14.h"
-#include "tabl_cd.h"
 
 #if (DVBPSI_VERSION_INT < ((1<<16)+(0<<8)+0))
 #define USING_DVBPSI_VERSION_0 1

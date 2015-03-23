@@ -40,9 +40,9 @@ static std::string TABLE_NAME = "STT[CD]";
 
 void stt::store(dvbpsi_atsc_stt_t *p_stt)
 {
-	time_t o_time = m_time;
+	time_t o_time = get<time_t>("time");
 
-	m_time = atsc_datetime_utc(p_stt->i_system_time);
+	time_t m_time = atsc_datetime_utc(p_stt->i_system_time);
 
 	//dbg_time("%s", ctime(&m_time));
 
@@ -67,28 +67,24 @@ bool stt::ingest(TableStore *s, dvbpsi_atsc_stt_t *t, TableWatcher *w)
 
 stt::stt(Decoder *parent)
  : Table(parent, TABLE_NAME, TABLEID)
- , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 stt::stt(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_time(-1)
 {
 	//store table later (probably repeatedly)
 }
 
 stt::stt(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_stt_t *p_stt)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_time(-1)
 {
 	store(p_stt);
 }
 
 stt::stt(Decoder *parent, dvbpsi_atsc_stt_t *p_stt)
  : Table(parent, TABLE_NAME, TABLEID)
- , m_time(-1)
 {
 	store(p_stt);
 }
