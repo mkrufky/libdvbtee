@@ -26,7 +26,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "desc.h"
+#include "descriptor.h"
 
 //#include "dvbpsi/dvbpsi.h"
 #include "dvbpsi/pat.h"
@@ -285,7 +285,7 @@ private:
 	unsigned int                    services_w_eit_pf;
 	unsigned int                    services_w_eit_sched;
 
-	desc descriptors;
+	dvbtee::decode::DescriptorStore descriptors;
 };
 
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
@@ -314,7 +314,7 @@ public:
 	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x) : false; }
 	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; }
 
-	desc descriptors;
+	dvbtee::decode::DescriptorStore descriptors;
 
 	uint16_t orig_network_id;
 private:
@@ -405,7 +405,7 @@ public:
 	const decoded_sdt_t*   get_decoded_sdt();
 	const decoded_nit_t*   get_decoded_nit();
 
-	const desc*            get_descriptors() { return &descriptors; }
+	const dvbtee::decode::DescriptorStore* get_descriptors() { return &descriptors; }
 
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; }
 	const map_decoded_eit*      get_decoded_eit();
@@ -455,7 +455,7 @@ private:
 	//map_rcvd rcvd_eit;
 	map_decoded_atsc_ett decoded_ett;
 
-	desc descriptors;
+	dvbtee::decode::DescriptorStore descriptors;
 
 	void dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	void dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);

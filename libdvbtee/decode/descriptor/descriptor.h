@@ -68,7 +68,11 @@ private:
 
 class DescriptorStore : public Array {
 public:
+#if 1 // temporarily allowing NULL parent during refactoring
+	DescriptorStore(Decoder *parent = NULL);
+#else
 	DescriptorStore(Decoder *);
+#endif
 	~DescriptorStore();
 
 	bool add(dvbpsi_descriptor_t*);

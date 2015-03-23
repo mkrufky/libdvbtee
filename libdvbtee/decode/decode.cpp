@@ -518,7 +518,7 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 		//FIXME: descriptors
 		descriptors.decode(p_es->p_first_descriptor);
 
-		desc local_descriptors;
+		dvbtee::decode::DescriptorStore local_descriptors;
 		local_descriptors.decode(p_es->p_first_descriptor);
 
 		dvbtee::decode::Descriptor *d = local_descriptors.last(0x0a);
@@ -606,7 +606,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 		dprintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
 		descriptors.decode(p_channel->p_first_descriptor);
 
-		desc local_descriptors;
+		dvbtee::decode::DescriptorStore local_descriptors;
 		local_descriptors.decode(p_channel->p_first_descriptor);
 
 		std::string languages;
@@ -698,7 +698,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 	return true;
 }
 
-static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, desc* descriptors)
+static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, dvbtee::decode::DescriptorStore* descriptors)
 #define NIT_DBG 1
 {
 	if ((decoded_nit->version    == p_nit->i_version) &&
@@ -787,7 +787,7 @@ bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
 	return __take_nit(p_nit, &decoded_nit, &descriptors);
 }
 
-static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, desc* descriptors,
+static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::decode::DescriptorStore* descriptors,
 		       unsigned int* services_w_eit_pf, unsigned int* services_w_eit_sched)
 #define SDT_DBG 1
 {
@@ -891,7 +891,7 @@ bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 			  &services_w_eit_pf, &services_w_eit_sched);
 }
 
-bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descriptors, uint8_t eit_x)
+bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decode::DescriptorStore* descriptors, uint8_t eit_x)
 {
 #if USING_DVBPSI_VERSION_0
 	uint16_t __service_id = p_eit->i_service_id;
