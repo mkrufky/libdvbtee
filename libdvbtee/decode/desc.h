@@ -28,7 +28,6 @@
 #include <map>
 
 #include "descriptor.h"
-#include "desc_a1.h"
 
 
 class desc : public dvbtee::decode::Decoder

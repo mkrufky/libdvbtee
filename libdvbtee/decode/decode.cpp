@@ -519,13 +519,6 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 		//FIXME: descriptors
 		descriptors.decode(p_es->p_first_descriptor);
 
-#ifdef COPY_DRA1_FROM_VCT_TO_PMT // disabled, to be deleted
-		if (descriptors._a1.count(p_es->i_pid)) {
-			memcpy(cur_es.iso_639_code,
-			       descriptors._a1[p_es->i_pid].iso_639_code,
-			       sizeof(descriptors._a1[p_es->i_pid].iso_639_code));
-		}
-#endif
 		desc local_descriptors;
 		local_descriptors.decode(p_es->p_first_descriptor);
 
@@ -619,20 +612,22 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 
 		std::string languages;
 
-		dvbtee::decode::desc_a1* _a1 = (dvbtee::decode::desc_a1*)local_descriptors.lastDesc(0xa1);
-		if (_a1)
-		for (dvbtee::decode::desc_a1::svcloc_map_t::const_iterator iter_dra1 = _a1->map_svcloc.begin(); iter_dra1 != _a1->map_svcloc.end(); ++iter_dra1) {
-#ifdef COPY_DRA1_FROM_VCT_TO_PMT // disabled, to be deleted
-			//stuff descriptor 0xa1 lang codes into PMT table if PMT has been decoded
-			if (decoded_pmt.count(p_channel->i_program_number)) {
-				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_pid].iso_639_code,
-				       iter_dra1->second.iso_639_code, sizeof(iter_dra1->second.iso_639_code));
-				dprintf("copied service location descriptor from VCT into PMT");
+		dvbtee::decode::Descriptor *d = local_descriptors.lastDesc(0xa1);
+		if (d) {
+			dvbtee::decode::Array& a  = d->get<dvbtee::decode::Array>("serviceLocation");
+			for (unsigned int i = 0; i < a.size(); i++) {
+				Object& o = a.get<Object>(i);
+
+				std::string lang = o.get<std::string>("lang");
+				//o.get<uint16_t>("esPid");
+				//o.get<uint8_t>("streamType");
+				//o.get<std::string>("streamTypeString");
+
+				if (lang.length()) {
+					if (!languages.empty()) languages.append(", ");
+					languages.append(lang.c_str());
+				}
 			}
-#endif
-			if (!languages.empty()) languages.append(", ");
-			if (iter_dra1->second.iso_639_code[0])
-				for (int i=0; i<3; i++) languages.push_back(iter_dra1->second.iso_639_code[i]);
 		}
 #if VCT_DBG
 		unsigned char service_name[8] = { 0 };

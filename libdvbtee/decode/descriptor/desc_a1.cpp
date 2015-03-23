@@ -52,11 +52,7 @@ desc_a1::desc_a1(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 			dprintf("error!");
 			break;
 		}
-#if 1
-		map_svcloc[element->i_elementary_pid].elementary_pid = element->i_elementary_pid;
-		map_svcloc[element->i_elementary_pid].stream_type    = element->i_stream_type;
-		memcpy(map_svcloc[element->i_elementary_pid].iso_639_code, element->i_iso_639_code, 3);
-#endif
+
 		Object svcloc;
 
 		char __lang[4] = { 0 };

@@ -36,17 +36,6 @@ class desc_a1: public Descriptor {
 public:
 	desc_a1(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_a1();
-#if 1
-	typedef struct {
-		uint8_t       stream_type;
-		uint16_t      elementary_pid;
-		unsigned char iso_639_code[3];
-	} svcloc_t;
-
-	typedef std::map<uint16_t, svcloc_t> svcloc_map_t;
-
-	svcloc_map_t map_svcloc;
-#endif
 
 	/* Object& o  = o->getByName<Object>(pid);
 	 *
