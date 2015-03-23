@@ -47,6 +47,14 @@ public:
 
 	svcloc_map_t map_svcloc;
 #endif
+
+	/* Object& o  = o->getByName<Object>(pid);
+	 *
+	 * o.get<std::string>("lang");
+	 * o.get<uint16_t>("esPid");
+	 * o.get<uint8_t>("streamType");
+	 * o.get<std::string>("streamTypeString");
+	 */
 };
 
 }

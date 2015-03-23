@@ -44,6 +44,8 @@ desc_a1::desc_a1(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	dvbpsi_service_location_dr_t* dr = dvbpsi_DecodeServiceLocationDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
+	Array locations("esPid");
+
 	for (int i = 0; i < dr->i_number_elements; i ++) {
 		dvbpsi_service_location_element_t *element = &dr->elements[i];
 		if (!element) {
@@ -65,8 +67,10 @@ desc_a1::desc_a1(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 		svcloc.set("esPid", element->i_elementary_pid);
 		svcloc.set("streamType", element->i_stream_type);
 		svcloc.set("streamTypeString", streamtype_name(element->i_stream_type));
-		set(element->i_elementary_pid, svcloc);
+
+		locations.push(svcloc);
 	}
+	set("serviceLocation", locations);
 
 	dprintf("%s", toJson().c_str());
 
