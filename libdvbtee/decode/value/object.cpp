@@ -90,7 +90,7 @@ void Object::clear()
 	map.clear();
 }
 
-const std::string Object::toJson()
+const std::string Object::toJson() const
 {
 	std::stringstream s;
 
@@ -99,7 +99,7 @@ const std::string Object::toJson()
 	int count = 0;
 
 	s << "{ ";
-	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
+	for (KeyValueMap::const_iterator it = map.begin(); it != map.end(); ++it) {
 		ValueBase *val = it->second;
 
 		if (count) s << ", ";

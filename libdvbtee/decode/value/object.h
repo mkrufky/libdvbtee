@@ -82,7 +82,7 @@ public:
 		return get<T>(intToStr(key));
 	}
 
-	const std::string toJson();
+	const std::string toJson() const;
 
 private:
 	KeyValueMap map;
