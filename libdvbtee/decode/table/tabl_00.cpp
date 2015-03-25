@@ -49,18 +49,31 @@ void pat::store(dvbpsi_pat_t *p_pat)
 	m_version = p_pat->i_version;
 	m_programs.clear();
 
+	set("tsId", p_pat->i_ts_id);
+	set("version", p_pat->i_version);
+
+	Array programs("number");
+
 	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
 	while (p_program) {
-		m_programs[p_program->i_number] = p_program->i_pid;
-
-//		rcvd_pmt[p_program->i_number] = false;
 #if PAT_DBG
 		fprintf(stderr, "  %10d | %x\n",
 			p_program->i_number,
-			m_programs[p_program->i_number]);
+			p_program->i_pid);
 #endif
+		Object program;
+		program.set("number", p_program->i_number);
+		program.set("pid", p_program->i_pid);
+		programs.push(program);
+
+		m_programs[p_program->i_number] = p_program->i_pid;
+
 		p_program = p_program->p_next;
 	}
+
+	set("programs", programs);
+
+	dprintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
