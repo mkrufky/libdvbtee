@@ -81,6 +81,8 @@ public:
 
 	const size_t size();
 
+	const std::string& getIndex() const;
+
 	const std::string toJson();
 
 private:

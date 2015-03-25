@@ -87,6 +87,11 @@ const size_t Array::size()
 	return vector.size();
 }
 
+const std::string &Array::getIndex() const
+{
+	return idxField;
+}
+
 ValueBase *Array::get(unsigned int idx)
 {
 	if (idx <= vector.size())
