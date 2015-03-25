@@ -83,7 +83,7 @@ public:
 
 	const std::string& getIndex() const;
 
-	const std::string toJson();
+	const std::string toJson() const;
 
 private:
 	KeyValueVector vector;

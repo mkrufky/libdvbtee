@@ -59,7 +59,7 @@ Array::Array(const Array &obj)
 #endif
 }
 
-const std::string Array::toJson()
+const std::string Array::toJson() const
 {
 	std::stringstream s;
 
