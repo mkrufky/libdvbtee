@@ -384,32 +384,39 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 	dprintf("0x%02x", tId);
 
 	switch (tId) {
-	case 0x00:
-	{
-		dvbtee::decode::pat *patTable = (dvbtee::decode::pat*)table;
-
-		decoded_pat.ts_id    = patTable->getTsId();
-		decoded_pat.version  = patTable->getVersion();
-		decoded_pat.programs = patTable->getPrograms();
-
-		printf("tsid %04x, ver %02x, %lu programs\n", decoded_pat.ts_id, decoded_pat.version, decoded_pat.programs.size());
-
-		for (map_decoded_pat_programs::const_iterator iter = decoded_pat.programs.begin();
-			iter != decoded_pat.programs.end(); ++iter)
-		{
-			// fixme!
-			rcvd_pmt[iter->first] = false;
-		}
+	case 0x00: /* PAT */
+		updatePAT(table);
 		break;
-	}
-	case 0x14:
-	case 0xcd:
+	case 0x14: /* TDT / TOT */
+	case 0xcd: /* STT */
 		stream_time = table->get<time_t>("time");
 		dbg_time("%s", ctime(&stream_time));
 		break;
 	default:
 		break;
 	}
+}
+
+bool decode::updatePAT(dvbtee::decode::Table *table)
+{
+	if ((!table) || (!table->isValid()) || (0x00 != table->getTableid())) return false;
+
+	dvbtee::decode::pat *patTable = (dvbtee::decode::pat*)table;
+
+	decoded_pat.ts_id    = patTable->getTsId();
+	decoded_pat.version  = patTable->getVersion();
+	decoded_pat.programs = patTable->getPrograms();
+
+	dprintf("tsid %04x, ver %02x, %lu programs", decoded_pat.ts_id, decoded_pat.version, decoded_pat.programs.size());
+
+	for (map_decoded_pat_programs::const_iterator iter = decoded_pat.programs.begin();
+		iter != decoded_pat.programs.end(); ++iter)
+	{
+		// fixme!
+		rcvd_pmt[iter->first] = false;
+	}
+
+	return true;
 }
 
 /* -- STREAM TIME -- */
