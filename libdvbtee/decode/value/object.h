@@ -45,26 +45,26 @@ public:
 	Object(const Object&);
 
 	template <typename T>
-	ValueBase* set(std::string key, T val)
+	const ValueBase* set(std::string key, T val)
 	{
 		return setByRef<T>(key, val);
 	}
 
-	inline ValueBase* set(std::string key,       char* val)	{ return set<std::string>(key, std::string(val)); }
-	inline ValueBase* set(std::string key, const char* val)	{ return set<std::string>(key, std::string(val)); }
-	inline ValueBase* set(std::string key, std::string& val)	{ return setByRef<std::string>(key, val); }
-	inline ValueBase* set(std::string key, Array& val)		{ return setByRef<Array>(key, val); }
-	inline ValueBase* set(std::string key, Object& val)		{ return setByRef<Object>(key, val); }
-	inline ValueBase* set(std::string key, Array* val)		{ return setByRef<Array>(key, *val); }
-	inline ValueBase* set(std::string key, Object* val)		{ return setByRef<Object>(key, *val); }
+	inline const ValueBase* set(std::string key,       char* val)	{ return set<std::string>(key, std::string(val)); }
+	inline const ValueBase* set(std::string key, const char* val)	{ return set<std::string>(key, std::string(val)); }
+	inline const ValueBase* set(std::string key, std::string& val)	{ return setByRef<std::string>(key, val); }
+	inline const ValueBase* set(std::string key, Array& val)	{ return setByRef<Array>(key, val); }
+	inline const ValueBase* set(std::string key, Object& val)	{ return setByRef<Object>(key, val); }
+	inline const ValueBase* set(std::string key, Array* val)	{ return setByRef<Array>(key, *val); }
+	inline const ValueBase* set(std::string key, Object* val)	{ return setByRef<Object>(key, *val); }
 
 	template <typename T>
-	ValueBase* set(int key, T val)
+	const ValueBase* set(int key, T val)
 	{
 		return set(intToStr(key), val);
 	}
 
-	ValueBase* set(ValueBase*);
+	const ValueBase* set(ValueBase*);
 
 	void unSet(std::string key);
 	void unSet(int key);
@@ -88,7 +88,7 @@ private:
 	KeyValueMap map;
 
 	template <typename T>
-	ValueBase* setByRef(std::string& key, T& val)
+	const ValueBase* setByRef(std::string& key, T& val)
 	{
 		if (map.count(key))
 			delete map[key];
