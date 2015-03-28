@@ -108,7 +108,7 @@ void Array::updateIndex(std::string key, ValueBase *val)
 std::string &Array::assignIndex(Object &obj, std::string &index)
 {
 	if (idxField.length()) {
-		ValueBase *val = obj.get(idxField);
+		const ValueBase *val = obj.get(idxField);
 		index = (typeid(std::string) == val->getType()) ?
 			obj.get<std::string>(idxField) : index = val->toJson();
 	}

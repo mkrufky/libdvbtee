@@ -71,8 +71,8 @@ public:
 
 	void clear();
 
-	ValueBase* get(std::string key);
-	ValueBase* get(int key);
+	const ValueBase* get(std::string key) const;
+	const ValueBase *get(int key);
 
 	template <typename T> const T& get(std::string key) const;
 

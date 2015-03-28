@@ -56,15 +56,16 @@ Object::Object(const Object &obj)
 #endif
 }
 
-ValueBase *Object::get(std::string key)
+const ValueBase *Object::get(std::string key) const
 {
-	if (map.count(key))
-		return map[key];
+	KeyValueMap::const_iterator it = map.find(key);
+	if (it != map.end())
+		return it->second;
 
 	return &valueUndefined;
 }
 
-ValueBase *Object::get(int key)
+const ValueBase *Object::get(int key)
 {
 	return get(intToStr(key));
 }
