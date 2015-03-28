@@ -102,10 +102,11 @@ private:
 	}
 
 	template <typename T>
-	T& get(std::string& key, T& def)
+	T& get(std::string& key, T& def) const
 	{
-		if (map.count(key)) {
-			Value<T> *val = (Value<T>*)map[key];
+		KeyValueMap::const_iterator it = map.find(key);
+		if (it != map.end()) {
+			Value<T> *val = (Value<T>*)(it->second);
 			if (val->checkType(typeid(T)))
 				return val->get();
 		}

@@ -113,7 +113,7 @@ private:
 	inline ValueBase* push(Array* val, std::string idx)		{ return pushByRef<Array>(*val, idx); }
 
 	template <typename T>
-	T& get(unsigned int &idx, T& def)
+	T& get(unsigned int &idx, T& def) const
 	{
 		if (idx <= vector.size()) {
 			Value<T> *val = (Value<T>*)vector[idx];
