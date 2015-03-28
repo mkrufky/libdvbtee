@@ -65,7 +65,7 @@ const ValueBase *Object::get(std::string key) const
 	return &valueUndefined;
 }
 
-const ValueBase *Object::get(int key)
+const ValueBase *Object::get(int key) const
 {
 	return get(intToStr(key));
 }

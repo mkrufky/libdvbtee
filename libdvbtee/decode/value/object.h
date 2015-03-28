@@ -72,7 +72,7 @@ public:
 	void clear();
 
 	const ValueBase* get(std::string key) const;
-	const ValueBase *get(int key);
+	const ValueBase *get(int key) const;
 
 	template <typename T> const T& get(std::string key) const;
 
