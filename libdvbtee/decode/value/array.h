@@ -70,10 +70,10 @@ public:
 		return set<T>(intToStr(key), val);
 	}
 
-	ValueBase* getByName(std::string idx);
-	ValueBase* getByName(unsigned int idx);
+	const ValueBase *getByName(std::string idx) const;
+	const ValueBase* getByName(unsigned int idx) const;
 
-	ValueBase* get(unsigned int idx);
+	const ValueBase *get(unsigned int idx) const;
 
 	template <typename T> const T& get(unsigned int idx) const;
 
