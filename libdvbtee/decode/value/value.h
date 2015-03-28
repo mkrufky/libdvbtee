@@ -113,7 +113,7 @@ public:
 	ValueUndefined(std::string n = "");
 	ValueUndefined(const ValueUndefined&);
 	~ValueUndefined();
-	std::string get();
+	const std::string get() const;
 };
 
 }

@@ -93,7 +93,7 @@ ValueUndefined::~ValueUndefined()
 {
 }
 
-std::string ValueUndefined::get()
+const std::string ValueUndefined::get() const
 {
 	return "undefined";
 }
