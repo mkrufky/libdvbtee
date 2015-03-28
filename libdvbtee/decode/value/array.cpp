@@ -100,7 +100,7 @@ const ValueBase *Array::get(unsigned int idx) const
 	return &valueUndefined;
 }
 
-void Array::updateIndex(std::string key, ValueBase *val)
+void Array::updateIndex(std::string key, const ValueBase *val)
 {
 	if (key.length()) indices[key] = val;
 }
@@ -118,7 +118,7 @@ std::string &Array::assignIndex(Object &obj, std::string &index)
 
 const ValueBase *Array::getByName(std::string idx) const
 {
-	std::map<std::string, ValueBase*>::const_iterator it = indices.find(idx);
+	std::map<std::string, const ValueBase*>::const_iterator it = indices.find(idx);
 	if (it == indices.end())
 		return &valueUndefined;
 
@@ -146,30 +146,30 @@ const std::string Array::intToStr(int i) const
 	return s.str();
 }
 
-ValueBase* Array::pushObject(Object &val, std::string idx)
+const ValueBase* Array::pushObject(Object &val, std::string idx)
 {
 	bool extractIndex = (!idx.length());
 
 	if (extractIndex) assignIndex(val, idx);
 
-	ValueBase *v = pushByRef<Object>(val, idx);
+	const ValueBase *v = pushByRef<Object>(val, idx);
 
 	if (extractIndex) updateIndex(idx, v);
 
 	return v;
 }
 
-ValueBase *Array::push(Object &o)
+const ValueBase *Array::push(Object &o)
 {
 	return pushObject(o, "");
 }
 
-ValueBase *Array::push(Object *o)
+const ValueBase *Array::push(Object *o)
 {
 	return push(*o);
 }
 
-ValueBase* Array::push(ValueBase *val)
+const ValueBase* Array::push(ValueBase *val)
 {
 	     if (val->getType() == typeid(int))			return push(((Value<int>*)val)->get(), val->getName());
 	else if (val->getType() == typeid(long))		return push(((Value<long>*)val)->get(), val->getName());
