@@ -37,7 +37,7 @@ ValueBase::~ValueBase()
 {
 }
 
-const std::type_info& ValueBase::getType()
+const std::type_info& ValueBase::getType() const
 {
 	return m_type;
 }
@@ -47,14 +47,14 @@ const std::string& ValueBase::getName() const
 	return m_name;
 }
 
-bool ValueBase::checkType(const std::type_info& typeRequested)
+const bool ValueBase::checkType(const std::type_info& typeRequested) const
 {
 	bool ret = (typeRequested == m_type);
 	if (!ret) fprintf(stderr, "Incorrect type requested for %s, requested %s, should be %s\n", m_name.length() ? m_name.c_str() : "[anonymous]", typeRequested.name(), typeid(m_type).name());
 	return ret;
 }
 
-const std::string ValueBase::toJson()
+const std::string ValueBase::toJson() const
 {
 	std::stringstream s;
 

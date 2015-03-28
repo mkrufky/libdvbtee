@@ -35,10 +35,10 @@ class ValueBase {
 public:
 	virtual ~ValueBase();
 
-	bool checkType(const std::type_info&);
-	const std::string toJson();
+	const bool checkType(const std::type_info&) const;
+	const std::string toJson() const;
 
-	const std::type_info& getType();
+	const std::type_info& getType() const;
 	const std::string& getName() const;
 
 protected:
