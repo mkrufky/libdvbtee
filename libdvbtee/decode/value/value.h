@@ -101,7 +101,7 @@ public:
 	}
 
 private:
-	T
+	const T
 #if VALUEBASE_POINTER
 	*
 #endif
