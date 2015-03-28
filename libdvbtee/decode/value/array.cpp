@@ -82,7 +82,7 @@ const std::string Array::toJson() const
 
 }
 
-const size_t Array::size()
+const size_t Array::size() const
 {
 	return vector.size();
 }
