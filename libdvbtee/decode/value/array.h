@@ -75,7 +75,7 @@ public:
 
 	ValueBase* get(unsigned int idx);
 
-	template <typename T> T& get(unsigned int idx);
+	template <typename T> const T& get(unsigned int idx) const;
 
 	void clear();
 
@@ -113,7 +113,7 @@ private:
 	inline ValueBase* push(Array* val, std::string idx)		{ return pushByRef<Array>(*val, idx); }
 
 	template <typename T>
-	T& get(unsigned int &idx, T& def) const
+	const T& get(unsigned int &idx, T& def) const
 	{
 		if (idx <= vector.size()) {
 			Value<T> *val = (Value<T>*)vector[idx];
@@ -126,7 +126,7 @@ private:
 	void updateIndex(std::string, ValueBase*);
 	std::string& assignIndex(Object&, std::string&);
 
-	std::string intToStr(int);
+	const std::string intToStr(int) const;
 };
 
 }

@@ -114,7 +114,7 @@ const std::string Object::toJson() const
 	return s.str();
 }
 
-std::string Object::intToStr(int i)
+const std::string Object::intToStr(int i) const
 {
 	std::stringstream s;
 	s << i;

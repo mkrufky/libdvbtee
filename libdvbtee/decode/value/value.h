@@ -82,7 +82,7 @@ public:
 #endif
 	}
 
-	T& get()
+	const T& get() const
 	{
 		if (!checkType(typeid(T))) {}
 		return

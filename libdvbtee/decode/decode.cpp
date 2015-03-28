@@ -530,11 +530,11 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 
 		dvbtee::decode::Descriptor *d = local_descriptors.last(0x0a);
 		if (d) {
-			dvbtee::decode::Array &a = d->get<dvbtee::decode::Array>("ISO639Lang");
+			const dvbtee::decode::Array &a = d->get<dvbtee::decode::Array>("ISO639Lang");
 			for (unsigned int i = 0; i < a.size(); i++) {
 
-				Object &entry(a.get<Object>(i));
-				std::string &lang(entry.get<std::string>("language"));
+				const Object &entry(a.get<Object>(i));
+				const std::string &lang(entry.get<std::string>("language"));
 
 				if (!lang.length())
 					continue;
@@ -620,11 +620,11 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 
 		dvbtee::decode::Descriptor *d = local_descriptors.last(0xa1);
 		if (d) {
-			dvbtee::decode::Array& a  = d->get<dvbtee::decode::Array>("serviceLocation");
+			const dvbtee::decode::Array& a  = d->get<dvbtee::decode::Array>("serviceLocation");
 			for (unsigned int i = 0; i < a.size(); i++) {
-				Object& o = a.get<Object>(i);
+				const Object& o = a.get<Object>(i);
 
-				std::string lang = o.get<std::string>("lang");
+				const std::string lang = o.get<std::string>("lang");
 				//o.get<uint16_t>("esPid");
 				//o.get<uint8_t>("streamType");
 				//o.get<std::string>("streamTypeString");

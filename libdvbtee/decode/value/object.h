@@ -74,10 +74,10 @@ public:
 	ValueBase* get(std::string key);
 	ValueBase* get(int key);
 
-	template <typename T> T& get(std::string key);
+	template <typename T> const T& get(std::string key) const;
 
 	template <typename T>
-	T& get(int key)
+	const T& get(int key) const
 	{
 		return get<T>(intToStr(key));
 	}
@@ -102,7 +102,7 @@ private:
 	}
 
 	template <typename T>
-	T& get(std::string& key, T& def) const
+	const T& get(std::string& key, T& def) const
 	{
 		KeyValueMap::const_iterator it = map.find(key);
 		if (it != map.end()) {
@@ -113,7 +113,7 @@ private:
 		return def;
 	}
 
-	std::string intToStr(int);
+	const std::string intToStr(int) const;
 };
 
 }

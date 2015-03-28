@@ -23,14 +23,14 @@
 #define __VALUE_MACROS_H__
 
 #define GET_DEFAULT(CLASS, IN, OUT) \
-template <> OUT& CLASS::get<OUT>(IN in) \
+template <> const OUT& CLASS::get<OUT>(IN in) const \
 { \
 	OUT def; \
 	return get<OUT>(in, def); \
 }
 
 #define GET_DEFAULT_VALUE(CLASS, IN, OUT, DEFAULT) \
-template <> OUT& CLASS::get<OUT>(IN in) \
+template <> const OUT& CLASS::get<OUT>(IN in) const \
 { \
 	OUT def = DEFAULT; \
 	return get<OUT>(in, def); \

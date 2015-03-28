@@ -137,7 +137,7 @@ void Array::clear()
 	indices.clear();
 }
 
-std::string Array::intToStr(int i)
+const std::string Array::intToStr(int i) const
 {
 	std::stringstream s;
 	s << i;
