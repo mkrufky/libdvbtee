@@ -395,7 +395,8 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 	case 0x02:
 		updatePMT(table);
 		break;
-	case 0x14: /* TDT / TOT */
+	case 0x70: /* TDT */
+	case 0x73: /* TOT */
 	case 0xcd: /* STT */
 		stream_time = table->get<time_t>("time");
 		dbg_time("%s", ctime(&stream_time));

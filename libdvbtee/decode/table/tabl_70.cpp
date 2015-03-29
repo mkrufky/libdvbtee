@@ -26,9 +26,9 @@
 
 #include "functions.h"
 
-#include "tabl_14.h"
+#include "tabl_70.h"
 
-#define TABLEID 0x14
+#define TABLEID 0x70
 
 #define CLASS_MODULE "[TDT (Time and Date Table)/TOT (Time Offset Table)]"
 
