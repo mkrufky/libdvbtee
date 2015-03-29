@@ -47,6 +47,7 @@ public:
 	virtual ~Decoder();
 
 	inline bool isValid() const { return m_valid; }
+	const std::string& getName() const;
 
 	int linkChild(Decoder *d);
 	bool unlinkChild(int);
@@ -58,7 +59,7 @@ protected:
 
 private:
 	Decoder *m_parent;
-	std::string m_name;
+	const std::string m_name;
 	bool m_valid;
 #if LOCK_DECODER_CHILDREN
 	pthread_mutex_t m_mutex;

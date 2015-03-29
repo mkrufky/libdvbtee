@@ -58,6 +58,11 @@ Decoder::~Decoder()
 #endif
 }
 
+const std::string& Decoder::getName() const
+{
+	return m_name;
+}
+
 int Decoder::linkChild(Decoder *d)
 {
 	return linkChild(d->getMapIndex(), d);
