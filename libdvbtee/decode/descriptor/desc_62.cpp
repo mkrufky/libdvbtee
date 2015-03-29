@@ -34,7 +34,7 @@ static std::string DESC_NAME = "DR[62]";
 desc_62::desc_62(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(m_tag, 0x62)) return;
+	if (!desc_check_tag(getTag(), 0x62)) return;
 
 	dvbpsi_frequency_list_dr_t* dr = dvbpsi_DecodeFrequencyListDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;

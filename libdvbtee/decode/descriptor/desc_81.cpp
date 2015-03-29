@@ -38,7 +38,7 @@ static const char *sample_rate(uint8_t sample_rate_code);
 desc_81::desc_81(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(m_tag, 0x81)) return;
+	if (!desc_check_tag(getTag(), 0x81)) return;
 
 	dvbpsi_ac3_audio_dr_t* dr = dvbpsi_DecodeAc3AudioDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;

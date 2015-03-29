@@ -60,9 +60,9 @@ protected:
 	Descriptor(Decoder *, std::string&, dvbpsi_descriptor_t*);
 	virtual ~Descriptor();
 
+private:
 	uint8_t m_tag;
 
-private:
 	void init();
 };
 

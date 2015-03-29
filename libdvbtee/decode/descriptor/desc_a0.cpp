@@ -38,7 +38,7 @@ static std::string DESC_NAME = "DR[A0]";
 desc_a0::desc_a0(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(m_tag, 0xa0)) return;
+	if (!desc_check_tag(getTag(), 0xa0)) return;
 
 	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_ExtendedChannelNameDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;

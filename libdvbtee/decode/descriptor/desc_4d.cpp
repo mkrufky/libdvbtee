@@ -36,7 +36,7 @@ static std::string DESC_NAME = "DR[4D]";
 desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(m_tag, 0x4d)) return;
+	if (!desc_check_tag(getTag(), 0x4d)) return;
 
 	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;

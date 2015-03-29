@@ -34,7 +34,7 @@ static std::string DESC_NAME = "DR[83]";
 desc_83::desc_83(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(m_tag, 0x83)) return;
+	if (!desc_check_tag(getTag(), 0x83)) return;
 
 	dvbpsi_lcn_dr_t* dr = dvbpsi_DecodeLCNDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
