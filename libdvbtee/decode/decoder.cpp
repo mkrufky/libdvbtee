@@ -128,7 +128,7 @@ NullDecoder::~NullDecoder()
 
 }
 
-int NullDecoder::getMapIndex()
+const int NullDecoder::getMapIndex() const
 {
 	return -1;
 }

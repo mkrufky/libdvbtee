@@ -52,7 +52,7 @@ public:
 	bool unlinkChild(int);
 
 protected:
-	virtual int getMapIndex() = 0;
+	virtual const int getMapIndex() const = 0;
 	Decoder *getParent() { return m_parent; }
 	void setValid(bool v) { m_valid = v; }
 
@@ -77,7 +77,7 @@ public:
 	virtual ~NullDecoder();
 
 protected:
-	virtual int getMapIndex();
+	virtual const int getMapIndex() const;
 };
 
 }
