@@ -118,7 +118,7 @@ public:
 	 : T(parent, p_descriptor)
 	 , m_linkedIdx(-1)
 	{
-		if (parent) m_linkedIdx = parent->linkChild(this);
+		linkParent(parent);
 	}
 
 	~LinkedDescriptor()
@@ -131,6 +131,8 @@ public:
 
 private:
 	int m_linkedIdx;
+
+	inline void linkParent(Decoder *parent) { if (parent) m_linkedIdx = parent->linkChild(this); }
 };
 
 template <uint8_t TAG, class T>
