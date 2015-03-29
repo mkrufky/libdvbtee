@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "decoder.h"
-//#include "dvbpsi/descriptor.h"
 
 #include "functions.h"
 
@@ -38,18 +37,21 @@ using namespace dvbtee::decode;
 
 static std::string TABLE_NAME = "PAT[00]";
 
+static std::string PATPROGRAM = "PATPROGRAM";
+
 void pat::store(dvbpsi_pat_t *p_pat)
 #define PAT_DBG 1
 {
 	if (!p_pat) return;
 #if PAT_DBG
-	fprintf(stderr, "%s: v%d, ts_id: %d\n", __func__,
+	fprintf(stderr, "%s PAT: v%d, ts_id: %d\n", __func__,
 		p_pat->i_version, p_pat->i_ts_id);
 #endif
+#if 1
 	m_ts_id   = p_pat->i_ts_id;
 	m_version = p_pat->i_version;
 	m_programs.clear();
-
+#endif
 	set("tsId", p_pat->i_ts_id);
 	set("version", p_pat->i_version);
 
@@ -57,18 +59,14 @@ void pat::store(dvbpsi_pat_t *p_pat)
 
 	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
 	while (p_program) {
-#if PAT_DBG
-		fprintf(stderr, "  %10d | %x\n",
-			p_program->i_number,
-			p_program->i_pid);
-#endif
-		Object program;
-		program.set("number", p_program->i_number);
-		program.set("pid", p_program->i_pid);
-		programs.push(program);
-
+		patProgram *program = new patProgram(this, p_program);
+		if (program->isValid()) {
+			programs.push((Object*)program);
+			//m_programs.insert(program->getPair());
+		}
+#if 1
 		m_programs[p_program->i_number] = p_program->i_pid;
-
+#endif
 		p_program = p_program->p_next;
 	}
 
@@ -81,6 +79,31 @@ void pat::store(dvbpsi_pat_t *p_pat)
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
 	}
+}
+
+patProgram::patProgram(Decoder *parent, dvbpsi_pat_program_t *p_program)
+: TableDataComponent(parent, PATPROGRAM)
+{
+	if (!p_program) return;
+#if PAT_DBG
+	fprintf(stderr, "  %10d | %x\n",
+		p_program->i_number,
+		p_program->i_pid);
+#endif
+	set("number", p_program->i_number);
+	set("pid", p_program->i_pid);
+
+	setValid(true);
+}
+
+patProgram::~patProgram()
+{
+
+}
+
+std::pair<uint16_t, uint16_t> patProgram::getPair()
+{
+	return std::pair<uint16_t, uint16_t>( get<uint16_t>("number"), get<uint16_t>("pid") );
 }
 
 bool pat::ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w)

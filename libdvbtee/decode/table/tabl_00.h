@@ -57,6 +57,14 @@ private:
 	map_decoded_pat_programs	m_programs;
 };
 
+class patProgram: public TableDataComponent {
+public:
+	patProgram(Decoder*, dvbpsi_pat_program_t*);
+	virtual ~patProgram();
+
+	std::pair<uint16_t, uint16_t> getPair();
+};
+
 }
 
 }
