@@ -43,7 +43,7 @@ protected:
 };
 
 
-class TableBase: public TableComponent {
+class TableBase: public Decoder {
 public:
 	const uint8_t& getTableid() const;
 	void reset();
@@ -54,6 +54,8 @@ protected:
 	virtual ~TableBase();
 
 	TableWatcher *m_watcher;
+
+	dvbtee::decode::DescriptorStore descriptors;
 
 private:
 	const uint8_t m_tableid;

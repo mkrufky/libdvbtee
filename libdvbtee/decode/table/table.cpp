@@ -42,16 +42,18 @@ void TableBase::init()
 }
 
 TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid)
- : TableComponent(parent, name)
+ : Decoder(parent, name)
  , m_watcher(NULL)
+ , descriptors(this)
  , m_tableid(tableid)
 {
 	init();
 }
 
 TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid, TableWatcher *watcher)
- : TableComponent(parent, name)
+ : Decoder(parent, name)
  , m_watcher(watcher)
+ , descriptors(this)
  , m_tableid(tableid)
 {
 	init();
