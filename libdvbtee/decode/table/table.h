@@ -35,7 +35,7 @@ namespace decode {
 class TableWatcher;
 
 class TableComponent: public Decoder {
-public:
+protected:
 	TableComponent(Decoder*, std::string&);
 	virtual ~TableComponent();
 
@@ -45,14 +45,14 @@ public:
 
 class TableBase: public TableComponent {
 public:
-	TableBase(Decoder*, std::string&, uint8_t);
-	TableBase(Decoder*, std::string&, uint8_t, TableWatcher*);
-	virtual ~TableBase();
-
 	const uint8_t& getTableid() const;
 	void reset();
 
 protected:
+	TableBase(Decoder*, std::string&, uint8_t);
+	TableBase(Decoder*, std::string&, uint8_t, TableWatcher*);
+	virtual ~TableBase();
+
 	TableWatcher *m_watcher;
 
 private:
