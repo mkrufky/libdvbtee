@@ -54,7 +54,7 @@ namespace decode {
 
 class Descriptor: public Decoder {
 public:
-	uint8_t getTag() { return m_tag; }
+	const uint8_t& getTag() const;
 
 protected:
 	Descriptor(Decoder *, std::string&, dvbpsi_descriptor_t*);

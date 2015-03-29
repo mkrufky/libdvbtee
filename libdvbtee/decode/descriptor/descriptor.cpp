@@ -46,6 +46,11 @@ void Descriptor::init()
 	set("descriptorTag", m_tag);
 }
 
+const uint8_t& Descriptor::getTag() const
+{
+	return m_tag;
+}
+
 
 bool DescriptorRegistry::registerFactory(uint8_t tag, DescriptorBaseFactory *factory)
 {
