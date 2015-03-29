@@ -30,6 +30,7 @@
 #include "decode.h"
 
 #include "tabl_00.h"
+#include "tabl_02.h"
 
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -391,6 +392,9 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 	case 0x00: /* PAT */
 		updatePAT(table);
 		break;
+	case 0x02:
+		updatePMT(table);
+		break;
 	case 0x14: /* TDT / TOT */
 	case 0xcd: /* STT */
 		stream_time = table->get<time_t>("time");
@@ -421,6 +425,22 @@ bool decode::updatePAT(dvbtee::decode::Table *table)
 	}
 
 	return true;
+}
+
+bool decode::updatePMT(dvbtee::decode::Table *table)
+{
+	if ((!table) || (!table->isValid()) || (0x02 != table->getTableid())) return false;
+
+	dvbtee::decode::pmt *pmtTable = (dvbtee::decode::pmt*)table;
+#if 0
+	decoded_pmt_t &cur_decoded_pmt = decoded_pmt[pmtTable->get<uint16_t>("program")];
+
+	cur_decoded_pmt.program = pmtTable->get<uint16_t>("program");
+	cur_decoded_pmt.version = pmtTable->get<uint8_t>("version");
+	cur_decoded_pmt.pcr_pid = pmtTable->get<uint16_t>("pcrPid");
+	cur_decoded_pmt.es_streams.clear();
+#endif
+	return rcvd_pmt[pmtTable->get<uint16_t>("program")] = true;
 }
 
 /* -- STREAM TIME -- */
@@ -557,9 +577,8 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 #endif
 		p_es = p_es->p_next;
 	}
-	rcvd_pmt[p_pmt->i_program_number] = true;
 
-	return true;
+	return store.ingest(p_pmt, this);
 }
 
 bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
