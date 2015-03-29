@@ -41,6 +41,7 @@ static std::string TABLE_NAME = "PAT[00]";
 void pat::store(dvbpsi_pat_t *p_pat)
 #define PAT_DBG 1
 {
+	if (!p_pat) return;
 #if PAT_DBG
 	fprintf(stderr, "%s: v%d, ts_id: %d\n", __func__,
 		p_pat->i_version, p_pat->i_ts_id);

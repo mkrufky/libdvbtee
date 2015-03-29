@@ -40,6 +40,8 @@ static std::string TABLE_NAME = "STT[CD]";
 
 void stt::store(dvbpsi_atsc_stt_t *p_stt)
 {
+	if (!p_stt) return;
+
 	time_t o_time = get<time_t>("time");
 
 	time_t m_time = atsc_datetime_utc(p_stt->i_system_time);

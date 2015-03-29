@@ -40,6 +40,8 @@ static std::string TABLE_NAME = "TOT[14]";
 
 void tot::store(dvbpsi_tot_t *p_tot)
 {
+	if (!p_tot) return;
+
 	time_t o_time = get<time_t>("time");
 
 	time_t m_time = datetime_utc(p_tot->i_utc_time);
