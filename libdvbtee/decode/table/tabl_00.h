@@ -44,13 +44,14 @@ public:
 	pat(Decoder *, dvbpsi_pat_t*);
 	virtual ~pat();
 
+	void store(dvbpsi_pat_t*);
+
+	static bool ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w = NULL);
+
 	const uint16_t& getTsId() const { return m_ts_id; }
 	const uint8_t& getVersion() const { return m_version; }
 	const map_decoded_pat_programs& getPrograms() const { return m_programs; }
 
-	void store(dvbpsi_pat_t*);
-
-	static bool ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w = NULL);
 private:
 	uint16_t			m_ts_id;
 	uint8_t				m_version;
