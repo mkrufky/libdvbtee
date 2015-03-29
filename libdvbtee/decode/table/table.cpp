@@ -184,14 +184,14 @@ bool TableStore::add(uint8_t id, PsiTable &inTable, TableWatcher *watcher)
 }
 
 
-std::vector<Table *> TableStore::get(uint8_t tableid)
+const std::vector<Table*> TableStore::get(uint8_t tableid) const
 {
-	std::vector<Table *> ret;
-	std::pair <std::multimap<uint8_t, Table*>::iterator, std::multimap<uint8_t, Table*>::iterator> range;
+	std::vector<Table*> ret;
+	std::pair <std::multimap<uint8_t, Table*>::const_iterator, std::multimap<uint8_t, Table*>::const_iterator> range;
 
 	range = m_store.equal_range(tableid);
 
-	for (std::multimap<uint8_t, Table*>::iterator it=range.first; it!=range.second; ++it)
+	for (std::multimap<uint8_t, Table*>::const_iterator it=range.first; it!=range.second; ++it)
 		ret.push_back(it->second);
 
 	return ret;

@@ -194,7 +194,7 @@ public:
 	template <typename T> bool ingest(T*);
 	template <typename T> bool ingest(T*, TableWatcher*);
 
-	std::vector<Table*> get(uint8_t);
+	const std::vector<Table*> get(uint8_t) const;
 
 private:
 	Decoder *m_parent;
