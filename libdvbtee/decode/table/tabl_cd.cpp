@@ -52,6 +52,8 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 
 	set("time", m_time);
 
+	setValid(true);
+
 	dprintf("%s", toJson().c_str());
 
 	if ((o_time != m_time) && (m_watcher)) {

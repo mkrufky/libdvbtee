@@ -52,6 +52,8 @@ void tot::store(dvbpsi_tot_t *p_tot)
 
 	set("time", m_time);
 
+	setValid(true);
+
 	dprintf("%s", toJson().c_str());
 
 	if ((o_time != m_time) && (m_watcher)) {

@@ -73,6 +73,8 @@ void pat::store(dvbpsi_pat_t *p_pat)
 
 	set("programs", programs);
 
+	setValid(true);
+
 	dprintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
