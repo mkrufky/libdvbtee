@@ -147,14 +147,14 @@ void DescriptorStore::decode(dvbpsi_descriptor_t *p_descriptor)
 	}
 }
 
-std::vector<Descriptor *> DescriptorStore::get(uint8_t tag)
+const std::vector<Descriptor *> DescriptorStore::get(uint8_t tag) const
 {
 	std::vector<Descriptor *> ret;
-	std::pair <std::multimap<uint8_t, Descriptor*>::iterator, std::multimap<uint8_t, Descriptor*>::iterator> range;
+	std::pair <std::multimap<uint8_t, Descriptor*>::const_iterator, std::multimap<uint8_t, Descriptor*>::const_iterator> range;
 
 	range = m_store.equal_range(tag);
 
-	for (std::multimap<uint8_t, Descriptor*>::iterator it=range.first; it!=range.second; ++it)
+	for (std::multimap<uint8_t, Descriptor*>::const_iterator it=range.first; it!=range.second; ++it)
 		ret.push_back(it->second);
 
 	return ret;
