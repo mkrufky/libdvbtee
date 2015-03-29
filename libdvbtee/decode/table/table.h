@@ -34,15 +34,6 @@ namespace decode {
 
 class TableWatcher;
 
-class TableComponent: public Decoder {
-protected:
-	TableComponent(Decoder*, std::string&);
-	virtual ~TableComponent();
-
-	dvbtee::decode::DescriptorStore descriptors;
-};
-
-
 class TableBase: public Decoder {
 public:
 	const uint8_t& getTableid() const;
@@ -76,6 +67,14 @@ public:
 	virtual ~TableWatcher() {}
 
 	virtual void updateTable(uint8_t tId, Table*) = 0;
+};
+
+class TableDataComponent: public LinkedDecoder {
+public:
+	TableDataComponent(Decoder*, std::string&);
+	virtual ~TableDataComponent();
+
+	dvbtee::decode::DescriptorStore descriptors;
 };
 
 class TableTypeCarrierBase {};

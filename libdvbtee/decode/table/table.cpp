@@ -23,14 +23,14 @@
 
 using namespace dvbtee::decode;
 
-TableComponent::TableComponent(Decoder *parent, std::string &name)
- : Decoder(parent, name)
+TableDataComponent::TableDataComponent(Decoder *parent, std::string &name)
+ : LinkedDecoder(parent, name)
  , descriptors(this)
 {
 	//
 }
 
-TableComponent::~TableComponent()
+TableDataComponent::~TableDataComponent()
 {
 	//
 }
