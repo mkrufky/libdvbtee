@@ -35,7 +35,7 @@
 
 using namespace dvbtee::decode;
 
-static std::string TABLE_NAME = "PMT[02]";
+static std::string TABLE_NAME = "PMT";
 
 static std::string PMTES = "PMTES";
 

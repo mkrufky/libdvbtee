@@ -36,7 +36,7 @@
 
 using namespace dvbtee::decode;
 
-static std::string TABLE_NAME = "STT[CD]";
+static std::string TABLE_NAME = "STT";
 
 void stt::store(dvbpsi_atsc_stt_t *p_stt)
 {

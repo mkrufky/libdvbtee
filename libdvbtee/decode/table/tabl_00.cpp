@@ -35,7 +35,7 @@
 
 using namespace dvbtee::decode;
 
-static std::string TABLE_NAME = "PAT[00]";
+static std::string TABLE_NAME = "PAT";
 
 static std::string PATPROGRAM = "PATPROGRAM";
 

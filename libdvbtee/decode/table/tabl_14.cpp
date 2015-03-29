@@ -36,7 +36,7 @@
 
 using namespace dvbtee::decode;
 
-static std::string TABLE_NAME = "TOT[14]";
+static std::string TABLE_NAME = "TOT";
 
 void tot::store(dvbpsi_tot_t *p_tot)
 {
