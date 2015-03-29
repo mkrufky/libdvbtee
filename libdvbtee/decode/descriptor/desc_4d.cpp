@@ -33,10 +33,12 @@ using namespace dvbtee::decode;
 
 static std::string DESC_NAME = "DR[4D]";
 
+#define DESC_TAG 0x4d
+
 desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(getTag(), 0x4d)) return;
+	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
 	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
@@ -63,4 +65,4 @@ desc_4d::~desc_4d()
 	//
 }
 
-REGISTER_DESCRIPTOR_FACTORY(0x4d, desc_4d);
+REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_4d);

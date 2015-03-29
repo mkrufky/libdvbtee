@@ -32,10 +32,12 @@ using namespace dvbtee::decode;
 
 static std::string DESC_NAME = "DR[0A]";
 
+#define DESC_TAG 0x0a
+
 desc_0a::desc_0a(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(getTag(), 0x0a)) return;
+	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
 	dvbpsi_iso639_dr_t* dr = dvbpsi_DecodeISO639Dr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
@@ -66,4 +68,4 @@ desc_0a::~desc_0a()
 	//
 }
 
-REGISTER_DESCRIPTOR_FACTORY(0x0a, desc_0a);
+REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_0a);

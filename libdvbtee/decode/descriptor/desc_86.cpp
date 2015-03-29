@@ -31,10 +31,12 @@ using namespace dvbtee::decode;
 
 static std::string DESC_NAME = "DR[86]";
 
+#define DESC_TAG 0x86
+
 desc_86::desc_86(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(getTag(), 0x86)) return;
+	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
 	dvbpsi_caption_service_dr_t* dr = dvbpsi_DecodeCaptionServiceDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
@@ -74,4 +76,4 @@ desc_86::~desc_86()
 	//
 }
 
-REGISTER_DESCRIPTOR_FACTORY(0x86, desc_86);
+REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_86);

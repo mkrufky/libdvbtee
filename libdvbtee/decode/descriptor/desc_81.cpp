@@ -31,6 +31,8 @@ using namespace dvbtee::decode;
 
 static std::string DESC_NAME = "DR[81]";
 
+#define DESC_TAG 0x81
+
 static const char *num_channels(uint8_t num_channels_code);
 static const char *surround_mode(uint8_t surround_mode_code);
 static const char *sample_rate(uint8_t sample_rate_code);
@@ -38,7 +40,7 @@ static const char *sample_rate(uint8_t sample_rate_code);
 desc_81::desc_81(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(getTag(), 0x81)) return;
+	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
 	dvbpsi_ac3_audio_dr_t* dr = dvbpsi_DecodeAc3AudioDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
@@ -202,4 +204,4 @@ static const char *num_channels(uint8_t num_channels_code)
 	return ret;
 }
 
-REGISTER_DESCRIPTOR_FACTORY(0x81, desc_81);
+REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_81);

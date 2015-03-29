@@ -31,10 +31,12 @@ using namespace dvbtee::decode;
 
 static std::string DESC_NAME = "DR[62]";
 
+#define DESC_TAG 0x62
+
 desc_62::desc_62(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(getTag(), 0x62)) return;
+	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
 	dvbpsi_frequency_list_dr_t* dr = dvbpsi_DecodeFrequencyListDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
@@ -65,4 +67,4 @@ desc_62::~desc_62()
 	//
 }
 
-REGISTER_DESCRIPTOR_FACTORY(0x62, desc_62);
+REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_62);

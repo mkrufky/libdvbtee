@@ -35,10 +35,12 @@ using namespace dvbtee::decode;
 
 static std::string DESC_NAME = "DR[A0]";
 
+#define DESC_TAG 0xa0
+
 desc_a0::desc_a0(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
 {
-	if (!desc_check_tag(getTag(), 0xa0)) return;
+	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
 	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_ExtendedChannelNameDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
@@ -58,4 +60,4 @@ desc_a0::~desc_a0()
 	//
 }
 
-REGISTER_DESCRIPTOR_FACTORY(0xa0, desc_a0);
+REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_a0);
