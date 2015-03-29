@@ -26,7 +26,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "descriptor.h"
+#include "table.h"
 
 //#include "dvbpsi/dvbpsi.h"
 #include "dvbpsi/pat.h"
@@ -48,8 +48,6 @@
 
 #include <map>
 
-
-#include "tabl_00.h"
 
 #if (DVBPSI_VERSION_INT < ((1<<16)+(0<<8)+0))
 #define USING_DVBPSI_VERSION_0 1

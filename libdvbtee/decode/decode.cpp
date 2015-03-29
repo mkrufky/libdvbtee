@@ -28,6 +28,9 @@
 
 #include "functions.h"
 #include "decode.h"
+
+#include "tabl_00.h"
+
 #include "log.h"
 #define CLASS_MODULE "decode"
 
