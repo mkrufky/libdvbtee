@@ -217,7 +217,8 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 }
 
 decode::decode()
-  : store(this)
+  : NullDecoder()
+  , store(this)
   , orig_network_id(0)
   , network_id(0)
   , stream_time((time_t)0)
@@ -286,7 +287,7 @@ decode::~decode()
 }
 
 decode::decode(const decode& d)
- : Decoder()
+ : NullDecoder()
  , store(this)
 {
 	dprintf("(copy)");

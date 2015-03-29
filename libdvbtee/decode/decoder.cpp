@@ -109,3 +109,26 @@ int Decoder::genMapIndex()
 		return genMapIndex();
 	return idx;
 }
+
+
+NullDecoder::NullDecoder()
+: Decoder()
+{
+
+}
+
+NullDecoder::NullDecoder(Decoder *parent, std::string &name)
+: Decoder(parent, name)
+{
+
+}
+
+NullDecoder::~NullDecoder()
+{
+
+}
+
+int NullDecoder::getMapIndex()
+{
+	return -1;
+}

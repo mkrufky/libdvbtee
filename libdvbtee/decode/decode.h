@@ -365,7 +365,7 @@ public:
 	virtual void print(const char *, ...) = 0;
 };
 
-class decode : public dvbtee::decode::Decoder, dvbtee::decode::TableWatcher
+class decode : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 {
 public:
 	decode();

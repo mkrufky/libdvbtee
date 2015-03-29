@@ -52,7 +52,7 @@ public:
 	bool unlinkChild(int);
 
 protected:
-	virtual int getMapIndex() { return -1; }
+	virtual int getMapIndex() = 0;
 	Decoder *getParent() { return m_parent; }
 	void setValid(bool v) { m_valid = v; }
 
@@ -68,6 +68,16 @@ private:
 	int linkChild(int, Decoder*);
 	int __genMapIdx;
 	int genMapIndex();
+};
+
+class NullDecoder: public Decoder {
+public:
+	NullDecoder();
+	NullDecoder(Decoder*, std::string&);
+	virtual ~NullDecoder();
+
+protected:
+	virtual int getMapIndex();
 };
 
 }
