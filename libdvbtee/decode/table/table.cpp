@@ -62,7 +62,7 @@ TableBase::~TableBase()
 	//
 }
 
-uint8_t TableBase::getTableid()
+const uint8_t& TableBase::getTableid() const
 {
 	return m_tableid;
 }

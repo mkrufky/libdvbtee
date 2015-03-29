@@ -49,7 +49,7 @@ public:
 	TableBase(Decoder*, std::string&, uint8_t, TableWatcher*);
 	virtual ~TableBase();
 
-	uint8_t getTableid();
+	const uint8_t& getTableid() const;
 	void reset();
 
 protected:
