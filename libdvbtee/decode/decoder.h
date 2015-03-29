@@ -70,6 +70,20 @@ private:
 	int genMapIndex();
 };
 
+class LinkedDecoder: public Decoder {
+public:
+	LinkedDecoder(Decoder*, std::string&);
+	virtual ~LinkedDecoder();
+
+protected:
+	virtual const int getMapIndex() const;
+
+private:
+	int m_linkedIdx;
+
+	void linkParent();
+};
+
 class NullDecoder: public Decoder {
 public:
 	NullDecoder();

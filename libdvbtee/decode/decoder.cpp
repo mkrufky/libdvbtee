@@ -111,14 +111,39 @@ int Decoder::genMapIndex()
 }
 
 
+LinkedDecoder::LinkedDecoder(Decoder *parent, std::string &name)
+ : Decoder(parent, name)
+ , m_linkedIdx(-1)
+{
+	linkParent();
+}
+
+LinkedDecoder::~LinkedDecoder()
+{
+	Decoder *parent = getParent();
+	if (parent) parent->unlinkChild(m_linkedIdx);
+}
+
+const int LinkedDecoder::getMapIndex() const
+{
+	return m_linkedIdx;
+}
+
+void LinkedDecoder::linkParent()
+{
+	Decoder *parent = getParent();
+	if (parent) m_linkedIdx = parent->linkChild(this);
+}
+
+
 NullDecoder::NullDecoder()
-: Decoder()
+ : Decoder()
 {
 
 }
 
 NullDecoder::NullDecoder(Decoder *parent, std::string &name)
-: Decoder(parent, name)
+ : Decoder(parent, name)
 {
 
 }
