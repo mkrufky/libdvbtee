@@ -81,6 +81,17 @@ bool Decoder::unlinkChild(int idx)
 	return true;
 }
 
+void Decoder::showChildren() const
+{
+	Array decoders;
+	for (std::map<int, Decoder*>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
+		Decoder *child = it->second;
+		if (!child) continue;
+		decoders.push((Object*)child);
+	}
+	fprintf(stderr, "%s: %s\n", __func__, decoders.toJson().c_str());
+}
+
 int Decoder::linkChild(int idx, Decoder *d)
 {
 #if LOCK_DECODER_CHILDREN

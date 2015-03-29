@@ -52,6 +52,8 @@ public:
 	int linkChild(Decoder *d);
 	bool unlinkChild(int);
 
+	void showChildren() const;
+
 protected:
 	virtual const int getMapIndex() const = 0;
 	Decoder *getParent() { return m_parent; }
