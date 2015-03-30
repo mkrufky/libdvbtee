@@ -33,6 +33,12 @@ namespace decode {
 
 class ValueBase {
 public:
+	ValueBase& operator++();
+	ValueBase& operator--();
+
+	ValueBase operator++(int);
+	ValueBase operator--(int);
+
 	virtual ~ValueBase();
 
 	const bool checkType(const std::type_info&) const;
@@ -40,6 +46,7 @@ public:
 
 	const std::type_info& getType() const;
 	const std::string& getName() const;
+	const int& getRefCnt() const;
 
 protected:
 	ValueBase(const std::type_info&, std::string);
@@ -47,6 +54,7 @@ protected:
 private:
 	const std::type_info& m_type;
 	const std::string m_name;
+	int m_refcnt;
 };
 
 #define VALUEBASE_POINTER 0

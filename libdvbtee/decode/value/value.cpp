@@ -30,7 +30,34 @@ using namespace dvbtee::decode;
 ValueBase::ValueBase(const std::type_info& type, std::string name)
  : m_type(type)
  , m_name(name)
+ , m_refcnt(0)
 {
+}
+
+ValueBase &ValueBase::operator++()
+{
+	m_refcnt++;
+	return *this;
+}
+
+ValueBase &ValueBase::operator--()
+{
+	m_refcnt--;
+	return *this;
+}
+
+ValueBase ValueBase::operator++(int)
+{
+	ValueBase r(*this);
+	++(*this);
+	return r;
+}
+
+ValueBase ValueBase::operator--(int)
+{
+	ValueBase r(*this);
+	--(*this);
+	return r;
 }
 
 ValueBase::~ValueBase()
@@ -45,6 +72,11 @@ const std::type_info& ValueBase::getType() const
 const std::string& ValueBase::getName() const
 {
 	return m_name;
+}
+
+const int &ValueBase::getRefCnt() const
+{
+	return m_refcnt;
 }
 
 const bool ValueBase::checkType(const std::type_info& typeRequested) const
