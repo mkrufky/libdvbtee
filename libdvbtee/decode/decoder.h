@@ -47,7 +47,7 @@ public:
 	virtual ~Decoder();
 
 	inline bool isValid() const { return m_valid; }
-	const std::string& getName() const;
+	const std::string& getDecoderName() const;
 
 	int linkChild(Decoder *d);
 	bool unlinkChild(int);

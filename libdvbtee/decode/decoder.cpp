@@ -58,7 +58,7 @@ Decoder::~Decoder()
 #endif
 }
 
-const std::string& Decoder::getName() const
+const std::string& Decoder::getDecoderName() const
 {
 	return m_name;
 }

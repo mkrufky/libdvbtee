@@ -39,7 +39,7 @@ TableDataComponent::~TableDataComponent()
 void TableBase::init()
 {
 	set("tableId", m_tableid);
-	set("tableName", getName());
+	set("tableName", getDecoderName());
 }
 
 TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid)
