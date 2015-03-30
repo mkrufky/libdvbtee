@@ -132,8 +132,10 @@ const ValueBase *Array::getByName(unsigned int idx) const
 
 void Array::clear()
 {
-	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it) {
-		delete *it;
+	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it)
+	{
+		// decrement refcount. if refcount becomes zero, delete
+		if (0 == (--(**it)).getRefCnt()) delete *it;
 	}
 	vector.clear();
 	indices.clear();

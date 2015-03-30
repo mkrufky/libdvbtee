@@ -90,14 +90,16 @@ private:
 	template <typename T>
 	const ValueBase* setByRef(std::string& key, T& val)
 	{
-		if (map.count(key))
-			delete map[key];
+		if (map.count(key)) {
+			if (0 == (--(*map[key])).getRefCnt()) delete map[key];
+		}
 
 		Value<T> *v = new Value<T>(key, val);
 
 		map[key] = v;
 		//map.insert( std::pair<std::string, ValueBase*>(key, v) );
 
+		++(*v); // increment refcount
 		return v;
 	}
 

@@ -73,7 +73,7 @@ const ValueBase *Object::get(int key) const
 void Object::unSet(std::string key)
 {
 	if (map.count(key)) {
-		delete map[key];
+		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
 		map.erase(key);
 	}
 }
@@ -85,8 +85,10 @@ void Object::unSet(int key)
 
 void Object::clear()
 {
-	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it) {
-		delete it->second;
+	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it)
+	{
+		// decrement refcount. if refcount becomes zero, delete
+		if (0 == (--(*it->second)).getRefCnt()) delete it->second;
 	}
 	map.clear();
 }

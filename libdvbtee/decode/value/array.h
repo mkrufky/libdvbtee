@@ -95,6 +95,7 @@ private:
 	{
 		Value<T> *v = new Value<T>(idx, val);
 		vector.push_back(v);
+		++(*v); // increment refcount
 		return v;
 	}
 
