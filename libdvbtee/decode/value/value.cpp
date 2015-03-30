@@ -86,7 +86,7 @@ const std::string ValueBase::toJson() const
 	else if (m_type == typeid(Object))		s << ((Value<Object>*)this)->get().toJson().c_str();
 	else if (m_type == typeid(Array))		s << ((Value<Array>*)this)->get().toJson().c_str();
 	else if (m_type == typeid(time_t))		s << (unsigned long)((Value<time_t>*)this)->get();
-	else if (m_type == typeid(size_t))		s << (unsigned long)((Value<time_t>*)this)->get();
+	else if (m_type == typeid(size_t))		s << (unsigned long)((Value<size_t>*)this)->get();
 	else if (m_type == typeid(void))		s << ((ValueUndefined*)this)->get();
 	// else // FIXME
 
