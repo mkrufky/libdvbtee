@@ -126,27 +126,10 @@ const std::string Object::intToStr(int i) const
 
 const ValueBase *Object::set(ValueBase *val)
 {
-	     if (val->getType() == typeid(int))			return set(val->getName(), ((Value<int>*)val)->get());
-	else if (val->getType() == typeid(long))		return set(val->getName(), ((Value<long>*)val)->get());
-	else if (val->getType() == typeid(unsigned short))	return set(val->getName(), ((Value<unsigned short>*)val)->get());
-	else if (val->getType() == typeid(unsigned char))	return set(val->getName(), ((Value<unsigned char>*)val)->get());
-	else if (val->getType() == typeid(std::string))		return set(val->getName(), ((Value<std::string>*)val)->get());
-	else if (val->getType() == typeid(bool))		return set(val->getName(), ((Value<bool>*)val)->get());
-	else if (val->getType() == typeid(double))		return set(val->getName(), ((Value<double>*)val)->get());
-	else if (val->getType() == typeid(Object))		return set(val->getName(), ((Value<Object>*)val)->get());
-	else if (val->getType() == typeid(Array))		return set(val->getName(), ((Value<Array>*)val)->get());
-	else {
-		fprintf(stderr, "%s unable to set %s, unknown type: %s !!!\n", __func__, val->getName().c_str(), val->getType().name());
-
-		const std::string& key = val->getName();
-		if (map.count(key))
-			delete map[key];
-
-		ValueBase *v = new ValueUndefined(key);
-		map[key] = v;
-		return v;
-	}
-
+	unSet(val->getName());
+	map[val->getName()] = val;
+	++(*val);
+	return val;
 }
 
 DEFINE_DEFAULT_GETTERS(Object, std::string)

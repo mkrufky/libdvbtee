@@ -173,22 +173,9 @@ const ValueBase *Array::push(Object *o)
 
 const ValueBase* Array::push(ValueBase *val)
 {
-	     if (val->getType() == typeid(int))			return push(((Value<int>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(long))		return push(((Value<long>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(unsigned short))	return push(((Value<unsigned short>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(unsigned char))	return push(((Value<unsigned char>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(std::string))		return push(((Value<std::string>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(bool))		return push(((Value<bool>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(double))		return push(((Value<double>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(Object))		return push(((Value<Object>*)val)->get(), val->getName());
-	else if (val->getType() == typeid(Array))		return push(((Value<Array>*)val)->get(), val->getName());
-	else {
-		fprintf(stderr, "%s unable to push unknown type: %s !!!\n", __func__, val->getType().name());
-
-		ValueBase *v = new ValueUndefined(val->getName());
-		vector.push_back(v);
-		return v;
-	}
+	vector.push_back(val);
+	++(*val);
+	return val;
 }
 
 DEFINE_DEFAULT_GETTERS(Array, unsigned int)
