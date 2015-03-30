@@ -46,20 +46,6 @@ ValueBase &ValueBase::operator--()
 	return *this;
 }
 
-ValueBase ValueBase::operator++(int)
-{
-	ValueBase r(*this);
-	++(*this);
-	return r;
-}
-
-ValueBase ValueBase::operator--(int)
-{
-	ValueBase r(*this);
-	--(*this);
-	return r;
-}
-
 ValueBase::~ValueBase()
 {
 }

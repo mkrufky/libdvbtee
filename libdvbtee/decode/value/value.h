@@ -36,9 +36,6 @@ public:
 	ValueBase& operator++();
 	ValueBase& operator--();
 
-	ValueBase operator++(int);
-	ValueBase operator--(int);
-
 	virtual ~ValueBase();
 
 	const bool checkType(const std::type_info&) const;
