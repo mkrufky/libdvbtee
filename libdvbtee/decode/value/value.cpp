@@ -20,7 +20,7 @@
  *****************************************************************************/
 
 #include <stdio.h>
-#include <sstream>
+
 #include "value.h"
 #include "array.h"
 #include "object.h"

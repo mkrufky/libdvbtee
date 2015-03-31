@@ -22,6 +22,9 @@
 #ifndef __VALUE_MACROS_H__
 #define __VALUE_MACROS_H__
 
+#include <sstream>
+#include <string>
+
 #define TO_JSON_TPL(CLASS, EXPRESSION) \
 namespace dvbtee { \
 namespace decode { \
