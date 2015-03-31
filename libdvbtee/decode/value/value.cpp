@@ -73,11 +73,6 @@ const bool ValueBase::checkType(const std::type_info& typeRequested) const
 	return ret;
 }
 
-const std::string ValueBase::toJson() const
-{
-	return toJsonValue();
-}
-
 
 ValueUndefined::ValueUndefined(std::string n)
 	: ValueBase(typeid(void), n)
@@ -98,19 +93,19 @@ const std::string ValueUndefined::get() const
 	return "undefined";
 }
 
-const std::string ValueUndefined::toJsonValue() const
+const std::string ValueUndefined::toJson() const
 {
 	return get();
 }
 
-TO_JSON_VALUE_TPL_PRIMITIVE(int)
-TO_JSON_VALUE_TPL_PRIMITIVE(long)
-TO_JSON_VALUE_TPL_PRIMITIVE(short)
-TO_JSON_VALUE_TPL(char, "'" << m_value << "'")
-TO_JSON_VALUE_TPL_PRIMITIVE(unsigned int)
-TO_JSON_VALUE_TPL_PRIMITIVE(unsigned long)
-TO_JSON_VALUE_TPL_PRIMITIVE(unsigned short)
-TO_JSON_VALUE_TPL(unsigned char, (unsigned int)m_value)
-TO_JSON_VALUE_TPL_PRIMITIVE(double)
-TO_JSON_VALUE_TPL(std::string, "'" << m_value << "'")
-TO_JSON_VALUE_TPL(bool, ((m_value) ? "true" : "false"))
+TO_JSON_TPL_PRIMITIVE(int)
+TO_JSON_TPL_PRIMITIVE(long)
+TO_JSON_TPL_PRIMITIVE(short)
+TO_JSON_TPL(char, "'" << m_value << "'")
+TO_JSON_TPL_PRIMITIVE(unsigned int)
+TO_JSON_TPL_PRIMITIVE(unsigned long)
+TO_JSON_TPL_PRIMITIVE(unsigned short)
+TO_JSON_TPL(unsigned char, (unsigned int)m_value)
+TO_JSON_TPL_PRIMITIVE(double)
+TO_JSON_TPL(std::string, "'" << m_value << "'")
+TO_JSON_TPL(bool, ((m_value) ? "true" : "false"))

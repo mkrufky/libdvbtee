@@ -39,13 +39,12 @@ public:
 	virtual ~ValueBase();
 
 	const bool checkType(const std::type_info&) const;
-	const std::string toJson() const;
 
 	const std::type_info& getType() const;
 	const std::string& getName() const;
 	const int& getRefCnt() const;
 
-	virtual const std::string toJsonValue() const = 0;
+	virtual const std::string toJson() const = 0;
 
 protected:
 	ValueBase(const std::type_info&, std::string);
@@ -107,7 +106,7 @@ public:
 		m_value = v;
 	}
 
-	virtual const std::string toJsonValue() const;
+	virtual const std::string toJson() const;
 
 private:
 	const T
@@ -123,7 +122,7 @@ public:
 	ValueUndefined(const ValueUndefined&);
 	~ValueUndefined();
 	const std::string get() const;
-	virtual const std::string toJsonValue() const;
+	virtual const std::string toJson() const;
 };
 
 }
