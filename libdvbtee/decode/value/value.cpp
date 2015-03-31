@@ -105,9 +105,12 @@ const std::string ValueUndefined::toJsonValue() const
 
 TO_JSON_VALUE_TPL_PRIMITIVE(int)
 TO_JSON_VALUE_TPL_PRIMITIVE(long)
+TO_JSON_VALUE_TPL_PRIMITIVE(short)
+TO_JSON_VALUE_TPL(char, "'" << m_value << "'")
 TO_JSON_VALUE_TPL_PRIMITIVE(unsigned int)
+TO_JSON_VALUE_TPL_PRIMITIVE(unsigned long)
 TO_JSON_VALUE_TPL_PRIMITIVE(unsigned short)
-TO_JSON_VALUE_TPL_PRIMITIVE(double)
 TO_JSON_VALUE_TPL(unsigned char, (unsigned int)m_value)
+TO_JSON_VALUE_TPL_PRIMITIVE(double)
 TO_JSON_VALUE_TPL(std::string, "'" << m_value << "'")
 TO_JSON_VALUE_TPL(bool, ((m_value) ? "true" : "false"))
