@@ -133,3 +133,4 @@ const ValueBase *Object::set(ValueBase *val)
 }
 
 DEFINE_DEFAULT_GETTERS(Object, std::string)
+TO_JSON_VALUE_TPL(Object, m_value.toJson().c_str())

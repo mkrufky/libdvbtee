@@ -45,6 +45,8 @@ public:
 	const std::string& getName() const;
 	const int& getRefCnt() const;
 
+	virtual const std::string toJsonValue() const = 0;
+
 protected:
 	ValueBase(const std::type_info&, std::string);
 
@@ -105,6 +107,8 @@ public:
 		m_value = v;
 	}
 
+	virtual const std::string toJsonValue() const;
+
 private:
 	const T
 #if VALUEBASE_POINTER
@@ -119,6 +123,7 @@ public:
 	ValueUndefined(const ValueUndefined&);
 	~ValueUndefined();
 	const std::string get() const;
+	virtual const std::string toJsonValue() const;
 };
 
 }

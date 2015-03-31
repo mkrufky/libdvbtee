@@ -24,6 +24,7 @@
 #include "value.h"
 #include "array.h"
 #include "object.h"
+#include "value-macros.h"
 
 using namespace dvbtee::decode;
 
@@ -74,26 +75,7 @@ const bool ValueBase::checkType(const std::type_info& typeRequested) const
 
 const std::string ValueBase::toJson() const
 {
-	std::stringstream s;
-
-	     if (m_type == typeid(int))			s << ((Value<int>*)this)->get();
-	else if (m_type == typeid(long))		s << ((Value<long>*)this)->get();
-	else if (m_type == typeid(unsigned short))	s << ((Value<unsigned short>*)this)->get();
-	else if (m_type == typeid(unsigned char))	s << (unsigned int)((Value<unsigned char>*)this)->get();
-	else if (m_type == typeid(std::string))		s << "'" << ((Value<std::string>*)this)->get() << "'";
-	else if (m_type == typeid(bool))		s << (((Value<bool>*)this)->get() ? "true" : "false");
-	else if (m_type == typeid(double))		s << ((Value<double>*)this)->get();
-	else if (m_type == typeid(Object))		s << ((Value<Object>*)this)->get().toJson().c_str();
-	else if (m_type == typeid(Array))		s << ((Value<Array>*)this)->get().toJson().c_str();
-	else if (m_type == typeid(time_t))		s << (unsigned long)((Value<time_t>*)this)->get();
-	else if (m_type == typeid(size_t))		s << (unsigned long)((Value<size_t>*)this)->get();
-	else if (m_type == typeid(void))		s << ((ValueUndefined*)this)->get();
-	// else // FIXME
-
-	if (s.str().length())
-		return s.str();
-
-	return "undefined";
+	return toJsonValue();
 }
 
 
@@ -115,3 +97,17 @@ const std::string ValueUndefined::get() const
 {
 	return "undefined";
 }
+
+const std::string ValueUndefined::toJsonValue() const
+{
+	return get();
+}
+
+TO_JSON_VALUE_TPL_PRIMITIVE(int)
+TO_JSON_VALUE_TPL_PRIMITIVE(long)
+TO_JSON_VALUE_TPL_PRIMITIVE(unsigned int)
+TO_JSON_VALUE_TPL_PRIMITIVE(unsigned short)
+TO_JSON_VALUE_TPL_PRIMITIVE(double)
+TO_JSON_VALUE_TPL(unsigned char, (unsigned int)m_value)
+TO_JSON_VALUE_TPL(std::string, "'" << m_value << "'")
+TO_JSON_VALUE_TPL(bool, ((m_value) ? "true" : "false"))
