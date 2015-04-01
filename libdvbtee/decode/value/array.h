@@ -44,7 +44,7 @@ public:
 
 	Array(const Array&);
 
-	const ValueBase *push(ValueBase*);
+	const ValueBase* push(ValueBase*);
 
 	const ValueBase* push(Object&);
 	const ValueBase* push(Object*);
@@ -70,10 +70,10 @@ public:
 		return set<T>(intToStr(key), val);
 	}
 
-	const ValueBase *getByName(std::string idx) const;
+	const ValueBase* getByName(std::string idx) const;
 	const ValueBase* getByName(unsigned int idx) const;
 
-	const ValueBase *get(unsigned int idx) const;
+	const ValueBase* get(unsigned int idx) const;
 
 	template <typename T> const T& get(unsigned int idx) const;
 
@@ -99,7 +99,7 @@ private:
 		return v;
 	}
 
-	const ValueBase *pushObject(Object& val, std::string idx);
+	const ValueBase* pushObject(Object& val, std::string idx);
 
 	template <typename T>
 	const ValueBase* push(T val, std::string idx)
@@ -124,7 +124,7 @@ private:
 		return def;
 	}
 
-	void updateIndex(std::string, const ValueBase *);
+	void updateIndex(std::string, const ValueBase*);
 	std::string& assignIndex(Object&, std::string&);
 
 	const std::string intToStr(int) const;

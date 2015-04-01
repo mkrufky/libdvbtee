@@ -92,7 +92,7 @@ const std::string &Array::getIndex() const
 	return idxField;
 }
 
-const ValueBase *Array::get(unsigned int idx) const
+const ValueBase* Array::get(unsigned int idx) const
 {
 	if (idx <= vector.size())
 		return vector[idx];
@@ -116,7 +116,7 @@ std::string &Array::assignIndex(Object &obj, std::string &index)
 	return index;
 }
 
-const ValueBase *Array::getByName(std::string idx) const
+const ValueBase* Array::getByName(std::string idx) const
 {
 	std::map<std::string, const ValueBase*>::const_iterator it = indices.find(idx);
 	if (it == indices.end())
@@ -125,7 +125,7 @@ const ValueBase *Array::getByName(std::string idx) const
 	return it->second;
 }
 
-const ValueBase *Array::getByName(unsigned int idx) const
+const ValueBase* Array::getByName(unsigned int idx) const
 {
 	return getByName(intToStr(idx));
 }
@@ -161,7 +161,7 @@ const ValueBase* Array::pushObject(Object &val, std::string idx)
 	return v;
 }
 
-const ValueBase *Array::push(Object &o)
+const ValueBase* Array::push(Object &o)
 {
 	return pushObject(o, "");
 }
