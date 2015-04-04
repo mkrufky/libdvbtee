@@ -430,17 +430,65 @@ bool decode::updatePAT(dvbtee::decode::Table *table)
 
 bool decode::updatePMT(dvbtee::decode::Table *table)
 {
+#define PMT_DBG 1
 	if ((!table) || (!table->isValid()) || (0x02 != table->getTableid())) return false;
 
 	dvbtee::decode::pmt *pmtTable = (dvbtee::decode::pmt*)table;
-#if 0
+
 	decoded_pmt_t &cur_decoded_pmt = decoded_pmt[pmtTable->get<uint16_t>("program")];
 
 	cur_decoded_pmt.program = pmtTable->get<uint16_t>("program");
 	cur_decoded_pmt.version = pmtTable->get<uint8_t>("version");
 	cur_decoded_pmt.pcr_pid = pmtTable->get<uint16_t>("pcrPid");
 	cur_decoded_pmt.es_streams.clear();
+
+#if PMT_DBG
+	fprintf(stderr, "%s: v%d, service_id %d, pcr_pid %d\n", __func__,
+		cur_decoded_pmt.version, cur_decoded_pmt.program, cur_decoded_pmt.pcr_pid);
+	fprintf(stderr, "  es_pid | type\n");
 #endif
+	const dvbtee::decode::Array &streams = pmtTable->get<dvbtee::decode::Array>("streams");
+
+	for (size_t j = 0; j < streams.size(); ++j) {
+
+		const dvbtee::decode::Object &stream = streams.get<dvbtee::decode::Object>(j);
+		//if (!stream.isValid()) continue;
+
+		ts_elementary_stream_t &cur_es = cur_decoded_pmt.es_streams[stream.get<uint16_t>("pid")];
+
+		cur_es.type = stream.get<uint8_t>("streamType");
+		cur_es.pid  = stream.get<uint16_t>("pid");
+
+		const dvbtee::decode::Array &desc = stream.get<dvbtee::decode::Array>("descriptors");
+		for (int k = desc.size()-1; k >= 0; --k)
+		{
+			const dvbtee::decode::Object &d = desc.get<dvbtee::decode::Object>(k);
+			if (0x0a == d.get<uint8_t>("descriptorTag")) {
+				const dvbtee::decode::Array &a = d.get<dvbtee::decode::Array>("ISO639Lang");
+				for (unsigned int i = 0; i < a.size(); i++) {
+
+					const Object &entry(a.get<Object>(i));
+					const std::string &lang(entry.get<std::string>("language"));
+
+					if (!lang.length())
+						continue;
+
+					memcpy(cur_es.iso_639_code,
+					       lang.c_str(),
+					       sizeof(cur_es.iso_639_code));
+					cur_es.iso_639_code[3] = 0;
+				}
+				continue;
+			}
+		}
+#if PMT_DBG
+		fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
+			cur_es.pid, cur_es.type,
+			streamtype_name(cur_es.type),
+			cur_es.iso_639_code);
+#endif
+	}
+
 	return rcvd_pmt[pmtTable->get<uint16_t>("program")] = true;
 }
 
@@ -491,7 +539,6 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 }
 
 bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
-#define PMT_DBG 1
 {
 	decoded_pmt_t &cur_decoded_pmt = decoded_pmt[p_pmt->i_program_number];
 

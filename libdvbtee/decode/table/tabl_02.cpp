@@ -53,16 +53,15 @@ void pmt::store(dvbpsi_pmt_t *p_pmt)
 	m_program = p_pmt->i_program_number;
 	m_version = p_pmt->i_version;
 	m_pcr_pid = p_pmt->i_pcr_pid;
-	//cur_decoded_pmt.es_streams.clear();
 
 	descriptors.decode(p_pmt->p_first_descriptor);
 
 	if (descriptors.size()) set<Array>("descriptors", descriptors);
 
 	Array streams("pid");
-
+#if PMT_DBG
 	fprintf(stderr, "  es_pid | type\n");
-
+#endif
 	dvbpsi_pmt_es_t* p_es = p_pmt->p_first_es;
 	while (p_es) {
 		pmtES * pmtes = new pmtES(this, p_es);
@@ -72,6 +71,8 @@ void pmt::store(dvbpsi_pmt_t *p_pmt)
 	}
 
 	set("streams", streams);
+
+	setValid(true);
 
 	dprintf("%s", toJson().c_str());
 
