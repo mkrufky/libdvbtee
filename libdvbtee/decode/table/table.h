@@ -40,8 +40,7 @@ public:
 	void reset();
 
 protected:
-	TableBase(Decoder*, std::string&, uint8_t);
-	TableBase(Decoder*, std::string&, uint8_t, TableWatcher*);
+	TableBase(Decoder*, std::string&, uint8_t, TableWatcher* = NULL);
 	virtual ~TableBase();
 
 	TableWatcher *m_watcher;

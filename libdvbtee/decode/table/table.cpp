@@ -42,15 +42,6 @@ void TableBase::init()
 	set("tableName", getDecoderName());
 }
 
-TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid)
- : Decoder(parent, name)
- , m_watcher(NULL)
- , descriptors(this)
- , m_tableid(tableid)
-{
-	init();
-}
-
 TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid, TableWatcher *watcher)
  : Decoder(parent, name)
  , m_watcher(watcher)
