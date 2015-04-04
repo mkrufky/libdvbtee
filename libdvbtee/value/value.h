@@ -29,7 +29,7 @@
 
 namespace dvbtee {
 
-namespace decode {
+namespace value {
 
 class ValueBase {
 public:

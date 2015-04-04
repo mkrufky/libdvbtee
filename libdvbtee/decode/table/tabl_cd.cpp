@@ -35,6 +35,7 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
+using namespace dvbtee::value;
 
 static std::string TABLE_NAME = "STT";
 

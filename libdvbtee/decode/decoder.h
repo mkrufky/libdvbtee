@@ -32,15 +32,15 @@
 
 #include "dvbpsi/dvbpsi.h"
 
-#include "decode/value/value.h"
-#include "decode/value/array.h"
-#include "decode/value/object.h"
+#include "value/value.h"
+#include "value/array.h"
+#include "value/object.h"
 
 namespace dvbtee {
 
 namespace decode {
 
-class Decoder: public Object {
+class Decoder: public value::Object {
 public:
 	Decoder();
 	Decoder(Decoder*, std::string&);

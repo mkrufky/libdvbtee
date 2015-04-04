@@ -34,6 +34,7 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
+using namespace dvbtee::value;
 
 static std::string TABLE_NAME = "PMT";
 
@@ -93,7 +94,7 @@ pmtES::pmtES(Decoder *parent, dvbpsi_pmt_es_t *p_es)
 #if PMT_DBG
 	const dvbtee::decode::Descriptor *d = descriptors.last(0x0a);
 	if (d) {
-		const dvbtee::decode::Array &a = d->get<dvbtee::decode::Array>("ISO639Lang");
+		const Array &a = d->get<Array>("ISO639Lang");
 		for (unsigned int i = 0; i < a.size(); i++) {
 
 			const Object &entry(a.get<Object>(i));

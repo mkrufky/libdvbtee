@@ -27,7 +27,7 @@
 
 #define TO_JSON_TPL(CLASS, EXPRESSION) \
 namespace dvbtee { \
-namespace decode { \
+namespace value { \
 template <> const std::string Value<CLASS>::toJson() const \
 { \
 	if (!checkType(typeid(CLASS))) return "undefined"; \
@@ -56,7 +56,7 @@ template <> const OUT& CLASS::get<OUT>(IN in) const \
 
 #define DEFINE_DEFAULT_GETTERS(CLASS, IN) \
 namespace dvbtee { \
-namespace decode { \
+namespace value { \
 	GET_DEFAULT_VALUE(CLASS, IN, int, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, long, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, short, 0) \

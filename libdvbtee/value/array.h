@@ -31,7 +31,7 @@
 
 namespace dvbtee {
 
-namespace decode {
+namespace value {
 
 typedef std::vector<ValueBase*> KeyValueVector;
 

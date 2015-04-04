@@ -26,7 +26,7 @@
 #include "object.h"
 #include "value-macros.h"
 
-using namespace dvbtee::decode;
+using namespace dvbtee::value;
 
 ValueBase::ValueBase(const std::type_info& type, std::string name)
  : m_type(type)

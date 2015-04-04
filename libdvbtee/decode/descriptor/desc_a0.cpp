@@ -32,6 +32,7 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
+using namespace dvbtee::value;
 
 static std::string DESC_NAME = "DR[A0]";
 

@@ -447,11 +447,11 @@ bool decode::updatePMT(dvbtee::decode::Table *table)
 		cur_decoded_pmt.version, cur_decoded_pmt.program, cur_decoded_pmt.pcr_pid);
 	fprintf(stderr, "  es_pid | type\n");
 #endif
-	const dvbtee::decode::Array &streams = pmtTable->get<dvbtee::decode::Array>("streams");
+	const dvbtee::value::Array &streams = pmtTable->get<dvbtee::value::Array>("streams");
 
 	for (size_t j = 0; j < streams.size(); ++j) {
 
-		const dvbtee::decode::Object &stream = streams.get<dvbtee::decode::Object>(j);
+		const dvbtee::value::Object &stream = streams.get<dvbtee::value::Object>(j);
 		//if (!stream.isValid()) continue;
 
 		ts_elementary_stream_t &cur_es = cur_decoded_pmt.es_streams[stream.get<uint16_t>("pid")];
@@ -459,12 +459,12 @@ bool decode::updatePMT(dvbtee::decode::Table *table)
 		cur_es.type = stream.get<uint8_t>("streamType");
 		cur_es.pid  = stream.get<uint16_t>("pid");
 
-		const dvbtee::decode::Array &desc = stream.get<dvbtee::decode::Array>("descriptors");
+		const dvbtee::value::Array &desc = stream.get<dvbtee::value::Array>("descriptors");
 		for (int k = desc.size()-1; k >= 0; --k)
 		{
-			const dvbtee::decode::Object &d = desc.get<dvbtee::decode::Object>(k);
+			const dvbtee::value::Object &d = desc.get<dvbtee::value::Object>(k);
 			if (0x0a == d.get<uint8_t>("descriptorTag")) {
-				const dvbtee::decode::Array &a = d.get<dvbtee::decode::Array>("ISO639Lang");
+				const dvbtee::value::Array &a = d.get<dvbtee::value::Array>("ISO639Lang");
 				for (unsigned int i = 0; i < a.size(); i++) {
 
 					const Object &entry(a.get<Object>(i));
@@ -614,7 +614,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 
 		const dvbtee::decode::Descriptor *d = local_descriptors.last(0xa1);
 		if (d) {
-			const dvbtee::decode::Array& a  = d->get<dvbtee::decode::Array>("serviceLocation");
+			const dvbtee::value::Array& a  = d->get<dvbtee::value::Array>("serviceLocation");
 			for (unsigned int i = 0; i < a.size(); i++) {
 				const Object& o = a.get<Object>(i);
 
