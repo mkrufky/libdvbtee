@@ -127,6 +127,14 @@ public:
 	virtual const std::string toJson() const;
 };
 
+class ReferencedValueUndefined : public ValueUndefined {
+public:
+	static ReferencedValueUndefined& instance();
+private:
+	ReferencedValueUndefined();
+	~ReferencedValueUndefined();
+};
+
 }
 
 }

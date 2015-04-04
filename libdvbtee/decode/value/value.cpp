@@ -98,6 +98,23 @@ const std::string ValueUndefined::toJson() const
 	return get();
 }
 
+ReferencedValueUndefined &ReferencedValueUndefined::instance()
+{
+	static ReferencedValueUndefined i;
+	return i;
+}
+
+ReferencedValueUndefined::ReferencedValueUndefined()
+	: ValueUndefined()
+{
+	ValueBase::operator ++();
+}
+
+ReferencedValueUndefined::~ReferencedValueUndefined()
+{
+	ValueBase::operator --();
+}
+
 TO_JSON_TPL_PRIMITIVE(int)
 TO_JSON_TPL_PRIMITIVE(long)
 TO_JSON_TPL_PRIMITIVE(short)

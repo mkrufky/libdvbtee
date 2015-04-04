@@ -28,7 +28,7 @@ using namespace dvbtee::decode;
 
 #define DBG 0
 
-static ValueUndefined valueUndefined;
+static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();
 
 Object::Object()
 {
