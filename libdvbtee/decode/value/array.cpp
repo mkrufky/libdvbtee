@@ -179,4 +179,4 @@ const ValueBase* Array::push(ValueBase *val)
 }
 
 DEFINE_DEFAULT_GETTERS(Array, unsigned int)
-TO_JSON_TPL(Array, m_value.toJson().c_str())
+TO_JSON_TPL(Array, VALUE.toJson().c_str())

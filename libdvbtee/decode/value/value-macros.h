@@ -37,7 +37,8 @@ template <> const std::string Value<CLASS>::toJson() const \
 } \
 }}
 
-#define TO_JSON_TPL_PRIMITIVE(CLASS) TO_JSON_TPL(CLASS, m_value)
+#define VALUE m_value
+#define TO_JSON_TPL_PRIMITIVE(CLASS) TO_JSON_TPL(CLASS, VALUE)
 
 #define GET_DEFAULT(CLASS, IN, OUT) \
 template <> const OUT& CLASS::get<OUT>(IN in) const \
