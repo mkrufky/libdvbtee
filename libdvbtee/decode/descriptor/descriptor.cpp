@@ -160,7 +160,7 @@ const std::vector<Descriptor *> DescriptorStore::get(uint8_t tag) const
 	return ret;
 }
 
-Descriptor *DescriptorStore::last(uint8_t tag) const
+const Descriptor *DescriptorStore::last(uint8_t tag) const
 {
 	const std::vector<Descriptor*> D = get(tag);
 	ssize_t s = D.size();

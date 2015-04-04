@@ -90,7 +90,7 @@ pmtES::pmtES(Decoder *parent, dvbpsi_pmt_es_t *p_es)
 	descriptors.decode(p_es->p_first_descriptor);
 
 #if PMT_DBG
-	dvbtee::decode::Descriptor *d = descriptors.last(0x0a);
+	const dvbtee::decode::Descriptor *d = descriptors.last(0x0a);
 	if (d) {
 		const dvbtee::decode::Array &a = d->get<dvbtee::decode::Array>("ISO639Lang");
 		for (unsigned int i = 0; i < a.size(); i++) {

@@ -529,7 +529,7 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 		dvbtee::decode::DescriptorStore local_descriptors;
 		local_descriptors.decode(p_es->p_first_descriptor);
 
-		dvbtee::decode::Descriptor *d = local_descriptors.last(0x0a);
+		const dvbtee::decode::Descriptor *d = local_descriptors.last(0x0a);
 		if (d) {
 			const dvbtee::decode::Array &a = d->get<dvbtee::decode::Array>("ISO639Lang");
 			for (unsigned int i = 0; i < a.size(); i++) {
@@ -618,7 +618,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 
 		std::string languages;
 
-		dvbtee::decode::Descriptor *d = local_descriptors.last(0xa1);
+		const dvbtee::decode::Descriptor *d = local_descriptors.last(0xa1);
 		if (d) {
 			const dvbtee::decode::Array& a  = d->get<dvbtee::decode::Array>("serviceLocation");
 			for (unsigned int i = 0; i < a.size(); i++) {
@@ -848,7 +848,7 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::
 		memset((void*)cur_service.provider_name, 0, sizeof(cur_service.provider_name));
 		memset((void*)cur_service.service_name, 0, sizeof(cur_service.service_name));
 
-		dvbtee::decode::Descriptor *d = descriptors->last(0x48);
+		const dvbtee::decode::Descriptor *d = descriptors->last(0x48);
 		if (d) {
 			strncpy((char*)cur_service.provider_name,
 				d->get<std::string>("providerName").c_str(),
@@ -939,7 +939,7 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decod
 
 		descriptors->decode(p_event->p_first_descriptor);
 
-		dvbtee::decode::Descriptor *d = descriptors->last(0x4d);
+		const dvbtee::decode::Descriptor *d = descriptors->last(0x4d);
 		if (d) {
 			cur_event.name.assign(d->get<std::string>("name").c_str());
 			cur_event.text.assign(d->get<std::string>("text").c_str());
@@ -1710,7 +1710,7 @@ uint16_t decode::get_lcn(uint16_t service_id)
 	uint16_t lcn = 0;
 
 	if (networks.count(network_id)) {
-		dvbtee::decode::Descriptor *d = networks[network_id].descriptors.last(0x83);
+		const dvbtee::decode::Descriptor *d = networks[network_id].descriptors.last(0x83);
 		if (d) lcn = d->get<uint16_t>(service_id);
 	}
 	return lcn;
