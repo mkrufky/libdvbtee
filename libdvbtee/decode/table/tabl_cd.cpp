@@ -69,12 +69,6 @@ bool stt::ingest(TableStore *s, dvbpsi_atsc_stt_t *t, TableWatcher *w)
 }
 
 
-stt::stt(Decoder *parent)
- : Table(parent, TABLE_NAME, TABLEID)
-{
-	//store table later (probably repeatedly)
-}
-
 stt::stt(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
@@ -88,7 +82,7 @@ stt::stt(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_stt_t *p_stt)
 }
 
 stt::stt(Decoder *parent, dvbpsi_atsc_stt_t *p_stt)
- : Table(parent, TABLE_NAME, TABLEID)
+ : Table(parent, TABLE_NAME, TABLEID, NULL)
 {
 	store(p_stt);
 }

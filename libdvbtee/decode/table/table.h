@@ -40,7 +40,7 @@ public:
 	void reset();
 
 protected:
-	TableBase(Decoder*, std::string&, uint8_t, TableWatcher* = NULL);
+	TableBase(Decoder*, std::string&, uint8_t, TableWatcher*);
 	virtual ~TableBase();
 
 	TableWatcher *m_watcher;
@@ -55,7 +55,6 @@ private:
 
 class Table: public TableBase {
 public:
-	Table(Decoder*, std::string&, uint8_t);
 	Table(Decoder*, std::string&, uint8_t, TableWatcher*);
 	virtual ~Table();
 };
@@ -107,25 +106,18 @@ public:
 	~TableStore();
 
 #if PsiTable_CONSTRUCTORTEMPLATE
-	bool add(uint8_t, PsiTable);
-	bool add(uint8_t, PsiTable, TableWatcher*);
+	bool add(uint8_t, PsiTable, TableWatcher* watcher = NULL);
 
 	template<typename T>
-	bool add(uint8_t tableid, T* p_table) { return add(tableid, PsiTable(TableTypeCarrier<T>(p_table))); }
-	template<typename T>
-	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher) { return add(tableid, PsiTable(TableTypeCarrier<T>(p_table)), watcher); }
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL) { return add(tableid, PsiTable(TableTypeCarrier<T>(p_table)), watcher); }
 #else
-	bool add(uint8_t, PsiTable&);
-	bool add(uint8_t, PsiTable&, TableWatcher*);
+	bool add(uint8_t, PsiTable&, TableWatcher* watcher = NULL);
 
 	template<typename T>
-	bool add(uint8_t tableid, T* p_table) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable); }
-	template<typename T>
-	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable, watcher); }
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable, watcher); }
 #endif
 
-	template <typename T> bool add(T*);
-	template <typename T> bool add(T*, TableWatcher*);
+	template <typename T> bool add(T*, TableWatcher* w = NULL);
 
 	template<typename T, class C>
 	bool update(uint8_t tableid, T* p_table)
@@ -145,27 +137,12 @@ public:
 
 #if PsiTable_CONSTRUCTORTEMPLATE
 	template<typename T, class C>
-	bool setOnly(uint8_t tableid, T* p_table)
-	{
-		return (update<T,C>(tableid, p_table)) ? true : add(p_table);
-	}
-	template<typename T, class C>
-	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher)
+	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
 		return (update<T,C>(tableid, p_table)) ? true : add(p_table, watcher);
 	}
 #else
-	template<typename T, class C>
-	bool setOnly(uint8_t tableid, T* p_table)
-	{
-		if (update<T,C>(tableid, p_table)) return true;
-
-		PsiTable psiTable;
-		psiTable.Set<T>(p_table);
-		return add(tableid, psiTable);
-	}
-	template<typename T, class C>
-	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher)
+	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
 		if (update<T,C>(tableid, p_table)) return true;
 
@@ -175,24 +152,16 @@ public:
 	}
 #endif
 
-	template <typename T> bool setOnly(T*);
-	template <typename T> bool setOnly(T*, TableWatcher*);
+	template <typename T> bool setOnly(T*, TableWatcher* w = NULL);
 
 
 	template<typename T, class C>
-	bool ingest(T *p_table)
-	{
-		return C::ingest(this, p_table);
-	}
-
-	template<typename T, class C>
-	bool ingest(T *p_table, TableWatcher *watcher)
+	bool ingest(T *p_table, TableWatcher *watcher = NULL)
 	{
 		return C::ingest(this, p_table, watcher);
 	}
 
-	template <typename T> bool ingest(T*);
-	template <typename T> bool ingest(T*, TableWatcher*);
+	template <typename T> bool ingest(T*, TableWatcher* w = NULL);
 
 	const std::vector<Table*> get(uint8_t) const;
 
@@ -204,29 +173,15 @@ private:
 template <uint8_t TABLEID, class T, typename S>
 class LinkedTable : public T {
 public:
-	LinkedTable(Decoder *parent)
-	 : T(parent)
-	 , m_linkedIdx(-1)
-	{
-		linkParent(parent);
-	}
-
-	LinkedTable(Decoder *parent, TableWatcher *watcher)
+	LinkedTable(Decoder *parent, TableWatcher *watcher = NULL)
 	 : T(parent, watcher)
 	 , m_linkedIdx(-1)
 	{
 		linkParent(parent);
 	}
 
-	LinkedTable(Decoder *parent, PsiTable& inTable, TableWatcher *watcher)
+	LinkedTable(Decoder *parent, PsiTable& inTable, TableWatcher *watcher = NULL)
 	 : T(parent, watcher, inTable.Get<S>())
-	 , m_linkedIdx(-1)
-	{
-		linkParent(parent);
-	}
-
-	LinkedTable(Decoder *parent, PsiTable& inTable)
-	 : T(parent, inTable.Get<S>())
 	 , m_linkedIdx(-1)
 	{
 		linkParent(parent);
@@ -248,10 +203,8 @@ private:
 
 class TableBaseFactory {
 public:
-	virtual Table *create(Decoder *parent) = 0;
 	virtual Table *create(Decoder *parent, TableWatcher *watcher) = 0;
 	virtual Table *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher) = 0;
-	virtual Table *create(Decoder *parent, PsiTable& inTable) = 0;
 protected:
 	TableBaseFactory() {}
 	~TableBaseFactory() {}
@@ -280,21 +233,13 @@ public:
 		static TableFactory<TABLEID, S, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder *parent)
-	{
-		return new LinkedTable<TABLEID,T,S>(parent);
-	}
-	virtual T *create(Decoder *parent, TableWatcher *watcher)
+	virtual T *create(Decoder *parent, TableWatcher *watcher) // = NULL
 	{
 		return new LinkedTable<TABLEID,T,S>(parent, watcher);
 	}
 	virtual T *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher)
 	{
 		return new LinkedTable<TABLEID,T,S>(parent, inTable, watcher);
-	}
-	virtual T *create(Decoder *parent, PsiTable& inTable)
-	{
-		return new LinkedTable<TABLEID,T,S>(parent, inTable);
 	}
 private:
 	TableFactory() {
@@ -309,17 +254,11 @@ private:
 	namespace decode {\
 	\
 	template <>\
-	bool TableStore::add<psitable>(psitable *p) { return add(tableid, p); }\
-	template <>\
 	bool TableStore::add<psitable>(psitable *p, TableWatcher *w) { return add(tableid, p, w); }\
 	\
 	template <>\
-	bool TableStore::setOnly<psitable>(psitable *p) { return setOnly<psitable, decoder>(tableid, p); }\
-	template <>\
 	bool TableStore::setOnly<psitable>(psitable *p, TableWatcher *w) { return setOnly<psitable, decoder>(tableid, p, w); }\
 	\
-	template <>\
-	bool TableStore::ingest<psitable>(psitable *p) { return ingest<psitable, decoder>(p); }\
 	template <>\
 	bool TableStore::ingest<psitable>(psitable *p, TableWatcher *w) { return ingest<psitable, decoder>(p, w); }\
 	\

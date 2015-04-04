@@ -36,7 +36,6 @@ namespace decode {
 
 class pmt: public Table/*<dvbpsi_pmt_t>*/ {
 public:
-	pmt(Decoder *);
 	pmt(Decoder *, TableWatcher*);
 	pmt(Decoder *, TableWatcher*, dvbpsi_pmt_t*);
 	pmt(Decoder *, dvbpsi_pmt_t*);

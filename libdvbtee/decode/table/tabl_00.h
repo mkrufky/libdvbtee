@@ -38,7 +38,6 @@ typedef std::map<uint16_t, uint16_t> map_decoded_pat_programs; /* program number
 
 class pat: public Table/*<dvbpsi_pat_t>*/ {
 public:
-	pat(Decoder *);
 	pat(Decoder *, TableWatcher*);
 	pat(Decoder *, TableWatcher*, dvbpsi_pat_t*);
 	pat(Decoder *, dvbpsi_pat_t*);

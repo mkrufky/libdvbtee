@@ -36,7 +36,6 @@ namespace decode {
 
 class tot: public Table/*<dvbpsi_tot_t>*/ {
 public:
-	tot(Decoder *);
 	tot(Decoder *, TableWatcher*);
 	tot(Decoder *, TableWatcher*, dvbpsi_tot_t*);
 	tot(Decoder *, dvbpsi_tot_t*);

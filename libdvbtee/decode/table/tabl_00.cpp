@@ -112,14 +112,6 @@ bool pat::ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w)
 }
 
 
-pat::pat(Decoder *parent)
- : Table(parent, TABLE_NAME, TABLEID)
- , m_ts_id(0xffff)
- , m_version(0xff)
-{
-	//store table later (probably repeatedly)
-}
-
 pat::pat(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
  , m_ts_id(0xffff)
@@ -137,7 +129,7 @@ pat::pat(Decoder *parent, TableWatcher *watcher, dvbpsi_pat_t *p_pat)
 }
 
 pat::pat(Decoder *parent, dvbpsi_pat_t *p_pat)
- : Table(parent, TABLE_NAME, TABLEID)
+ : Table(parent, TABLE_NAME, TABLEID, NULL)
  , m_ts_id(0xffff)
  , m_version(0xff)
 {

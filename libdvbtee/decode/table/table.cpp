@@ -27,12 +27,10 @@ TableDataComponent::TableDataComponent(Decoder *parent, std::string &name)
  : LinkedDecoder(parent, name)
  , descriptors(this)
 {
-	//
 }
 
 TableDataComponent::~TableDataComponent()
 {
-	//
 }
 
 
@@ -53,7 +51,6 @@ TableBase::TableBase(Decoder *parent, std::string &name, uint8_t tableid, TableW
 
 TableBase::~TableBase()
 {
-	//
 }
 
 const uint8_t& TableBase::getTableid() const
@@ -68,21 +65,13 @@ void TableBase::reset()
 }
 
 
-Table::Table(Decoder *parent, std::string &name, uint8_t tableid)
- : TableBase(parent, name, tableid)
-{
-	//
-}
-
 Table::Table(Decoder *parent, std::string &name, uint8_t tableid, TableWatcher *watcher)
  : TableBase(parent, name, tableid, watcher)
 {
-	//
 }
 
 Table::~Table()
 {
-	//
 }
 
 
@@ -139,27 +128,10 @@ TableRegistry &TableRegistry::instance()
 TableStore::TableStore(Decoder *parent)
  : m_parent(parent)
 {
-	//
 }
 
 TableStore::~TableStore()
 {
-	//
-}
-
-#if PsiTable_CONSTRUCTORTEMPLATE
-bool TableStore::add(uint8_t id, PsiTable p_table)
-#else
-bool TableStore::add(uint8_t id, PsiTable &p_table)
-#endif
-{
-	Table *t = NULL;
-
-	TableBaseFactory* f = TableRegistry::instance().getFactory(id);
-	if (f) t = f->create(m_parent, p_table);
-
-	if (t) m_store.insert( std::pair<uint8_t, Table*>(t->getTableid(), t) );
-	return (t != NULL);
 }
 
 #if PsiTable_CONSTRUCTORTEMPLATE

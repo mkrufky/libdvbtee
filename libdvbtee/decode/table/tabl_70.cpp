@@ -69,12 +69,6 @@ bool tot::ingest(TableStore *s, dvbpsi_tot_t *t, TableWatcher *w)
 }
 
 
-tot::tot(Decoder *parent)
- : Table(parent, TABLE_NAME, TABLEID)
-{
-	//store table later (probably repeatedly)
-}
-
 tot::tot(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
@@ -88,7 +82,7 @@ tot::tot(Decoder *parent, TableWatcher *watcher, dvbpsi_tot_t *p_tot)
 }
 
 tot::tot(Decoder *parent, dvbpsi_tot_t *p_tot)
- : Table(parent, TABLE_NAME, TABLEID)
+ : Table(parent, TABLE_NAME, TABLEID, NULL)
 {
 	store(p_tot);
 }

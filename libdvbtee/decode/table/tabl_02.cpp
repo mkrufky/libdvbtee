@@ -144,15 +144,6 @@ bool pmt::ingest(TableStore *s, dvbpsi_pmt_t *t, TableWatcher *w)
 }
 
 
-pmt::pmt(Decoder *parent)
- : Table(parent, TABLE_NAME, TABLEID)
- , m_program(0xffff)
- , m_version(0xff)
- , m_pcr_pid(0xffff)
-{
-	//store table later (probably repeatedly)
-}
-
 pmt::pmt(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
  , m_program(0xffff)
@@ -172,7 +163,7 @@ pmt::pmt(Decoder *parent, TableWatcher *watcher, dvbpsi_pmt_t *p_pmt)
 }
 
 pmt::pmt(Decoder *parent, dvbpsi_pmt_t *p_pmt)
- : Table(parent, TABLE_NAME, TABLEID)
+ : Table(parent, TABLE_NAME, TABLEID, NULL)
  , m_program(0xffff)
  , m_version(0xff)
  , m_pcr_pid(0xffff)

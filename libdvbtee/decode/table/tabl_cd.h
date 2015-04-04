@@ -34,7 +34,6 @@ namespace decode {
 
 class stt: public Table/*<dvbpsi_atsc_stt_t>*/ {
 public:
-	stt(Decoder *);
 	stt(Decoder *, TableWatcher*);
 	stt(Decoder *, TableWatcher*, dvbpsi_atsc_stt_t*);
 	stt(Decoder *, dvbpsi_atsc_stt_t*);
