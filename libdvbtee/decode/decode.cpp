@@ -392,7 +392,7 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 	case 0x00: /* PAT */
 		updatePAT(table);
 		break;
-	case 0x02:
+	case 0x02: /* PMT */
 		updatePMT(table);
 		break;
 	case 0x70: /* TDT */
@@ -486,32 +486,8 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 			p_pat->i_version, p_pat->i_ts_id);
 		return false;
 	}
-#if 0
-#if PAT_DBG
-	fprintf(stderr, "%s: v%d, ts_id: %d\n", __func__,
-		p_pat->i_version, p_pat->i_ts_id);
-#endif
-	decoded_pat.ts_id   = p_pat->i_ts_id;
-	decoded_pat.version = p_pat->i_version;
-	decoded_pat.programs.clear();
 
-	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
-	while (p_program) {
-//		if (p_program->i_number > 0)
-		decoded_pat.programs[p_program->i_number] = p_program->i_pid;
-
-		rcvd_pmt[p_program->i_number] = false;
-#if PAT_DBG
-		fprintf(stderr, "  %10d | %x\n",
-			p_program->i_number,
-			decoded_pat.programs[p_program->i_number]);
-#endif
-		p_program = p_program->p_next;
-	}
-	return true;
-#else
 	return store.ingest(p_pat, this);
-#endif
 }
 
 bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
