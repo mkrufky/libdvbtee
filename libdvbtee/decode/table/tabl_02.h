@@ -38,7 +38,6 @@ class pmt: public Table/*<dvbpsi_pmt_t>*/ {
 public:
 	pmt(Decoder *, TableWatcher*);
 	pmt(Decoder *, TableWatcher*, dvbpsi_pmt_t*);
-	pmt(Decoder *, dvbpsi_pmt_t*);
 	virtual ~pmt();
 
 	void store(dvbpsi_pmt_t*);

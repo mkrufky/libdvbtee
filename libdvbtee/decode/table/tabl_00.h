@@ -40,7 +40,6 @@ class pat: public Table/*<dvbpsi_pat_t>*/ {
 public:
 	pat(Decoder *, TableWatcher*);
 	pat(Decoder *, TableWatcher*, dvbpsi_pat_t*);
-	pat(Decoder *, dvbpsi_pat_t*);
 	virtual ~pat();
 
 	void store(dvbpsi_pat_t*);

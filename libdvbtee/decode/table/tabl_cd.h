@@ -36,7 +36,6 @@ class stt: public Table/*<dvbpsi_atsc_stt_t>*/ {
 public:
 	stt(Decoder *, TableWatcher*);
 	stt(Decoder *, TableWatcher*, dvbpsi_atsc_stt_t*);
-	stt(Decoder *, dvbpsi_atsc_stt_t*);
 	virtual ~stt();
 
 	void store(dvbpsi_atsc_stt_t*);

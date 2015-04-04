@@ -162,15 +162,6 @@ pmt::pmt(Decoder *parent, TableWatcher *watcher, dvbpsi_pmt_t *p_pmt)
 	store(p_pmt);
 }
 
-pmt::pmt(Decoder *parent, dvbpsi_pmt_t *p_pmt)
- : Table(parent, TABLE_NAME, TABLEID, NULL)
- , m_program(0xffff)
- , m_version(0xff)
- , m_pcr_pid(0xffff)
-{
-	store(p_pmt);
-}
-
 pmt::~pmt()
 {
 	//

@@ -128,14 +128,6 @@ pat::pat(Decoder *parent, TableWatcher *watcher, dvbpsi_pat_t *p_pat)
 	store(p_pat);
 }
 
-pat::pat(Decoder *parent, dvbpsi_pat_t *p_pat)
- : Table(parent, TABLE_NAME, TABLEID, NULL)
- , m_ts_id(0xffff)
- , m_version(0xff)
-{
-	store(p_pat);
-}
-
 pat::~pat()
 {
 	//

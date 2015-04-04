@@ -81,12 +81,6 @@ stt::stt(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_stt_t *p_stt)
 	store(p_stt);
 }
 
-stt::stt(Decoder *parent, dvbpsi_atsc_stt_t *p_stt)
- : Table(parent, TABLE_NAME, TABLEID, NULL)
-{
-	store(p_stt);
-}
-
 stt::~stt()
 {
 	//

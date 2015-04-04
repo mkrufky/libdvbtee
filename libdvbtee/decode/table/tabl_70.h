@@ -38,7 +38,6 @@ class tot: public Table/*<dvbpsi_tot_t>*/ {
 public:
 	tot(Decoder *, TableWatcher*);
 	tot(Decoder *, TableWatcher*, dvbpsi_tot_t*);
-	tot(Decoder *, dvbpsi_tot_t*);
 	virtual ~tot();
 
 	void store(dvbpsi_tot_t*);

@@ -81,12 +81,6 @@ tot::tot(Decoder *parent, TableWatcher *watcher, dvbpsi_tot_t *p_tot)
 	store(p_tot);
 }
 
-tot::tot(Decoder *parent, dvbpsi_tot_t *p_tot)
- : Table(parent, TABLE_NAME, TABLEID, NULL)
-{
-	store(p_tot);
-}
-
 tot::~tot()
 {
 	//
