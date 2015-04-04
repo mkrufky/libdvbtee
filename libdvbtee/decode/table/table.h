@@ -45,7 +45,7 @@ protected:
 
 	TableWatcher *m_watcher;
 
-	dvbtee::decode::DescriptorStore descriptors;
+	DescriptorStore descriptors;
 
 private:
 	const uint8_t m_tableid;
@@ -72,7 +72,7 @@ public:
 	TableDataComponent(Decoder*, std::string&);
 	virtual ~TableDataComponent();
 
-	dvbtee::decode::DescriptorStore descriptors;
+	DescriptorStore descriptors;
 };
 
 class TableTypeCarrierBase {};
