@@ -28,9 +28,7 @@
 
 #include "table.h"
 
-//#include "dvbpsi/dvbpsi.h"
 #include "dvbpsi/pat.h"
-//#include "dvbpsi/descriptor.h"
 #include "dvbpsi/pmt.h"
 #include "dvbpsi/demux.h"
 #include "dvbpsi/sdt.h"

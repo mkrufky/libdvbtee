@@ -290,7 +290,7 @@ decode::~decode()
 	decoded_ett.clear();
 }
 
-decode::decode(const decode& d)
+decode::decode(const decode&)
  : NullDecoder()
  , store(this)
 {
