@@ -59,6 +59,7 @@ private:
 template <typename T>
 class Value : public ValueBase {
 public:
+	explicit
 	Value(std::string& n, T& v)
 	 : ValueBase(typeid(T), n)
 #if !VALUEBASE_POINTER
@@ -70,6 +71,7 @@ public:
 #endif
 	}
 
+	explicit
 	Value(const Value<T>& o)
 	 : ValueBase(typeid(T), o.getName())
 #if !VALUEBASE_POINTER
@@ -119,7 +121,7 @@ private:
 class ValueUndefined : public ValueBase {
 public:
 	ValueUndefined(std::string n = "");
-	ValueUndefined(const ValueUndefined&);
+	explicit ValueUndefined(const ValueUndefined&);
 	~ValueUndefined();
 	const std::string get() const;
 	virtual const std::string toJson() const;
