@@ -79,7 +79,7 @@ public:
 	void decode(dvbpsi_descriptor_t*);
 
 	const std::vector<Descriptor*> get(uint8_t) const;
-	Descriptor* last(uint8_t);
+	Descriptor* last(uint8_t) const;
 
 private:
 	Decoder *m_parent;
