@@ -1,4 +1,4 @@
-include ( value_include.pri )
+INCLUDEPATH += $$PWD
 
 SOURCES += \
     $$PWD/array.cpp \

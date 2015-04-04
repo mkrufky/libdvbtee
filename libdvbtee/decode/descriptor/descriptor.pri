@@ -1,4 +1,4 @@
-include ( descriptor_include.pri )
+INCLUDEPATH += $$PWD
 
 SOURCES += \
     $$PWD/desc_0a.cpp \

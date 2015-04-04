@@ -1,4 +1,4 @@
-include ( decode_include.pri )
+INCLUDEPATH += $$PWD
 
 include ( table/table.pri )
 include ( descriptor/descriptor.pri )

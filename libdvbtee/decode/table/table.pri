@@ -1,4 +1,4 @@
-include ( table_include.pri )
+INCLUDEPATH += $$PWD
 
 SOURCES += \
     $$PWD/tabl_00.cpp \
