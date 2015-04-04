@@ -75,12 +75,12 @@ const bool ValueBase::checkType(const std::type_info& typeRequested) const
 
 
 ValueUndefined::ValueUndefined(std::string n)
-	: ValueBase(typeid(void), n)
+ : ValueBase(typeid(void), n)
 {
 }
 
 ValueUndefined::ValueUndefined(const ValueUndefined &v)
-	: ValueBase(typeid(void), v.getName())
+ : ValueBase(typeid(void), v.getName())
 {
 }
 
