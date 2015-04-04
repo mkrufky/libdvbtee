@@ -173,14 +173,14 @@ private:
 template <uint8_t TABLEID, class T, typename S>
 class LinkedTable : public T {
 public:
-	LinkedTable(Decoder *parent, TableWatcher *watcher = NULL)
+	LinkedTable(Decoder *parent, TableWatcher *watcher)
 	 : T(parent, watcher)
 	 , m_linkedIdx(-1)
 	{
 		linkParent(parent);
 	}
 
-	LinkedTable(Decoder *parent, PsiTable& inTable, TableWatcher *watcher = NULL)
+	LinkedTable(Decoder *parent, PsiTable& inTable, TableWatcher *watcher)
 	 : T(parent, watcher, inTable.Get<S>())
 	 , m_linkedIdx(-1)
 	{
@@ -233,7 +233,7 @@ public:
 		static TableFactory<TABLEID, S, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder *parent, TableWatcher *watcher) // = NULL
+	virtual T *create(Decoder *parent, TableWatcher *watcher)
 	{
 		return new LinkedTable<TABLEID,T,S>(parent, watcher);
 	}
