@@ -26,7 +26,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "table.h"
+#include "decode/table/table.h"
 
 #include "dvbpsi/pat.h"
 #include "dvbpsi/pmt.h"

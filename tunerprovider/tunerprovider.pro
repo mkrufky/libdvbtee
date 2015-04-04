@@ -4,8 +4,6 @@ TARGET = dvbtee_tunerprovider
 TEMPLATE = lib
 CONFIG += staticlib
 
-include ( ../libdvbtee/libdvbtee_include.pri )
-
 INCLUDEPATH += ../libdvbtee/
 INCLUDEPATH += ../usr/include
 

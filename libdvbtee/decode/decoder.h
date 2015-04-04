@@ -32,9 +32,9 @@
 
 #include "dvbpsi/dvbpsi.h"
 
-#include "value.h"
-#include "array.h"
-#include "object.h"
+#include "decode/value/value.h"
+#include "decode/value/array.h"
+#include "decode/value/object.h"
 
 namespace dvbtee {
 

@@ -18,8 +18,6 @@ SOURCES += serve.cpp \
 HEADERS += serve.h \
     text.h
 
-include ( ../libdvbtee/libdvbtee_include.pri )
-
 symbian {
     MMP_RULES += EXPORTUNFROZEN
     TARGET.UID3 = 0xE1EA1848
