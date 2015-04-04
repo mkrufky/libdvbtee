@@ -430,7 +430,7 @@ bool decode::updatePAT(dvbtee::decode::Table *table)
 
 bool decode::updatePMT(dvbtee::decode::Table *table)
 {
-#define PMT_DBG 1
+#define PMT_DBG 0
 	if ((!table) || (!table->isValid()) || (0x02 != table->getTableid())) return false;
 
 	dvbtee::decode::pmt *pmtTable = (dvbtee::decode::pmt*)table;
@@ -549,59 +549,6 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 			p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
 		return false;
 	}
-#if PMT_DBG
-	fprintf(stderr, "%s: v%d, service_id %d, pcr_pid %d\n", __func__,
-		p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
-#endif
-	cur_decoded_pmt.program = p_pmt->i_program_number;
-	cur_decoded_pmt.version = p_pmt->i_version;
-	cur_decoded_pmt.pcr_pid = p_pmt->i_pcr_pid;
-	cur_decoded_pmt.es_streams.clear();
-	//FIXME: descriptors
-	descriptors.decode(p_pmt->p_first_descriptor);
-
-	fprintf(stderr, "  es_pid | type\n");
-
-	dvbpsi_pmt_es_t* p_es = p_pmt->p_first_es;
-	while (p_es) {
-
-		ts_elementary_stream_t &cur_es = cur_decoded_pmt.es_streams[p_es->i_pid];
-
-		cur_es.type = p_es->i_type;
-		cur_es.pid  = p_es->i_pid;
-
-		//FIXME: descriptors
-		descriptors.decode(p_es->p_first_descriptor);
-
-		dvbtee::decode::DescriptorStore local_descriptors;
-		local_descriptors.decode(p_es->p_first_descriptor);
-
-		const dvbtee::decode::Descriptor *d = local_descriptors.last(0x0a);
-		if (d) {
-			const dvbtee::decode::Array &a = d->get<dvbtee::decode::Array>("ISO639Lang");
-			for (unsigned int i = 0; i < a.size(); i++) {
-
-				const Object &entry(a.get<Object>(i));
-				const std::string &lang(entry.get<std::string>("language"));
-
-				if (!lang.length())
-					continue;
-
-				memcpy(cur_es.iso_639_code,
-				       lang.c_str(),
-				       sizeof(cur_es.iso_639_code));
-				cur_es.iso_639_code[3] = 0;
-			}
-		}
-#if PMT_DBG
-		fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
-			cur_es.pid, cur_es.type,
-			streamtype_name(cur_es.type),
-			cur_es.iso_639_code);
-#endif
-		p_es = p_es->p_next;
-	}
-
 	return store.ingest(p_pmt, this);
 }
 
