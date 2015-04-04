@@ -15,6 +15,7 @@ DEFINES += DVBTEE_LIBRARY
 include ( libdvbtee.pri )
 
 SOURCES += channels.cpp \
+    decode.cpp \
     demux.cpp \
     feed.cpp \
     functions.cpp \
@@ -31,6 +32,7 @@ SOURCES += channels.cpp \
 
 HEADERS += atsctext.h \
     channels.h \
+    decode.h \
     demux.h \
     feed.h \
     functions.h \
