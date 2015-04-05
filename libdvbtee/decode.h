@@ -307,9 +307,9 @@ public:
 	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_extension].take_sdt(p_sdt); }
 #endif
 
-	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL; }
-	const decoded_nit_t*   get_decoded_nit() { return &decoded_nit; }
-	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit: NULL; }
+	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) const;
+	const decoded_nit_t*   get_decoded_nit() const { return &decoded_nit; }
+	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) const;
 
 	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x) : false; }
 	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; }
@@ -397,29 +397,29 @@ public:
 #ifdef RRT
 	bool take_rrt(dvbpsi_atsc_mgt_t*);
 #endif
-	bool complete_pmt();
+	bool complete_pmt() const;
 #if 0
 	bool complete_psip();
 #endif
 
-	const decoded_pat_t*   get_decoded_pat() { return &decoded_pat; }
-	const map_decoded_pmt* get_decoded_pmt() { return &decoded_pmt; }
-	const decoded_vct_t*   get_decoded_vct() { return &decoded_vct; }
-	const decoded_mgt_t*   get_decoded_mgt() { return &decoded_mgt; }
-	const decoded_sdt_t*   get_decoded_sdt();
-	const decoded_nit_t*   get_decoded_nit();
+	const decoded_pat_t*   get_decoded_pat() const { return &decoded_pat; }
+	const map_decoded_pmt* get_decoded_pmt() const { return &decoded_pmt; }
+	const decoded_vct_t*   get_decoded_vct() const { return &decoded_vct; }
+	const decoded_mgt_t*   get_decoded_mgt() const { return &decoded_mgt; }
+	const decoded_sdt_t*   get_decoded_sdt() const;
+	const decoded_nit_t*   get_decoded_nit() const;
 
-	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; }
-	const map_decoded_eit*      get_decoded_eit();
+	const map_decoded_atsc_eit* get_decoded_atsc_eit() const { return decoded_atsc_eit; }
+	const map_decoded_eit*      get_decoded_eit() const;
 
 	unsigned char* get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message); /* message must be an array of 256 unsigned char's */
 
-	uint8_t get_current_eit_x() { return eit_x; }
-	uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; }
+	const uint8_t get_current_eit_x() const { return eit_x; }
+	const uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; }
 
-	uint16_t get_lcn(uint16_t);
+	const uint16_t get_lcn(uint16_t) const;
 
-	const decode_network*  get_decoded_network();
+	const decode_network*  get_decoded_network() const;
 
 	void dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
