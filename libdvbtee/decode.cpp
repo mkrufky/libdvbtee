@@ -31,6 +31,7 @@
 
 #include "tabl_00.h"
 #include "tabl_02.h"
+#include "tabl_c7.h"
 #include "tabl_c8.h"
 
 #include "log.h"
@@ -402,6 +403,9 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 		stream_time = table->get<time_t>("time");
 		dbg_time("%s", ctime(&stream_time));
 		break;
+	case 0xc7: /* MGT */
+		updateMGT(table);
+		break;
 	case 0xc8: /* TVCT */
 	case 0xc9: /* CVCT */
 		updateVCT(table);
@@ -511,6 +515,20 @@ bool decode::updateVCT(dvbtee::decode::Table *table)
 	decoded_vct.ts_id     = vctTable->decoded_vct.ts_id;
 	decoded_vct.cable_vct = vctTable->decoded_vct.cable_vct;
 	decoded_vct.channels  = vctTable->decoded_vct.channels;
+
+	return true;
+}
+
+bool decode::updateMGT(dvbtee::decode::Table *table)
+{
+	if ((!table) || (!table->isValid()) || (0xc7 != table->getTableid()))
+		return false;
+
+	dvbtee::decode::mgt *mgtTable = (dvbtee::decode::mgt*)table;
+
+	decoded_mgt.version      = mgtTable->decoded_mgt.version;
+	decoded_mgt.table_id_ext = mgtTable->decoded_mgt.table_id_ext;
+	decoded_mgt.tables       = mgtTable->decoded_mgt.tables;
 
 	return true;
 }
@@ -683,6 +701,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 		dprintf("v%d: ALREADY DECODED", p_mgt->i_version);
 		return false;
 	}
+#if 0
 #if MGT_DBG
 	fprintf(stderr, "%s: v%d\n", __func__, p_mgt->i_version);
 #endif
@@ -719,8 +738,8 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 	}
 	//FIXME: descriptors
 	descriptors.decode(p_mgt->p_first_descriptor);
-
-	return true;
+#endif
+	return store.ingest(p_mgt, this);
 }
 
 static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, dvbtee::decode::DescriptorStore* descriptors)
