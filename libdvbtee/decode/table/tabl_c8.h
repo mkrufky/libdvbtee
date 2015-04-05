@@ -46,6 +46,9 @@ public:
 
 	static bool ingest(TableStore *s, dvbpsi_atsc_vct_t *t, TableWatcher *w = NULL);
 
+	const decoded_vct_t& getDecodedVCT() const { return decoded_vct; }
+
+private:
 	decoded_vct_t   decoded_vct;
 };
 

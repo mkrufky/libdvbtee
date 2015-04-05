@@ -519,10 +519,7 @@ bool decode::updateVCT(dvbtee::decode::Table *table)
 
 	dvbtee::decode::vct *vctTable = (dvbtee::decode::vct*)table;
 
-	decoded_vct.version   = vctTable->decoded_vct.version;
-	decoded_vct.ts_id     = vctTable->decoded_vct.ts_id;
-	decoded_vct.cable_vct = vctTable->decoded_vct.cable_vct;
-	decoded_vct.channels  = vctTable->decoded_vct.channels;
+	decoded_vct = vctTable->getDecodedVCT();
 
 	return true;
 }
