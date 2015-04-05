@@ -31,6 +31,7 @@
 
 #include "tabl_00.h"
 #include "tabl_02.h"
+#include "tabl_c8.h"
 
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -401,6 +402,10 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 		stream_time = table->get<time_t>("time");
 		dbg_time("%s", ctime(&stream_time));
 		break;
+	case 0xc8: /* TVCT */
+	case 0xc9: /* CVCT */
+		updateVCT(table);
+		break;
 	default:
 		break;
 	}
@@ -492,6 +497,23 @@ bool decode::updatePMT(dvbtee::decode::Table *table)
 	return rcvd_pmt[pmtTable->get<uint16_t>("program")] = true;
 }
 
+bool decode::updateVCT(dvbtee::decode::Table *table)
+{
+	if ((!table) || (!table->isValid()) ||
+	    ((0xc8 != table->getTableid()) &&
+	     (0xc9 != table->getTableid())))
+		return false;
+
+	dvbtee::decode::vct *vctTable = (dvbtee::decode::vct*)table;
+
+	decoded_vct.version   = vctTable->decoded_vct.version;
+	decoded_vct.ts_id     = vctTable->decoded_vct.ts_id;
+	decoded_vct.cable_vct = vctTable->decoded_vct.cable_vct;
+	decoded_vct.channels  = vctTable->decoded_vct.channels;
+
+	return true;
+}
+
 /* -- STREAM TIME -- */
 bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 {
@@ -567,6 +589,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 			p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 		return false;
 	}
+#if 0
 #if VCT_DBG
 	fprintf(stderr, "%s: v%d, ts_id %d, b_cable_vct %d\n", __func__,
 		p_vct->i_version, __ts_id, p_vct->b_cable_vct);
@@ -646,8 +669,8 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 	//FIXME: descriptors
 	dprintf("parsing channel descriptors for mux:");
 	descriptors.decode(p_vct->p_first_descriptor);
-
-	return true;
+#endif
+	return store.ingest(p_vct, this);
 }
 
 bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
