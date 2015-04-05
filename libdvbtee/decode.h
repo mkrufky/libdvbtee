@@ -264,7 +264,7 @@ typedef struct
 typedef std::map<uint16_t, bool> map_rcvd;
 
 
-class decode_network_service
+class decode_network_service : public dvbtee::decode::TableWatcher
 {
 public:
 	decode_network_service();
@@ -272,6 +272,11 @@ public:
 
 	decode_network_service(const decode_network_service&);
 	decode_network_service& operator= (const decode_network_service&);
+
+	/* TableWatcher */
+	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
+	bool updateEIT(dvbtee::decode::Table *table);
+	bool updateSDT(dvbtee::decode::Table *table);
 
 	bool take_eit(dvbpsi_eit_t*, uint8_t);
 	bool take_sdt(dvbpsi_sdt_t*);
@@ -296,7 +301,7 @@ private:
 
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
 
-class decode_network
+class decode_network : public dvbtee::decode::TableWatcher
 {
 public:
 	decode_network();
@@ -304,6 +309,10 @@ public:
 
 	decode_network(const decode_network&);
 	decode_network& operator= (const decode_network&);
+
+	/* TableWatcher */
+	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
+	bool updateNIT(dvbtee::decode::Table *table);
 
 	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); }
 	bool take_nit(dvbpsi_nit_t*);

@@ -155,6 +155,36 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 	return *this;
 }
 
+/* TableWatcher */
+void decode_network_service::updateTable(uint8_t tId, dvbtee::decode::Table *table)
+{
+	dprintf("0x%02x", tId);
+
+	switch (tId) {
+	case 0x42: /* SDT (actual) */
+	case 0x46: /* SDT (other) */
+		updateSDT(table);
+		break;
+	case 0x4e: /* EIT (actual) */
+	case 0x4f: /* EIT (other) */
+		updateEIT(table);
+		break;
+	default:
+		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
+		break;
+	}
+}
+
+bool decode_network_service::updateEIT(dvbtee::decode::Table *table)
+{
+	return false;
+}
+
+bool decode_network_service::updateSDT(dvbtee::decode::Table *table)
+{
+	return false;
+}
+
 decode_network::decode_network()
   : orig_network_id(0)
 {
@@ -220,6 +250,27 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 	decoded_network_services.clear();
 
 	return *this;
+}
+
+/* TableWatcher */
+void decode_network::updateTable(uint8_t tId, dvbtee::decode::Table *table)
+{
+	dprintf("0x%02x", tId);
+
+	switch (tId) {
+	case 0x40: /* NIT (actual) */
+	case 0x41: /* NIT (other) */
+		updateNIT(table);
+		break;
+	default:
+		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
+		break;
+	}
+}
+
+bool decode_network::updateNIT(dvbtee::decode::Table *table)
+{
+	return false;
 }
 
 decode::decode()
