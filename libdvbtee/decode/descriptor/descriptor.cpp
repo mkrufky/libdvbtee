@@ -165,7 +165,7 @@ const Descriptor *DescriptorStore::last(uint8_t tag) const
 {
 	const std::vector<Descriptor*> D = get(tag);
 	ssize_t s = D.size();
-	if (s > 1) fprintf(stderr, "tag: %02x, %ld collected, returning last\n", tag, s);
+	//if (s > 1) fprintf(stderr, "tag: %02x, %ld collected, returning last\n", tag, s);
 	if (s) return D[s-1];
 	return NULL;
 }
