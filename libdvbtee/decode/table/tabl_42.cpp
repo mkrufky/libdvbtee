@@ -162,13 +162,13 @@ bool sdt::ingest(TableStore *s, dvbpsi_sdt_t *t, TableWatcher *w)
 {
 	const std::vector<Table*> sdts = s->get(TABLEID);
 	for (std::vector<Table*>::const_iterator it = sdts.begin(); it != sdts.end(); ++it) {
-		sdt *thisPmt = (sdt*)*it;
-		if (thisPmt->get<uint16_t>("networkId") == t->i_network_id) {
-			if (thisPmt->get<uint16_t>("version") == t->i_version) {
+		sdt *thisSDT = (sdt*)*it;
+		if (thisSDT->get<uint16_t>("networkId") == t->i_network_id) {
+			if (thisSDT->get<uint16_t>("version") == t->i_version) {
 				dprintf("SDT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
 				return false;
 			}
-			thisPmt->store(t);
+			thisSDT->store(t);
 			return true;
 		}
 	}

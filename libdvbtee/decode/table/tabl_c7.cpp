@@ -97,13 +97,13 @@ bool mgt::ingest(TableStore *s, dvbpsi_atsc_mgt_t *t, TableWatcher *w)
 #endif
 	const std::vector<Table*> mgts = s->get(TABLEID);
 	for (std::vector<Table*>::const_iterator it = mgts.begin(); it != mgts.end(); ++it) {
-		mgt *thisPmt = (mgt*)*it;
-		if (thisPmt->get<uint16_t>("tsId") == __ts_id) {
-			if (thisPmt->get<uint16_t>("version") == t->i_version) {
+		mgt *thisMGT = (mgt*)*it;
+		if (thisMGT->get<uint16_t>("tsId") == __ts_id) {
+			if (thisMGT->get<uint16_t>("version") == t->i_version) {
 				dprintf("MGT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
 				return false;
 			}
-			thisPmt->store(t);
+			thisMGT->store(t);
 			return true;
 		}
 	}

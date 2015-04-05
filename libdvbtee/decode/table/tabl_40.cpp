@@ -124,13 +124,13 @@ bool nit::ingest(TableStore *s, dvbpsi_nit_t *t, TableWatcher *w)
 {
 	const std::vector<Table*> nits = s->get(TABLEID);
 	for (std::vector<Table*>::const_iterator it = nits.begin(); it != nits.end(); ++it) {
-		nit *thisPmt = (nit*)*it;
-		if (thisPmt->get<uint16_t>("networkId") == t->i_network_id) {
-			if (thisPmt->get<uint16_t>("version") == t->i_version) {
+		nit *thisNIT = (nit*)*it;
+		if (thisNIT->get<uint16_t>("networkId") == t->i_network_id) {
+			if (thisNIT->get<uint16_t>("version") == t->i_version) {
 				dprintf("NIT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
 				return false;
 			}
-			thisPmt->store(t);
+			thisNIT->store(t);
 			return true;
 		}
 	}
