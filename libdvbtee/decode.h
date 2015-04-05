@@ -251,13 +251,15 @@ typedef struct
 
 typedef std::map<uint16_t, decoded_sdt_service_t> map_decoded_sdt_services; /* service_id, decoded_sdt_service */
 
-typedef struct
+typedef struct decoded_sdt_s
 {
 	uint16_t                        ts_id;
 	uint8_t                         version;
 	uint16_t                        network_id;
 	// FIXME: descriptors...
 	map_decoded_sdt_services        services;
+
+	decoded_sdt_s() : ts_id(0xffff), version(0xff), network_id(0xffff) { services.clear(); }
 } decoded_sdt_t;
 
 
