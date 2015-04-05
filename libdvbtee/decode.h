@@ -277,11 +277,15 @@ public:
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_pf();
 
+	const decoded_sdt_t* get_decoded_sdt() const { return &decoded_sdt; }
+	const map_decoded_eit* get_decoded_eit() const { return decoded_eit; }
+
+private:
 	decoded_sdt_t                   decoded_sdt;
 
 #define NUM_EIT 17
 	map_decoded_eit decoded_eit[NUM_EIT];
-private:
+
 	unsigned int                    services_w_eit_pf;
 	unsigned int                    services_w_eit_sched;
 

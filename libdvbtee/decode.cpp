@@ -164,8 +164,8 @@ decode_network::decode_network()
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-		iter->second.decoded_sdt.services.clear();
+//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 }
 
@@ -182,8 +182,8 @@ decode_network::~decode_network()
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-		iter->second.decoded_sdt.services.clear();
+//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 }
 
@@ -197,8 +197,8 @@ decode_network::decode_network(const decode_network&)
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-		iter->second.decoded_sdt.services.clear();
+//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 }
 
@@ -215,8 +215,8 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 
 	decoded_nit.ts_list.clear();
 
-	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-		iter->second.decoded_sdt.services.clear();
+//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
+//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 
 	return *this;
@@ -837,14 +837,14 @@ bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
 const decoded_sdt_t *decode_network::get_decoded_sdt(uint16_t ts_id) const
 {
 	map_decoded_network_services::const_iterator it = decoded_network_services.find(ts_id);
-	return (it == decoded_network_services.end()) ? NULL : &it->second.decoded_sdt;
+	return (it == decoded_network_services.end()) ? NULL : it->second.get_decoded_sdt();
 	//return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL;
 }
 
 const map_decoded_eit *decode_network::get_decoded_eit(uint16_t ts_id) const
 {
 	map_decoded_network_services::const_iterator it = decoded_network_services.find(ts_id);
-	return (it == decoded_network_services.end()) ? NULL : it->second.decoded_eit;
+	return (it == decoded_network_services.end()) ? NULL : it->second.get_decoded_eit();
 	//return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit : NULL;
 }
 
