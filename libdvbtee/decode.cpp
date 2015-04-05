@@ -534,9 +534,7 @@ bool decode::updateMGT(dvbtee::decode::Table *table)
 
 	dvbtee::decode::mgt *mgtTable = (dvbtee::decode::mgt*)table;
 
-	decoded_mgt.version      = mgtTable->decoded_mgt.version;
-	decoded_mgt.table_id_ext = mgtTable->decoded_mgt.table_id_ext;
-	decoded_mgt.tables       = mgtTable->decoded_mgt.tables;
+	decoded_mgt = mgtTable->getDecodedMGT();
 
 	return true;
 }

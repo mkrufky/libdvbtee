@@ -46,6 +46,9 @@ public:
 
 	static bool ingest(TableStore *s, dvbpsi_atsc_mgt_t *t, TableWatcher *w = NULL);
 
+	const decoded_mgt_t& getDecodedMGT() const { return decoded_mgt; }
+
+private:
 	decoded_mgt_t   decoded_mgt;
 };
 
