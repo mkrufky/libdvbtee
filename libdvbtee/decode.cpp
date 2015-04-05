@@ -35,6 +35,7 @@
 #include "tabl_c8.h"
 #include "tabl_40.h"
 #include "tabl_42.h"
+#include "tabl_4e.h"
 
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -183,7 +184,18 @@ void decode_network_service::updateTable(uint8_t tId, dvbtee::decode::Table *tab
 
 bool decode_network_service::updateEIT(dvbtee::decode::Table *table)
 {
-	return false;
+	if ((!table) || (!table->isValid()) ||
+	    ((0x4e != table->getTableid()) &&
+	     (0x4f != table->getTableid())))
+		return false;
+
+	dvbtee::decode::eit *eitTable = (dvbtee::decode::eit*)table;
+
+	decoded_eit_t &cur_eit = decoded_eit[m_eit_x][eitTable->get<uint16_t>("serviceId")];
+
+	cur_eit = eitTable->getDecodedEIT();
+
+	return true;
 }
 
 bool decode_network_service::updateSDT(dvbtee::decode::Table *table)
@@ -1049,6 +1061,7 @@ bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 #endif
 }
 
+#if 0
 bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decode::DescriptorStore* descriptors, uint8_t eit_x)
 {
 #if USING_DVBPSI_VERSION_0
@@ -1108,6 +1121,7 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decod
 	}
 	return true;
 }
+#endif
 
 static inline bool table_id_to_eit_x(uint8_t table_id, uint8_t *eit_x)
 {
@@ -1151,8 +1165,13 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 
 bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
 {
+#if 1
+	m_eit_x = eit_x;
+	return store.ingest(p_eit, this);
+#else
 	dvbtee::decode::DescriptorStore descriptors;
 	return __take_eit(p_eit, decoded_eit, &descriptors, eit_x);
+#endif
 }
 
 bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
