@@ -266,7 +266,7 @@ typedef struct decoded_sdt_s
 typedef std::map<uint16_t, bool> map_rcvd;
 
 
-class decode_network_service : public dvbtee::decode::TableWatcher
+class decode_network_service : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 {
 public:
 	decode_network_service();
@@ -290,6 +290,8 @@ public:
 	const map_decoded_eit* get_decoded_eit() const { return decoded_eit; }
 
 private:
+	dvbtee::decode::TableStore store;
+
 	decoded_sdt_t                   decoded_sdt;
 
 #define NUM_EIT 17
@@ -303,7 +305,7 @@ private:
 
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
 
-class decode_network : public dvbtee::decode::TableWatcher
+class decode_network : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 {
 public:
 	decode_network();
@@ -335,6 +337,8 @@ public:
 
 	uint16_t orig_network_id;
 private:
+	dvbtee::decode::TableStore store;
+
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
 };

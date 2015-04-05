@@ -31,7 +31,8 @@
 
 #define CLASS_MODULE "[SDT]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+//#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dprintf(fmt, arg...) fprintf(stderr, fmt"\n", ##arg)
 
 using namespace dvbtee::decode;
 using namespace dvbtee::value;
@@ -57,8 +58,8 @@ void sdt::store(dvbpsi_sdt_t *p_sdt)
 //			p_sdt->i_network_id);
 //		return false;
 //	}
-	dprintf("SDT v%02d | ts_id %05d | network_id %05d\n"
-		/*"------------------------------------"*/,
+	fprintf(stderr, "%s SDT: v%02d, ts_id %05d, network_id %05d\n"
+		/*"------------------------------------"*/, __func__,
 		p_sdt->i_version,
 		__ts_id,
 		p_sdt->i_network_id);
@@ -78,6 +79,8 @@ void sdt::store(dvbpsi_sdt_t *p_sdt)
 
 	//fprintf(stderr, "  service_id | service_name");
 	dvbpsi_sdt_service_t* p_service = p_sdt->p_first_service;
+	if (p_service)
+		dprintf(" svcId | EIT avail |  provider  | service name");
 	while (p_service) {
 
 		decoded_sdt_service_t &cur_service = decoded_sdt.services[p_service->i_service_id];
@@ -96,7 +99,9 @@ void sdt::store(dvbpsi_sdt_t *p_sdt)
 
 	setValid(true);
 
+#if 0
 	dprintf("%s", toJson().c_str());
+#endif
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
@@ -137,7 +142,7 @@ sdtSVC::sdtSVC(decoded_sdt_service_t& cur_service, Decoder *parent, dvbpsi_sdt_s
 			sizeof(cur_service.service_name));
 	}
 
-	dprintf("    %05d | %s %s | %s - %s",
+	dprintf(" %05d | %s %s | %s - %s",
 		cur_service.service_id,
 		(cur_service.f_eit_present) ? "p/f" : "   ",
 		(cur_service.f_eit_sched) ? "sched" : "     ",

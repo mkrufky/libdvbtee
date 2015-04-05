@@ -33,6 +33,8 @@
 #include "tabl_02.h"
 #include "tabl_c7.h"
 #include "tabl_c8.h"
+#include "tabl_40.h"
+#include "tabl_42.h"
 
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -75,7 +77,9 @@ void clear_decoded_networks()
 }
 
 decode_network_service::decode_network_service()
-  : services_w_eit_pf(0)
+  : NullDecoder()
+  , store(this)
+  , services_w_eit_pf(0)
   , services_w_eit_sched(0)
 {
 	dprintf("()");
@@ -111,6 +115,8 @@ decode_network_service::~decode_network_service()
 }
 
 decode_network_service::decode_network_service(const decode_network_service&)
+  : NullDecoder()
+  , store(this)
 {
 	dprintf("(copy)");
 
@@ -182,11 +188,25 @@ bool decode_network_service::updateEIT(dvbtee::decode::Table *table)
 
 bool decode_network_service::updateSDT(dvbtee::decode::Table *table)
 {
-	return false;
+	if ((!table) || (!table->isValid()) ||
+	    ((0x42 != table->getTableid()) &&
+	     (0x46 != table->getTableid())))
+		return false;
+
+	dvbtee::decode::sdt *sdtTable = (dvbtee::decode::sdt*)table;
+
+	decoded_sdt = sdtTable->getDecodedSDT();
+
+	services_w_eit_pf    = sdtTable->get_services_w_eit_pf();
+	services_w_eit_sched = sdtTable->get_services_w_eit_sched();
+
+	return true;
 }
 
 decode_network::decode_network()
-  : orig_network_id(0)
+  : NullDecoder()
+  , orig_network_id(0)
+  , store(this)
 {
 	dprintf("()");
 
@@ -218,6 +238,8 @@ decode_network::~decode_network()
 }
 
 decode_network::decode_network(const decode_network&)
+  : NullDecoder()
+  , store(this)
 {
 	dprintf("(copy)");
 
@@ -270,7 +292,16 @@ void decode_network::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 
 bool decode_network::updateNIT(dvbtee::decode::Table *table)
 {
-	return false;
+	if ((!table) || (!table->isValid()) ||
+	    ((0x40 != table->getTableid()) &&
+	     (0x41 != table->getTableid())))
+		return false;
+
+	dvbtee::decode::nit *nitTable = (dvbtee::decode::nit*)table;
+
+	decoded_nit = nitTable->getDecodedNIT();
+
+	return true;
 }
 
 decode::decode()
@@ -796,6 +827,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 	return store.ingest(p_mgt, this);
 }
 
+#if 0
 static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, dvbtee::decode::DescriptorStore* descriptors)
 #define NIT_DBG 1
 {
@@ -840,6 +872,7 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, dvbtee::
 
 	return true;
 }
+#endif
 
 bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 {
@@ -882,7 +915,10 @@ bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
 
 bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
 {
+	return store.ingest(p_nit, this);
+#if 0
 	return __take_nit(p_nit, &decoded_nit, &descriptors);
+#endif
 }
 
 const decoded_sdt_t *decode_network::get_decoded_sdt(uint16_t ts_id) const
@@ -899,6 +935,7 @@ const map_decoded_eit *decode_network::get_decoded_eit(uint16_t ts_id) const
 	//return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit : NULL;
 }
 
+#if 0
 static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::decode::DescriptorStore* descriptors,
 		       unsigned int* services_w_eit_pf, unsigned int* services_w_eit_sched)
 #define SDT_DBG 1
@@ -976,6 +1013,7 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::
 	*services_w_eit_sched = _services_w_eit_sched;
 	return true;
 }
+#endif
 
 bool decode::take_sdt_actual(dvbpsi_sdt_t* p_sdt)
 {
@@ -999,8 +1037,11 @@ bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 
 bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
+	return store.ingest(p_sdt, this);
+#if 0
 	return __take_sdt(p_sdt, &decoded_sdt, &descriptors,
 			  &services_w_eit_pf, &services_w_eit_sched);
+#endif
 }
 
 bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decode::DescriptorStore* descriptors, uint8_t eit_x)
