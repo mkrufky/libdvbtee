@@ -101,12 +101,13 @@ typedef struct
 
 typedef std::map<uint16_t, decoded_mgt_table_t> map_decoded_mgt_tables; /* type, decoded_mgt_table_t */
 
-typedef struct
+typedef struct decoded_mgt_s
 {
 	uint8_t				version;
 	uint16_t			table_id_ext;
 	// FIXME: descriptors...
 	map_decoded_mgt_tables		tables;
+	decoded_mgt_s() : version(0xff), table_id_ext(0xffff) { tables.clear(); }
 } decoded_mgt_t;
 
 /* -- VCT -- */
@@ -132,13 +133,14 @@ typedef struct
 
 typedef std::map<uint16_t, decoded_vct_channel_t> map_decoded_vct_channels; /* arbitrary idx((source_id) / program_id ???), decoded_vct_channel_t */
 
-typedef struct
+typedef struct decoded_vct_s
 {
 	uint8_t				version;
 	uint16_t			ts_id;
 	int				cable_vct;
 	// FIXME: descriptors...
 	map_decoded_vct_channels	channels;
+	decoded_vct_s() : version(0xff), ts_id(0xffff) { channels.clear(); }
 } decoded_vct_t;
 
 /* -- EIT -- */
