@@ -28,6 +28,8 @@
 #include "dvbpsi/pmt.h"
 #endif
 
+#include "decode.h"
+
 namespace dvbtee {
 
 namespace decode {
@@ -44,19 +46,15 @@ public:
 
 	static bool ingest(TableStore *s, dvbpsi_pmt_t *t, TableWatcher *w = NULL);
 
-	const uint16_t& getProgram() const { return m_program; }
-	const uint8_t& getVersion() const { return m_version; }
-	const uint16_t& getPcrPid() const { return m_pcr_pid; }
+	const decoded_pmt_t& getDecodedPMT() const { return decoded_pmt; }
 
 private:
-	uint16_t m_program;
-	uint8_t  m_version;
-	uint16_t m_pcr_pid;
+	decoded_pmt_t decoded_pmt;
 };
 
 class pmtES: public TableDataComponent {
 public:
-	pmtES(Decoder*, dvbpsi_pmt_es_t*);
+	pmtES(decoded_pmt_t&, Decoder*, dvbpsi_pmt_es_t*);
 	virtual ~pmtES();
 };
 

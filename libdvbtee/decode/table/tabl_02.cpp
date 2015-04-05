@@ -51,12 +51,12 @@ void pmt::store(dvbpsi_pmt_t *p_pmt)
 	set("version", p_pmt->i_version);
 	set("pcrPid", p_pmt->i_pcr_pid);
 
-	m_program = p_pmt->i_program_number;
-	m_version = p_pmt->i_version;
-	m_pcr_pid = p_pmt->i_pcr_pid;
+	decoded_pmt.program = p_pmt->i_program_number;
+	decoded_pmt.version = p_pmt->i_version;
+	decoded_pmt.pcr_pid = p_pmt->i_pcr_pid;
+	decoded_pmt.es_streams.clear();
 
 	descriptors.decode(p_pmt->p_first_descriptor);
-
 	if (descriptors.size()) set<Array>("descriptors", descriptors);
 
 	Array streams("pid");
@@ -65,7 +65,7 @@ void pmt::store(dvbpsi_pmt_t *p_pmt)
 #endif
 	dvbpsi_pmt_es_t* p_es = p_pmt->p_first_es;
 	while (p_es) {
-		pmtES * pmtes = new pmtES(this, p_es);
+		pmtES * pmtes = new pmtES(decoded_pmt, this, p_es);
 		if (pmtes->isValid())
 			streams.push((Object*)pmtes);
 		p_es = p_es->p_next;
@@ -82,14 +82,20 @@ void pmt::store(dvbpsi_pmt_t *p_pmt)
 	}
 }
 
-pmtES::pmtES(Decoder *parent, dvbpsi_pmt_es_t *p_es)
+pmtES::pmtES(decoded_pmt_t& decoded_pmt, Decoder *parent, dvbpsi_pmt_es_t *p_es)
 : TableDataComponent(parent, PMTES)
 {
 	if (!p_es) return;
 
+	ts_elementary_stream_t &cur_es = decoded_pmt.es_streams[p_es->i_pid];
+
+	cur_es.type = p_es->i_type;
+	cur_es.pid  = p_es->i_pid;
+
 	std::string iso639lang;
 
 	descriptors.decode(p_es->p_first_descriptor);
+	if (descriptors.size()) set<Array>("descriptors", descriptors);
 
 #if PMT_DBG
 	const dvbtee::decode::Descriptor *d = descriptors.last(0x0a);
@@ -105,6 +111,9 @@ pmtES::pmtES(Decoder *parent, dvbpsi_pmt_es_t *p_es)
 
 			if (iso639lang.length()) iso639lang.append(", ");
 			iso639lang.append(lang.c_str());
+
+			memcpy(cur_es.iso_639_code, lang.c_str(), sizeof(cur_es.iso_639_code));
+			cur_es.iso_639_code[3] = 0;
 		}
 	}
 
@@ -116,8 +125,6 @@ pmtES::pmtES(Decoder *parent, dvbpsi_pmt_es_t *p_es)
 	set("pid", p_es->i_pid);
 	set("streamType", p_es->i_type);
 	set("streamTypeString", streamtype_name(p_es->i_type));
-
-	if (descriptors.size()) set<Array>("descriptors", descriptors);
 
 	setValid(true);
 }
@@ -148,18 +155,12 @@ bool pmt::ingest(TableStore *s, dvbpsi_pmt_t *t, TableWatcher *w)
 
 pmt::pmt(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_program(0xffff)
- , m_version(0xff)
- , m_pcr_pid(0xffff)
 {
 	//store table later (probably repeatedly)
 }
 
 pmt::pmt(Decoder *parent, TableWatcher *watcher, dvbpsi_pmt_t *p_pmt)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_program(0xffff)
- , m_version(0xff)
- , m_pcr_pid(0xffff)
 {
 	store(p_pmt);
 }

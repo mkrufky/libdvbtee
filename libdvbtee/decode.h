@@ -77,13 +77,14 @@ typedef struct ts_elementary_stream_s
 
 typedef std::map<uint16_t, ts_elementary_stream_t> map_ts_elementary_streams; /* arbitrary idx(pid), ts_elementary_stream_t */
 
-typedef struct
+typedef struct decoded_pmt_s
 {
 	uint16_t			program;
 	uint8_t				version;
 	uint16_t			pcr_pid;
 	// FIXME: descriptors...
 	map_ts_elementary_streams	es_streams;
+	decoded_pmt_s() : program(0xffff), version(0xff), pcr_pid(0xffff) { es_streams.clear(); }
 } decoded_pmt_t;
 
 typedef std::map<uint16_t, decoded_pmt_t> map_decoded_pmt; /* program num, decoded_pmt_t */

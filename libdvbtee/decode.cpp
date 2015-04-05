@@ -440,13 +440,20 @@ bool decode::updatePAT(dvbtee::decode::Table *table)
 
 bool decode::updatePMT(dvbtee::decode::Table *table)
 {
-#define PMT_DBG 0
+#define PMT_DBG 1
 	if ((!table) || (!table->isValid()) || (0x02 != table->getTableid())) return false;
 
 	dvbtee::decode::pmt *pmtTable = (dvbtee::decode::pmt*)table;
 
 	decoded_pmt_t &cur_decoded_pmt = decoded_pmt[pmtTable->get<uint16_t>("program")];
 
+#if 1
+	const decoded_pmt_t &new_decoded_pmt = pmtTable->getDecodedPMT();
+	cur_decoded_pmt.program = new_decoded_pmt.program;
+	cur_decoded_pmt.version = new_decoded_pmt.version;
+	cur_decoded_pmt.pcr_pid = new_decoded_pmt.pcr_pid;
+	cur_decoded_pmt.es_streams = new_decoded_pmt.es_streams;
+#else
 	cur_decoded_pmt.program = pmtTable->get<uint16_t>("program");
 	cur_decoded_pmt.version = pmtTable->get<uint8_t>("version");
 	cur_decoded_pmt.pcr_pid = pmtTable->get<uint16_t>("pcrPid");
@@ -498,8 +505,8 @@ bool decode::updatePMT(dvbtee::decode::Table *table)
 			cur_es.iso_639_code);
 #endif
 	}
-
-	return rcvd_pmt[pmtTable->get<uint16_t>("program")] = true;
+#endif
+	return rcvd_pmt[new_decoded_pmt.program /*pmtTable->get<uint16_t>("program")*/] = true;
 }
 
 bool decode::updateVCT(dvbtee::decode::Table *table)
