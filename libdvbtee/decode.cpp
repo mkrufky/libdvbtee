@@ -407,6 +407,7 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 		updateVCT(table);
 		break;
 	default:
+		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
 		break;
 	}
 }
