@@ -102,10 +102,12 @@ patProgram::~patProgram()
 
 }
 
+#if 0
 std::pair<uint16_t, uint16_t> patProgram::getPair()
 {
 	return std::pair<uint16_t, uint16_t>( get<uint16_t>("number"), get<uint16_t>("pid") );
 }
+#endif
 
 bool pat::ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w)
 {

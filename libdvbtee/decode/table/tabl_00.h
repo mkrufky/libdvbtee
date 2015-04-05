@@ -60,8 +60,9 @@ class patProgram: public TableDataComponent {
 public:
 	patProgram(Decoder*, dvbpsi_pat_program_t*);
 	virtual ~patProgram();
-
+#if 0
 	std::pair<uint16_t, uint16_t> getPair();
+#endif
 };
 
 }
