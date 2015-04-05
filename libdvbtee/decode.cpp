@@ -915,6 +915,11 @@ bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
 
 bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
 {
+	// XXX: FIXME: must refactor decode::get_lcn() & LCN descriptor 0x83
+	descriptors.decode(p_nit->p_first_descriptor);
+	dvbpsi_nit_ts_t *ts = p_nit->p_first_ts;
+	while (ts) { descriptors.decode(ts->p_first_descriptor); ts = ts->p_next; }
+
 	return store.ingest(p_nit, this);
 #if 0
 	return __take_nit(p_nit, &decoded_nit, &descriptors);
@@ -1146,6 +1151,7 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 
 bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
 {
+	dvbtee::decode::DescriptorStore descriptors;
 	return __take_eit(p_eit, decoded_eit, &descriptors, eit_x);
 }
 
@@ -1857,6 +1863,7 @@ const uint16_t decode::get_lcn(uint16_t service_id) const
 {
 	uint16_t lcn = 0;
 
+	// XXX: FIXME: must refactor decode::get_lcn() & LCN descriptor 0x83
 	map_network_decoder::const_iterator it = networks.find(network_id);
 	if (it != networks.end()) {
 		const dvbtee::decode::Descriptor *d = it->second.descriptors.last(0x83);

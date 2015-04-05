@@ -299,8 +299,6 @@ private:
 
 	unsigned int                    services_w_eit_pf;
 	unsigned int                    services_w_eit_sched;
-
-	dvbtee::decode::DescriptorStore descriptors;
 };
 
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
