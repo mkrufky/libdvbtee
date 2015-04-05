@@ -409,8 +409,6 @@ public:
 	const decoded_sdt_t*   get_decoded_sdt();
 	const decoded_nit_t*   get_decoded_nit();
 
-	const dvbtee::decode::DescriptorStore* get_descriptors() { return &descriptors; }
-
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() { return decoded_atsc_eit; }
 	const map_decoded_eit*      get_decoded_eit();
 
