@@ -49,9 +49,9 @@ void pat::store(dvbpsi_pat_t *p_pat)
 		p_pat->i_version, p_pat->i_ts_id);
 #endif
 #if 1
-	m_ts_id   = p_pat->i_ts_id;
-	m_version = p_pat->i_version;
-	m_programs.clear();
+	decoded_pat.ts_id   = p_pat->i_ts_id;
+	decoded_pat.version = p_pat->i_version;
+	decoded_pat.programs.clear();
 #endif
 	set("tsId", p_pat->i_ts_id);
 	set("version", p_pat->i_version);
@@ -63,10 +63,10 @@ void pat::store(dvbpsi_pat_t *p_pat)
 		patProgram *program = new patProgram(this, p_program);
 		if (program->isValid()) {
 			programs.push((Object*)program);
-			//m_programs.insert(program->getPair());
+			//decoded_pat.programs.insert(program->getPair());
 		}
 #if 1
-		m_programs[p_program->i_number] = p_program->i_pid;
+		decoded_pat.programs[p_program->i_number] = p_program->i_pid;
 #endif
 		p_program = p_program->p_next;
 	}
@@ -115,16 +115,12 @@ bool pat::ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w)
 
 pat::pat(Decoder *parent, TableWatcher *watcher)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_ts_id(0xffff)
- , m_version(0xff)
 {
 	//store table later (probably repeatedly)
 }
 
 pat::pat(Decoder *parent, TableWatcher *watcher, dvbpsi_pat_t *p_pat)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
- , m_ts_id(0xffff)
- , m_version(0xff)
 {
 	store(p_pat);
 }

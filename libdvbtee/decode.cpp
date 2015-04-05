@@ -421,17 +421,18 @@ bool decode::updatePAT(dvbtee::decode::Table *table)
 	if ((!table) || (!table->isValid()) || (0x00 != table->getTableid())) return false;
 
 	dvbtee::decode::pat *patTable = (dvbtee::decode::pat*)table;
-
+#if 0
 	decoded_pat.ts_id    = patTable->getTsId();
 	decoded_pat.version  = patTable->getVersion();
 	decoded_pat.programs = patTable->getPrograms();
-
+#else
+	decoded_pat = patTable->getDecodedPAT();
+#endif
 	dprintf("tsid %04x, ver %02x, %lu programs", decoded_pat.ts_id, decoded_pat.version, decoded_pat.programs.size());
 
 	for (map_decoded_pat_programs::const_iterator iter = decoded_pat.programs.begin();
 		iter != decoded_pat.programs.end(); ++iter)
 	{
-		// fixme!
 		rcvd_pmt[iter->first] = false;
 	}
 

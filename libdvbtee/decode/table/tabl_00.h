@@ -28,13 +28,13 @@
 #include "dvbpsi/pat.h"
 #endif
 
+#include "decode.h"
+
 namespace dvbtee {
 
 namespace decode {
 
 /* PAT (Table) */
-
-typedef std::map<uint16_t, uint16_t> map_decoded_pat_programs; /* program number, pid */
 
 class pat: public Table/*<dvbpsi_pat_t>*/ {
 public:
@@ -45,15 +45,15 @@ public:
 	void store(dvbpsi_pat_t*);
 
 	static bool ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w = NULL);
-
-	const uint16_t& getTsId() const { return m_ts_id; }
-	const uint8_t& getVersion() const { return m_version; }
-	const map_decoded_pat_programs& getPrograms() const { return m_programs; }
+#if 0
+	const uint16_t& getTsId() const { return decoded_pat.ts_id; }
+	const uint8_t& getVersion() const { return decoded_pat.version; }
+	const map_decoded_pat_programs& getPrograms() const { return decoded_pat.programs; }
+#endif
+	const decoded_pat_t& getDecodedPAT() const { return decoded_pat; }
 
 private:
-	uint16_t			m_ts_id;
-	uint8_t				m_version;
-	map_decoded_pat_programs	m_programs;
+	decoded_pat_t decoded_pat;
 };
 
 class patProgram: public TableDataComponent {
