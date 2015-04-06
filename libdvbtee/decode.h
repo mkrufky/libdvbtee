@@ -401,6 +401,7 @@ public:
 	bool updatePMT(dvbtee::decode::Table *table);
 	bool updateVCT(dvbtee::decode::Table *table);
 	bool updateMGT(dvbtee::decode::Table *table);
+	bool updateEIT(dvbtee::decode::Table *table);
 
 	bool take_pat(dvbpsi_pat_t*);
 	bool take_pmt(dvbpsi_pmt_t*);

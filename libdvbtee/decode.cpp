@@ -31,11 +31,12 @@
 
 #include "tabl_00.h"
 #include "tabl_02.h"
-#include "tabl_c7.h"
-#include "tabl_c8.h"
 #include "tabl_40.h"
 #include "tabl_42.h"
 #include "tabl_4e.h"
+#include "tabl_c7.h"
+#include "tabl_c8.h"
+#include "tabl_cb.h"
 
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -506,6 +507,9 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 	case 0xc9: /* CVCT */
 		updateVCT(table);
 		break;
+	case 0xcb: /* EIT */
+		updateEIT(table);
+		break;
 	default:
 		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
 		break;
@@ -628,6 +632,20 @@ bool decode::updateMGT(dvbtee::decode::Table *table)
 	dvbtee::decode::mgt *mgtTable = (dvbtee::decode::mgt*)table;
 
 	decoded_mgt = mgtTable->getDecodedMGT();
+
+	return true;
+}
+
+bool decode::updateEIT(dvbtee::decode::Table *table)
+{
+	if ((!table) || (!table->isValid()) || (0xcb != table->getTableid()))
+		return false;
+
+	dvbtee::decode::atsc_eit *eitTable = (dvbtee::decode::atsc_eit*)table;
+
+	decoded_atsc_eit_t &cur_atsc_eit = decoded_atsc_eit[eit_x][eitTable->get<uint16_t>("sourceId")];
+
+	cur_atsc_eit = eitTable->getDecodedEIT();
 
 	return true;
 }
@@ -1188,6 +1206,7 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 #endif
 		return false;
 	}
+#if 0
 #if DBG
 	map_decoded_vct_channels::const_iterator iter_vct;
 	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct)
@@ -1247,6 +1266,9 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 	descriptors.decode(p_eit->p_first_descriptor);
 
 	return true;
+#else
+	return store.ingest(p_eit, this);
+#endif
 }
 
 static bool _get_epg_event(decoded_event_t *e,

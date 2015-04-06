@@ -1,0 +1,65 @@
+/*****************************************************************************
+ * Copyright (C) 2011-2015 Michael Ira Krufky
+ *
+ * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; atsc_either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  cb110-1301  USA
+ *
+ *****************************************************************************/
+
+#ifndef _ATSC_EIT_H__
+#define _ATSC_EIT_H__
+
+#include "table.h"
+
+#ifndef _DVBPSI_EIT_H_
+#include "dvbpsi/atsc_eit.h"
+#endif
+
+#include "decode.h"
+
+namespace dvbtee {
+
+namespace decode {
+
+/* EIT (Table) */
+
+class atsc_eit: public Table/*<dvbpsi_atsc_eit_t>*/ {
+public:
+	atsc_eit(Decoder *, TableWatcher*);
+	atsc_eit(Decoder *, TableWatcher*, dvbpsi_atsc_eit_t*);
+	virtual ~atsc_eit();
+
+	void store(dvbpsi_atsc_eit_t*);
+
+	static bool ingest(TableStore *s, dvbpsi_atsc_eit_t *t, TableWatcher *w = NULL);
+
+	const decoded_atsc_eit_t& getDecodedEIT() const { return decoded_eit; }
+
+private:
+	decoded_atsc_eit_t   decoded_eit;
+};
+
+class atsc_eitEV: public TableDataComponent {
+public:
+	atsc_eitEV(decoded_atsc_eit_t&, Decoder*, dvbpsi_atsc_eit_event_t*);
+	virtual ~atsc_eitEV();
+};
+
+}
+
+}
+
+#endif /* _ATSC_EIT_H__ */
