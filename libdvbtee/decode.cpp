@@ -172,8 +172,10 @@ void decode_network_service::updateTable(uint8_t tId, dvbtee::decode::Table *tab
 	case 0x46: /* SDT (other) */
 		updateSDT(table);
 		break;
-	case 0x4e: /* EIT (actual) */
-	case 0x4f: /* EIT (other) */
+	case 0x4e:          /* EIT | actual |  p/f  */
+	case 0x4f:          /* EIT | other  |  p/f  */
+	case 0x50 ... 0x5f: /* EIT | actual | sched */
+	case 0x60 ... 0x6f: /* EIT | other  | sched */
 		updateEIT(table);
 		break;
 	default:
@@ -185,8 +187,8 @@ void decode_network_service::updateTable(uint8_t tId, dvbtee::decode::Table *tab
 bool decode_network_service::updateEIT(dvbtee::decode::Table *table)
 {
 	if ((!table) || (!table->isValid()) ||
-	    ((0x4e != table->getTableid()) &&
-	     (0x4f != table->getTableid())))
+	    ((0x4e >= table->getTableid()) ||
+	     (0x6f <= table->getTableid())))
 		return false;
 
 	dvbtee::decode::eit *eitTable = (dvbtee::decode::eit*)table;
