@@ -85,6 +85,8 @@ void atsc_eit::store(dvbpsi_atsc_eit_t *p_atsc_eit)
 
 	set("version", p_atsc_eit->i_version);
 	set("sourceId", p_atsc_eit->i_source_id);
+	set("tableId", p_atsc_eit->i_table_id);
+	set("extension", p_atsc_eit->i_extension);
 
 	Array events;
 
@@ -160,6 +162,7 @@ atsc_eitEV::~atsc_eitEV()
 bool atsc_eit::ingest(TableStore *s, dvbpsi_atsc_eit_t *t, TableWatcher *w)
 {
 #if 1
+#if 0
 #if USING_DVBPSI_VERSION_0
 	uint16_t __ts_id = t->i_ts_id;
 #else
@@ -170,13 +173,18 @@ bool atsc_eit::ingest(TableStore *s, dvbpsi_atsc_eit_t *t, TableWatcher *w)
 		atsc_eit *thisEIT = (atsc_eit*)*it;
 		if (thisEIT->get<uint16_t>("sourceId") == t->i_source_id) {
 			if (thisEIT->get<uint8_t>("version") == t->i_version) {
-				dprintf("EIT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
-				return false;
+				if (thisEIT->get<uint8_t>("tableId") == t->i_table_id) {
+					if (thisEIT->get<uint16_t>("extension") == t->i_extension) {
+						dprintf("EIT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
+						return false;
+					}
+				}
 			}
 			thisEIT->store(t);
 			return true;
 		}
 	}
+#endif
 	return s->add<dvbpsi_atsc_eit_t>(TABLEID, t, w);
 #else
 	return s->setOnly<dvbpsi_atsc_eit_t, atsc_eit>(TABLEID, t, w);
