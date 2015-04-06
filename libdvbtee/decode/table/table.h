@@ -135,8 +135,8 @@ public:
 		return false;
 	}
 
-#if PsiTable_CONSTRUCTORTEMPLATE
 	template<typename T, class C>
+#if PsiTable_CONSTRUCTORTEMPLATE
 	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
 		return (update<T,C>(tableid, p_table)) ? true : add(p_table, watcher);
