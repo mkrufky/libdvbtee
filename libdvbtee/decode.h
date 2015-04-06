@@ -199,7 +199,7 @@ typedef void (* decoded_atsc_eit_callback)(void* p_cb_data, uint8_t eit_x);
 #endif
 
 /* -- ETT -- */
-typedef struct
+typedef struct decoded_atsc_ett_s
 {
 	uint8_t				version;
 #if 1
@@ -211,6 +211,8 @@ typedef struct
 #endif
 	uint16_t			etm_length;
 	uint8_t				etm[256/*4096*/];
+
+	decoded_atsc_ett_s() : version(0xff), etm_id(0xffffffff) {}
 } decoded_atsc_ett_t;
 
 typedef std::map<uint16_t, decoded_atsc_ett_t> map_decoded_atsc_ett; /* etm_id, decoded_atsc_eit_t */
@@ -402,6 +404,7 @@ public:
 	bool updateVCT(dvbtee::decode::Table *table);
 	bool updateMGT(dvbtee::decode::Table *table);
 	bool updateEIT(dvbtee::decode::Table *table);
+	bool updateETT(dvbtee::decode::Table *table);
 
 	bool take_pat(dvbpsi_pat_t*);
 	bool take_pmt(dvbpsi_pmt_t*);

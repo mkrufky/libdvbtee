@@ -37,6 +37,7 @@
 #include "tabl_c7.h"
 #include "tabl_c8.h"
 #include "tabl_cb.h"
+#include "tabl_cc.h"
 
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -510,6 +511,9 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 	case 0xcb: /* EIT */
 		updateEIT(table);
 		break;
+	case 0xcc: /* ETT */
+		updateETT(table);
+		break;
 	default:
 		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
 		break;
@@ -646,6 +650,20 @@ bool decode::updateEIT(dvbtee::decode::Table *table)
 	decoded_atsc_eit_t &cur_atsc_eit = decoded_atsc_eit[eit_x][eitTable->get<uint16_t>("sourceId")];
 
 	cur_atsc_eit = eitTable->getDecodedEIT();
+
+	return true;
+}
+
+bool decode::updateETT(dvbtee::decode::Table *table)
+{
+	if ((!table) || (!table->isValid()) || (0xcc != table->getTableid()))
+		return false;
+
+	dvbtee::decode::atsc_ett *ettTable = (dvbtee::decode::atsc_ett*)table;
+
+	decoded_atsc_ett_t &cur_ett = decoded_ett[ettTable->get<uint32_t>("etmId")];
+
+	cur_ett = ettTable->getDecodedETT();
 
 	return true;
 }
@@ -1752,6 +1770,7 @@ unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message,
 
 bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 {
+#if 0
 	decoded_atsc_ett_t &cur_ett = decoded_ett[p_ett->i_etm_id];
 #if 1
 	if ((cur_ett.version == p_ett->i_version) &&
@@ -1784,6 +1803,9 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 	descriptors.decode(p_ett->p_first_descriptor);
 
 	return true;
+#else
+	return store.ingest(p_ett, this);
+#endif
 }
 
 /* -- -- -- */
