@@ -159,7 +159,7 @@ typedef struct
 
 typedef std::map<uint16_t, decoded_eit_event_t> map_decoded_eit_events; /* event_id, decoded_eit_event_t */
 
-typedef struct
+typedef struct decoded_eit_s
 {
 	uint16_t			service_id;
 	uint8_t				version;
@@ -167,6 +167,8 @@ typedef struct
 	uint16_t			network_id;
 	uint8_t				last_table_id;
 	map_decoded_eit_events		events;
+
+	decoded_eit_s() : service_id(0xffff), version(0xff), ts_id(0xffff), network_id(0xffff), last_table_id(0xff) { events.clear(); }
 } decoded_eit_t;
 
 typedef std::map<uint16_t, decoded_eit_t> map_decoded_eit; /* service_id, decoded_eit_t */
@@ -184,11 +186,13 @@ typedef struct
 
 typedef std::map<uint16_t, decoded_atsc_eit_event_t> map_decoded_atsc_eit_events; /* event_id, decoded_atsc_eit_event_t */
 
-typedef struct
+typedef struct decoded_atsc_eit_s
 {
 	uint8_t				version;
 	uint16_t			source_id;
 	map_decoded_atsc_eit_events	events;
+
+	decoded_atsc_eit_s() : version(0xff), source_id(0xffff) { events.clear(); }
 } decoded_atsc_eit_t;
 
 typedef std::map<uint16_t, decoded_atsc_eit_t> map_decoded_atsc_eit; /* source_id, decoded_atsc_eit_t */
