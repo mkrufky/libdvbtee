@@ -67,6 +67,7 @@ void sdt::store(dvbpsi_sdt_t *p_sdt)
 	decoded_sdt.ts_id      = __ts_id;
 	decoded_sdt.version    = p_sdt->i_version;
 	decoded_sdt.network_id = p_sdt->i_network_id;
+	decoded_sdt.services.clear();
 
 	set("tsId", __ts_id);
 	set("version", p_sdt->i_version);

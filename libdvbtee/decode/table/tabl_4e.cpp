@@ -69,6 +69,7 @@ void eit::store(dvbpsi_eit_t *p_eit)
 	decoded_eit.ts_id         = p_eit->i_ts_id;
 	decoded_eit.network_id    = p_eit->i_network_id;
 	decoded_eit.last_table_id = p_eit->i_last_table_id;
+	decoded_eit.events.clear();
 
 	set("serviceId",   __service_id);
 	set("version",     p_eit->i_version);
