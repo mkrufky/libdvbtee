@@ -26,7 +26,7 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
-using namespace dvbtee::value;
+using namespace valueobj;
 
 
 Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *p_dvbpsi_descriptor)

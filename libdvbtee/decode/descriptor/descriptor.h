@@ -66,7 +66,7 @@ private:
 	void init();
 };
 
-class DescriptorStore : public value::Array {
+class DescriptorStore : public valueobj::Array {
 public:
 #if 1 // temporarily allowing NULL parent during refactoring
 	DescriptorStore(Decoder *parent = NULL);

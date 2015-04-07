@@ -29,9 +29,7 @@
 #include "value.h"
 #include "array.h"
 
-namespace dvbtee {
-
-namespace value {
+namespace valueobj {
 
 typedef std::map<std::string, ValueBase*> KeyValueMap;
 
@@ -117,8 +115,6 @@ private:
 
 	const std::string intToStr(int) const;
 };
-
-}
 
 }
 

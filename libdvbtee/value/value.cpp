@@ -26,7 +26,7 @@
 #include "object.h"
 #include "value-macros.h"
 
-using namespace dvbtee::value;
+using namespace valueobj;
 
 ValueBase::ValueBase(const std::type_info& type, std::string name)
  : m_type(type)

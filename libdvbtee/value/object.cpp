@@ -24,7 +24,7 @@
 #include "object.h"
 #include "value-macros.h"
 
-using namespace dvbtee::value;
+using namespace valueobj;
 
 #define DBG 0
 

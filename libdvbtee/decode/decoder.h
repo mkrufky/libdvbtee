@@ -40,7 +40,7 @@ namespace dvbtee {
 
 namespace decode {
 
-class Decoder: public value::Object {
+class Decoder: public valueobj::Object {
 public:
 	Decoder();
 	Decoder(Decoder*, std::string&);

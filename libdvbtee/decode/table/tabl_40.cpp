@@ -34,7 +34,7 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
-using namespace dvbtee::value;
+using namespace valueobj;
 
 static std::string TABLE_NAME = "NIT";
 

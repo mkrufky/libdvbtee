@@ -22,7 +22,7 @@
 #include "decoder.h"
 
 using namespace dvbtee::decode;
-using namespace dvbtee::value;
+using namespace valueobj;
 
 Decoder::Decoder()
  : m_parent(NULL)

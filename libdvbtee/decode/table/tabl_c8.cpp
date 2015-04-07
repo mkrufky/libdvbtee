@@ -34,7 +34,7 @@
 #define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
-using namespace dvbtee::value;
+using namespace valueobj;
 
 static std::string TABLE_NAME = "VCT";
 
@@ -185,7 +185,7 @@ vctCh::vctCh(decoded_vct_t &decoded_vct, Decoder *parent, dvbpsi_atsc_vct_channe
 
 	const dvbtee::decode::Descriptor *d = descriptors.last(0xa1);
 	if (d) {
-		const dvbtee::value::Array& a  = d->get<dvbtee::value::Array>("serviceLocation");
+		const valueobj::Array& a  = d->get<valueobj::Array>("serviceLocation");
 		for (unsigned int i = 0; i < a.size(); i++) {
 			const Object& o = a.get<Object>(i);
 
