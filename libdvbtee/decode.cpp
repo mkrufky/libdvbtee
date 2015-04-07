@@ -849,13 +849,13 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, desc* descrip
 	    (cur_eit.service_id == __service_id)) {
 #if DBG
 		fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d: ALREADY DECODED\n", __func__, eit_x,
-			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, service_id);
+			p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, __service_id);
 #endif
 		return false;
 	}
 #if DBG
 	fprintf(stderr, "%s-%d: v%d | ts_id %d | network_id %d service_id %d | table id: 0x%02x, last_table id: 0x%02x\n", __func__, eit_x,
-		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, p_eit->i_service_id, p_eit->i_table_id, p_eit->i_last_table_id);
+		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, __service_id, p_eit->i_table_id, p_eit->i_last_table_id);
 #endif
 	cur_eit.service_id    = __service_id;
 	cur_eit.version       = p_eit->i_version;
