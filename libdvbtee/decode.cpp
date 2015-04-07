@@ -927,6 +927,9 @@ static inline bool table_id_to_eit_x(uint8_t table_id, uint8_t *eit_x)
 
 bool decode::take_eit(dvbpsi_eit_t* p_eit)
 {
+	/* we want our own eit_x here - we don't need to store this in our class, the stored eit_x is for ATSC */
+	/* prevent warning: ‘eit_x’ may be used uninitialized in this function [-Wmaybe-uninitialized] */
+	uint8_t eit_x = 0;
 	table_id_to_eit_x(p_eit->i_table_id, &eit_x);
 
 	return networks[p_eit->i_network_id].take_eit(p_eit, eit_x);
