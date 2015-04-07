@@ -29,9 +29,7 @@
 #include "value.h"
 #include "object.h"
 
-namespace dvbtee {
-
-namespace value {
+namespace valueobj {
 
 typedef std::vector<ValueBase*> KeyValueVector;
 
@@ -129,8 +127,6 @@ private:
 
 	const std::string intToStr(int) const;
 };
-
-}
 
 }
 

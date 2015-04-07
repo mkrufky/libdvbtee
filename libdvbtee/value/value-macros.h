@@ -26,8 +26,7 @@
 #include <string>
 
 #define TO_JSON_TPL(CLASS, EXPRESSION) \
-namespace dvbtee { \
-namespace value { \
+namespace valueobj { \
 template <> const std::string Value<CLASS>::toJson() const \
 { \
 	if (!checkType(typeid(CLASS))) return "undefined"; \
@@ -35,7 +34,7 @@ template <> const std::string Value<CLASS>::toJson() const \
 	s << EXPRESSION; \
 	return s.str(); \
 } \
-}}
+}
 
 #define VALUE m_value
 #define TO_JSON_TPL_PRIMITIVE(CLASS) TO_JSON_TPL(CLASS, VALUE)
@@ -55,8 +54,7 @@ template <> const OUT& CLASS::get<OUT>(IN in) const \
 }
 
 #define DEFINE_DEFAULT_GETTERS(CLASS, IN) \
-namespace dvbtee { \
-namespace value { \
+namespace valueobj { \
 	GET_DEFAULT_VALUE(CLASS, IN, int, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, long, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, short, 0) \
@@ -70,6 +68,6 @@ namespace value { \
 	GET_DEFAULT_VALUE(CLASS, IN, double, 0.0) \
 	GET_DEFAULT(CLASS, IN, Array) \
 	GET_DEFAULT(CLASS, IN, Object) \
-}}
+}
 
 #endif /* __VALUE_MACROS_H__ */

@@ -27,9 +27,7 @@
 #include <vector>
 #include <typeinfo>
 
-namespace dvbtee {
-
-namespace value {
+namespace valueobj {
 
 class ValueBase {
 public:
@@ -134,8 +132,6 @@ private:
 	ReferencedValueUndefined();
 	~ReferencedValueUndefined();
 };
-
-}
 
 }
 
