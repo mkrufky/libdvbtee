@@ -36,7 +36,7 @@ public:
 
 	virtual ~ValueBase();
 
-	const bool checkType(const std::type_info&) const;
+	bool checkType(const std::type_info&) const;
 
 	const std::type_info& getType() const;
 	const std::string& getName() const;

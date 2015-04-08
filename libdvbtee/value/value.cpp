@@ -66,7 +66,7 @@ const int &ValueBase::getRefCnt() const
 	return m_refcnt;
 }
 
-const bool ValueBase::checkType(const std::type_info& typeRequested) const
+bool ValueBase::checkType(const std::type_info& typeRequested) const
 {
 	const bool ret = (typeRequested == m_type);
 	if (!ret) fprintf(stderr, "Incorrect type requested for %s, requested %s, should be %s\n", m_name.length() ? m_name.c_str() : "[anonymous]", typeRequested.name(), typeid(m_type).name());

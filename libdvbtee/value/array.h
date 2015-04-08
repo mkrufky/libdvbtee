@@ -77,7 +77,7 @@ public:
 
 	void clear();
 
-	const size_t size() const;
+	size_t size() const;
 
 	const std::string& getIndex() const;
 
