@@ -105,11 +105,20 @@ private:
 		return pushByRef<T>(val, idx);
 	}
 
+#define USING_INLINE_PUSH
+#ifdef USING_INLINE_PUSH
 	inline const ValueBase* push(      char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
 	inline const ValueBase* push(const char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
 	inline const ValueBase* push(std::string& val, std::string idx)	{ return pushByRef<std::string>(val, idx); }
 	inline const ValueBase* push(Array& val, std::string idx)	{ return pushByRef<Array>(val, idx); }
 	inline const ValueBase* push(Array* val, std::string idx)	{ return pushByRef<Array>(*val, idx); }
+#else
+	const ValueBase* push(      char* val, std::string idx);
+	const ValueBase* push(const char* val, std::string idx);
+	const ValueBase* push(std::string& val, std::string idx);
+	const ValueBase* push(Array& val, std::string idx);
+	const ValueBase* push(Array* val, std::string idx);
+#endif
 
 	template <typename T>
 	const T& get(unsigned int &idx, T& def) const
