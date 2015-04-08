@@ -48,13 +48,13 @@ public:
 		return setByRef<T>(key, val);
 	}
 
-	inline const ValueBase* set(std::string key,       char* val)	{ return set<std::string>(key, std::string(val)); }
-	inline const ValueBase* set(std::string key, const char* val)	{ return set<std::string>(key, std::string(val)); }
-	inline const ValueBase* set(std::string key, std::string& val)	{ return setByRef<std::string>(key, val); }
-	inline const ValueBase* set(std::string key, Array& val)	{ return setByRef<Array>(key, val); }
-	inline const ValueBase* set(std::string key, Object& val)	{ return setByRef<Object>(key, val); }
-	inline const ValueBase* set(std::string key, Array* val)	{ return setByRef<Array>(key, *val); }
-	inline const ValueBase* set(std::string key, Object* val)	{ return setByRef<Object>(key, *val); }
+	const ValueBase* set(std::string key,       char* val);
+	const ValueBase* set(std::string key, const char* val);
+	const ValueBase* set(std::string key, std::string& val);
+	const ValueBase* set(std::string key, Array& val);
+	const ValueBase* set(std::string key, Object& val);
+	const ValueBase* set(std::string key, Array* val);
+	const ValueBase* set(std::string key, Object* val);
 
 	template <typename T>
 	const ValueBase* set(int key, T val)
