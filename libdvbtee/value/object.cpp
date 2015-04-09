@@ -26,6 +26,77 @@
 
 using namespace valueobj;
 
+namespace valueobj {
+
+template <typename T>
+const ValueBase* Object::set(std::string key, T val)
+{
+	return setByRef<T>(key, val);
+}
+
+template <typename T>
+const ValueBase* Object::set(int key, T val)
+{
+	return set(intToStr(key), val);
+}
+
+template <typename T>
+const T& Object::get(int key) const
+{
+	return get<T>(intToStr(key));
+}
+
+template <typename T>
+const ValueBase* Object::setByRef(std::string& key, T& val)
+{
+	if (map.count(key)) {
+		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
+	}
+
+	Value<T> *v = new Value<T>(key, val);
+
+	map[key] = v;
+	//map.insert( std::pair<std::string, ValueBase*>(key, v) );
+
+	++(*v); // increment refcount
+	return v;
+}
+
+template <typename T>
+const T& Object::get(std::string& key, T& def) const
+{
+	KeyValueMap::const_iterator it = map.find(key);
+	if (it != map.end()) {
+		Value<T> *val = (Value<T>*)(it->second);
+		if (val->checkType(typeid(T)))
+			return val->get();
+	}
+	return def;
+}
+}
+
+#define IMPL_OBJECT_TMPL(T) \
+template const ValueBase* Object::set<T>(std::string key, T val); \
+template const ValueBase* Object::set<T>(int key, T val); \
+template const T& Object::get<T>(int key) const; \
+template const ValueBase* Object::setByRef<T>(std::string& key, T& val); \
+template const T& Object::get<T>(std::string& key, T& def) const
+
+IMPL_OBJECT_TMPL(int);
+IMPL_OBJECT_TMPL(long);
+IMPL_OBJECT_TMPL(short);
+IMPL_OBJECT_TMPL(char);
+IMPL_OBJECT_TMPL(unsigned int);
+IMPL_OBJECT_TMPL(unsigned long);
+IMPL_OBJECT_TMPL(unsigned short);
+IMPL_OBJECT_TMPL(unsigned char);
+IMPL_OBJECT_TMPL(std::string);
+IMPL_OBJECT_TMPL(bool);
+IMPL_OBJECT_TMPL(double);
+IMPL_OBJECT_TMPL(Array);
+IMPL_OBJECT_TMPL(Object);
+
+
 #define DBG 0
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();

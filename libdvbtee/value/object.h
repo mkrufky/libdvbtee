@@ -43,10 +43,7 @@ public:
 	Object(const Object&);
 
 	template <typename T>
-	const ValueBase* set(std::string key, T val)
-	{
-		return setByRef<T>(key, val);
-	}
+	const ValueBase* set(std::string key, T val);
 
 	const ValueBase* set(std::string key,       char* val);
 	const ValueBase* set(std::string key, const char* val);
@@ -57,10 +54,7 @@ public:
 	const ValueBase* set(std::string key, Object* val);
 
 	template <typename T>
-	const ValueBase* set(int key, T val)
-	{
-		return set(intToStr(key), val);
-	}
+	const ValueBase* set(int key, T val);
 
 	const ValueBase* set(ValueBase*);
 
@@ -75,10 +69,7 @@ public:
 	template <typename T> const T& get(std::string key) const;
 
 	template <typename T>
-	const T& get(int key) const
-	{
-		return get<T>(intToStr(key));
-	}
+	const T& get(int key) const;
 
 	const std::string toJson() const;
 
@@ -86,32 +77,10 @@ private:
 	KeyValueMap map;
 
 	template <typename T>
-	const ValueBase* setByRef(std::string& key, T& val)
-	{
-		if (map.count(key)) {
-			if (0 == (--(*map[key])).getRefCnt()) delete map[key];
-		}
-
-		Value<T> *v = new Value<T>(key, val);
-
-		map[key] = v;
-		//map.insert( std::pair<std::string, ValueBase*>(key, v) );
-
-		++(*v); // increment refcount
-		return v;
-	}
+	const ValueBase* setByRef(std::string& key, T& val);
 
 	template <typename T>
-	const T& get(std::string& key, T& def) const
-	{
-		KeyValueMap::const_iterator it = map.find(key);
-		if (it != map.end()) {
-			Value<T> *val = (Value<T>*)(it->second);
-			if (val->checkType(typeid(T)))
-				return val->get();
-		}
-		return def;
-	}
+	const T& get(std::string& key, T& def) const;
 
 	const std::string intToStr(int) const;
 };
