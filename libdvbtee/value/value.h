@@ -98,14 +98,6 @@ public:
 		m_value;
 	}
 
-	void set(T& v)
-	{
-#if VALUEBASE_POINTER
-		*
-#endif
-		m_value = v;
-	}
-
 	virtual const std::string toJson() const;
 
 private:
