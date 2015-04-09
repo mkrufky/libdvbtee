@@ -28,6 +28,66 @@
 
 using namespace valueobj;
 
+namespace valueobj {
+
+template <typename T>
+Value<T>::Value(std::string& n, T& v)
+ : ValueBase(typeid(T), n)
+#if !VALUEBASE_POINTER
+ , m_value(v)
+#endif
+{
+#if VALUEBASE_POINTER
+	m_value = new T(v);
+#endif
+}
+
+template <typename T>
+Value<T>::Value(const Value<T>& o)
+ : ValueBase(typeid(T), o.getName())
+#if !VALUEBASE_POINTER
+ , m_value(o.get())
+#endif
+{
+#if VALUEBASE_POINTER
+	m_value = new T(o.get());
+#endif
+}
+
+template <typename T>
+Value<T>::~Value()
+{
+#if VALUEBASE_POINTER
+	delete m_value;
+#endif
+}
+
+template <typename T>
+const T& Value<T>::get() const
+{
+	if (!checkType(typeid(T))) {}
+	return
+#if VALUEBASE_POINTER
+	*
+#endif
+	m_value;
+}
+}
+
+template class Value<int>;
+template class Value<long>;
+template class Value<short>;
+template class Value<char>;
+template class Value<unsigned int>;
+template class Value<unsigned long>;
+template class Value<unsigned short>;
+template class Value<unsigned char>;
+template class Value<std::string>;
+template class Value<bool>;
+template class Value<double>;
+template class Value<Array>;
+template class Value<Object>;
+
 ValueBase::ValueBase(const std::type_info& type, std::string name)
  : m_type(type)
  , m_name(name)
