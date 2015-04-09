@@ -58,54 +58,23 @@ template <typename T>
 class Value : public ValueBase {
 public:
 	explicit
-	Value(std::string& n, T& v)
-	 : ValueBase(typeid(T), n)
-#if !VALUEBASE_POINTER
-	 , m_value(v)
-#endif
-	{
-#if VALUEBASE_POINTER
-		m_value = new T(v);
-#endif
-	}
+	Value(std::string& n, T& v);
 
 	explicit
-	Value(const Value<T>& o)
-	 : ValueBase(typeid(T), o.getName())
-#if !VALUEBASE_POINTER
-	 , m_value(o.get())
-#endif
-	{
-#if VALUEBASE_POINTER
-		m_value = new T(o.get());
-#endif
-	}
+	Value(const Value<T>& o);
 
-	~Value()
-	{
-#if VALUEBASE_POINTER
-		delete m_value;
-#endif
-	}
+	~Value();
 
-	const T& get() const
-	{
-		if (!checkType(typeid(T))) {}
-		return
-#if VALUEBASE_POINTER
-		*
-#endif
-		m_value;
-	}
+	const T& get() const;
 
 	virtual const std::string toJson() const;
 
 private:
-	const T
 #if VALUEBASE_POINTER
-	*
+	const T *m_value;
+#else
+	const T  m_value;
 #endif
-	m_value;
 };
 
 class ValueUndefined : public ValueBase {
