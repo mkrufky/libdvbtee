@@ -26,6 +26,71 @@
 
 using namespace valueobj;
 
+namespace valueobj {
+
+template <typename T>
+const ValueBase* Array::push(T val)
+{
+	return push<T>(val, "");
+}
+
+template <typename T>
+const ValueBase* Array::set(std::string key, T val)
+{
+	if (!key.length()) return NULL;
+	const ValueBase* v = push<T>(val, key);
+	if (v) updateIndex(key, v);
+	return v;
+}
+
+template <typename T>
+const ValueBase* Array::set(int key, T val)
+{
+	return set<T>(intToStr(key), val);
+}
+
+template <typename T>
+const ValueBase* Array::pushByRef(T& val, std::string idx)
+{
+	Value<T> *v = new Value<T>(idx, val);
+	vector.push_back(v);
+	++(*v); // increment refcount
+	return v;
+}
+
+template <typename T>
+const ValueBase* Array::push(T val, std::string idx)
+{
+	return pushByRef<T>(val, idx);
+}
+
+
+template <typename T>
+const T& Array::get(unsigned int &idx, T& def) const
+{
+	if (idx <= vector.size()) {
+		Value<T> *val = (Value<T>*)vector[idx];
+		if (val->checkType(typeid(T)))
+			return val->get();
+	}
+	return def;
+}
+}
+
+#define IMPL_ARRAY_TMPL(T) \
+template const ValueBase* Array::push(T val); \
+template const ValueBase* Array::set(std::string key, T val); \
+template const ValueBase* Array::set(int key, T val); \
+template const ValueBase* Array::pushByRef(T& val, std::string idx); \
+template const ValueBase* Array::push(T val, std::string idx); \
+template const T& Array::get(unsigned int &idx, T& def) const
+
+#if 1 // we only need Array::push(unsigned int) but implementing them all for the sake of completeness
+IMPL_ARRAY_TMPL(unsigned int);
+#else
+template const ValueBase* Array::push(unsigned int val);
+#endif
+
 #define DBG 0
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();

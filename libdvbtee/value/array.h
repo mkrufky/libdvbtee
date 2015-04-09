@@ -48,25 +48,13 @@ public:
 	const ValueBase* push(Object*);
 
 	template <typename T>
-	const ValueBase* push(T val)
-	{
-		return push<T>(val, "");
-	}
+	const ValueBase* push(T val);
 
 	template <typename T>
-	const ValueBase* set(std::string key, T val)
-	{
-		if (!key.length()) return NULL;
-		const ValueBase* v = push<T>(val, key);
-		if (v) updateIndex(key, v);
-		return v;
-	}
+	const ValueBase* set(std::string key, T val);
 
 	template <typename T>
-	const ValueBase* set(int key, T val)
-	{
-		return set<T>(intToStr(key), val);
-	}
+	const ValueBase* set(int key, T val);
 
 	const ValueBase* getByName(std::string idx) const;
 	const ValueBase* getByName(unsigned int idx) const;
@@ -89,21 +77,12 @@ private:
 	std::string idxField;
 
 	template <typename T>
-	const ValueBase* pushByRef(T& val, std::string idx)
-	{
-		Value<T> *v = new Value<T>(idx, val);
-		vector.push_back(v);
-		++(*v); // increment refcount
-		return v;
-	}
+	const ValueBase* pushByRef(T& val, std::string idx);
 
 	const ValueBase* pushObject(Object& val, std::string idx);
 
 	template <typename T>
-	const ValueBase* push(T val, std::string idx)
-	{
-		return pushByRef<T>(val, idx);
-	}
+	const ValueBase* push(T val, std::string idx);
 
 #define USING_INLINE_PUSH
 #ifdef USING_INLINE_PUSH
@@ -121,15 +100,7 @@ private:
 #endif
 
 	template <typename T>
-	const T& get(unsigned int &idx, T& def) const
-	{
-		if (idx <= vector.size()) {
-			Value<T> *val = (Value<T>*)vector[idx];
-			if (val->checkType(typeid(T)))
-				return val->get();
-		}
-		return def;
-	}
+	const T& get(unsigned int &idx, T& def) const;
 
 	void updateIndex(std::string, const ValueBase*);
 	std::string& assignIndex(Object&, std::string&);
