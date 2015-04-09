@@ -12,6 +12,7 @@ SOURCES += \
     $$PWD/tabl_cb.cpp \
     $$PWD/tabl_cc.cpp \
     $$PWD/tabl_cd.cpp \
+    $$PWD/table-impl.cpp \
     $$PWD/table.cpp
 
 HEADERS += \
