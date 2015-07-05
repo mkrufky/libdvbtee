@@ -4,7 +4,6 @@ include ( value/value.pri )
 include ( decode/decode.pri )
 
 SOURCES += \
-    $$DECODER_SOURCES \
     atsctext.cpp \
     channels.cpp \
     decode.cpp \

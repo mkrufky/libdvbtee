@@ -14,6 +14,8 @@ DEFINES += DVBTEE_LIBRARY
 
 include ( libdvbtee.pri )
 
+LIBS += -L$$PWD/decode/ -ldvbtee_decode
+
 symbian {
     MMP_RULES += EXPORTUNFROZEN
     TARGET.UID3 = 0xE1EA1848
