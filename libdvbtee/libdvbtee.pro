@@ -16,6 +16,8 @@ include ( libdvbtee.pri )
 
 LIBS += -L$$PWD/decode/ -ldvbtee_decode
 
+LIBS += -L$$PWD/value/ -lvalueobj
+
 symbian {
     MMP_RULES += EXPORTUNFROZEN
     TARGET.UID3 = 0xE1EA1848
