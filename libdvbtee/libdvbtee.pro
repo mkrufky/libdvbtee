@@ -14,8 +14,6 @@ DEFINES += DVBTEE_LIBRARY
 
 include ( libdvbtee.pri )
 
-LIBS += -L$$PWD/decode/ -ldvbtee_decode
-
 LIBS += -L$$PWD/value/ -lvalueobj
 
 symbian {
