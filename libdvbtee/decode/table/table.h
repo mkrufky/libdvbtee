@@ -90,11 +90,11 @@ private:
 #define PsiTable_CONSTRUCTORTEMPLATE 1
 struct PsiTable {
 #if PsiTable_CONSTRUCTORTEMPLATE
-    template<typename T> PsiTable(TableTypeCarrier<T> inT);
+    template<typename T> PsiTable(TableTypeCarrier<T> inT) { m_priv = &inT; }
 #else
-    template<typename T> void Set(TableTypeCarrier<T> inT);
+    template<typename T> void Set(TableTypeCarrier<T> inT) { m_priv = &inT; }
 #endif
-    template<typename T> T* Get();
+    template<typename T> T* Get() { return ((TableTypeCarrier<T>*)m_priv)->Get(); }
 
 private:
     TableTypeCarrierBase* m_priv;
@@ -109,31 +109,57 @@ public:
 	bool add(uint8_t, PsiTable, TableWatcher* watcher = NULL);
 
 	template<typename T>
-	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL);
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL) { return add(tableid, PsiTable(TableTypeCarrier<T>(p_table)), watcher); }
 #else
 	bool add(uint8_t, PsiTable&, TableWatcher* watcher = NULL);
 
 	template<typename T>
-	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL);
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable, watcher); }
 #endif
 
 	template <typename T> bool add(T*, TableWatcher* w = NULL);
 
 	template<typename T, class C>
-	bool update(uint8_t tableid, T* p_table);
+	bool update(uint8_t tableid, T* p_table)
+	{
+		std::vector<Table*> V = get(tableid);
+		ssize_t s = V.size();
+		if (s > 1) printf("TABLE: %02x %ld collected, something is wrong\n", tableid, s);
+		if (s) {
+			printf("UPDATING TABLE %02x\n", tableid);
+			C *t = (C*)V[s-1];
+			t->reset();
+			t->store(p_table);
+			return true;
+		}
+		return false;
+	}
 
 	template<typename T, class C>
 #if PsiTable_CONSTRUCTORTEMPLATE
-	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL);
+	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
+	{
+		return (update<T,C>(tableid, p_table)) ? true : add(p_table, watcher);
+	}
 #else
-	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL);
+	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
+	{
+		if (update<T,C>(tableid, p_table)) return true;
+
+		PsiTable psiTable;
+		psiTable.Set<T>(p_table);
+		return add(tableid, psiTable, watcher);
+	}
 #endif
 
 	template <typename T> bool setOnly(T*, TableWatcher* w = NULL);
 
 
 	template<typename T, class C>
-	bool ingest(T *p_table, TableWatcher *watcher = NULL);
+	bool ingest(T *p_table, TableWatcher *watcher = NULL)
+	{
+		return C::ingest(this, p_table, watcher);
+	}
 
 	template <typename T> bool ingest(T*, TableWatcher* w = NULL);
 
