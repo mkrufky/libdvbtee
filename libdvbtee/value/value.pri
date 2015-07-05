@@ -1,6 +1,6 @@
 INCLUDEPATH += $$PWD
 
-SOURCES += \
+VALUEOBJ_SOURCES = \
     $$PWD/array.cpp \
     $$PWD/object.cpp \
     $$PWD/value.cpp
