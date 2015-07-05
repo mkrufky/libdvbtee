@@ -1,6 +1,6 @@
 INCLUDEPATH += $$PWD
 
-SOURCES += \
+DESCRIPTOR_SOURCES = \
     $$PWD/desc_0a.cpp \
     $$PWD/desc_48.cpp \
     $$PWD/desc_4d.cpp \

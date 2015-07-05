@@ -1,6 +1,6 @@
 INCLUDEPATH += $$PWD
 
-SOURCES += \
+TABLE_SOURCES = \
     $$PWD/tabl_00.cpp \
     $$PWD/tabl_02.cpp \
     $$PWD/tabl_40.cpp \

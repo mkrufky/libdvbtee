@@ -3,7 +3,9 @@ INCLUDEPATH += $$PWD
 include ( table/table.pri )
 include ( descriptor/descriptor.pri )
 
-SOURCES += \
+DECODER_SOURCES = \
+    $$TABLE_SOURCES \
+    $$DESCRIPTOR_SOURCES \
     $$PWD/decoder.cpp
 
 HEADERS += \
