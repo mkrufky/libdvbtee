@@ -87,9 +87,6 @@ decode_network_service::decode_network_service()
 {
 	dprintf("()");
 
-	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
-	decoded_sdt.services.clear();
-
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
 			decoded_eit[i].begin();
@@ -104,8 +101,6 @@ decode_network_service::~decode_network_service()
 {
 	dprintf("(%05d|%05d)",
 		decoded_sdt.network_id, decoded_sdt.ts_id);
-
-	decoded_sdt.services.clear();
 
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
@@ -124,9 +119,6 @@ decode_network_service::decode_network_service(const decode_network_service&)
   , services_w_eit_sched(0)
 {
 	dprintf("(copy)");
-
-	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
-	decoded_sdt.services.clear();
 
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =
@@ -147,9 +139,6 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 
 	services_w_eit_pf = 0;
 	services_w_eit_sched = 0;
-
-	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
-	decoded_sdt.services.clear();
 
 	for (int i = 0; i < NUM_EIT; i++) {
 		for (map_decoded_eit::iterator iter =

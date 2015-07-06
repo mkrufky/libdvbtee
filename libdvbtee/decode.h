@@ -242,7 +242,7 @@ typedef struct decoded_nit_s
 } decoded_nit_t;
 
 /* -- SDT -- */
-typedef struct
+typedef struct decoded_sdt_service_s
 {
 	uint16_t                        service_id;
 	unsigned int                    f_eit_sched:1;
@@ -252,6 +252,17 @@ typedef struct
 	// FIXME: descriptors...
 	unsigned char                   provider_name[256];
 	unsigned char                   service_name[256];
+
+	decoded_sdt_service_s()
+	 : service_id(0xffff)
+	 , f_eit_sched(0)
+	 , f_eit_present(0)
+	 , running_status(0)
+	 , f_free_ca(0)
+	{
+		memset(&provider_name, 0, sizeof(provider_name));
+		memset(&service_name, 0, sizeof(service_name));
+	}
 
 } decoded_sdt_service_t;
 
@@ -266,6 +277,7 @@ typedef struct decoded_sdt_s
 	map_decoded_sdt_services        services;
 
 	decoded_sdt_s() : ts_id(0xffff), version(0xff), network_id(0xffff) { services.clear(); }
+	~decoded_sdt_s() { services.clear(); }
 } decoded_sdt_t;
 
 
