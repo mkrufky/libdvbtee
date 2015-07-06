@@ -310,9 +310,6 @@ decode::decode()
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
 
-	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
-	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
-
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
@@ -360,9 +357,6 @@ decode::decode(const decode&)
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
 
-	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
-	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
-
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
 	decoded_ett.clear();
@@ -395,9 +389,6 @@ decode& decode::operator= (const decode& cSource)
 	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
 	     iter != decoded_pmt.end(); ++iter)
 		iter->second.es_streams.clear();
-
-	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
-	memset(&decoded_ett, 0, sizeof(map_decoded_atsc_ett));
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
