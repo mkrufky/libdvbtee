@@ -230,8 +230,6 @@ decode_network::decode_network()
 
 	decoded_nit.ts_list.clear();
 
-//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 }
 
@@ -248,8 +246,6 @@ decode_network::~decode_network()
 
 	decoded_nit.ts_list.clear();
 
-//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 }
 
@@ -265,8 +261,6 @@ decode_network::decode_network(const decode_network&)
 
 	decoded_nit.ts_list.clear();
 
-//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 }
 
@@ -283,8 +277,6 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 
 	decoded_nit.ts_list.clear();
 
-//	for (map_decoded_network_services::iterator iter = decoded_network_services.begin(); iter != decoded_network_services.end(); ++iter)
-//		iter->second.decoded_sdt.services.clear();
 	decoded_network_services.clear();
 
 	return *this;
