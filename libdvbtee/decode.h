@@ -86,6 +86,7 @@ typedef struct decoded_pmt_s
 	// FIXME: descriptors...
 	map_ts_elementary_streams	es_streams;
 	decoded_pmt_s() : program(0xffff), version(0xff), pcr_pid(0xffff) { es_streams.clear(); }
+	~decoded_pmt_s() { es_streams.clear(); }
 } decoded_pmt_t;
 
 typedef std::map<uint16_t, decoded_pmt_t> map_decoded_pmt; /* program num, decoded_pmt_t */
