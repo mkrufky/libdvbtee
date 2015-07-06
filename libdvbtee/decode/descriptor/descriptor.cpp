@@ -88,7 +88,7 @@ DescriptorBaseFactory *DescriptorRegistry::getFactory(uint8_t tag)
 
 DescriptorBaseFactory *DescriptorRegistry::getFactory(dvbpsi_descriptor_t *d)
 {
-	return getFactory(d->i_tag);
+	return (!d) ? NULL : getFactory(d->i_tag);
 }
 
 Descriptor *DescriptorRegistry::create(Decoder *parent, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
