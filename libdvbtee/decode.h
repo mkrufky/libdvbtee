@@ -146,6 +146,7 @@ typedef struct decoded_vct_s
 	// FIXME: descriptors...
 	map_decoded_vct_channels	channels;
 	decoded_vct_s() : version(0xff), ts_id(0xffff) { channels.clear(); }
+	~decoded_vct_s() { channels.clear(); }
 } decoded_vct_t;
 
 /* -- EIT -- */

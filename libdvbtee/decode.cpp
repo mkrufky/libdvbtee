@@ -298,11 +298,9 @@ decode::decode()
 	dprintf("()");
 
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
-	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	//memset(&decoded_atsc_eit, 0, sizeof(decoded_atsc_eit_t));
 
 	decoded_pat.programs.clear();
-	decoded_vct.channels.clear();
 
 	for (int i = 0; i < 128; i++) {
 		for (map_decoded_atsc_eit::iterator iter =
@@ -346,7 +344,6 @@ decode::~decode()
 	rcvd_pmt.clear();
 	decoded_pmt.clear();
 	decoded_pat.programs.clear();
-	decoded_vct.channels.clear();
 	//decoded_atsc_eit.events.clear();
 	//decoded_eit.events.clear();
 	decoded_ett.clear();
@@ -359,11 +356,9 @@ decode::decode(const decode&)
 	dprintf("(copy)");
 
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
-	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	//memset(&decoded_atsc_eit, 0, sizeof(decoded_atsc_eit_t));
 
 	decoded_pat.programs.clear();
-	decoded_vct.channels.clear();
 	//decoded_atsc_eit.events.clear();
 
 	for (int i = 0; i < 128; i++) {
@@ -403,11 +398,9 @@ decode& decode::operator= (const decode& cSource)
 		return *this;
 
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
-	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
 	//memset(&decoded_atsc_eit, 0, sizeof(decoded_atsc_eit_t));
 
 	decoded_pat.programs.clear();
-	decoded_vct.channels.clear();
 	//decoded_atsc_eit.events.clear();
 
 	for (int i = 0; i < 128; i++) {
