@@ -120,11 +120,10 @@ decode_network_service::~decode_network_service()
 decode_network_service::decode_network_service(const decode_network_service&)
   : NullDecoder()
   , store(this)
+  , services_w_eit_pf(0)
+  , services_w_eit_sched(0)
 {
 	dprintf("(copy)");
-
-	services_w_eit_pf = 0;
-	services_w_eit_sched = 0;
 
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
 	decoded_sdt.services.clear();
