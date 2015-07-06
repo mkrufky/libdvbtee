@@ -92,13 +92,15 @@ typedef struct decoded_pmt_s
 typedef std::map<uint16_t, decoded_pmt_t> map_decoded_pmt; /* program num, decoded_pmt_t */
 
 /* -- MGT -- */
-typedef struct
+typedef struct decoded_mgt_table_s
 {
 	uint16_t			type;
 	uint16_t			pid;
 	uint8_t				version;
 	uint32_t			bytes;
 	// FIXME: descriptors...
+
+	decoded_mgt_table_s() : type(0xffff), pid(0xffff), version(0xff), bytes(0) {}
 } decoded_mgt_table_t;
 
 typedef std::map<uint16_t, decoded_mgt_table_t> map_decoded_mgt_tables; /* type, decoded_mgt_table_t */
@@ -110,6 +112,7 @@ typedef struct decoded_mgt_s
 	// FIXME: descriptors...
 	map_decoded_mgt_tables		tables;
 	decoded_mgt_s() : version(0xff), table_id_ext(0xffff) { tables.clear(); }
+	~decoded_mgt_s() { tables.clear(); }
 } decoded_mgt_t;
 
 /* -- VCT -- */
