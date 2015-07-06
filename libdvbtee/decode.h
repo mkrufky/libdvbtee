@@ -61,7 +61,9 @@ typedef struct decoded_pat_s
 	uint16_t			ts_id;
 	uint8_t				version;
 	map_decoded_pat_programs	programs;
+
 	decoded_pat_s() : ts_id(0xffff), version(0xff) { programs.clear(); }
+	~decoded_pat_s() { programs.clear(); }
 } decoded_pat_t;
 
 /* -- PMT -- */
