@@ -222,11 +222,13 @@ typedef struct decoded_atsc_ett_s
 typedef std::map<uint16_t, decoded_atsc_ett_t> map_decoded_atsc_ett; /* etm_id, decoded_atsc_eit_t */
 
 /* -- NIT -- */
-typedef struct
+typedef struct decoded_nit_ts_s
 {
 	uint16_t                        ts_id;
 	uint16_t                        orig_network_id;
 	// FIXME: descriptors...
+
+	decoded_nit_ts_s() : ts_id(0xffff), orig_network_id(0xffff) {}
 } decoded_nit_ts_t;
 
 typedef std::map<uint16_t, decoded_nit_ts_t> map_decoded_nit_ts_t; /* ts_id, decoded_nit_ts_t */
@@ -239,6 +241,7 @@ typedef struct decoded_nit_s
 	map_decoded_nit_ts_t            ts_list;
 
 	decoded_nit_s() : network_id(0xffff), version(0xff) { ts_list.clear(); }
+	~decoded_nit_s() { ts_list.clear(); }
 } decoded_nit_t;
 
 /* -- SDT -- */

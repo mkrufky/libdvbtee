@@ -214,10 +214,6 @@ decode_network::decode_network()
 {
 	dprintf("()");
 
-	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
-
-	decoded_nit.ts_list.clear();
-
 	decoded_network_services.clear();
 }
 
@@ -232,8 +228,6 @@ decode_network::~decode_network()
 		decoded_network_services.size());
 #endif
 
-	decoded_nit.ts_list.clear();
-
 	decoded_network_services.clear();
 }
 
@@ -244,10 +238,6 @@ decode_network::decode_network(const decode_network&)
 	dprintf("(copy)");
 
 	orig_network_id = 0;
-
-	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
-
-	decoded_nit.ts_list.clear();
 
 	decoded_network_services.clear();
 }
@@ -260,10 +250,6 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 		return *this;
 
 	orig_network_id = 0;
-
-	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
-
-	decoded_nit.ts_list.clear();
 
 	decoded_network_services.clear();
 
