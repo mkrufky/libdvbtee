@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Libdvbtee by mkrufky</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Libdvbtee</h1>
+        <p>dvbtee: a digital television streamer / parser / service information aggregator supporting various interfaces including telnet CLI &amp; http control</p>
+
+        <p class="view"><a href="https://github.com/mkrufky/libdvbtee">View the Project on GitHub <small>mkrufky/libdvbtee</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/mkrufky/libdvbtee/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mkrufky/libdvbtee/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mkrufky/libdvbtee">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a id="dvbtee--libdvbtee" class="anchor" href="#dvbtee--libdvbtee" aria-hidden="true"><span class="octicon octicon-link"></span></a>dvbtee &amp; libdvbtee</h2>
+
+<h3>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h3>
+
+<p>libdvbtee is a stream parser and service information aggregator library for
+MPEG2 transport streams. The library includes a program service information
+(PSI) parser and support for various network streaming methods and is aware
+of the linux-dvb kernel API as well as HDHomeRun network streaming APIs.</p>
+
+<p>The library contains enough functionality to power a full featured television
+middleware application, including the ability to acquire and stream data
+through UDP, TCP, HTTP, DMA and various other mechanisms.</p>
+
+<p><code>libdvbtee_server</code> allows for these features to be controlled from an http
+session or command line interface, and can be used to control multiple tuners.</p>
+
+<p>The dvbtee executable application provides a variety of features, including:
+scanning, tuning, EPG browsing, receive incoming network streams,
+stream out network streams, manage multiple tuners, and more...</p>
+
+<p>The server can be accessed either by telnet or http. The default port number
+is <code>64080</code>, but this is configurable. The <code>server_example</code> uses port number <code>62080</code>.</p>
+
+<p>When accessing the server via http, precede commands by / and arguments by =.
+When accessing the server via telnet, enter in the form 'command=argument'
+and press enter.</p>
+
+<p><strong>Command line arguments:</strong></p>
+
+<pre><code>-a      adapter id
+-A      (1 for ATSC, 2 for ClearQAM)
+-b      display bitrates &amp; statistics
+-c      channel to tune /
+        comma (,) separated list of channels to scan /
+        scan minimum channel
+-C      channel to tune /
+        comma (,) separated list of channels to scan /
+        scan maximum channel
+-f      frontend id
+-F      filename to use as input
+-t      timeout
+-T      number of tuners (dvb adapters) allowed to use, 0 for all
+-s      scan, optional arg when using multiple tuners:
+        1 for speed, 2 for redundancy,
+        3 for speed AND redundancy,
+        4 for optimized speed / partial redundancy
+-S      server mode, optional arg 1 for command server,
+        2 for http stream server, 3 for both
+-i      pull local/remote tcp/udp port for data
+-I      request a service and its associated PES streams by its service id
+-E      enable EPG scan, optional arg to limit the number of EITs to parse
+-o      output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
+-O      output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
+-H      use a HdHomeRun device, optional arg to specify the device string
+-d      debug level
+-h      display additional help
+</code></pre>
+
+<h3>
+<a id="example-usage" class="anchor" href="#example-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example Usage</h3>
+
+<p>To tune to service id 1 of physical channel 33 and stream it to a udp port:</p>
+
+<pre><code>  ./dvbtee -c33 -I1 -oudp://192.168.1.100:1234
+</code></pre>
+
+<p>To tune the second frontend of adapter 1 and stream the full TS of physical channel 44 to a tcp listener:</p>
+
+<pre><code>  ./dvbtee -c44 -otcp://192.168.1.200:5555
+</code></pre>
+
+<p>To listen to a TCP port and stream to a UDP port:</p>
+
+<pre><code>  ./dvbtee -itcp://5555 -oudp://192.168.1.100:1234
+</code></pre>
+
+<p>To parse a captured file and filter out the PSIP data, saving the PAT/PMT and PES streams to a file:</p>
+
+<pre><code>  ./dvbtee -Finput.ts -O3 -ofile://output.ts
+</code></pre>
+
+<p>To parse a UDP stream for ten seconds:</p>
+
+<pre><code>  ./dvbtee -iudp://127.0.0.1:1234 -t10
+</code></pre>
+
+<p>To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:</p>
+
+<pre><code>  ./dvbtee -A2 -T5 -s4
+</code></pre>
+
+<p>To scan for ATSC services using 2 HdHomeRun tuners optimized for speed and redundancy:</p>
+
+<pre><code>  ./dvbtee -A1 -H -T2 -s3
+</code></pre>
+
+<p>To start a server using adapter 0:</p>
+
+<pre><code>  ./dvbtee -a0 -S
+</code></pre>
+
+<p>To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):</p>
+
+<pre><code>  ./dvbtee -H ABCDABCD-1 -S
+</code></pre>
+
+<h3>
+<a id="server-commands" class="anchor" href="#server-commands" aria-hidden="true"><span class="octicon octicon-link"></span></a>Server commands</h3>
+
+<pre><code>tuner           specify tuner id
+feeder          specify feeder id
+scan            scan for services, optional arg comma (,) separated list of channels to scan
+scanepg         same as 'scan' with EPG data collection enabled during scan
+startscan       same as 'scan' but asynchronous
+startscanepg    combo of 'scanepg' and 'startscan'
+tune            tune to a channel or service, ie:
+                tune=33 (full mux) / tune=44~3 (svc id 3)
+channels        list channels
+channel         tune physical channel (unsafe - use tune instead)
+service         select service (unsafe - use tune instead)
+stream          add output file / tcp / udp / http stream, ie:
+                stream=udp:192.168.1.100:1234
+                stream=tcp:192.168.1.200:5555
+                stream=file:output.ts
+                stream (over http with no arg will begin streaming to current socket)
+epg             dump collected EPG data
+xmltv           dump collected EPG data in XMLTV format
+stop            stop the tuner
+stopoutput      stop the tuner and output
+check           display debug info if debug is enabled
+debug           enable debug
+parser          enable / disable the parser for data shovel
+listen          listen for TS on a TCP or UDP port
+save            save scanned channels
+quit            stop the server and exit
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/mkrufky">mkrufky</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
