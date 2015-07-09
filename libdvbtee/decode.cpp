@@ -591,7 +591,7 @@ bool decode::updateETT(dvbtee::decode::Table *table)
 /* -- STREAM TIME -- */
 bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 {
-#if 0
+#ifdef OLD_DECODER
 	stream_time = atsc_datetime_utc(p_stt->i_system_time);
 
 	dbg_time("%s", ctime(&stream_time));
@@ -606,7 +606,7 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 
 bool decode::take_tot(dvbpsi_tot_t* p_tot)
 {
-#if 0
+#ifdef OLD_DECODER
 	stream_time = datetime_utc(p_tot->i_utc_time);
 
 	dbg_time("%s", ctime(&stream_time));
@@ -631,7 +631,32 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 		return false;
 	}
 
+#ifdef OLD_DECODER
+#if PAT_DBG
+	fprintf(stderr, "%s: v%d, ts_id: %d\n", __func__,
+		p_pat->i_version, p_pat->i_ts_id);
+#endif
+	decoded_pat.ts_id   = p_pat->i_ts_id;
+	decoded_pat.version = p_pat->i_version;
+	decoded_pat.programs.clear();
+
+	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
+	while (p_program) {
+//		if (p_program->i_number > 0)
+		decoded_pat.programs[p_program->i_number] = p_program->i_pid;
+
+		rcvd_pmt[p_program->i_number] = false;
+#if PAT_DBG
+		fprintf(stderr, "  %10d | %x\n",
+			p_program->i_number,
+			decoded_pat.programs[p_program->i_number]);
+#endif
+		p_program = p_program->p_next;
+	}
+	return true;
+#else
 	return store.ingest(p_pat, this);
+#endif
 }
 
 bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
@@ -645,7 +670,71 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 			p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
 		return false;
 	}
+#ifdef OLD_DECODER
+#if PMT_DBG
+	fprintf(stderr, "%s: v%d, service_id %d, pcr_pid %d\n", __func__,
+		p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
+#endif
+	cur_decoded_pmt.program = p_pmt->i_program_number;
+	cur_decoded_pmt.version = p_pmt->i_version;
+	cur_decoded_pmt.pcr_pid = p_pmt->i_pcr_pid;
+	cur_decoded_pmt.es_streams.clear();
+	//FIXME: descriptors
+	descriptors.decode(p_pmt->p_first_descriptor);
+
+	fprintf(stderr, "  es_pid | type\n");
+
+	dvbpsi_pmt_es_t* p_es = p_pmt->p_first_es;
+	while (p_es) {
+
+		ts_elementary_stream_t &cur_es = cur_decoded_pmt.es_streams[p_es->i_pid];
+
+		cur_es.type = p_es->i_type;
+		cur_es.pid  = p_es->i_pid;
+
+		//FIXME: descriptors
+		descriptors.decode(p_es->p_first_descriptor);
+
+#ifdef COPY_DRA1_FROM_VCT_TO_PMT // disabled, to be deleted
+		if (descriptors._a1.count(p_es->i_pid)) {
+			memcpy(cur_es.iso_639_code,
+			       descriptors._a1[p_es->i_pid].iso_639_code,
+			       sizeof(descriptors._a1[p_es->i_pid].iso_639_code));
+		}
+#endif
+		desc local_descriptors;
+		local_descriptors.decode(p_es->p_first_descriptor);
+
+		std::string languages;
+
+		for (map_dr0a::const_iterator iter_dr0a = local_descriptors._0a.begin(); iter_dr0a != local_descriptors._0a.end(); ++iter_dr0a) {
+			if (!languages.empty()) languages.append(", ");
+			if (iter_dr0a->second.iso_639_code[0]) {
+				for (int i=0; i<3; i++) languages.push_back(iter_dr0a->second.iso_639_code[i]);
+
+				memcpy(cur_es.iso_639_code,
+				       iter_dr0a->second.iso_639_code,
+				       sizeof(iter_dr0a->second.iso_639_code));
+			}
+		}
+#if PMT_DBG
+		fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
+			cur_es.pid, cur_es.type,
+			streamtype_name(cur_es.type),
+#if 1 //def COPY_DRA1_FROM_VCT_TO_PMT // FIXME
+			cur_es.iso_639_code);
+#else
+			languages.c_str());
+#endif
+#endif
+		p_es = p_es->p_next;
+	}
+	rcvd_pmt[p_pmt->i_program_number] = true;
+
+	return true;
+#else
 	return store.ingest(p_pmt, this);
+#endif
 }
 
 bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
@@ -663,7 +752,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 			p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 		return false;
 	}
-#if 0
+#ifdef OLD_DECODER
 #if VCT_DBG
 	fprintf(stderr, "%s: v%d, ts_id %d, b_cable_vct %d\n", __func__,
 		p_vct->i_version, __ts_id, p_vct->b_cable_vct);
@@ -743,8 +832,11 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 	//FIXME: descriptors
 	dprintf("parsing channel descriptors for mux:");
 	descriptors.decode(p_vct->p_first_descriptor);
-#endif
+
+	return true;
+#else
 	return store.ingest(p_vct, this);
+#endif
 }
 
 bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
@@ -756,7 +848,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 		dprintf("v%d: ALREADY DECODED", p_mgt->i_version);
 		return false;
 	}
-#if 0
+#ifdef OLD_DECODER
 #if MGT_DBG
 	fprintf(stderr, "%s: v%d\n", __func__, p_mgt->i_version);
 #endif
@@ -793,11 +885,14 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 	}
 	//FIXME: descriptors
 	descriptors.decode(p_mgt->p_first_descriptor);
-#endif
+
+	return true;
+#else
 	return store.ingest(p_mgt, this);
+#endif
 }
 
-#if 0
+#ifdef OLD_DECODER
 static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, dvbtee::decode::DescriptorStore* descriptors)
 #define NIT_DBG 1
 {
@@ -885,14 +980,15 @@ bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
 
 bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
 {
+#ifdef OLD_DECODER
+	return __take_nit(p_nit, &decoded_nit, &descriptors);
+#else
 	// XXX: FIXME: must refactor decode::get_lcn() & LCN descriptor 0x83
 	descriptors.decode(p_nit->p_first_descriptor);
 	dvbpsi_nit_ts_t *ts = p_nit->p_first_ts;
 	while (ts) { descriptors.decode(ts->p_first_descriptor); ts = ts->p_next; }
 
 	return store.ingest(p_nit, this);
-#if 0
-	return __take_nit(p_nit, &decoded_nit, &descriptors);
 #endif
 }
 
@@ -910,7 +1006,7 @@ const map_decoded_eit *decode_network::get_decoded_eit(uint16_t ts_id) const
 	//return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit : NULL;
 }
 
-#if 0
+#ifdef OLD_DECODER
 static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::decode::DescriptorStore* descriptors,
 		       unsigned int* services_w_eit_pf, unsigned int* services_w_eit_sched)
 #define SDT_DBG 1
@@ -1012,14 +1108,15 @@ bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 
 bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 {
-	return store.ingest(p_sdt, this);
-#if 0
+#ifdef OLD_DECODER
 	return __take_sdt(p_sdt, &decoded_sdt, &descriptors,
 			  &services_w_eit_pf, &services_w_eit_sched);
+#else
+	return store.ingest(p_sdt, this);
 #endif
 }
 
-#if 0
+#ifdef OLD_DECODER
 bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decode::DescriptorStore* descriptors, uint8_t eit_x)
 {
 #if USING_DVBPSI_VERSION_0
@@ -1147,7 +1244,7 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 #endif
 		return false;
 	}
-#if 0
+#ifdef OLD_DECODER
 #if DBG
 	map_decoded_vct_channels::const_iterator iter_vct;
 	for (iter_vct = decoded_vct.channels.begin(); iter_vct != decoded_vct.channels.end(); ++iter_vct)
@@ -1693,7 +1790,7 @@ unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message,
 
 bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 {
-#if 0
+#ifdef OLD_DECODER
 	decoded_atsc_ett_t &cur_ett = decoded_ett[p_ett->i_etm_id];
 #if 1
 	if ((cur_ett.version == p_ett->i_version) &&
