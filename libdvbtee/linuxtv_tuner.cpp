@@ -93,7 +93,6 @@ linuxtv_tuner::linuxtv_tuner()
   , dvr_id(-1)
 {
 	dprintf("()");
-	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
 }
 
@@ -117,7 +116,6 @@ linuxtv_tuner::linuxtv_tuner(const linuxtv_tuner& linuxtv)
 	dprintf("(copy)");
 
 	feeder.parser.cleanup();
-	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
 }
 
@@ -129,7 +127,6 @@ linuxtv_tuner& linuxtv_tuner::operator= (const linuxtv_tuner& cSource)
 		return *this;
 
 	feeder.parser.cleanup();
-	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
 	adap_id = -1;
 	fe_fd = -1;
