@@ -508,7 +508,7 @@ int main(int argc, char **argv)
 		if (b_hdhr) {
 			tuner = new hdhr_tuner;
 
-			if (strlen(hdhrname)) {
+			if ((tuner) && (strlen(hdhrname))) {
 				((hdhr_tuner*)(tuner))->set_hdhr_id(hdhrname);
 			}
 		} else {
@@ -518,7 +518,7 @@ int main(int argc, char **argv)
 #ifdef USE_LINUXTV
 			tuner = new linuxtv_tuner;
 
-			if ((dvb_adap >= 0) || (fe_id >= 0)) {
+			if ((tuner) && ((dvb_adap >= 0) || (fe_id >= 0))) {
 				if (dvb_adap < 0)
 					dvb_adap = 0;
 				if (fe_id < 0)
@@ -527,8 +527,13 @@ int main(int argc, char **argv)
 			}
 #endif
 		}
-		context.tuners[context.tuners.size()] = tuner;
-		tuner->feeder.parser.limit_eit(eit_limit);
+		if (tuner) {
+			context.tuners[context.tuners.size()] = tuner;
+			tuner->feeder.parser.limit_eit(eit_limit);
+		} else {
+			fprintf(stderr, "ERROR allocating tuner %lu\n", context.tuners.size());
+			exit(-1);
+		}
 	}
 #if (defined(USE_HDHOMERUN) | defined(USE_LINUXTV))
 	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners)) {
