@@ -1256,7 +1256,10 @@ bool serve_client::__command(char* cmdline)
 		if ((arg) && strlen(arg)) {
 			cli_print("opening %s...", arg);
 			if (strstr(cmd, "openfile")) {
-				feeder->open_file(arg);
+				if (feeder->open_file(arg) < 0) {
+					cli_print("ERROR: open_file(%s) failed.\n", arg);
+					return false;
+				}
 				feeder->start();
 			} else
 			if (strstr(cmd, "opensock")) {
