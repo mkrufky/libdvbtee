@@ -222,6 +222,7 @@ output_stream::output_stream()
   , stream_method(OUTPUT_STREAM_UDP)
   , count_in(0)
   , count_out(0)
+  , m_iface(NULL)
   , stream_cb(NULL)
   , stream_cb_priv(NULL)
   , have_pat(false)
@@ -248,6 +249,7 @@ output_stream::output_stream(const output_stream&)
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
+	m_iface = NULL;
 	stream_cb = NULL;
 	stream_cb_priv = NULL;
 	count_in = 0;
