@@ -722,8 +722,6 @@ output::output()
 {
 	dprintf("()");
 
-	memset(&output_streams, 0, sizeof(output_streams));
-
 	output_streams.clear();
 }
 
@@ -752,7 +750,6 @@ output::output(const output&)
 	count_out = 0;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
 }
@@ -773,7 +770,6 @@ output& output::operator= (const output& cSource)
 	count_out = 0;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
 
