@@ -1317,8 +1317,9 @@ bool serve_client::__command(char* cmdline)
 		if (cur == phy) /* (cur) */ {
 			cli_print("already tuned to physical channel %d.\n", phy);
 			tuned = true;
-		} else
+		} else if (arg) {
 			tuned = cmd_tuner_channel(strtoul(arg, NULL, 0), scan_flags);
+		} // else tuned = false;
 
 		if (tuned) {
 			/* set service, if any */
