@@ -746,8 +746,6 @@ parse::parse()
 	dvbpsi_AttachDemux(h_demux[PID_TOT].get_handle(), attach_table, this);//if !scan_mode
 #endif
 
-	memset(&service_ids, 0, sizeof(service_ids));
-	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
 	service_ids.clear();
 	rcvd_pmt.clear();
 	out_pids.clear();
