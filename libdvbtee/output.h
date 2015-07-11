@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include <map>
+#include <string>
 
 #include "listen.h"
 #include "rbuf.h"
@@ -57,7 +58,7 @@ enum output_mimetype {
 	MIMETYPE_TEXT_HTML,
 };
 
-const char * http_response(enum output_mimetype mimetype);
+const std::string http_response(enum output_mimetype mimetype);
 
 #define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES)
 

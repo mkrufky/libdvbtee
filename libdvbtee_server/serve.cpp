@@ -447,8 +447,8 @@ void* serve_client::client_thread()
 
 			if (httphead) {
 				/* send http 200 ok, do not process commands (FIXME) and close connection */
-				const char *str = http_response(MIMETYPE_NONE);
-				socket_send(sock_fd, str, strlen(str), 0);
+				std::string str = http_response(MIMETYPE_NONE);
+				socket_send(sock_fd, str.c_str(), str.length(), 0);
 			} else {
 				/* httpget - process commands */
 				command(cmdbuf);
@@ -854,12 +854,12 @@ bool serve_client::command(char* cmdline)
 	streamback_started = false;
 
 	if (stream_http_headers) {
-		const char *str;
+		std::string str;
 		if ((USE_JSON(data_fmt)) || (USE_XML(data_fmt)))
 			str = http_response(MIMETYPE_TEXT_PLAIN);
 		else
 			str = http_response(MIMETYPE_TEXT_HTML);
-		socket_send(sock_fd, str, strlen(str), 0);
+		socket_send(sock_fd, str.c_str(), str.length(), 0);
 	}
 #endif
 	if (item) while (item) {
