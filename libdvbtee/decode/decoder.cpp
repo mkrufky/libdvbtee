@@ -38,6 +38,7 @@ Decoder::Decoder()
 Decoder::Decoder(Decoder *parent, std::string &name)
  : m_parent(parent)
  , m_name(name)
+ , m_valid(false)
  , __genMapIdx(0)
 {
 #if LOCK_DECODER_CHILDREN

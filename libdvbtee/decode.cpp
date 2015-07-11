@@ -84,6 +84,7 @@ decode_network_service::decode_network_service()
   , store(this)
   , services_w_eit_pf(0)
   , services_w_eit_sched(0)
+  , m_eit_x(0)
 {
 	dprintf("()");
 
@@ -117,6 +118,7 @@ decode_network_service::decode_network_service(const decode_network_service&)
   , store(this)
   , services_w_eit_pf(0)
   , services_w_eit_sched(0)
+  , m_eit_x(0)
 {
 	dprintf("(copy)");
 
