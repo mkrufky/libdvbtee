@@ -566,7 +566,7 @@ void serve_client::epg_header_footer(bool header, bool channel)
 	if (!streamback_started) return;
 	if ((header) && (channel)) streamback_newchannel = true;
 	if (data_fmt & SERVE_DATA_FMT_TEXT) {
-		const char *str;
+		std::string str;
 		switch (data_fmt) {
 		default: // FIXME
 		case SERVE_DATA_FMT_HTML:
@@ -579,7 +579,7 @@ void serve_client::epg_header_footer(bool header, bool channel)
 			str = "";//xml_dump_epg_header_footer_callback(this, header, channel);
 			break;
 		}
-		streamback((const uint8_t *)str, strlen(str));
+		streamback((const uint8_t *)str.c_str(), str.length());
 	}
 	if ((!header) && (!channel)) fflush(stdout);
 	return;
@@ -639,8 +639,8 @@ void serve_client::epg_event(decoded_event_t &e)
 			ee.chan_physical = e.chan_physical;
 			ee.chan_svc_id   = e.chan_svc_id;
 			//const char *str = html_dump_epg_event_callback(this, channel_name, chan_major, chan_minor, 0, 0, 0, NULL, NULL);
-			const char *str = html_dump_epg_event_callback(this, &ee);
-			streamback((const uint8_t *)str, strlen(str));
+			std::string str = html_dump_epg_event_callback(this, &ee);
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 		streamback_newchannel = false;
 		fflush(stdout);
@@ -671,7 +671,7 @@ void serve_client::epg_event(decoded_event_t &e)
 		ee.name.assign(e.name);
 		ee.text.assign(e.text);
 
-		const char *str;
+		std::string str;
 		switch (data_fmt) {
 		default: // FIXME
 		case SERVE_DATA_FMT_HTML:
@@ -684,7 +684,7 @@ void serve_client::epg_event(decoded_event_t &e)
 			str = xml_dump_epg_event_callback(this, &e);
 			break;
 		}
-		streamback((const uint8_t *)str, strlen(str));
+		streamback((const uint8_t *)str.c_str(), str.length());
 	}
 	return;
 }
@@ -902,7 +902,7 @@ serve_parser_iface::serve_parser_iface(serve_client &client, bool to_disk)
 
 void serve_parser_iface::chandump(parsed_channel_info_t *c)
 {
-	const char *str = NULL;
+	std::string str;
 	char channelno[7] = { 0 }; /* XXX.XXX */
 	if (c->major + c->minor > 1)
 		sprintf(channelno, "%d.%d", c->major, c->minor);
@@ -943,7 +943,7 @@ void serve_parser_iface::chandump(parsed_channel_info_t *c)
 			xml_dump_channels(this, c) :
 			html_dump_channels(this, c);
 
-		m_serve_client.streamback((const uint8_t *)str, strlen(str));
+		m_serve_client.streamback((const uint8_t *)str.c_str(), str.length());
 	}
 
 	return;
@@ -1342,15 +1342,15 @@ bool serve_client::__command(char* cmdline)
 		}
 		cli_print("dumping channel list...\n");
 
-		const char *str;
+		std::string str;
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, true, false);
-			streamback((const uint8_t*)str, strlen(str));
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 		if (data_fmt == SERVE_DATA_FMT_JSON) {
 			str = json_dump_epg_header_footer_callback(this, true, false);
-			streamback((const uint8_t*)str, strlen(str));
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 
 		/* channels verified during this session */
@@ -1360,13 +1360,13 @@ bool serve_client::__command(char* cmdline)
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, false, false);
-			streamback((const uint8_t*)str, strlen(str));
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 		if (data_fmt == SERVE_DATA_FMT_JSON) {
 			str = " {} ";
-			streamback((const uint8_t*)str, strlen(str));
+			streamback((const uint8_t *)str.c_str(), str.length());
 			str = json_dump_epg_header_footer_callback(this, false, false);
-			streamback((const uint8_t*)str, strlen(str));
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 
 	} else if (strstr(cmd, "channel")) {
@@ -1401,24 +1401,24 @@ bool serve_client::__command(char* cmdline)
 	} else if (strstr(cmd, "video")) {
 		if (data_fmt == SERVE_DATA_FMT_HTML) {
 			cli_print("streaming video via html5...\n");
-			const char *str = html_playing_video(this);
-			streamback((const uint8_t *)str, strlen(str));
+			std::string str = html_playing_video(this);
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 	} else if (strstr(cmd, "epg")) {
 		cli_print("dumping epg...\n");
 
-		const char *str;
+		std::string str;
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, true, false);
-			streamback((const uint8_t*)str, strlen(str));
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 
 		feeder->parser.epg_dump(this);
 
 		if (data_fmt == SERVE_DATA_FMT_XML) {
 			str = xml_dump_epg_header_footer_callback(this, false, false);
-			streamback((const uint8_t*)str, strlen(str));
+			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 
 	} else if (strstr(cmd, "xmltv")) {
@@ -1427,10 +1427,10 @@ bool serve_client::__command(char* cmdline)
 			return false;
 		}
 		cli_print("dumping xmltv...\n");
-		const char *str;
+		std::string str;
 
 		str = xml_dump_epg_header_footer_callback(this, true, false);
-		streamback((const uint8_t*)str, strlen(str));
+		streamback((const uint8_t *)str.c_str(), str.length());
 
 		/* channels verified during this session */
 		tuner->get_scan_results(false, &parser_iface);
@@ -1440,7 +1440,7 @@ bool serve_client::__command(char* cmdline)
 		feeder->parser.epg_dump(this);
 
 		str = xml_dump_epg_header_footer_callback(this, false, false);
-		streamback((const uint8_t*)str, strlen(str));
+		streamback((const uint8_t *)str.c_str(), str.length());
 
 	} else if (strstr(cmd, "info")) {
 		char *cmdinfo;
@@ -1463,15 +1463,15 @@ bool serve_client::__command(char* cmdline)
 
 		if (feeder->parser.get_stream_info(phy, ser, &c, &e[0], &e[1])) {
 
-			const char *str;
+			std::string str;
 
 			if (data_fmt == SERVE_DATA_FMT_XML) {
 				str = xml_dump_epg_header_footer_callback(this, true, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 			if (data_fmt == SERVE_DATA_FMT_JSON) {
 				str = json_dump_epg_header_footer_callback(this, true, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 
 			streamback_started = true;
@@ -1479,40 +1479,40 @@ bool serve_client::__command(char* cmdline)
 
 			if (data_fmt == SERVE_DATA_FMT_HTML) {
 				str = html_dump_epg_header_footer_callback(this, true, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 
 			epg_event(e[0]);
 
 			if (data_fmt == SERVE_DATA_FMT_HTML) {
 				str = html_dump_epg_header_footer_callback(this, false, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 				str = html_dump_epg_header_footer_callback(this, true, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 			if (data_fmt == SERVE_DATA_FMT_JSON) {
 				str = ",";
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 
 			epg_event(e[1]);
 
 			if (data_fmt == SERVE_DATA_FMT_HTML) {
 				str = html_dump_epg_header_footer_callback(this, false, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 
 			streamback_started = false;
 
 			if (data_fmt == SERVE_DATA_FMT_XML) {
 				str = xml_dump_epg_header_footer_callback(this, false, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 			if (data_fmt == SERVE_DATA_FMT_JSON) {
 //				str = " {} ";
-//				streamback((const uint8_t*)str, strlen(str));
+//				streamback((const uint8_t *)str.c_str(), str.length());
 				str = json_dump_epg_header_footer_callback(this, false, false);
-				streamback((const uint8_t*)str, strlen(str));
+				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 		}
 

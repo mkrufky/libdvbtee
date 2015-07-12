@@ -25,10 +25,10 @@
 #include "functions.h"
 #include "text.h"
 
-const char * html_dump_epg_header_footer_callback(void *, bool header, bool channel)
+const std::string html_dump_epg_header_footer_callback(void *, bool header, bool channel)
 {
 	//fprintf(stderr, "%s(%s, %s)\n", __func__, (header) ? "header" : "footer", (channel) ? "channel" : "body");
-	const char *str = NULL;
+	std::string str;
 	if (header)
 		if (channel)
 			str = "<tr>";
@@ -43,10 +43,10 @@ const char * html_dump_epg_header_footer_callback(void *, bool header, bool chan
 	return str;
 }
 
-const char * json_dump_epg_header_footer_callback(void *, bool header, bool channel)
+const std::string json_dump_epg_header_footer_callback(void *, bool header, bool channel)
 {
 	//fprintf(stderr, "%s(%s, %s)\n", __func__, (header) ? "header" : "footer", (channel) ? "channel" : "body");
-	const char *str = NULL;
+	std::string str;
 	if (header)
 		if (channel)
 			str = "{\"Entries\":\n[";
@@ -61,10 +61,10 @@ const char * json_dump_epg_header_footer_callback(void *, bool header, bool chan
 	return str;
 }
 
-const char * xml_dump_epg_header_footer_callback(void *, bool header, bool channel)
+const std::string xml_dump_epg_header_footer_callback(void *, bool header, bool channel)
 {
 	//fprintf(stderr, "%s(%s, %s)\n", __func__, (header) ? "header" : "footer", (channel) ? "channel" : "body");
-	const char *str = NULL;
+	std::string str;
 	if (header)
 		if (channel)
 			str = "";
@@ -79,7 +79,7 @@ const char * xml_dump_epg_header_footer_callback(void *, bool header, bool chann
 	return str;
 }
 
-const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
+const std::string html_dump_epg_event_callback(void * context, decoded_event_t *e)
 {
 	//fprintf(stderr, "%s()\n", __func__);
 	std::string str;
@@ -135,10 +135,10 @@ const char * html_dump_epg_event_callback(void * context, decoded_event_t *e)
 	}
 	str.append("</td>");
 //	fprintf(stderr, "%s", str.c_str());
-	return str.c_str();
+	return str;
 }
 
-const char * json_dump_epg_event_callback(void * context, decoded_event_t *e)
+const std::string json_dump_epg_event_callback(void * context, decoded_event_t *e)
 {
 	time_t end_time = e->start_time + e->length_sec;
 	char time_str[15] = { 0 };
@@ -184,7 +184,7 @@ const char * json_dump_epg_event_callback(void * context, decoded_event_t *e)
 
 	str.append("}");
 //	fprintf(stderr, "%s", str.c_str());
-	return str.c_str();
+	return str;
 }
 
 
@@ -204,7 +204,7 @@ const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len
 }
 
 
-const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
+const std::string xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 {
 	time_t end_time = e->start_time + e->length_sec;
 	char time_str[15] = { 0 };
@@ -258,10 +258,10 @@ const char * xml_dump_epg_event_callback(void * context, decoded_event_t *e)
 #endif
 	str.append("</programme>\n");
 
-	return str.c_str();
+	return str;
 }
 
-const char * html_dump_channels(void *context, parsed_channel_info_t *c)
+const std::string html_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
@@ -315,10 +315,10 @@ const char * html_dump_channels(void *context, parsed_channel_info_t *c)
 	str.append("</tr>");
 	str.append("</table>");
 
-	return str.c_str();
+	return str;
 }
 
-const char * json_dump_channels(void *context, parsed_channel_info_t *c)
+const std::string json_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
@@ -380,10 +380,10 @@ const char * json_dump_channels(void *context, parsed_channel_info_t *c)
 
 	str.append(",");
 
-	return str.c_str();
+	return str;
 }
 
-const char * xml_dump_channels(void *context, parsed_channel_info_t *c)
+const std::string xml_dump_channels(void *context, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
@@ -447,7 +447,7 @@ const char * xml_dump_channels(void *context, parsed_channel_info_t *c)
 	str.append("</display-name>\n");
 	str.append("</channel>\n");
 
-	return str.c_str();
+	return str;
 }
 
 const char * html_playing_video(void *)
