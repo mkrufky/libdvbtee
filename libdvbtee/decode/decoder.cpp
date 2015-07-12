@@ -142,7 +142,7 @@ LinkedDecoder::~LinkedDecoder()
 	if (parent) parent->unlinkChild(m_linkedIdx);
 }
 
-const int LinkedDecoder::getMapIndex() const
+int LinkedDecoder::getMapIndex() const
 {
 	return m_linkedIdx;
 }
@@ -171,7 +171,7 @@ NullDecoder::~NullDecoder()
 
 }
 
-const int NullDecoder::getMapIndex() const
+int NullDecoder::getMapIndex() const
 {
 	return -1;
 }

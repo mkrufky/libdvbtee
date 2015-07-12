@@ -193,7 +193,7 @@ public:
 		if (parent) parent->unlinkChild(m_linkedIdx);
 	}
 
-	virtual const int getMapIndex() const { return m_linkedIdx; }
+	virtual int getMapIndex() const { return m_linkedIdx; }
 
 private:
 	int m_linkedIdx;

@@ -57,7 +57,7 @@ public:
 	void showChildren() const;
 
 protected:
-	virtual const int getMapIndex() const = 0;
+	virtual int getMapIndex() const = 0;
 	Decoder *getParent() { return m_parent; }
 	void setValid(bool v) { m_valid = v; }
 
@@ -81,7 +81,7 @@ public:
 	virtual ~LinkedDecoder();
 
 protected:
-	virtual const int getMapIndex() const;
+	virtual int getMapIndex() const;
 
 private:
 	int m_linkedIdx;
@@ -96,7 +96,7 @@ public:
 	virtual ~NullDecoder();
 
 protected:
-	virtual const int getMapIndex() const;
+	virtual int getMapIndex() const;
 };
 
 }
