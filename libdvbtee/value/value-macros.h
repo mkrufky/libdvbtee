@@ -42,14 +42,14 @@ template <> const std::string Value<CLASS>::toJson() const \
 #define GET_DEFAULT(CLASS, IN, OUT) \
 template <> const OUT& CLASS::get<OUT>(IN in) const \
 { \
-	OUT def; \
+	static OUT def; \
 	return get<OUT>(in, def); \
 }
 
 #define GET_DEFAULT_VALUE(CLASS, IN, OUT, DEFAULT) \
 template <> const OUT& CLASS::get<OUT>(IN in) const \
 { \
-	OUT def = DEFAULT; \
+	static OUT def = DEFAULT; \
 	return get<OUT>(in, def); \
 }
 
