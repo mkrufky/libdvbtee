@@ -113,7 +113,7 @@ void feed::set_filename(char* new_file)
 
 	size_t len = strlen(new_file);
 	strncpy(filename, new_file, sizeof(filename)-1);
-	filename[len <= sizeof(filename) ? len : sizeof(filename)] = '\0';
+	filename[len < sizeof(filename) ? len : sizeof(filename)-1] = '\0';
 }
 
 int feed::_open_file(int flags)
@@ -553,7 +553,7 @@ int feed::start_socket(char* source)
 	dprintf("(<--%s)", source);
 	size_t len = strlen(source);
 	strncpy(filename, source, sizeof(filename)-1);
-	filename[len <= sizeof(filename) ? len : sizeof(filename)] = '\0';
+	filename[len <= sizeof(filename) ? len : sizeof(filename)-1] = '\0';
 
 	if (strstr(source, ":")) {
 		ip = strtok_r(source, ":", &save);
