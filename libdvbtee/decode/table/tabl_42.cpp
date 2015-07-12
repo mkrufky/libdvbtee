@@ -137,10 +137,10 @@ sdtSVC::sdtSVC(decoded_sdt_service_t& cur_service, Decoder *parent, dvbpsi_sdt_s
 	if (d) {
 		strncpy((char*)cur_service.provider_name,
 			d->get<std::string>("providerName").c_str(),
-			sizeof(cur_service.provider_name));
+			sizeof(cur_service.provider_name)-1);
 		strncpy((char*)cur_service.service_name,
 			d->get<std::string>("serviceName").c_str(),
-			sizeof(cur_service.service_name));
+			sizeof(cur_service.service_name)-1);
 	}
 
 	dprintf(" %05d | %s %s | %s - %s",
