@@ -460,7 +460,8 @@ int main(int argc, char **argv)
 			break;
 		case 'o': /* output filtered data, optional arg is a filename */
 			if (optarg) {
-				strncpy(outfilename, optarg, sizeof(outfilename));
+				/* outfilename was initialized with 0's */
+				strncpy(outfilename, optarg, sizeof(outfilename)-1);
 				b_output_file = true;
 			} else
 				b_output_stdout = true;

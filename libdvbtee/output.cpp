@@ -608,7 +608,9 @@ int output_stream::add(char* target, map_pidtype &pids)
 
 	dprintf("(-->%s)", target);
 
-	strncpy(name, target, sizeof(name));
+	size_t len = strlen(target);
+	strncpy(name, target, sizeof(name)-1);
+	name[len <= sizeof(name) ? len : sizeof(name)] = '\0';
 
 	if ((0 == strcmp(target, "-")) ||
 	    (0 == strcmp(target, "fd://0")) ||
