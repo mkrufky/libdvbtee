@@ -31,6 +31,10 @@
 class socket_listen_iface
 {
 public:
+	/* It is the responsibility of the interface class to close
+	 * the socket accepted by accept_socket() when it is no
+	 * longer needed, otherwise it would be a resource leak.
+	 */
 	virtual void accept_socket(int) = 0;
 };
 
