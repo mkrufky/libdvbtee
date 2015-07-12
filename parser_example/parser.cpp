@@ -140,12 +140,14 @@ int main(int argc, char **argv)
 	unsigned int timeout = 0;
 	char filename[256];
 
+	memset(&filename, 0, sizeof(filename));
+
 	context.server = NULL;
 
 	while ((opt = getopt(argc, argv, "F:t:d::")) != -1) {
 		switch (opt) {
 		case 'F': /* Filename */
-			strncpy(filename, optarg, sizeof(filename));
+			strncpy(filename, optarg, sizeof(filename)-1);
 			break;
 
 		case 't': /* timeout */

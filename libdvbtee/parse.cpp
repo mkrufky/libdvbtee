@@ -434,13 +434,12 @@ bool parse::take_sdt_other(dvbpsi_sdt_t* p_sdt, bool decoded)
 	dprintf("(%s): v%d | ts_id %d | network_id %d",
 		(decoded) ? "post" : "pre",
 		p_sdt->i_version, __ts_id, p_sdt->i_network_id);
-
-	if (!decoded) {
 #if 0
+	if (!decoded) {
 		set_ts_id(p_sdt->i_ts_id);
-#endif
 		return true;
 	}
+#endif
 #if 0
 	has_sdt = true;
 #endif

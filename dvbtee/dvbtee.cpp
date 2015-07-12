@@ -399,7 +399,7 @@ int main(int argc, char **argv)
 			break;
 		case 'c': /* channel list | channel / scan min */
 			if (strstr(optarg, ","))
-				strncpy(channel_list, optarg, sizeof(channel_list));
+				strncpy(channel_list, optarg, sizeof(channel_list)-1);
 
 			/* if a list was provided, use the first item */
 			channel = strtoul(optarg, NULL, 0);
