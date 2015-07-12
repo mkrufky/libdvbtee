@@ -85,9 +85,9 @@ bool TableRegistry::registerFactory(uint8_t tableid, TableBaseFactory *factory)
 	}
 
 	m_factories.insert( std::pair<uint8_t, TableBaseFactory*>(tableid,factory) );
-
+#if DBG_DECODER_INSERTION
 	fprintf(stderr, "inserted 0x%02x, %p, %ld table decoders present\n", tableid, factory, m_factories.size());
-
+#endif
 	pthread_mutex_unlock(&m_mutex);
 	return true;
 }

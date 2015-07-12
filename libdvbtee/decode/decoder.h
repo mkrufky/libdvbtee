@@ -36,6 +36,8 @@
 #include "value/array.h"
 #include "value/object.h"
 
+#define DBG_DECODER_INSERTION 0
+
 namespace dvbtee {
 
 namespace decode {
