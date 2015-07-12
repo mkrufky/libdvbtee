@@ -414,9 +414,9 @@ void* serve_client::client_thread()
 #endif
 	while (!f_kill_thread) {
 
-		memset(buf, 0, sizeof(buf));
-		rxlen = recv(sock_fd, buf, sizeof(buf), MSG_DONTWAIT);
+		rxlen = recv(sock_fd, buf, sizeof(buf)-1, MSG_DONTWAIT);
 		if (rxlen > 0) {
+			buf[rxlen] = '\0';
 			dprintf("(%d): %s", sock_fd, buf);
 
 			http = (strstr(buf, "HTTP")) ? true : false;
