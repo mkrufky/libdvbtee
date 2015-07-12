@@ -206,11 +206,13 @@ void* socket_listen::listen_thread()
 
 	while (!f_kill_thread) {
 		int accepted_sock_fd = accept(sock_fd, (struct sockaddr*)&tcpsa, &salen);
-		if (accepted_sock_fd != -1) {
-			if (m_socket_listen_iface)
+		if (accepted_sock_fd >= 0) {
+			if (m_socket_listen_iface) {
 				m_socket_listen_iface->accept_socket(accepted_sock_fd);
-			else
+			} else {
 				dprintf("(accept_socket callback not defined!)");
+				close(accepted_sock_fd);
+			}
 		}
 		usleep(20*1000);
 	}
