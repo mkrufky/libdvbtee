@@ -179,6 +179,7 @@ void hdhr_tuner::add_filter(uint16_t pid)
 	default:
 	case -1:
 		dprintf("ERROR!!!");
+		/* FALL THRU */
 	case 0:
 		dprintf("FAILED!!");
 		break;
