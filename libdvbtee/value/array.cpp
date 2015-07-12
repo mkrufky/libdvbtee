@@ -175,7 +175,7 @@ std::string &Array::assignIndex(Object &obj, std::string &index)
 	if (idxField.length()) {
 		const ValueBase *val = obj.get(idxField);
 		index = (typeid(std::string) == val->getType()) ?
-			obj.get<std::string>(idxField) : index = val->toJson();
+			obj.get<std::string>(idxField) : val->toJson();
 	}
 
 	return index;
