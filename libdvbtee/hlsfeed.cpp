@@ -49,8 +49,12 @@ inline double convertToDouble(std::string const& s)
 }
 
 hlsfeed::hlsfeed(const char *url, curlhttpget_iface *iface)
+#if 0
   : toplevel(url)
   , Url(url)
+#else
+  : Url(url)
+#endif
   , m_iface(iface)
   , push_buffer()
   , walk_buffer()
