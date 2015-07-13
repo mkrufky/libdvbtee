@@ -1563,6 +1563,8 @@ int parse::feed(int count, uint8_t* p_data)
 #if !USING_DVBPSI_VERSION_0
 static void dvbpsi_message(dvbpsi_t *handle, const dvbpsi_msg_level_t level, const char* msg)
 {
+	(void)handle;
+
 	const char *status;
 	switch(level)
 	{
