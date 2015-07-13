@@ -118,6 +118,7 @@ void printpids()
 /* -- TABLE HANDLERS -- */
 bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 {
+	(void)p_stt;
 	dprintf("(%s)", (decoded) ? "post" : "pre");
 
 	if (decoded) return true;
@@ -127,6 +128,7 @@ bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 
 bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 {
+	(void)p_tot;
 	dprintf("(%s)", (decoded) ? "post" : "pre");
 
 	if (decoded) return true;
