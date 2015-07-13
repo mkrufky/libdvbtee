@@ -434,13 +434,12 @@ bool parse::take_sdt_other(dvbpsi_sdt_t* p_sdt, bool decoded)
 	dprintf("(%s): v%d | ts_id %d | network_id %d",
 		(decoded) ? "post" : "pre",
 		p_sdt->i_version, __ts_id, p_sdt->i_network_id);
-
-	if (!decoded) {
 #if 0
+	if (!decoded) {
 		set_ts_id(p_sdt->i_ts_id);
-#endif
 		return true;
 	}
+#endif
 #if 0
 	has_sdt = true;
 #endif
@@ -746,8 +745,6 @@ parse::parse()
 	dvbpsi_AttachDemux(h_demux[PID_TOT].get_handle(), attach_table, this);//if !scan_mode
 #endif
 
-	memset(&service_ids, 0, sizeof(service_ids));
-	memset(&rcvd_pmt, 0, sizeof(map_rcvd));
 	service_ids.clear();
 	rcvd_pmt.clear();
 	out_pids.clear();

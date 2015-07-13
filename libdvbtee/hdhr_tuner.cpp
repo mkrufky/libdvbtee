@@ -90,7 +90,6 @@ hdhr_tuner::hdhr_tuner()
   : dev(NULL)
 {
 	dprintf("()");
-	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
 	dev = new hdhr_tuner_device();
 	fe_type = DVBTEE_FE_ATSC; // FIXME
@@ -113,7 +112,6 @@ hdhr_tuner::hdhr_tuner(const hdhr_tuner& hdhr)
 	dprintf("(copy)");
 
 	feeder.parser.cleanup();
-	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
 	dev = new hdhr_tuner_device();
 }
@@ -126,7 +124,6 @@ hdhr_tuner& hdhr_tuner::operator= (const hdhr_tuner& cSource)
 		return *this;
 
 	feeder.parser.cleanup();
-	memset(&filtered_pids, 0, sizeof(filtered_pids));
 	filtered_pids.clear();
 	dev = new hdhr_tuner_device();
 
@@ -182,6 +179,7 @@ void hdhr_tuner::add_filter(uint16_t pid)
 	default:
 	case -1:
 		dprintf("ERROR!!!");
+		/* FALL THRU */
 	case 0:
 		dprintf("FAILED!!");
 		break;

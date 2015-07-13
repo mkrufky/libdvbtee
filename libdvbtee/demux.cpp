@@ -33,7 +33,6 @@
 demux::demux()
 {
 	dprintf("()");
-	memset(&out, 0, sizeof(out));
 	out.clear();
 }
 

@@ -90,7 +90,7 @@ int hostname_to_ip(char *hostname, char *ip, size_t sizeof_ip = 0)
 }
 
 
-static const char * __http_response(const char *mimetype)
+static const std::string __http_response(const char *mimetype)
 {
 	std::string str;
 	str.clear();
@@ -106,10 +106,10 @@ static const char * __http_response(const char *mimetype)
 	}
 	str.append(CRLF);
 
-	return str.c_str();
+	return str;
 }
 
-const char * http_response(enum output_mimetype mimetype)
+const std::string http_response(enum output_mimetype mimetype)
 {
 	const char *str;
 
@@ -222,6 +222,7 @@ output_stream::output_stream()
   , stream_method(OUTPUT_STREAM_UDP)
   , count_in(0)
   , count_out(0)
+  , m_iface(NULL)
   , stream_cb(NULL)
   , stream_cb_priv(NULL)
   , have_pat(false)
@@ -248,6 +249,7 @@ output_stream::output_stream(const output_stream&)
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
+	m_iface = NULL;
 	stream_cb = NULL;
 	stream_cb_priv = NULL;
 	count_in = 0;
@@ -303,8 +305,8 @@ void* output_stream::output_stream_thread()
 #if 1
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
-		const char *str = http_response(mimetype);
-		ret = socket_send(sock, str, strlen(str), 0);
+		std::string str = http_response(mimetype);
+		ret = socket_send(sock, str.c_str(), str.length(), 0);
 		break;
 	}
 	if (ret < 0) {
@@ -606,7 +608,9 @@ int output_stream::add(char* target, map_pidtype &pids)
 
 	dprintf("(-->%s)", target);
 
-	strncpy(name, target, sizeof(name));
+	size_t len = strlen(target);
+	strncpy(name, target, sizeof(name)-1);
+	name[len < sizeof(name) ? len : sizeof(name)-1] = '\0';
 
 	if ((0 == strcmp(target, "-")) ||
 	    (0 == strcmp(target, "fd://0")) ||
@@ -720,8 +724,6 @@ output::output()
 {
 	dprintf("()");
 
-	memset(&output_streams, 0, sizeof(output_streams));
-
 	output_streams.clear();
 }
 
@@ -750,7 +752,6 @@ output::output(const output&)
 	count_out = 0;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
 }
@@ -771,7 +772,6 @@ output& output::operator= (const output& cSource)
 	count_out = 0;
 
 	memset(&ringbuffer, 0, sizeof(ringbuffer));
-	memset(&output_streams, 0, sizeof(output_streams));
 
 	output_streams.clear();
 
