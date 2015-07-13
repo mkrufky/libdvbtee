@@ -450,7 +450,7 @@ const std::string xml_dump_channels(void *context, parsed_channel_info_t *c)
 	return str;
 }
 
-const char * html_playing_video(void *)
+const std::string html_playing_video(void *)
 {
 	std::string str;
 	str.clear();
@@ -467,5 +467,5 @@ const char * html_playing_video(void *)
 	str.append("</video>");
 	str.append("</div>");
 	str.append("</body></html>");
-	return str.c_str();
+	return str;
 }
