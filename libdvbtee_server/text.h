@@ -31,17 +31,17 @@ const std::string json_dump_epg_header_footer_callback(void *, bool, bool);
 
 const std::string xml_dump_epg_header_footer_callback(void *, bool, bool);
 
-const std::string html_dump_epg_event_callback(void * context, decoded_event_t *e);
+const std::string html_dump_epg_event_callback(void *, decoded_event_t *e);
 
-const std::string json_dump_epg_event_callback(void * context, decoded_event_t *e);
+const std::string json_dump_epg_event_callback(void *, decoded_event_t *e);
 
-const std::string xml_dump_epg_event_callback(void * context, decoded_event_t *e);
+const std::string xml_dump_epg_event_callback(void *, decoded_event_t *e);
 
-const std::string html_dump_channels(void *context, parsed_channel_info_t *c);
+const std::string html_dump_channels(void *, parsed_channel_info_t *c);
 
-const std::string json_dump_channels(void *context, parsed_channel_info_t *c);
+const std::string json_dump_channels(void *, parsed_channel_info_t *c);
 
-const std::string xml_dump_channels(void *context, parsed_channel_info_t *c);
+const std::string xml_dump_channels(void *, parsed_channel_info_t *c);
 
 const std::string html_playing_video(void *);
 
