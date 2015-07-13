@@ -43,6 +43,6 @@ else:unix: LIBS += -L$$PWD/../usr/lib/ -ldvbpsi
 INCLUDEPATH += $$PWD/../usr/include
 DEPENDPATH += $$PWD/../usr/include
 
-QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64 -D__STDC_FORMAT_MACROS -DUSE_HDHOMERUN
+QMAKE_CXXFLAGS += -Wno-unused-parameter -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64 -D__STDC_FORMAT_MACROS -DUSE_HDHOMERUN
 
 unix:!macx:!symbian: QMAKE_CXXFLAGS += -DUSE_LINUXTV
