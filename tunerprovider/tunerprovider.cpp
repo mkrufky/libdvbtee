@@ -96,6 +96,11 @@ bool TunerProvider::add_linuxtv_tuner(int adap, int fe, int demux, int dvr)
 	tuners[id] = linuxtv;
 	linuxtv->set_device_ids(adap, fe, demux, dvr);
 #else
+	(void)adap;
+	(void)fe;
+	(void)demux;
+	(void)dvr;
+
 	int id = -1;
 #endif
 	return id;
