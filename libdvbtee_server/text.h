@@ -43,6 +43,6 @@ const std::string json_dump_channels(void *context, parsed_channel_info_t *c);
 
 const std::string xml_dump_channels(void *context, parsed_channel_info_t *c);
 
-const char * html_playing_video(void *);
+const std::string html_playing_video(void *);
 
 #endif /* __TEXT_H__ */

@@ -212,6 +212,7 @@ void* socket_listen::listen_thread()
 			} else {
 				dprintf("(accept_socket callback not defined!)");
 				close(accepted_sock_fd);
+				accepted_sock_fd = -1;
 			}
 		}
 		usleep(20*1000);
