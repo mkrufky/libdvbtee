@@ -118,6 +118,7 @@ void printpids()
 /* -- TABLE HANDLERS -- */
 bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 {
+	(void)p_stt;
 	dprintf("(%s)", (decoded) ? "post" : "pre");
 
 	if (decoded) return true;
@@ -127,6 +128,7 @@ bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 
 bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 {
+	(void)p_tot;
 	dprintf("(%s)", (decoded) ? "post" : "pre");
 
 	if (decoded) return true;
@@ -1563,6 +1565,8 @@ int parse::feed(int count, uint8_t* p_data)
 #if !USING_DVBPSI_VERSION_0
 static void dvbpsi_message(dvbpsi_t *handle, const dvbpsi_msg_level_t level, const char* msg)
 {
+	(void)handle;
+
 	const char *status;
 	switch(level)
 	{

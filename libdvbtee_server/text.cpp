@@ -79,7 +79,7 @@ const std::string xml_dump_epg_header_footer_callback(void *, bool header, bool 
 	return str;
 }
 
-const std::string html_dump_epg_event_callback(void * context, decoded_event_t *e)
+const std::string html_dump_epg_event_callback(void *, decoded_event_t *e)
 {
 	//fprintf(stderr, "%s()\n", __func__);
 	std::string str;
@@ -138,7 +138,7 @@ const std::string html_dump_epg_event_callback(void * context, decoded_event_t *
 	return str;
 }
 
-const std::string json_dump_epg_event_callback(void * context, decoded_event_t *e)
+const std::string json_dump_epg_event_callback(void *, decoded_event_t *e)
 {
 	time_t end_time = e->start_time + e->length_sec;
 	char time_str[15] = { 0 };
@@ -204,7 +204,7 @@ const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len
 }
 
 
-const std::string xml_dump_epg_event_callback(void * context, decoded_event_t *e)
+const std::string xml_dump_epg_event_callback(void *, decoded_event_t *e)
 {
 	time_t end_time = e->start_time + e->length_sec;
 	char time_str[15] = { 0 };
@@ -261,7 +261,7 @@ const std::string xml_dump_epg_event_callback(void * context, decoded_event_t *e
 	return str;
 }
 
-const std::string html_dump_channels(void *context, parsed_channel_info_t *c)
+const std::string html_dump_channels(void *, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
@@ -318,7 +318,7 @@ const std::string html_dump_channels(void *context, parsed_channel_info_t *c)
 	return str;
 }
 
-const std::string json_dump_channels(void *context, parsed_channel_info_t *c)
+const std::string json_dump_channels(void *, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();
@@ -383,7 +383,7 @@ const std::string json_dump_channels(void *context, parsed_channel_info_t *c)
 	return str;
 }
 
-const std::string xml_dump_channels(void *context, parsed_channel_info_t *c)
+const std::string xml_dump_channels(void *, parsed_channel_info_t *c)
 {
 	std::string str;
 	str.clear();

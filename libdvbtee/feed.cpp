@@ -458,7 +458,7 @@ void *feed::tcp_client_feed_thread()
 #endif
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
-		} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
+		} else if (rxlen == -1) { //( (rxlen == -1) && (errno == EAGAIN) ) {
 			usleep(50*1000);
 		}
 #if FEED_BUFFER
@@ -503,7 +503,7 @@ void *feed::udp_listen_feed_thread()
 #endif
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
-		} else if ( (rxlen == -1) /*&& (errno == EAGAIN)*/ ) {
+		} else if (rxlen == -1) { //( (rxlen == -1) && (errno == EAGAIN) ) {
 			usleep(50*1000);
 		}
 #if FEED_BUFFER

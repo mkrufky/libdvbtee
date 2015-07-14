@@ -381,6 +381,8 @@ bool hdhr_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int 
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	state &= ~TUNE_STATE_LOCK;
 
+	(void)modulation;
+
 	char channelno[4] = { 0 };
 	snprintf(channelno, sizeof(channelno), "%d", channel);
 
