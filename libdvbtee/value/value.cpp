@@ -80,6 +80,7 @@ template class Value<short>;
 template class Value<char>;
 template class Value<unsigned int>;
 template class Value<unsigned long>;
+template class Value<unsigned long long>;
 template class Value<unsigned short>;
 template class Value<unsigned char>;
 template class Value<std::string>;
@@ -181,6 +182,7 @@ TO_JSON_TPL_PRIMITIVE(short)
 TO_JSON_TPL(char, "'" << VALUE << "'")
 TO_JSON_TPL_PRIMITIVE(unsigned int)
 TO_JSON_TPL_PRIMITIVE(unsigned long)
+TO_JSON_TPL_PRIMITIVE(unsigned long long)
 TO_JSON_TPL_PRIMITIVE(unsigned short)
 TO_JSON_TPL(unsigned char, (unsigned int)VALUE)
 TO_JSON_TPL_PRIMITIVE(double)
