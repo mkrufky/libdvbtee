@@ -90,6 +90,7 @@ IMPL_OBJECT_TMPL(short);
 IMPL_OBJECT_TMPL(char);
 IMPL_OBJECT_TMPL(unsigned int);
 IMPL_OBJECT_TMPL(unsigned long);
+IMPL_OBJECT_TMPL(unsigned long long);
 IMPL_OBJECT_TMPL(unsigned short);
 IMPL_OBJECT_TMPL(unsigned char);
 IMPL_OBJECT_TMPL(std::string);

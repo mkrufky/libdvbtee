@@ -61,6 +61,7 @@ namespace valueobj { \
 	GET_DEFAULT_VALUE(CLASS, IN, char, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, unsigned int, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, unsigned long, 0) \
+	GET_DEFAULT_VALUE(CLASS, IN, unsigned long long, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, unsigned short, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, unsigned char, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, std::string, "") \
