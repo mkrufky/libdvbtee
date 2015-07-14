@@ -26,6 +26,8 @@
 
 using namespace valueobj;
 
+DEFINE_DEFAULT_GETTERS(Object, std::string)
+
 namespace valueobj {
 
 template <typename T>
@@ -238,5 +240,4 @@ const ValueBase *Object::set(ValueBase *val)
 	return val;
 }
 
-DEFINE_DEFAULT_GETTERS(Object, std::string)
 TO_JSON_TPL(Object, VALUE.toJson().c_str())
