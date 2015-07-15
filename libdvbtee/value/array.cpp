@@ -85,11 +85,20 @@ template const ValueBase* Array::pushByRef(T& val, std::string idx); \
 template const ValueBase* Array::push(T val, std::string idx); \
 template const T& Array::get(unsigned int &idx, T& def) const
 
-#if 1 // we only need Array::push(unsigned int) but implementing them all for the sake of completeness
+IMPL_ARRAY_TMPL(int);
+IMPL_ARRAY_TMPL(long);
+IMPL_ARRAY_TMPL(short);
+IMPL_ARRAY_TMPL(char);
 IMPL_ARRAY_TMPL(unsigned int);
-#else
-template const ValueBase* Array::push(unsigned int val);
-#endif
+IMPL_ARRAY_TMPL(unsigned long);
+IMPL_ARRAY_TMPL(unsigned long long);
+IMPL_ARRAY_TMPL(unsigned short);
+IMPL_ARRAY_TMPL(unsigned char);
+IMPL_ARRAY_TMPL(std::string);
+IMPL_ARRAY_TMPL(bool);
+IMPL_ARRAY_TMPL(double);
+IMPL_ARRAY_TMPL(Array);
+IMPL_ARRAY_TMPL(Object);
 
 #define DBG 0
 
