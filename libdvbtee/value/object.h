@@ -43,7 +43,10 @@ public:
 	Object(const Object&);
 
 	template <typename T>
-	const ValueBase* set(std::string key, T val);
+	const ValueBase* set(std::string key, T val)
+	{
+		return setByRef<T>(key, val);
+	}
 
 	const ValueBase* set(std::string key,       char* val);
 	const ValueBase* set(std::string key, const char* val);
