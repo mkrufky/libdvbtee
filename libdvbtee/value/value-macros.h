@@ -57,6 +57,7 @@ template <> const OUT& CLASS::get<OUT>(IN in) const \
 namespace valueobj { \
 	GET_DEFAULT_VALUE(CLASS, IN, int, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, long, 0) \
+	GET_DEFAULT_VALUE(CLASS, IN, long long, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, short, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, char, 0) \
 	GET_DEFAULT_VALUE(CLASS, IN, unsigned int, 0) \
