@@ -54,7 +54,11 @@ public:
 	const ValueBase* set(std::string key, Object* val);
 
 	template <typename T>
-	const ValueBase* set(int key, T val);
+	const ValueBase* set(int key, T val)
+	{
+		return set(intToStr(key), val);
+	}
+
 
 	const ValueBase* set(ValueBase*);
 
