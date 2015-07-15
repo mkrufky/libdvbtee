@@ -76,6 +76,7 @@ const T& Value<T>::get() const
 
 template class Value<int>;
 template class Value<long>;
+template class Value<long long>;
 template class Value<short>;
 template class Value<char>;
 template class Value<unsigned int>;
@@ -178,6 +179,7 @@ ReferencedValueUndefined::~ReferencedValueUndefined()
 
 TO_JSON_TPL_PRIMITIVE(int)
 TO_JSON_TPL_PRIMITIVE(long)
+TO_JSON_TPL_PRIMITIVE(long long)
 TO_JSON_TPL_PRIMITIVE(short)
 TO_JSON_TPL(char, "'" << VALUE << "'")
 TO_JSON_TPL_PRIMITIVE(unsigned int)

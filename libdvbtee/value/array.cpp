@@ -87,6 +87,7 @@ template const T& Array::get(unsigned int &idx, T& def) const
 
 IMPL_ARRAY_TMPL(int);
 IMPL_ARRAY_TMPL(long);
+IMPL_ARRAY_TMPL(long long);
 IMPL_ARRAY_TMPL(short);
 IMPL_ARRAY_TMPL(char);
 IMPL_ARRAY_TMPL(unsigned int);

@@ -80,6 +80,7 @@ template const T& Object::get<T>(std::string& key, T& def) const
 
 IMPL_OBJECT_TMPL(int);
 IMPL_OBJECT_TMPL(long);
+IMPL_OBJECT_TMPL(long long);
 IMPL_OBJECT_TMPL(short);
 IMPL_OBJECT_TMPL(char);
 IMPL_OBJECT_TMPL(unsigned int);
