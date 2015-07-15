@@ -37,12 +37,6 @@ const ValueBase* Object::set(std::string key, T val)
 }
 
 template <typename T>
-const ValueBase* Object::set(int key, T val)
-{
-	return set(intToStr(key), val);
-}
-
-template <typename T>
 const T& Object::get(int key) const
 {
 	return get<T>(intToStr(key));
