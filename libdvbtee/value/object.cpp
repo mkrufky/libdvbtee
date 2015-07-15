@@ -31,12 +31,6 @@ DEFINE_DEFAULT_GETTERS(Object, std::string)
 namespace valueobj {
 
 template <typename T>
-const T& Object::get(int key) const
-{
-	return get<T>(intToStr(key));
-}
-
-template <typename T>
 const ValueBase* Object::setByRef(std::string& key, T& val)
 {
 	if (map.count(key)) {
@@ -66,7 +60,6 @@ const T& Object::get(std::string& key, T& def) const
 }
 
 #define IMPL_OBJECT_TMPL(T) \
-template const T& Object::get<T>(int key) const; \
 template const ValueBase* Object::setByRef<T>(std::string& key, T& val); \
 template const T& Object::get<T>(std::string& key, T& def) const
 
