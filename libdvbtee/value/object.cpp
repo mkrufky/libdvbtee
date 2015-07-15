@@ -73,7 +73,6 @@ const T& Object::get(std::string& key, T& def) const
 
 #define IMPL_OBJECT_TMPL(T) \
 template const ValueBase* Object::set<T>(std::string key, T val); \
-template const ValueBase* Object::set<T>(int key, T val); \
 template const T& Object::get<T>(int key) const; \
 template const ValueBase* Object::setByRef<T>(std::string& key, T& val); \
 template const T& Object::get<T>(std::string& key, T& def) const
