@@ -76,7 +76,10 @@ public:
 	template <typename T> const T& get(std::string key) const;
 
 	template <typename T>
-	const T& get(int key) const;
+	const T& get(int key) const
+	{
+		return get<T>(intToStr(key));
+	}
 
 	const std::string toJson() const;
 
