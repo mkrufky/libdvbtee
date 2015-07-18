@@ -1028,26 +1028,18 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, parse_iface *iface)
 	const char *slashchannelsconf = "/channels.conf";
 	char dir[/*strlen(homedir)+strlen(subdir)*/64] = { 0 };
 	char filepath[/*strlen(dir)+strlen(slashchannelsconf)*/78] = { 0 };
-	struct stat st;
 
 	//snprintf(dir, strlen(dir), "%s%s", homedir, subdir);
 	memcpy(dir, homedir, strlen(homedir));
 	memcpy(dir + strlen(homedir), subdir, strlen(subdir) + 1);
 	//snprintf(filepath, strlen(filepath), "%s%s", dir, slashchannelsconf);
-
-	if (stat(dir, &st) != 0)
-		return false;
-
 	memcpy(filepath, dir, strlen(dir));
 	memcpy(filepath + strlen(dir), slashchannelsconf, strlen(slashchannelsconf) + 1);
 
-	if (stat(filepath, &st) != 0)
-		return false;
-
-	dprintf("reading %s...", filepath);
-
 	FILE *channels_conf = fopen(filepath, "r");
 	if (channels_conf) {
+		dprintf("reading %s...", filepath);
+
 		char line[256] = { 0 };
 		while (fgets(line, sizeof(line), channels_conf)) {
 #if 0
