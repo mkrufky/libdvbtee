@@ -33,7 +33,9 @@ public:
   explicit hlsfeed(const char *url = NULL, curlhttpget_iface *iface = NULL);
 
 private:
+#if 0
   const char *toplevel;
+#endif
   std::string Url;
   curlhttpget_iface *m_iface;
 

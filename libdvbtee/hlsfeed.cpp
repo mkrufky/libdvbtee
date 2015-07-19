@@ -49,8 +49,12 @@ inline double convertToDouble(std::string const& s)
 }
 
 hlsfeed::hlsfeed(const char *url, curlhttpget_iface *iface)
+#if 0
   : toplevel(url)
   , Url(url)
+#else
+  : Url(url)
+#endif
   , m_iface(iface)
   , push_buffer()
   , walk_buffer()
@@ -203,8 +207,8 @@ void* hlsfeed::walk_thread()
 void hlsfeed::push(uint8_t *buffer, size_t size, size_t nmemb)
 {
 #if PUSH_THREAD
-  if (!push_buffer.write(buffer, size * nmemb))
-    while (nmemb)
+  if (!push_buffer.write(buffer, size * nmemb)) {
+    while (nmemb) {
       if (push_buffer.write(buffer, nmemb)) {
 	buffer += size;
 	nmemb--;
@@ -212,6 +216,8 @@ void hlsfeed::push(uint8_t *buffer, size_t size, size_t nmemb)
 	fprintf(stderr, "%s: FAILED: %zu packets dropped\n", __func__, nmemb);
 	return;
       }
+    }
+  }
 #else
   if (datapump_cb)
     datapump_cb(datapump_ctxt, buffer, size, nmemb);
@@ -221,8 +227,8 @@ void hlsfeed::push(uint8_t *buffer, size_t size, size_t nmemb)
 void hlsfeed::walk(uint8_t *buffer, size_t size, size_t nmemb)
 {
 #if WALK_THREAD
-  if (!walk_buffer.write(buffer, size * nmemb))
-    while (nmemb)
+  if (!walk_buffer.write(buffer, size * nmemb)) {
+    while (nmemb) {
       if (walk_buffer.write(buffer, nmemb)) {
 	buffer += size;
 	nmemb--;
@@ -230,6 +236,8 @@ void hlsfeed::walk(uint8_t *buffer, size_t size, size_t nmemb)
 	fprintf(stderr, "%s: FAILED: %zu bytes dropped\n", __func__, size * nmemb);
 	return;
       }
+    }
+  }
 #else
   walk(buffer);
 #endif

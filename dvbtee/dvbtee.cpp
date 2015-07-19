@@ -155,6 +155,7 @@ void signal_callback_handler(int signum)
 
 static void bitrate_stats(void *priv, stats_map &bitrates, stats_map &discontinuities, uint64_t tei_count, bool per_sec)
 {
+	(void)priv;
 	/* display the bitrates for each pid, followed by special pid 0x2000 for the full TS */
 	for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
 		char a[16];
