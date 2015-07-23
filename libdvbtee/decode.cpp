@@ -1098,7 +1098,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 					 physical_channel, channel->program,
 					 event->event_id,
 					 start,
-					 event->length_sec,
+					 (end - start),
 					 (const char *)name,
 					 (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
 	}
@@ -1127,7 +1127,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 					 physical_channel, service->service_id,
 					 event->event_id,
 					 start,
-					 event->length_sec,
+					 (end - start),
 					 event->name.c_str(),
 					 event->text.c_str());
 	return;
