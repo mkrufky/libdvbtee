@@ -591,6 +591,7 @@ bool decode::updateETT(dvbtee::decode::Table *table)
 }
 
 /* -- STREAM TIME -- */
+#if !USING_DVBPSI_VERSION_0
 bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 {
 #ifdef OLD_DECODER
@@ -605,6 +606,7 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 	return store.ingest(p_stt, this);
 #endif
 }
+#endif
 
 bool decode::take_tot(dvbpsi_tot_t* p_tot)
 {
@@ -739,6 +741,7 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 #endif
 }
 
+#if !USING_DVBPSI_VERSION_0
 bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 #define VCT_DBG 1
 {
@@ -893,6 +896,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 	return store.ingest(p_mgt, this);
 #endif
 }
+#endif
 
 #ifdef OLD_DECODER
 static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, dvbtee::decode::DescriptorStore* descriptors)
@@ -1218,7 +1222,9 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	/* we want our own eit_x here - we don't need to store this in our class, the stored eit_x is for ATSC */
 	/* prevent warning: ‘eit_x’ may be used uninitialized in this function [-Wmaybe-uninitialized] */
 	uint8_t eit_x = 0;
+#if !USING_DVBPSI_VERSION_0 // this is totally a bug when this line is omitted.  instead of trying to fix this, just update your libdvbpsi
 	table_id_to_eit_x(p_eit->i_table_id, &eit_x);
+#endif
 
 	return networks[p_eit->i_network_id].take_eit(p_eit, eit_x);
 }
@@ -1234,6 +1240,7 @@ bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
 #endif
 }
 
+#if !USING_DVBPSI_VERSION_0
 bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 {
 	decoded_atsc_eit_t &cur_atsc_eit = decoded_atsc_eit[eit_x][p_eit->i_source_id];
@@ -1310,6 +1317,7 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 	return store.ingest(p_eit, this);
 #endif
 }
+#endif
 
 static bool _get_epg_event(decoded_event_t *e,
 			  const char * channel_name,
@@ -1790,6 +1798,7 @@ unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message,
 	return message;
 }
 
+#if !USING_DVBPSI_VERSION_0
 bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 {
 #ifdef OLD_DECODER
@@ -1829,6 +1838,7 @@ bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
 	return store.ingest(p_ett, this);
 #endif
 }
+#endif
 
 /* -- -- -- */
 bool decode::complete_pmt() const

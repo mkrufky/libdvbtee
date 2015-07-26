@@ -116,6 +116,7 @@ void printpids()
 
 
 /* -- TABLE HANDLERS -- */
+#if !USING_DVBPSI_VERSION_0
 bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 {
 	(void)p_stt;
@@ -125,6 +126,7 @@ bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 
 	return true;
 }
+#endif
 
 bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 {
@@ -257,6 +259,7 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 	return true;
 }
 
+#if !USING_DVBPSI_VERSION_0
 bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 {
 #if USING_DVBPSI_VERSION_0
@@ -378,6 +381,7 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 
 	return true;
 }
+#endif
 
 bool parse::take_nit_actual(dvbpsi_nit_t* p_nit, bool decoded)
 {
@@ -464,6 +468,7 @@ bool parse::take_eit(dvbpsi_eit_t* p_eit, bool decoded)
 	return true;
 }
 
+#if !USING_DVBPSI_VERSION_0
 bool parse::take_eit(dvbpsi_atsc_eit_t* p_eit, bool decoded)
 {
 	dprintf("(%s): v%d, source_id %d",
@@ -485,6 +490,7 @@ bool parse::take_ett(dvbpsi_atsc_ett_t* p_ett, bool decoded)
 
 	return true;
 }
+#endif
 
 #if USING_DVBPSI_VERSION_0
 #define attach_table_auto_detach_wrapper(container, attach, detach, take, table_id, extension) \
@@ -565,6 +571,7 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 	case TID_TOT:
 		attach_table_auto_detach_wrapper(container, dvbpsi_tot_attach, dvbpsi_tot_detach, take_tot, i_table_id, i_extension);
 		break;
+#if !USING_DVBPSI_VERSION_0
 	case TID_ATSC_TVCT:
 	case TID_ATSC_CVCT:
 		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachVCT, dvbpsi_atsc_DetachVCT, take_vct, i_table_id, i_extension);
@@ -588,6 +595,7 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 	case TID_ATSC_MGT:
 		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachMGT, dvbpsi_atsc_DetachMGT, take_mgt, i_table_id, i_extension);
 		break;
+#endif
 	}
 }
 
@@ -634,11 +642,13 @@ define_table_wrapper(take_nit_other,  dvbpsi_nit_t, dvbpsi_nit_delete, enabled)
 define_table_wrapper(take_sdt_actual, dvbpsi_sdt_t, dvbpsi_sdt_delete, has_sdt)
 define_table_wrapper(take_sdt_other,  dvbpsi_sdt_t, dvbpsi_sdt_delete, enabled)
 define_table_wrapper(take_tot, dvbpsi_tot_t, dvbpsi_tot_delete, enabled)
+#if !USING_DVBPSI_VERSION_0
 define_table_wrapper(take_vct, dvbpsi_atsc_vct_t, dvbpsi_atsc_DeleteVCT, has_vct)
 define_table_wrapper(take_eit, dvbpsi_atsc_eit_t, dvbpsi_atsc_DeleteEIT, enabled)
 define_table_wrapper(take_ett, dvbpsi_atsc_ett_t, dvbpsi_atsc_DeleteETT, enabled)
 define_table_wrapper(take_stt, dvbpsi_atsc_stt_t, dvbpsi_atsc_DeleteSTT, enabled)
 define_table_wrapper(take_mgt, dvbpsi_atsc_mgt_t, dvbpsi_atsc_DeleteMGT, has_mgt)
+#endif
 
 #if USING_DVBPSI_VERSION_0
 void parse::attach_table(void* p_this, dvbpsi_handle h_dvbpsi, uint8_t i_table_id, uint16_t i_extension)

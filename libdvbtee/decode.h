@@ -35,6 +35,7 @@
 #include "dvbpsi/eit.h"
 #include "dvbpsi/nit.h"
 #include "dvbpsi/tot.h"
+#if !USING_DVBPSI_VERSION_0
 #include "dvbpsi/atsc_eit.h"
 #include "dvbpsi/atsc_ett.h"
 #include "dvbpsi/atsc_stt.h"
@@ -42,6 +43,7 @@
 #include "dvbpsi/atsc_mgt.h"
 #ifdef RRT
 #include "dvbpsi/atsc_rrt.h"
+#endif
 #endif
 
 #include <map>
@@ -440,6 +442,7 @@ public:
 	bool take_sdt_actual(dvbpsi_sdt_t*);
 	bool take_sdt_other(dvbpsi_sdt_t*);
 	bool take_tot(dvbpsi_tot_t*);
+#if !USING_DVBPSI_VERSION_0
 	bool take_vct(dvbpsi_atsc_vct_t*);
 	bool take_eit(dvbpsi_atsc_eit_t*);
 	bool take_ett(dvbpsi_atsc_ett_t*);
@@ -447,6 +450,7 @@ public:
 	bool take_mgt(dvbpsi_atsc_mgt_t*);
 #ifdef RRT
 	bool take_rrt(dvbpsi_atsc_mgt_t*);
+#endif
 #endif
 	bool complete_pmt() const;
 #if 0
