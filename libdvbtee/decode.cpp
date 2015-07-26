@@ -33,11 +33,13 @@
 #include "tabl_02.h"
 #include "tabl_40.h"
 #include "tabl_42.h"
+#if !USING_DVBPSI_VERSION_0
 #include "tabl_4e.h"
 #include "tabl_c7.h"
 #include "tabl_c8.h"
 #include "tabl_cb.h"
 #include "tabl_cc.h"
+#endif
 
 #include "log.h"
 #define CLASS_MODULE "decode"
@@ -536,6 +538,7 @@ bool decode::updatePMT(dvbtee::decode::Table *table)
 	return rcvd_pmt[new_decoded_pmt.program /*pmtTable->get<uint16_t>("program")*/] = true;
 }
 
+#if !USING_DVBPSI_VERSION_0
 bool decode::updateVCT(dvbtee::decode::Table *table)
 {
 	if ((!table) || (!table->isValid()) ||
@@ -589,6 +592,7 @@ bool decode::updateETT(dvbtee::decode::Table *table)
 
 	return true;
 }
+#endif
 
 /* -- STREAM TIME -- */
 #if !USING_DVBPSI_VERSION_0
