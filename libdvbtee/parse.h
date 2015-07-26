@@ -220,11 +220,13 @@ private:
 	static void take_sdt_actual(void*, dvbpsi_sdt_t*);
 	static void take_sdt_other(void*,  dvbpsi_sdt_t*);
 	static void take_tot(void*, dvbpsi_tot_t*);
+#if !USING_DVBPSI_VERSION_0
 	static void take_vct(void*, dvbpsi_atsc_vct_t*);
 	static void take_eit(void*, dvbpsi_atsc_eit_t*);
 	static void take_ett(void*, dvbpsi_atsc_ett_t*);
 	static void take_stt(void*, dvbpsi_atsc_stt_t*);
 	static void take_mgt(void*, dvbpsi_atsc_mgt_t*);
+#endif
 
 #if USING_DVBPSI_VERSION_0
 	static void attach_table(void*, dvbpsi_handle, uint8_t, uint16_t);
@@ -241,11 +243,13 @@ private:
 	bool take_sdt_actual(dvbpsi_sdt_t*, bool);
 	bool take_sdt_other(dvbpsi_sdt_t*,  bool);
 	bool take_tot(dvbpsi_tot_t*, bool);
+#if !USING_DVBPSI_VERSION_0
 	bool take_vct(dvbpsi_atsc_vct_t*, bool);
 	bool take_eit(dvbpsi_atsc_eit_t*, bool);
 	bool take_ett(dvbpsi_atsc_ett_t*, bool);
 	bool take_stt(dvbpsi_atsc_stt_t*, bool);
 	bool take_mgt(dvbpsi_atsc_mgt_t*, bool);
+#endif
 
 #if USING_DVBPSI_VERSION_0
 	void attach_table(dvbpsi_handle, uint8_t, uint16_t);
