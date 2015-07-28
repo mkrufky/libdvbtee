@@ -5,6 +5,7 @@
 
 # Compiled Dynamic libraries
 *.so
+*.so.1*
 
 # Compiled Static libraries
 *.lai
@@ -25,6 +26,13 @@ usr/
 
 # compiled binary
 dvbtee/dvbtee
+parser_example/parser
+server_example/server
+walk_hls/walk_hls
 
 # other build stuff
 .x86
+Makefile
+
+# deb package build dir
+deb/build/
