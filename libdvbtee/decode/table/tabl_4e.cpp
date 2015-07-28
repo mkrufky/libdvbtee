@@ -61,8 +61,13 @@ void eit::store(dvbpsi_eit_t *p_eit)
 //		return false;
 //	}
 #if EIT_DBG
+#if USING_DVBPSI_VERSION_0
+	fprintf(stderr, "%s EIT-%d: v%d | ts_id %d | network_id %d service_id %d | last_table id: 0x%02x\n", __func__, /*XXX: FIXME: eit_x*/0xff,
+		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, __service_id, p_eit->i_last_table_id);
+#else
 	fprintf(stderr, "%s EIT-%d: v%d | ts_id %d | network_id %d service_id %d | table id: 0x%02x, last_table id: 0x%02x\n", __func__, /*XXX: FIXME: eit_x*/0xff,
 		p_eit->i_version, p_eit->i_ts_id, p_eit->i_network_id, __service_id, p_eit->i_table_id, p_eit->i_last_table_id);
+#endif
 #endif
 	decoded_eit.service_id    = __service_id;
 	decoded_eit.version       = p_eit->i_version;
