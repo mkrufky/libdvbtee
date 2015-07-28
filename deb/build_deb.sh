@@ -70,7 +70,7 @@ main() {
   fpm -f -s dir -C build -t deb --description "${pkg_description}" \
     --vendor "${pkg_vendor}" \
     --maintainer "${pkg_maintainer}" --url "${pkg_url}" --name "${pkg_name}" \
-    --version "${pkg_version}" --package "." \
+    --version "${pkg_version/v/}" --package "." \
     --after-install "${current_dir}/scripts/_after-install.sh" \
     --after-remove "${current_dir}/scripts/_after-remove.sh" \
     --depends "libhdhomerun1 >= 20140121-1" \

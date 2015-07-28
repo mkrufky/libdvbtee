@@ -36,3 +36,4 @@ Makefile
 
 # deb package build dir
 deb/build/
+deb/*.deb
