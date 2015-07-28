@@ -59,3 +59,7 @@ examples/walk_hls/walk-hls
 /m4
 Makefile
 Makefile.in
+
+# deb package build dir
+deb/build/
+deb/*.deb
