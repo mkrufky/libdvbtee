@@ -33,8 +33,8 @@
 #include "tabl_02.h"
 #include "tabl_40.h"
 #include "tabl_42.h"
-#if !USING_DVBPSI_VERSION_0
 #include "tabl_4e.h"
+#if !USING_DVBPSI_VERSION_0
 #include "tabl_c7.h"
 #include "tabl_c8.h"
 #include "tabl_cb.h"
