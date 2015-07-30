@@ -49,6 +49,8 @@ AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memchr memmove memset select s
 AC_CONFIG_FILES([Makefile
                  dvbtee/Makefile
                  libdvbtee/Makefile
+                 libdvbtee/decode/Makefile
+                 libdvbtee/value/Makefile
                  libdvbtee_server/Makefile
                  parser_example/Makefile
                  server_example/Makefile

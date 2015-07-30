@@ -10,3 +10,5 @@ DECODER_SOURCES = \
 
 HEADERS += \
     $$PWD/decoder.h
+
+OTHER_FILES += Makefile.am

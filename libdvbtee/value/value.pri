@@ -10,3 +10,5 @@ HEADERS += \
     $$PWD/object.h \
     $$PWD/value-macros.h \
     $$PWD/value.h
+
+OTHER_FILES += Makefile.am
