@@ -29,18 +29,15 @@
 #include "log.h"
 #define CLASS_MODULE "desc"
 
-//#define DVBPSI_SUPPORTS_DR_81_86_A0_A1 (DVBPSI_VERSION_INT > ((1<<16)+(1<<8)+1))
-#define DVBPSI_SUPPORTS_DR_81_86_A0_A1 1
+#define DVBPSI_SUPPORTS_DR_81_86_A0_A1 (DVBPSI_VERSION_INT > ((1<<16)+(1<<8)+1))
 
 #include "dvbpsi/dr_0a.h" /* ISO639 language descriptor */
 #include "dvbpsi/dr_48.h" /* service descriptor */
 #include "dvbpsi/dr_4d.h" /* short event descriptor */
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 #include "dvbpsi/dr_62.h" /* frequency list descriptor */
-#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 #include "dvbpsi/dr_81.h" /* AC-3 Audio descriptor */
-#endif
 #include "dvbpsi/dr_83.h" /* LCN descriptor */
-#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 #include "dvbpsi/dr_86.h" /* caption service descriptor */
 #include "dvbpsi/dr_a0.h" /* extended channel name descriptor */
 #include "dvbpsi/dr_a1.h" /* service location descriptor */
@@ -141,6 +138,7 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 
 bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 {
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 	if (p_descriptor->i_tag != DT_FrequencyList)
 		return false;
 
@@ -154,6 +152,7 @@ bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 		dprintf("%d", dr->p_center_frequencies[i]);
 #endif
 	}
+#endif
 	return true;
 }
 
@@ -301,6 +300,7 @@ bool desc::ac3_audio(dvbpsi_descriptor_t* p_descriptor)
 
 bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 {
+#if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 	if (p_descriptor->i_tag != DT_LogicalChannelNumber)
 		return false;
 
@@ -316,7 +316,7 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 		dprintf("%d, %d", dr->p_entries[i].i_service_id, lcn[dr->p_entries[i].i_service_id]);
 #endif
 	}
-
+#endif
 	return true;
 }
 
