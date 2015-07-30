@@ -29,6 +29,8 @@
 
 #include "feed.h"
 #include "hlsfeed.h"
+
+#include "dvbtee_config.h"
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
 #endif

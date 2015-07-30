@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libdvbtee
+Description: libdvbtee is a digital television streamer / parser / service information aggregator supporting various interfaces including telnet CLI & http control
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -ldvbtee
+Cflags: -I${includedir}

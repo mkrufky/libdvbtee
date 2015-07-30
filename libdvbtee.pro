@@ -31,3 +31,5 @@ QMAKE_EXTRA_TARGETS += libdvbtee \
                        server_example \
                        parser_example \
                        walk_hls
+
+OTHER_FILES += AUTHORS COPYING INSTALL NEWS README ChangeLog configure.ac Makefile.am
