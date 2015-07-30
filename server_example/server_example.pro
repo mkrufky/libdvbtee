@@ -44,3 +44,5 @@ DEPENDPATH += $$PWD/../usr/include
 QMAKE_CXXFLAGS += -Wno-unused-parameter -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64
 
 unix:!macx:!symbian: QMAKE_CXXFLAGS += -DUSE_LINUXTV
+
+OTHER_FILES += Makefile.am

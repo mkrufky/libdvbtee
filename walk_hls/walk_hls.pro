@@ -41,3 +41,5 @@ unix|win32: LIBS += -lhdhomerun
 macx: LIBS += -L/opt/local/lib/ -lhdhomerun
 
 QMAKE_CXXFLAGS += -Wno-unused-parameter -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64
+
+OTHER_FILES += Makefile.am
