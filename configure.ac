@@ -52,10 +52,11 @@ AC_CONFIG_FILES([Makefile
                  libdvbtee/decode/Makefile
                  libdvbtee/value/Makefile
                  libdvbtee_server/Makefile
-                 parser_example/Makefile
-                 server_example/Makefile
                  tunerprovider/Makefile
-                 walk_hls/Makefile
+                 examples/parser_example/Makefile
+                 examples/server_example/Makefile
+                 examples/walk_hls/Makefile
+                 examples/Makefile
                  libdvbtee.pc])
 AC_OUTPUT
 
