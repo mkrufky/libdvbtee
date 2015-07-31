@@ -1,29 +1,31 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2013-03-31T23:14:10
+# Project created by QtCreator 2013-04-08T14:29:53
 #
 #-------------------------------------------------
 
 QT       -= gui
 QT       -= core
 
-TARGET = parser
-CONFIG   += console
+TARGET = walk_hls
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
 
-SOURCES += \
-    parser.cpp
+SOURCES += main.cpp \
+    hlsinput.cpp
+
+HEADERS += \
+    hlsinput.h
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee/release/ -ldvbtee
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ldvbtee
 else:symbian: LIBS += -ldvbtee
-else:unix: LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
+else:unix: LIBS += -L$$PWD/../../libdvbtee/ -ldvbtee
 
-INCLUDEPATH += $$PWD/../libdvbtee
-DEPENDPATH += $$PWD/../libdvbtee
+INCLUDEPATH += $$PWD/../../libdvbtee
+DEPENDPATH += $$PWD/../../libdvbtee
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../usr/lib/release/ -ldvbpsi
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../usr/lib/debug/ -ldvbpsi
@@ -33,13 +35,10 @@ else:unix: LIBS += -L$$PWD/../usr/lib/ -ldvbpsi
 INCLUDEPATH += $$PWD/../usr/include
 DEPENDPATH += $$PWD/../usr/include
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee_server/release/ -ldvbtee_server
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee_server/debug/ -ldvbtee_server
-else:symbian: LIBS += -ldvbtee_server
-else:unix: LIBS += -L$$PWD/../libdvbtee_server/ -ldvbtee_server
+unix|win32: LIBS += -lcurl
 
-INCLUDEPATH += $$PWD/../libdvbtee_server
-DEPENDPATH += $$PWD/../libdvbtee_server
+unix|win32: LIBS += -lhdhomerun
+macx: LIBS += -L/opt/local/lib/ -lhdhomerun
 
 QMAKE_CXXFLAGS += -Wno-unused-parameter -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64
 

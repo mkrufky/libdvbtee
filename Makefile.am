@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS= -I m4
 
-SUBDIRS=libdvbtee libdvbtee_server tunerprovider server_example parser_example walk_hls dvbtee
+SUBDIRS=libdvbtee libdvbtee_server tunerprovider examples dvbtee
 
 EXTRA_DIST = libdvbpsi.pc.in
 

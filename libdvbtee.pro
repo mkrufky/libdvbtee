@@ -5,31 +5,23 @@ SUBDIRS += libdvbtee \
            tunerprovider \
            libdvbtee_server \
            dvbtee \
-           server_example \
-           parser_example \
-           walk_hls
+           examples
 
 libdvbtee.target = libdvbtee
 tunerprovider.target = tunerprovider
 libdvbtee_server.target = libdvbtee_server
 dvbtee.target = dvbtee
-server_example.target = server_example
-parser_example.target = parser_example
-walk_hls.target = walk_hls
+examples.target = examples
 
 tunerprovider.depends = libdvbtee
 libdvbtee_server.depends = libdvbtee
 dvbtee.depends = libdvbtee_server
-server_example.depends = libdvbtee_server
-parser_example.depends = libdvbtee_server
-walk_hls.depends = libdvbtee
+examples.depends = libdvbtee_server
 
 QMAKE_EXTRA_TARGETS += libdvbtee \
                        tunerprovider \
                        libdvbtee_server \
                        dvbtee \
-                       server_example \
-                       parser_example \
-                       walk_hls
+                       examples
 
 OTHER_FILES += AUTHORS COPYING INSTALL NEWS README ChangeLog configure.ac Makefile.am
