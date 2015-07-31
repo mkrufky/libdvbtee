@@ -4,7 +4,9 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libdvbtee
-Description: libdvbtee is a digital television streamer / parser / service information aggregator supporting various interfaces including telnet CLI & http control
+Description: MPEG2 transport stream parser & digital television service info aggregation library
+URL: http://mkrufky.github.io/libdvbtee
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -ldvbtee
+Requires: libdvbpsi
 Cflags: -I${includedir}
+Libs: -L${libdir} -ldvbtee
