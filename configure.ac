@@ -57,6 +57,7 @@ AC_CONFIG_FILES([Makefile
                  examples/server_example/Makefile
                  examples/walk_hls/Makefile
                  examples/Makefile
+                 libdvbtee_server.pc
                  libdvbtee.pc])
 AC_OUTPUT
 

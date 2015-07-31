@@ -29,4 +29,13 @@ QMAKE_EXTRA_TARGETS += libdvbtee \
                        dvbtee \
                        examples
 
-OTHER_FILES += AUTHORS COPYING INSTALL NEWS README ChangeLog configure.ac Makefile.am
+OTHER_FILES += AUTHORS \
+               COPYING \
+               INSTALL \
+               NEWS \
+               README \
+               ChangeLog \
+               configure.ac \
+               Makefile.am \
+               libdvbtee.pc.in \
+               libdvbtee_server.pc.in
