@@ -19,6 +19,8 @@
  *
  *****************************************************************************/
 
+#include "dvbtee_config.h"
+#ifdef HAVE_LIBCURL
 #include "curlhttpget.h"
 
 curlhttpget::curlhttpget(const char *url, curlhttpget_iface *iface, curlhttpget_info_t *info)
@@ -67,3 +69,4 @@ size_t curlhttpget::__write_data(void *buffer, size_t size, size_t nmemb)
   if (m_iface) m_iface->write_data(buffer, size, nmemb);
   return size * nmemb;
 }
+#endif
