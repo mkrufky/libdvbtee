@@ -35,6 +35,13 @@
 #include "dvbpsi/eit.h"
 #include "dvbpsi/nit.h"
 #include "dvbpsi/tot.h"
+
+#if (DVBPSI_VERSION_INT < ((1<<16)+(0<<8)+0))
+#define USING_DVBPSI_VERSION_0 1
+#else
+#define USING_DVBPSI_VERSION_0 0
+#endif
+
 #if !USING_DVBPSI_VERSION_0
 #include "dvbpsi/atsc_eit.h"
 #include "dvbpsi/atsc_ett.h"
@@ -49,12 +56,6 @@
 #include "desc.h"
 
 #include <map>
-
-#if (DVBPSI_VERSION_INT < ((1<<16)+(0<<8)+0))
-#define USING_DVBPSI_VERSION_0 1
-#else
-#define USING_DVBPSI_VERSION_0 0
-#endif
 
 /* -- PAT -- */
 typedef std::map<uint16_t, uint16_t> map_decoded_pat_programs; /* program number, pid */

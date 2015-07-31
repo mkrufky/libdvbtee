@@ -27,6 +27,8 @@
 #include <unistd.h>
 
 #include "feed.h"
+
+#include "dvbtee_config.h"
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
 #else

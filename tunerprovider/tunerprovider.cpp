@@ -21,6 +21,7 @@
 
 #include "tunerprovider.h"
 
+#include "dvbtee_config.h"
 #ifdef USE_HDHOMERUN
 #include "hdhr_tuner.h"
 #endif

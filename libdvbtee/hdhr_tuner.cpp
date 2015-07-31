@@ -19,6 +19,8 @@
  *
  *****************************************************************************/
 
+#include "dvbtee_config.h"
+#ifdef USE_HDHOMERUN
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -393,3 +395,4 @@ bool hdhr_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int 
 	}
 	return false;
 }
+#endif

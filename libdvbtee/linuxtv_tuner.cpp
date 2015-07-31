@@ -19,6 +19,8 @@
  *
  *****************************************************************************/
 
+#include "dvbtee_config.h"
+#ifdef USE_LINUXTV
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -519,3 +521,4 @@ void linuxtv_tuner::add_filter(uint16_t pid)
 fail_demux:
 	return;
 }
+#endif
