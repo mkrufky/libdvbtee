@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS= -I m4
 
 SUBDIRS=libdvbtee libdvbtee_server tunerprovider examples dvbtee
 
-EXTRA_DIST = libdvbpsi.pc.in
+EXTRA_DIST = libdvbtee.pc.in
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libdvbtee.pc
