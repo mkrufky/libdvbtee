@@ -65,7 +65,7 @@ main() {
     --after-install "${current_dir}/scripts/_after-install.sh" \
     --after-remove "${current_dir}/scripts/_after-remove.sh" \
     --depends "libhdhomerun1 >= 20140121-1" \
-    --depends "libdvbpsi" \
+    --depends "libdvbpsi9" \
     --iteration "${pkg_iteration}"
 
   rm -rf "${build_dir_base}"
