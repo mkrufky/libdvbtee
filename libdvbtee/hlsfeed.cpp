@@ -19,6 +19,7 @@
  *
  *****************************************************************************/
 
+#include "dvbtee_config.h"
 #include "hlsfeed.h"
 
 #include <iostream>
@@ -111,6 +112,7 @@ private:
 
 void hlsfeed::walk(uint8_t *buffer)
 {
+#ifdef HAVE_LIBCURL // FIXME!!!
   char *save;
   char *playlist = (char *)buffer;
   char *line = strtok_r(playlist, "\n", &save);
@@ -142,6 +144,7 @@ void hlsfeed::walk(uint8_t *buffer)
 
     line = strtok_r(NULL, "\n", &save);
   }
+#endif
 }
 
 //static

@@ -1,8 +1,9 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+m4_include([version.m4])
 AC_PREREQ([2.69])
-AC_INIT([libdvbtee], [0.3.7], [mkrufky@linuxtv.org])
+AC_INIT([libdvbtee], m4_defn([DVBTEE_VERSION]), [mkrufky@linuxtv.org])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 

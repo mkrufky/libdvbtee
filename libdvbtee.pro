@@ -38,4 +38,5 @@ OTHER_FILES += AUTHORS \
                configure.ac \
                Makefile.am \
                libdvbtee.pc.in \
-               libdvbtee_server.pc.in
+               libdvbtee_server.pc.in \
+               version.m4
