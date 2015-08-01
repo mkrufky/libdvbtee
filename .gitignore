@@ -35,6 +35,7 @@ examples/walk_hls/walk-hls
 
 # other build stuff
 .x86
+.dirstamp
 .deps/
 .libs/
 /*.pc
