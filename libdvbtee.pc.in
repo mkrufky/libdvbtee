@@ -7,6 +7,7 @@ Name: libdvbtee
 Description: MPEG2 transport stream parser & digital television service info aggregation library
 URL: http://mkrufky.github.io/libdvbtee
 Version: @PACKAGE_VERSION@
+
 Requires: libdvbpsi
-Cflags: -I${includedir}
 Libs: -L${libdir} -ldvbtee
+Cflags: -I${includedir}
