@@ -20,6 +20,16 @@ err() {
 }
 
 main() {
+  # check autoconf package
+  which autoreconf > /dev/null
+  if [ "$?" -ne "0" ]; then
+    err "autoconf package is not installed."
+    echo "Please use the following commands to install it:"
+    echo -e "\e[32msudo apt-get install autoconf\e[0m"
+    exit 1;
+  fi
+  # end check autoconf package
+
   build_dir_base=${current_dir}/build
   build_dir=${build_dir_base}/${pkg_install_dir}
   build_dir_ldconf=${build_dir_base}/etc/ld.so.conf.d
@@ -33,7 +43,7 @@ main() {
   cd "${current_dir}" || exit
   # end Run sources build
 
-  #Check if fpm package
+  # check fpm package
   which fpm > /dev/null
   if [ "$?" -ne "0" ]; then
     err "fpm package is not installed."
@@ -42,7 +52,7 @@ main() {
     echo -e "\e[32msudo gem install fpm\e[0m"
     exit 1;
   fi
-  # end Check if fpm package
+  # end check fpm package
 
   # Prepare file for deb packaging
   mkdir -p "${build_dir_ldconf}"
