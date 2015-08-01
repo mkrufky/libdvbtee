@@ -35,7 +35,7 @@ main() {
   build_dir_ldconf=${build_dir_base}/etc/ld.so.conf.d
 
   # Run sources build
-  cd "${compiled_base_dir}" && autoreconf -i && ./configure --prefix="${build_dir}" && make clean && make && make install
+  cd "${compiled_base_dir}" && autoreconf -i && ./configure --prefix="${build_dir}" && make clean && make && make install-strip
   if [ "$?" -ne "0" ]; then
     err "Build failed"
     exit 1
