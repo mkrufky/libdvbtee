@@ -1,28 +1,33 @@
 #!/bin/bash
 #
+# build_deb.sh:
 # Script for deb packaging dvbtee
 #
-# Tested on Ubuntu 14.04
+# Originally submitted by: Pasha Mesh <pasha.mesh@gmail.com>
 #
-# Author: Pasha Mesh <pasha.mesh@gmail.com>
+# Tested on Ubuntu 14.04 & 15.04
 #
 
-PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games'
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 current_dir="$(dirname "$(readlink -f "$0")")"
 compiled_base_dir="$(readlink -f "${current_dir}/../")"
 
-pkg_install_dir='/opt/dvbtee'
+pkg_install_dir='/usr'
 
 err() {
   echo -e "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: \e[32m${@}\e[0m" >&2
 }
 
 main() {
+  build_dir_base=${current_dir}/build
+  build_dir=${build_dir_base}/${pkg_install_dir}
+  build_dir_ldconf=${build_dir_base}/etc/ld.so.conf.d
+
   # Run sources build
-  cd "${compiled_base_dir}" && ./build.sh
+  cd "${compiled_base_dir}" && autoreconf -i && ./configure --prefix="${build_dir}" && make clean && make && make install
   if [ "$?" -ne "0" ]; then
-    err "Build is failed"
+    err "Build failed"
     exit 1
   fi
   cd "${current_dir}" || exit
@@ -31,8 +36,8 @@ main() {
   #Check if fpm package
   which fpm > /dev/null
   if [ "$?" -ne "0" ]; then
-    err "fpm package not installed."
-    echo "Please use next commands to install it:"
+    err "fpm package is not installed."
+    echo "Please use the following commands to install it:"
     echo -e "\e[32msudo apt-get install ruby-dev gcc\e[0m"
     echo -e "\e[32msudo gem install fpm\e[0m"
     exit 1;
@@ -40,30 +45,16 @@ main() {
   # end Check if fpm package
 
   # Prepare file for deb packaging
-  build_dir_base=${current_dir}/build
-  build_dir=${build_dir_base}/${pkg_install_dir}
-  build_dir_ldconf=${build_dir_base}/etc/ld.so.conf.d
-
-  rm -rf "${build_dir_base}"
-
-  mkdir -p "${build_dir}"/{bin,lib}
   mkdir -p "${build_dir_ldconf}"
 
   echo "${pkg_install_dir}/lib" > "${build_dir_ldconf}/libdvbtee.conf"
-
-  rsync -a "${compiled_base_dir}/usr/" "${build_dir}"
-  rsync -a "${compiled_base_dir}/dvbtee/dvbtee" "${build_dir}/bin"
-  rsync -a "${compiled_base_dir}/libdvbtee/libdvbtee.so"* \
-    "${compiled_base_dir}/libdvbtee_server/libdvbtee_server.so"* \
-    "${build_dir}/lib"
   # end Prepare file for deb packaging
 
   pkg_name="dvbtee"
-  pkg_description="Stream parser and service information aggregator library "
-  pkg_description+="for MPEG2 transport streams"
-  pkg_maintainer="pasha.mesh@gmail.com"
+  pkg_description="MPEG2 transport stream parser & digital television service info aggregation library"
+  pkg_maintainer="mkrufky@linuxtv.org"
   pkg_vendor="mkrufky@linuxtv.org"
-  pkg_url=$(git config --get remote.origin.url)
+  pkg_url="git://github.com/mkrufky/libdvbtee.git"
   pkg_iteration=$(git rev-list HEAD --count)
   pkg_version=$(git describe --abbrev=0 --tags)
 
@@ -74,7 +65,10 @@ main() {
     --after-install "${current_dir}/scripts/_after-install.sh" \
     --after-remove "${current_dir}/scripts/_after-remove.sh" \
     --depends "libhdhomerun1 >= 20140121-1" \
+    --depends "libdvbpsi" \
     --iteration "${pkg_iteration}"
+
+  rm -rf "${build_dir_base}"
 }
 
 main
