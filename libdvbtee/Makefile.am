@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -I./decode -I./decode/table -I/usr/include/libhdhomerun -I/opt/local/include
+AM_CXXFLAGS = -I./decode -I./decode/table -I/usr/include/libhdhomerun -I/opt/local/include -pthread
 
 lib_LTLIBRARIES = libdvbtee.la
 
