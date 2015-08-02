@@ -64,7 +64,8 @@ AC_CONFIG_FILES([Makefile
                  examples/parser_example/Makefile
                  examples/server_example/Makefile
                  examples/walk_hls/Makefile
-                 examples/Makefile])
+                 examples/Makefile
+                 packaging/libdvbtee.spec])
 AC_OUTPUT
 
 echo "

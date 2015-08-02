@@ -1,0 +1,101 @@
+%define name		libdvbtee
+%define version		@PACKAGE_VERSION@
+%define release		1
+
+%define lib_name	%{name}
+
+%define redhat 1
+%if %redhat
+# some mdk macros that do not exist in rh
+%define configure2_5x CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=/usr --libdir=%{_libdir}
+%define make %__make
+%define makeinstall_std %__make DESTDIR="$RPM_BUILD_ROOT" install
+# adjust define for Redhat.
+%endif
+
+Summary:	A stream parser & service information aggregator library for MPEG2 transport streams
+Name:		%{name}
+Version:	%{version}
+Release:	%{release}
+License:	LGPLv2.1
+URL:		http://mkrufky.github.io/libdvbtee/
+Group:		System/Libraries
+Source:		https://github.com/mkrufky/libdvbtee/archive/v%{version}.tar.gz
+BuildRoot:	%_tmppath/%name-%version-%release-root
+Provides:	%name
+Prefix:		@prefix@
+
+Requires: pkgconfig(libdvbpsi)
+Requires: pkgconfig(libcurl)
+BuildRequires: libdvbpsi-devel
+BuildRequires: libcurl-devel
+
+%description
+libdvbtee is a stream parser & service information aggregator library
+for MPEG2 transport streams.
+
+%package -n %{lib_name}-devel
+Summary:	Development tools for programs which will use the libdvbtee library.
+Group:		Development/C
+Provides:	%name-devel = %version-%release
+Requires:	%{lib_name} = %version-%release
+
+%description -n %{lib_name}-devel
+The %{name}-devel package includes the header files and static
+libraries necessary for developing programs using the %{name} library.
+
+If you are going to develop programs using the %{name} library,
+you should install %{name}-devel.  You'll also need to have
+the %name package installed.
+
+%package -n %{lib_name}-examples
+Summary:	Example applications that use the libdvbtee library.
+Group:		Development/C
+Provides:	%name-devel = %version-%release
+Requires:	%{lib_name} = %version-%release
+
+%description -n %{lib_name}-examples
+The %{name}-examples package includes example applications
+that use the libdvbtee library.
+
+%prep
+%setup -q
+
+%build
+%configure2_5x --enable-release
+%make
+
+%install
+rm -rf %buildroot
+%makeinstall_std
+
+%clean
+rm -rf %buildroot
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(-,root,root,-)
+%doc AUTHORS README COPYING ChangeLog
+%{_libdir}/*.so.*
+%{_libdir}/*.so
+%{_libdir}/pkgconfig/libdvbtee.pc
+%{_libdir}/pkgconfig/libdvbtee_server.pc
+%{_bindir}/dvbtee
+
+%files -n %{lib_name}-devel
+%defattr(-,root,root)
+%doc COPYING NEWS
+%{_libdir}/*a
+%{_libdir}/pkgconfig/libdvbtee.pc
+%{_libdir}/pkgconfig/libdvbtee_server.pc
+%{_includedir}/*
+
+%files -n %{lib_name}-examples
+%defattr(-,root,root)
+%doc COPYING NEWS
+%{_bindir}/dvbtee-parser
+%{_bindir}/dvbtee-server
+%{_bindir}/walk-hls
