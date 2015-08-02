@@ -51,7 +51,7 @@ the %name package installed.
 %package -n %{lib_name}-examples
 Summary:	Example applications that use the libdvbtee library.
 Group:		Development/C
-Provides:	%name-devel = %version-%release
+Provides:	%name-examples = %version-%release
 Requires:	%{lib_name} = %version-%release
 
 %description -n %{lib_name}-examples
