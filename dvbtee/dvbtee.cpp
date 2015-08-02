@@ -535,7 +535,7 @@ int main(int argc, char **argv)
 			context.tuners[context.tuners.size()] = tuner;
 			tuner->feeder.parser.limit_eit(eit_limit);
 		} else {
-			fprintf(stderr, "ERROR allocating tuner %lu\n", context.tuners.size());
+			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
 			exit(-1);
 		}
 	}
@@ -556,7 +556,7 @@ int main(int argc, char **argv)
 			new_tuner->feeder.parser.limit_eit(eit_limit);
 			context.tuners[context.tuners.size()] = new_tuner;
 		} else {
-			fprintf(stderr, "ERROR allocating tuner %lu\n", context.tuners.size());
+			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
 			break;
 		}
 	}

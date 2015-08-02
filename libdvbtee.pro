@@ -39,4 +39,5 @@ OTHER_FILES += AUTHORS \
                Makefile.am \
                libdvbtee.pc.in \
                libdvbtee_server.pc.in \
+               packaging/libdvbtee.spec.in \
                version.m4
