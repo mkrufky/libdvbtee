@@ -1,8 +1,9 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
+m4_include([version.m4])
 AC_PREREQ([2.69])
-AC_INIT([libdvbtee], [0.3.7], [mkrufky@linuxtv.org])
+AC_INIT([libdvbtee], m4_defn([DVBTEE_VERSION]), [mkrufky@linuxtv.org])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 
@@ -46,6 +47,15 @@ AC_FUNC_MALLOC
 AC_FUNC_STRCOLL
 AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memchr memmove memset select socket stpcpy strchr strcspn strdup strerror strpbrk strrchr strspn strstr strtoul])
 
+PKG_PROG_PKG_CONFIG([0.20])
+AM_CONDITIONAL([HAVE_PKG_CONFIG], [test "x$PKG_CONFIG" != "x"])
+AC_SUBST(HAVE_PKG_CONFIG)
+
+AS_IF([test "x$PKG_CONFIG" != "x"], [
+	AC_CONFIG_FILES([libdvbtee.pc
+	                 libdvbtee_server.pc])
+])
+
 AC_CONFIG_FILES([Makefile
                  dvbtee/Makefile
                  libdvbtee/Makefile
@@ -55,7 +65,7 @@ AC_CONFIG_FILES([Makefile
                  examples/server_example/Makefile
                  examples/walk_hls/Makefile
                  examples/Makefile
-                 libdvbtee.pc])
+                 packaging/libdvbtee.spec])
 AC_OUTPUT
 
 echo "

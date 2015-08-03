@@ -33,7 +33,7 @@
 /* update version number by updating the LIBDVBTEE_VERSION_FOO fields below */
 #define LIBDVBTEE_VERSION_A 0
 #define LIBDVBTEE_VERSION_B 3
-#define LIBDVBTEE_VERSION_C 7
+#define LIBDVBTEE_VERSION_C 8
 
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)

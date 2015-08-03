@@ -25,8 +25,6 @@ When accessing the server via http, precede commands by / and arguments by =.
 When accessing the server via telnet, enter in the form 'command=argument'
 and press enter.
 
-This README file is a work-in-progress.
-
 Michael Ira Krufky  
 mkrufky at linuxtv dot org
 

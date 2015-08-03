@@ -26,13 +26,39 @@ usr/
 
 # compiled binary
 dvbtee/dvbtee
-parser_example/parser
-server_example/server
-walk_hls/walk_hls
+examples/parser_example/parser
+examples/parser_example/dvbtee-parser
+examples/server_example/server
+examples/server_example/dvbtee-server
+examples/walk_hls/walk_hls
+examples/walk_hls/walk-hls
 
 # other build stuff
 .x86
+.dirstamp
+.deps/
+.libs/
+/*.pc
+/stamp-h1
+/aclocal.m4
+/ar-lib
+/autom4te.cache/
+/compile
+/config.h
+/config.h.in
+/config.guess
+/config.log
+/config.status
+/config.sub
+/configure
+/depcomp
+/install-sh
+/libtool
+/ltmain.sh
+/missing
+/m4
 Makefile
+Makefile.in
 
 # deb package build dir
 deb/build/
