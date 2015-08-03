@@ -53,6 +53,10 @@
 #endif
 #endif
 
+#ifdef OLD_DECODER
+#include "desc.h"
+#endif
+
 #include <map>
 
 /* -- PAT -- */
@@ -296,7 +300,10 @@ typedef struct decoded_sdt_s
 typedef std::map<uint16_t, bool> map_rcvd;
 
 
-class decode_network_service : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
+class decode_network_service
+#ifndef OLD_DECODER
+ : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
+#endif
 {
 public:
 	decode_network_service();
@@ -305,10 +312,12 @@ public:
 	decode_network_service(const decode_network_service&);
 	decode_network_service& operator= (const decode_network_service&);
 
+#ifndef OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 	bool updateEIT(dvbtee::decode::Table *table);
 	bool updateSDT(dvbtee::decode::Table *table);
+#endif
 
 	bool take_eit(dvbpsi_eit_t*, uint8_t);
 	bool take_sdt(dvbpsi_sdt_t*);
@@ -320,7 +329,9 @@ public:
 	const map_decoded_eit* get_decoded_eit() const { return decoded_eit; }
 
 private:
+#ifndef OLD_DECODER
 	dvbtee::decode::TableStore store;
+#endif
 
 	decoded_sdt_t                   decoded_sdt;
 
@@ -335,7 +346,10 @@ private:
 
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
 
-class decode_network : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
+class decode_network
+#ifndef OLD_DECODER
+ : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
+#endif
 {
 public:
 	decode_network();
@@ -344,9 +358,11 @@ public:
 	decode_network(const decode_network&);
 	decode_network& operator= (const decode_network&);
 
+#ifndef OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 	bool updateNIT(dvbtee::decode::Table *table);
+#endif
 
 	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); }
 	bool take_nit(dvbpsi_nit_t*);
@@ -363,11 +379,17 @@ public:
 	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x) : false; }
 	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; }
 
+#ifdef OLD_DECODER
+	desc descriptors;
+#else
 	dvbtee::decode::DescriptorStore descriptors;
+#endif
 
 	uint16_t orig_network_id;
 private:
+#ifndef OLD_DECODER
 	dvbtee::decode::TableStore store;
+#endif
 
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
@@ -416,7 +438,10 @@ public:
 	virtual void print(const char *, ...) = 0;
 };
 
-class decode : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
+class decode
+#ifndef OLD_DECODER
+ : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
+#endif
 {
 public:
 	decode();
@@ -425,6 +450,7 @@ public:
 	decode(const decode&);
 	decode& operator= (const decode&);
 
+#ifndef OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 	bool updatePAT(dvbtee::decode::Table *table);
@@ -433,6 +459,7 @@ public:
 	bool updateMGT(dvbtee::decode::Table *table);
 	bool updateEIT(dvbtee::decode::Table *table);
 	bool updateETT(dvbtee::decode::Table *table);
+#endif
 
 	bool take_pat(dvbpsi_pat_t*);
 	bool take_pmt(dvbpsi_pmt_t*);
@@ -489,7 +516,9 @@ public:
 
 	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e);
 private:
+#ifndef OLD_DECODER
 	dvbtee::decode::TableStore store;
+#endif
 
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -512,7 +541,11 @@ private:
 	//map_rcvd rcvd_eit;
 	map_decoded_atsc_ett decoded_ett;
 
+#ifdef OLD_DECODER
+	desc descriptors;
+#else
 	dvbtee::decode::DescriptorStore descriptors;
+#endif
 
 	void dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	void dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);

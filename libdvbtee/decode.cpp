@@ -29,6 +29,7 @@
 #include "functions.h"
 #include "decode.h"
 
+#ifndef OLD_DECODER
 #include "tabl_00.h"
 #include "tabl_02.h"
 #include "tabl_40.h"
@@ -39,6 +40,7 @@
 #include "tabl_c8.h"
 #include "tabl_cb.h"
 #include "tabl_cc.h"
+#endif
 #endif
 
 #include "log.h"
@@ -82,9 +84,13 @@ void clear_decoded_networks()
 }
 
 decode_network_service::decode_network_service()
+#ifdef OLD_DECODER
+  : services_w_eit_pf(0)
+#else
   : NullDecoder()
   , store(this)
   , services_w_eit_pf(0)
+#endif
   , services_w_eit_sched(0)
   , m_eit_x(0)
 {
@@ -116,9 +122,13 @@ decode_network_service::~decode_network_service()
 }
 
 decode_network_service::decode_network_service(const decode_network_service&)
+#ifdef OLD_DECODER
+  : services_w_eit_pf(0)
+#else
   : NullDecoder()
   , store(this)
   , services_w_eit_pf(0)
+#endif
   , services_w_eit_sched(0)
   , m_eit_x(0)
 {
@@ -156,6 +166,7 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 	return *this;
 }
 
+#ifndef OLD_DECODER
 /* TableWatcher */
 void decode_network_service::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 {
@@ -210,11 +221,16 @@ bool decode_network_service::updateSDT(dvbtee::decode::Table *table)
 
 	return true;
 }
+#endif
 
 decode_network::decode_network()
+#ifdef OLD_DECODER
+  : orig_network_id(0)
+#else
   : NullDecoder()
   , orig_network_id(0)
   , store(this)
+#endif
 {
 	dprintf("()");
 
@@ -236,8 +252,10 @@ decode_network::~decode_network()
 }
 
 decode_network::decode_network(const decode_network&)
+#ifndef OLD_DECODER
   : NullDecoder()
   , store(this)
+#endif
 {
 	dprintf("(copy)");
 
@@ -260,6 +278,7 @@ decode_network& decode_network::operator= (const decode_network& cSource)
 	return *this;
 }
 
+#ifndef OLD_DECODER
 /* TableWatcher */
 void decode_network::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 {
@@ -289,11 +308,16 @@ bool decode_network::updateNIT(dvbtee::decode::Table *table)
 
 	return true;
 }
+#endif
 
 decode::decode()
+#ifdef OLD_DECODER
+  : orig_network_id(0)
+#else
   : NullDecoder()
   , store(this)
   , orig_network_id(0)
+#endif
   , network_id(0)
   , stream_time((time_t)0)
   , eit_x(0)
@@ -343,8 +367,10 @@ decode::~decode()
 }
 
 decode::decode(const decode&)
+#ifndef OLD_DECODER
  : NullDecoder()
  , store(this)
+#endif
 {
 	dprintf("(copy)");
 
@@ -407,6 +433,7 @@ decode& decode::operator= (const decode& cSource)
 	return *this;
 }
 
+#ifndef OLD_DECODER
 /* TableWatcher */
 void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 {
@@ -592,6 +619,7 @@ bool decode::updateETT(dvbtee::decode::Table *table)
 
 	return true;
 }
+#endif
 #endif
 
 /* -- STREAM TIME -- */
@@ -802,11 +830,22 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 		dprintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
 		descriptors.decode(p_channel->p_first_descriptor);
 
+#ifdef OLD_DECODER
+		desc local_descriptors;
+#else
 		dvbtee::decode::DescriptorStore local_descriptors;
+#endif
 		local_descriptors.decode(p_channel->p_first_descriptor);
 
 		std::string languages;
 
+#ifdef OLD_DECODER
+		for (map_dra1::const_iterator iter_dra1 = local_descriptors._a1.begin(); iter_dra1 != local_descriptors._a1.end(); ++iter_dra1) {
+			if (!languages.empty()) languages.append(", ");
+			if (iter_dra1->second.iso_639_code[0])
+				for (int i=0; i<3; i++) languages.push_back(iter_dra1->second.iso_639_code[i]);
+		}
+#else
 		const dvbtee::decode::Descriptor *d = local_descriptors.last(0xa1);
 		if (d) {
 			const dvbtee::value::Array& a  = d->get<dvbtee::value::Array>("serviceLocation");
@@ -824,6 +863,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 				}
 			}
 		}
+#endif
 #if VCT_DBG
 		unsigned char service_name[8] = { 0 };
 		for ( int i = 0; i < 7; ++i ) service_name[i] = cur_channel.short_name[i*2+1];
