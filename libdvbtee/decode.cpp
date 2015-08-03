@@ -943,7 +943,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 #endif
 
 #ifdef OLD_DECODER
-static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, dvbtee::decode::DescriptorStore* descriptors)
+static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, /*dvbtee::decode::DescriptorStore*/ desc* descriptors)
 #define NIT_DBG 1
 {
 	if ((decoded_nit->version    == p_nit->i_version) &&
@@ -1057,7 +1057,7 @@ const map_decoded_eit *decode_network::get_decoded_eit(uint16_t ts_id) const
 }
 
 #ifdef OLD_DECODER
-static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::decode::DescriptorStore* descriptors,
+static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, /*dvbtee::decode::DescriptorStore*/ desc* descriptors,
 		       unsigned int* services_w_eit_pf, unsigned int* services_w_eit_sched)
 #define SDT_DBG 1
 {
@@ -1108,6 +1108,14 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::
 		/* service descriptors contain service provider name & service name */
 		descriptors->decode(p_service->p_first_descriptor);
 
+#ifdef OLD_DECODER
+		strncpy((char*)cur_service.provider_name,
+			(const char*)descriptors->provider_name,
+			sizeof(cur_service.provider_name));
+		strncpy((char*)cur_service.service_name,
+			(const char*)descriptors->service_name,
+			sizeof(cur_service.service_name));
+#else
 		memset((void*)cur_service.provider_name, 0, sizeof(cur_service.provider_name));
 		memset((void*)cur_service.service_name, 0, sizeof(cur_service.service_name));
 
@@ -1120,6 +1128,7 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, dvbtee::
 				d->get<std::string>("serviceName").c_str(),
 				sizeof(cur_service.service_name));
 		}
+#endif
 
 		dprintf("%05d | %s %s | %s - %s",
 			cur_service.service_id,
@@ -1167,7 +1176,7 @@ bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 }
 
 #ifdef OLD_DECODER
-bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decode::DescriptorStore* descriptors, uint8_t eit_x)
+bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, /*dvbtee::decode::DescriptorStore*/ desc* descriptors, uint8_t eit_x)
 {
 #if USING_DVBPSI_VERSION_0
 	uint16_t __service_id = p_eit->i_service_id;
@@ -1208,11 +1217,16 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, dvbtee::decod
 
 		descriptors->decode(p_event->p_first_descriptor);
 
+#ifdef OLD_DECODER
+		cur_event.name.assign((const char *)descriptors->_4d.name);
+		cur_event.text.assign((const char *)descriptors->_4d.text);
+#else
 		const dvbtee::decode::Descriptor *d = descriptors->last(0x4d);
 		if (d) {
 			cur_event.name.assign(d->get<std::string>("name").c_str());
 			cur_event.text.assign(d->get<std::string>("text").c_str());
 		}
+#endif
 #if DBG
 		time_t start = datetime_utc(cur_event.start_time /*+ (60 * tz_offset)*/);
 		time_t end   = datetime_utc(cur_event.start_time + cur_event.length_sec /*+ (60 * tz_offset)*/);
@@ -1275,12 +1289,11 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 
 bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
 {
-#if 1
+#ifdef OLD_DECODER
+	return __take_eit(p_eit, decoded_eit, &descriptors, eit_x);
+#else
 	m_eit_x = eit_x;
 	return store.ingest(p_eit, this);
-#else
-	dvbtee::decode::DescriptorStore descriptors;
-	return __take_eit(p_eit, decoded_eit, &descriptors, eit_x);
 #endif
 }
 
@@ -2002,6 +2015,9 @@ const decode_network* decode::get_decoded_network() const
 
 uint16_t decode::get_lcn(uint16_t service_id) const
 {
+#ifdef OLD_DECODER
+	return networks.count(network_id) ? networks[network_id].descriptors.lcn[service_id]: 0;
+#else
 	uint16_t lcn = 0;
 
 	// XXX: FIXME: must refactor decode::get_lcn() & LCN descriptor 0x83
@@ -2011,6 +2027,7 @@ uint16_t decode::get_lcn(uint16_t service_id) const
 		if (d) lcn = d->get<uint16_t>(service_id);
 	}
 	return lcn;
+#endif
 }
 
 const map_decoded_eit* decode::get_decoded_eit() const

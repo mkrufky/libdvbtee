@@ -342,6 +342,9 @@ private:
 	unsigned int                    services_w_eit_sched;
 
 	uint8_t m_eit_x;
+#ifdef OLD_DECODER
+	desc descriptors;
+#endif
 };
 
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
