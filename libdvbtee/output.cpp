@@ -562,11 +562,21 @@ void output_stream::close_file()
 **/
 int output_stream::change_file(char* target_file)
 {
-    std::stringstream tmp_stream;
     std::string new_name;
     
-    tmp_stream << target_file << "_" << name_index;
-    tmp_stream >> new_name;
+    if (detect_printf_seq(target_file)) {
+        dprintf("sequence detected");
+        
+        char buff[100];
+        snprintf(buff, sizeof(buff), target_file, name_index);
+        new_name = buff;
+    } else {
+        dprintf("sequence not detected");
+        
+        std::stringstream tmp_stream;
+        tmp_stream << target_file << "_" << name_index;
+        tmp_stream >> new_name;
+    }
     
     dprintf("sock: %d, old: %s, new: %s", sock, target_file, new_name.c_str());
 
@@ -584,6 +594,50 @@ int output_stream::change_file(char* target_file)
     
     name_index++;
     return 0;
+}
+
+/**
+    Search for printf format sequence in string.
+
+    @param char* str target string.
+    @return bool
+**/
+bool output_stream::detect_printf_seq(const std::string& str) {
+    std::string::size_type last_pos = 0;
+    
+    do {
+        last_pos = str.find('%', last_pos);
+        
+        if (last_pos == std::string::npos)
+            break; // Not found anythin.
+        
+        if (last_pos == str.length() - 1)
+            break; // Found stray '%' at the end of the string.
+        
+        char ch = str[last_pos + 1];
+        
+        if (ch == '%') // double percent -> escaped %. Go on for next. 
+        {
+            last_pos += 2;
+            continue;
+        }
+        
+        while (
+            last_pos < str.length()
+            && std::string("0123456789").find(ch) != std::string::npos
+        ) {
+            last_pos++;
+            ch = str[last_pos+1];
+        }
+        
+        if (ch == 'd')
+        {
+            return true;
+        }
+        last_pos++;
+    } while (last_pos < str.length());
+    
+    return false;
 }
 
 int output_stream::add(void* priv, stream_callback callback, map_pidtype &pids)

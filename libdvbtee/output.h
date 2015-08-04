@@ -89,6 +89,7 @@ public:
 	void stop();
 	inline void stop_after_drain() { if (drain()) stop(); }
 	int change_file(char*);
+	bool detect_printf_seq(const std::string&);
 	void close_file();
 
 	bool push(uint8_t*, int);
