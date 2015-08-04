@@ -76,7 +76,7 @@ typedef struct ts_elementary_stream_s
 	// from ISO639 language descriptor 0A:
 	unsigned char iso_639_code[4];
 
-	ts_elementary_stream_s() { memset(iso_639_code, 0, sizeof(iso_639_code)); }
+	ts_elementary_stream_s() : type(0xff), pid(0xffff) { memset(iso_639_code, 0, sizeof(iso_639_code)); }
 } ts_elementary_stream_t; // FIXME: rename this later
 
 typedef std::map<uint16_t, ts_elementary_stream_t> map_ts_elementary_streams; /* arbitrary idx(pid), ts_elementary_stream_t */
