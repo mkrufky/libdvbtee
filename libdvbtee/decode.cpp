@@ -1111,10 +1111,12 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, /*dvbtee
 #ifdef OLD_DECODER
 		strncpy((char*)cur_service.provider_name,
 			(const char*)descriptors->provider_name,
-			sizeof(cur_service.provider_name));
+			sizeof(cur_service.provider_name)-1);
+		cur_service.provider_name[sizeof(cur_service.provider_name)-1] = '\0';
 		strncpy((char*)cur_service.service_name,
 			(const char*)descriptors->service_name,
-			sizeof(cur_service.service_name));
+			sizeof(cur_service.service_name)-1);
+		cur_service.service_name[sizeof(cur_service.service_name)-1] = '\0';
 #else
 		memset((void*)cur_service.provider_name, 0, sizeof(cur_service.provider_name));
 		memset((void*)cur_service.service_name, 0, sizeof(cur_service.service_name));
