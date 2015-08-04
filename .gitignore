@@ -23,6 +23,7 @@ patches/
 # dirs
 libdvbpsi/
 usr/
+nbproject/
 
 # compiled binary
 dvbtee/dvbtee

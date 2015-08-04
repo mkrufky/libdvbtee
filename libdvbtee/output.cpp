@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string>
+#include <sstream>
 #include <netdb.h>
 
 #include "output.h"
@@ -301,7 +302,7 @@ void* output_stream::output_stream_thread()
 	uint8_t *data = NULL;
 	int buf_size, ret = 0;
 
-	dPrintf("(%d)", sock);
+	dPrintf("sock: %d, stream_method: %d", sock, stream_method);
 #if 1
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
@@ -553,6 +554,38 @@ void output_stream::close_file()
 	}
 }
 
+/**
+    Open or reopen file for output.
+
+    @param char* output filename.
+    @return int 0 if file opened and -1 if open fails.
+**/
+int output_stream::change_file(char* target_file)
+{
+    std::stringstream tmp_stream;
+    std::string new_name;
+    
+    tmp_stream << target_file << "_" << name_index;
+    tmp_stream >> new_name;
+    
+    dprintf("sock: %d, old: %s, new: %s", sock, target_file, new_name.c_str());
+
+    if (sock >= 0) {
+        close(sock);
+        //sock = -1;
+    }
+        
+    if (
+        (sock = open(new_name.c_str(), O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0
+    ) {
+        perror("file open failed");
+        return -1;
+    }
+    
+    name_index++;
+    return 0;
+}
+
 int output_stream::add(void* priv, stream_callback callback, map_pidtype &pids)
 {
 	stream_cb = callback;
@@ -647,13 +680,14 @@ int output_stream::add(char* target, map_pidtype &pids)
 
 	if (b_file) {
 		dPrintf("opening %s...", ip);
-		if ((sock = open(ip, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0) {
-			perror("file failed");
+		if (change_file(ip) < 0) {
 			return -1;
 		} else {
-			ringbuffer.reset();
-			stream_method = OUTPUT_STREAM_FILE;
-			return set_pids(pids);
+                    name_index = 0;
+
+                    ringbuffer.reset();
+                    stream_method = OUTPUT_STREAM_FILE;
+                    return set_pids(pids);
 		}
 	}
 

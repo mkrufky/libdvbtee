@@ -88,6 +88,7 @@ public:
 	bool drain();
 	void stop();
 	inline void stop_after_drain() { if (drain()) stop(); }
+	int change_file(char*);
 	void close_file();
 
 	bool push(uint8_t*, int);
@@ -116,6 +117,7 @@ private:
 	enum output_mimetype mimetype;
 
 	char name[21];
+	unsigned int name_index;
 
 	rbuf ringbuffer;
 
