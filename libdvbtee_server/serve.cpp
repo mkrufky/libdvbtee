@@ -1252,7 +1252,10 @@ bool serve_client::__command(char* cmdline)
 					cli_print("ERROR: open_file(%s) failed.\n", arg);
 					return false;
 				}
-				feeder->start();
+				if (!feeder->start()) {
+					cli_print("ERROR: start() failed.\n");
+					return false;
+				}
 			} else
 			if (strstr(cmd, "opensock")) {
 				feeder->start_socket(arg);
