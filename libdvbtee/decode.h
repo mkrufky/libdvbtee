@@ -53,7 +53,11 @@
 #endif
 #endif
 
-#ifdef OLD_DECODER
+#ifndef OLD_DECODER
+#define OLD_DECODER 0
+#endif
+
+#if OLD_DECODER
 #include "desc.h"
 #endif
 
@@ -301,7 +305,7 @@ typedef std::map<uint16_t, bool> map_rcvd;
 
 
 class decode_network_service
-#ifndef OLD_DECODER
+#if !OLD_DECODER
  : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 #endif
 {
@@ -312,7 +316,7 @@ public:
 	decode_network_service(const decode_network_service&);
 	decode_network_service& operator= (const decode_network_service&);
 
-#ifndef OLD_DECODER
+#if !OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 	bool updateEIT(dvbtee::decode::Table *table);
@@ -329,7 +333,7 @@ public:
 	const map_decoded_eit* get_decoded_eit() const { return decoded_eit; }
 
 private:
-#ifndef OLD_DECODER
+#if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
 
@@ -342,7 +346,7 @@ private:
 	unsigned int                    services_w_eit_sched;
 
 	uint8_t m_eit_x;
-#ifdef OLD_DECODER
+#if OLD_DECODER
 	desc descriptors;
 #endif
 };
@@ -350,7 +354,7 @@ private:
 typedef std::map<uint16_t, decode_network_service> map_decoded_network_services;
 
 class decode_network
-#ifndef OLD_DECODER
+#if !OLD_DECODER
  : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 #endif
 {
@@ -361,7 +365,7 @@ public:
 	decode_network(const decode_network&);
 	decode_network& operator= (const decode_network&);
 
-#ifndef OLD_DECODER
+#if !OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 	bool updateNIT(dvbtee::decode::Table *table);
@@ -382,7 +386,7 @@ public:
 	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_sched(current_eit_x) : false; }
 	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].eit_x_complete_dvb_pf() : false; }
 
-#ifdef OLD_DECODER
+#if OLD_DECODER
 	desc descriptors;
 #else
 	dvbtee::decode::DescriptorStore descriptors;
@@ -390,7 +394,7 @@ public:
 
 	uint16_t orig_network_id;
 private:
-#ifndef OLD_DECODER
+#if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
 
@@ -442,7 +446,7 @@ public:
 };
 
 class decode
-#ifndef OLD_DECODER
+#if !OLD_DECODER
  : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 #endif
 {
@@ -453,7 +457,7 @@ public:
 	decode(const decode&);
 	decode& operator= (const decode&);
 
-#ifndef OLD_DECODER
+#if !OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 	bool updatePAT(dvbtee::decode::Table *table);
@@ -519,7 +523,7 @@ public:
 
 	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e);
 private:
-#ifndef OLD_DECODER
+#if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
 
@@ -544,7 +548,7 @@ private:
 	//map_rcvd rcvd_eit;
 	map_decoded_atsc_ett decoded_ett;
 
-#ifdef OLD_DECODER
+#if OLD_DECODER
 	desc descriptors;
 #else
 	dvbtee::decode::DescriptorStore descriptors;
