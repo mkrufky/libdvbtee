@@ -219,6 +219,7 @@ output_stream::output_stream()
   , f_streaming(false)
   , sock(-1)
   , mimetype(MIMETYPE_OCTET_STREAM)
+  , target_file_size_limit(0)
   , ringbuffer()
   , stream_method(OUTPUT_STREAM_UDP)
   , count_in(0)
@@ -488,7 +489,7 @@ bool output_stream::push(uint8_t* p_data, int size)
 int output_stream::stream(uint8_t* p_data, int size)
 {
 	int ret = -1;
-
+        
 	if ((!p_data) || (!size))
 		dPrintf("no data to stream!!!");
 	/* stream data to target */
@@ -504,6 +505,15 @@ int output_stream::stream(uint8_t* p_data, int size)
 		}
 		break;
 	case OUTPUT_STREAM_FILE:
+            //dprintf("(sock: %d, size: %d, filesize: %lu, limit: %lu)", sock, size, get_file_size(sock), target_file_size_limit);
+
+            if (
+                target_file_size_limit > 0
+                && ((unsigned)get_file_size(sock) + size) >= target_file_size_limit
+            ) {
+                change_file();
+            }
+            
 		ret = write(sock, p_data, size);
 		if (ret < 0) {
 			stop_without_wait();
@@ -560,39 +570,44 @@ void output_stream::close_file()
     @param char* output filename.
     @return int 0 if file opened and -1 if open fails.
 **/
-int output_stream::change_file(char* target_file)
+int output_stream::change_file()
 {
     std::string new_name;
     
-    if (detect_printf_seq(target_file)) {
-        dprintf("sequence detected");
-        
-        char buff[100];
-        snprintf(buff, sizeof(buff), target_file, name_index);
-        new_name = buff;
-    } else {
-        dprintf("sequence not detected");
-        
-        std::stringstream tmp_stream;
-        tmp_stream << target_file << "_" << name_index;
-        tmp_stream >> new_name;
+    new_name = target_file_name;
+    
+    if (target_file_size_limit > 0){
+        if (detect_printf_seq(target_file_name)) {
+            dprintf("sequence detected");
+
+            char buff[100];
+            snprintf(buff, sizeof(buff), target_file_name, target_file_name_index);
+            new_name = buff;
+        } else {
+            dprintf("sequence not detected");
+
+            std::stringstream tmp_stream;
+            tmp_stream << target_file_name << "_" << target_file_name_index;
+            tmp_stream >> new_name;
+        }
     }
     
-    dprintf("sock: %d, old: %s, new: %s", sock, target_file, new_name.c_str());
+    //dprintf("sock: %d, old: %s, new: %s", sock, target_file, new_name.c_str());
 
     if (sock >= 0) {
         close(sock);
         //sock = -1;
     }
         
+    dprintf("opening file %s...", new_name.c_str());
     if (
         (sock = open(new_name.c_str(), O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0
     ) {
-        perror("file open failed");
+        perror("open file failed");
         return -1;
     }
     
-    name_index++;
+    target_file_name_index++;
     return 0;
 }
 
@@ -638,6 +653,19 @@ bool output_stream::detect_printf_seq(const std::string& str) {
     } while (last_pos < str.length());
     
     return false;
+}
+
+/**
+    Get file size by file descriptor 
+
+    @param int fd file descriptor
+    @return int file size
+**/
+long output_stream::get_file_size(int fd)
+{
+    struct stat stat_buf;
+    int rc = fstat(fd, &stat_buf);
+    return rc == 0 ? stat_buf.st_size : -1;
 }
 
 int output_stream::add(void* priv, stream_callback callback, map_pidtype &pids)
@@ -733,16 +761,16 @@ int output_stream::add(char* target, map_pidtype &pids)
 		close(sock);
 
 	if (b_file) {
-		dPrintf("opening %s...", ip);
-		if (change_file(ip) < 0) {
-			return -1;
-		} else {
-                    name_index = 0;
+            target_file_name       = ip;
+            target_file_name_index = 0;
 
-                    ringbuffer.reset();
-                    stream_method = OUTPUT_STREAM_FILE;
-                    return set_pids(pids);
-		}
+            if (change_file() < 0) {
+                return -1;
+            }
+
+            ringbuffer.reset();
+            stream_method = OUTPUT_STREAM_FILE;
+            return set_pids(pids);
 	}
 
 	sock = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
@@ -807,6 +835,7 @@ output::output()
   , ringbuffer()
   , num_targets(0)
   , options(OUTPUT_NONE)
+  , file_size_limit(0)
   , count_in(0)
   , count_out(0)
 {
@@ -1213,9 +1242,13 @@ int output::__add(char* target, map_pidtype &pids)
 
 	/* push data into output buffer */
 	int ret = output_streams[target_id].add(target, pids);
-	if (ret == 0)
+	if (ret == 0) {
 		num_targets++;
-	else
+
+		dPrintf("Set file size limit to %lu", file_size_limit);
+            
+		output_streams[target_id].rotate(file_size_limit);
+	} else
 		dPrintf("failed to add target #%d: %s", target_id, target);
 
 	dPrintf("~(%d->%s)", target_id, target);

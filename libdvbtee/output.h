@@ -88,7 +88,8 @@ public:
 	bool drain();
 	void stop();
 	inline void stop_after_drain() { if (drain()) stop(); }
-	int change_file(char*);
+	int change_file();
+        void rotate(unsigned long int limit) { target_file_size_limit = limit; }
 	bool detect_printf_seq(const std::string&);
 	void close_file();
 
@@ -118,12 +119,16 @@ private:
 	enum output_mimetype mimetype;
 
 	char name[21];
-	unsigned int name_index;
+        
+	char*             target_file_name;
+	unsigned int      target_file_name_index;
+        unsigned long int target_file_size_limit;
 
 	rbuf ringbuffer;
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
+        long get_file_size(int);
 
 	struct sockaddr_in  ip_addr;
 
@@ -192,6 +197,7 @@ public:
 	int add_http_server(int);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
+        void rotate(unsigned long int limit) { file_size_limit = limit; }
 
 	bool check();
 
@@ -222,6 +228,8 @@ private:
 	unsigned int num_targets;
 
 	enum output_options options;
+        
+        unsigned long int file_size_limit;
 
 	unsigned long int count_in, count_out;
 
