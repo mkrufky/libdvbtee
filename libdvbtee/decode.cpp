@@ -1455,7 +1455,9 @@ void decode::dump_epg_dvb(decode_report *reporter, uint16_t service_id)
 {
 	unsigned int eit_num = 0;
 
-	if (get_decoded_eit()) while ((eit_num < NUM_EIT) && (get_decoded_eit()[eit_num].count(service_id))) {
+	const map_decoded_eit *decoded_eit = get_decoded_eit();
+
+	if (decoded_eit) while ((eit_num < NUM_EIT) && (decoded_eit[eit_num].count(service_id))) {
 		dump_eit_x_dvb(reporter, eit_num, service_id);
 		eit_num++;
 	}
