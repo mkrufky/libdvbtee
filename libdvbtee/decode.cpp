@@ -1403,9 +1403,11 @@ void decode::dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t ser
 #endif
 
 		map_decoded_eit_events::const_iterator iter_eit;
-		if (get_decoded_eit())
-		for (iter_eit = ((map_decoded_eit*)get_decoded_eit())[eit_x][iter_sdt->second.service_id].events.begin();
-		     iter_eit != ((map_decoded_eit*)get_decoded_eit())[eit_x][iter_sdt->second.service_id].events.end();
+		const map_decoded_eit *decoded_eit = get_decoded_eit();
+		// FIXME:  CHANGE TO CONST_ITERATOR -- THIS IS DANGEROUS!!
+		if (decoded_eit)
+		for (iter_eit = ((map_decoded_eit*)decoded_eit)[eit_x][iter_sdt->second.service_id].events.begin();
+		     iter_eit != ((map_decoded_eit*)decoded_eit)[eit_x][iter_sdt->second.service_id].events.end();
 		     ++iter_eit) {
 #if 0
 			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
