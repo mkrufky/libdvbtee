@@ -192,8 +192,8 @@ void decode_network_service::updateTable(uint8_t tId, dvbtee::decode::Table *tab
 bool decode_network_service::updateEIT(dvbtee::decode::Table *table)
 {
 	if ((!table) || (!table->isValid()) ||
-	    ((0x4e >= table->getTableid()) ||
-	     (0x6f <= table->getTableid())))
+	    ((0x4e > table->getTableid()) ||
+	     (0x6f < table->getTableid())))
 		return false;
 
 	dvbtee::decode::eit *eitTable = (dvbtee::decode::eit*)table;
