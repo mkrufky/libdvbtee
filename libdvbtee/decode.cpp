@@ -1636,7 +1636,10 @@ bool decode::get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_eve
 
 	unsigned int eit_num = 0;
 
-	if (get_decoded_eit()) while ((eit_num < NUM_EIT) && (get_decoded_eit()[eit_num].count(service_id))) {
+	const map_decoded_eit *decoded_eit = get_decoded_eit();
+	// FIXME:  CHANGE TO CONST_ITERATOR -- THIS IS DANGEROUS!!
+
+	if (decoded_eit) while ((eit_num < NUM_EIT) && (decoded_eit[eit_num].count(service_id))) {
 #if 0
 		fprintf(stdout, "%s-%d: id:%d - %d: %s\n", __func__,
 			eit_num, iter_sdt->second.service_id,
@@ -1645,9 +1648,9 @@ bool decode::get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_eve
 #endif
 
 		map_decoded_eit_events::const_iterator iter_eit;
-		if (get_decoded_eit())
-		for (iter_eit = ((map_decoded_eit*)get_decoded_eit())[eit_num][iter_sdt->second.service_id].events.begin();
-		     iter_eit != ((map_decoded_eit*)get_decoded_eit())[eit_num][iter_sdt->second.service_id].events.end();
+		//if (decoded_eit)
+		for (iter_eit = ((map_decoded_eit*)decoded_eit)[eit_num][iter_sdt->second.service_id].events.begin();
+		     iter_eit != ((map_decoded_eit*)decoded_eit)[eit_num][iter_sdt->second.service_id].events.end();
 		     ++iter_eit) {
 
 			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
@@ -1758,9 +1761,11 @@ void decode::dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t ser
 #endif
 
 		map_decoded_eit_events::const_iterator iter_eit;
-		if (get_decoded_eit())
-		for (iter_eit = ((map_decoded_eit*)get_decoded_eit())[eit_x][iter_sdt->second.service_id].events.begin();
-		     iter_eit != ((map_decoded_eit*)get_decoded_eit())[eit_x][iter_sdt->second.service_id].events.end();
+		const map_decoded_eit *decoded_eit = get_decoded_eit();
+		// FIXME:  CHANGE TO CONST_ITERATOR -- THIS IS DANGEROUS!!
+		if (decoded_eit)
+		for (iter_eit = ((map_decoded_eit*)decoded_eit)[eit_x][iter_sdt->second.service_id].events.begin();
+		     iter_eit != ((map_decoded_eit*)decoded_eit)[eit_x][iter_sdt->second.service_id].events.end();
 		     ++iter_eit) {
 #if 0
 			time_t start = datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);
@@ -1810,7 +1815,9 @@ void decode::dump_epg_dvb(decode_report *reporter, uint16_t service_id)
 {
 	unsigned int eit_num = 0;
 
-	if (get_decoded_eit()) while ((eit_num < NUM_EIT) && (get_decoded_eit()[eit_num].count(service_id))) {
+	const map_decoded_eit *decoded_eit = get_decoded_eit();
+
+	if (decoded_eit) while ((eit_num < NUM_EIT) && (decoded_eit[eit_num].count(service_id))) {
 		dump_eit_x_dvb(reporter, eit_num, service_id);
 		eit_num++;
 	}
