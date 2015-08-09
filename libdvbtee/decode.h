@@ -550,8 +550,6 @@ private:
 
 #if OLD_DECODER
 	desc descriptors;
-#else
-	dvbtee::decode::DescriptorStore descriptors;
 #endif
 
 	void dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
