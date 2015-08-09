@@ -146,22 +146,10 @@ public:
 	}
 
 	template<typename T, class C>
-#if PsiTable_CONSTRUCTORTEMPLATE
 	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
 		return (update<T,C>(tableid, p_table)) ? true : add(tableid, p_table, watcher);
 	}
-#else
-	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
-	{
-		if (update<T,C>(tableid, p_table)) return true;
-
-		PsiTable psiTable;
-		TableTypeCarrier<T> inT(p_table);
-		psiTable.Set<T>(inT);
-		return add(tableid, psiTable, watcher);
-	}
-#endif
 
 	template <typename T> bool setOnly(T*, TableWatcher* w = NULL);
 
