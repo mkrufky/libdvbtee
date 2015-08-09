@@ -90,6 +90,9 @@ void Decoder::showChildren() const
 		Decoder *child = it->second;
 		if (!child) continue;
 		decoders.push((Object*)child);
+#if 0
+		child->showChildren();
+#endif
 	}
 	fprintf(stderr, "%s: %s\n", __func__, decoders.toJson().c_str());
 }
