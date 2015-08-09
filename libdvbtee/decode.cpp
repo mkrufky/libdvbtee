@@ -80,14 +80,16 @@ static map_network_decoder   networks;
 
 void clear_decoded_networks()
 {
+	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it)
+		delete it->second;
 	networks.clear();
 }
 
-decode_network_service::decode_network_service()
+decode_network_service::decode_network_service(Decoder *parent, std::string &name)
 #if OLD_DECODER
   : services_w_eit_pf(0)
 #else
-  : NullDecoder()
+  : LinkedDecoder(parent, name)
   , store(this)
   , services_w_eit_pf(0)
 #endif
@@ -108,6 +110,8 @@ decode_network_service::decode_network_service()
 
 decode_network_service::~decode_network_service()
 {
+	//showChildren();
+
 	dprintf("(%05d|%05d)",
 		decoded_sdt.network_id, decoded_sdt.ts_id);
 
@@ -119,51 +123,6 @@ decode_network_service::~decode_network_service()
 
 		decoded_eit[i].clear();
 	}
-}
-
-decode_network_service::decode_network_service(const decode_network_service&)
-#if OLD_DECODER
-  : services_w_eit_pf(0)
-#else
-  : NullDecoder()
-  , store(this)
-  , services_w_eit_pf(0)
-#endif
-  , services_w_eit_sched(0)
-  , m_eit_x(0)
-{
-	dprintf("(copy)");
-
-	for (int i = 0; i < NUM_EIT; i++) {
-		for (map_decoded_eit::iterator iter =
-			decoded_eit[i].begin();
-		     iter != decoded_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_eit[i].clear();
-	}
-}
-
-decode_network_service& decode_network_service::operator= (const decode_network_service& cSource)
-{
-	dprintf("(operator=)");
-
-	if (this == &cSource)
-		return *this;
-
-	services_w_eit_pf = 0;
-	services_w_eit_sched = 0;
-
-	for (int i = 0; i < NUM_EIT; i++) {
-		for (map_decoded_eit::iterator iter =
-			decoded_eit[i].begin();
-		     iter != decoded_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_eit[i].clear();
-	}
-
-	return *this;
 }
 
 #if !OLD_DECODER
@@ -223,11 +182,11 @@ bool decode_network_service::updateSDT(dvbtee::decode::Table *table)
 }
 #endif
 
-decode_network::decode_network()
+decode_network::decode_network(Decoder *parent, std::string &name)
 #if OLD_DECODER
   : orig_network_id(0)
 #else
-  : NullDecoder()
+  : LinkedDecoder(parent, name)
   , orig_network_id(0)
   , store(this)
 #endif
@@ -239,6 +198,8 @@ decode_network::decode_network()
 
 decode_network::~decode_network()
 {
+	//showChildren();
+
 #if 0
 	dprintf("(%05d|%05d)",
 		decoded_nit.network_id, decoded_sdt.network_id);
@@ -248,34 +209,25 @@ decode_network::~decode_network()
 		decoded_network_services.size());
 #endif
 
+	for (map_decoded_network_services::const_iterator it = decoded_network_services.begin(); it != decoded_network_services.end(); ++it)
+		delete it->second;
 	decoded_network_services.clear();
 }
 
-decode_network::decode_network(const decode_network&)
-#if !OLD_DECODER
-  : NullDecoder()
-  , store(this)
-#endif
+decode_network_service *decode_network::fetch_network_service(uint16_t ts_id)
 {
-	dprintf("(copy)");
+	static std::string name = "NETWORK SERVICE";
+	decode_network_service *ret = NULL;
+	map_decoded_network_services::const_iterator it = decoded_network_services.find(ts_id);
 
-	orig_network_id = 0;
+	if (it != decoded_network_services.end()) {
+		ret = it->second;
+	} else {
+		ret = new decode_network_service(this, name);
+		decoded_network_services[ts_id] = ret;
+	}
 
-	decoded_network_services.clear();
-}
-
-decode_network& decode_network::operator= (const decode_network& cSource)
-{
-	dprintf("(operator=)");
-
-	if (this == &cSource)
-		return *this;
-
-	orig_network_id = 0;
-
-	decoded_network_services.clear();
-
-	return *this;
+	return ret;
 }
 
 #if !OLD_DECODER
@@ -431,6 +383,22 @@ decode& decode::operator= (const decode& cSource)
 	physical_channel = 0;
 
 	return *this;
+}
+
+decode_network *decode::fetch_network(uint16_t nw_id)
+{
+	static std::string name = "NETWORK";
+	decode_network *ret = NULL;
+	map_network_decoder::const_iterator it = networks.find(nw_id);
+
+	if (it != networks.end()) {
+		ret = it->second;
+	} else {
+		ret = new decode_network(this, name);
+		networks[nw_id] = ret;
+	}
+
+	return ret;
 }
 
 #if !OLD_DECODER
@@ -992,15 +960,17 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, /*dvbtee
 bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 {
 	network_id = p_nit->i_network_id;
+
+	decode_network *nw = fetch_network(network_id);
 #if 0
-	return networks[network_id].take_nit(p_nit);
+	return nw->take_nit(p_nit);
 #else
-	bool ret = networks[network_id].take_nit(p_nit);
+	bool ret = nw->take_nit(p_nit);
 	const decoded_nit_t *decoded_nit = get_decoded_nit();
 	if ((decoded_nit) && (decoded_nit->ts_list.count(decoded_pat.ts_id))) {
 		orig_network_id = ((decoded_nit_t*)decoded_nit)->ts_list[decoded_pat.ts_id].orig_network_id;
 
-		networks[network_id].orig_network_id = orig_network_id;
+		nw->orig_network_id = orig_network_id;
 #if 0
 		return networks[orig_network_id].take_nit(p_nit);
 #endif
@@ -1011,15 +981,16 @@ bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 
 bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
 {
+	decode_network *nw = fetch_network(p_nit->i_network_id);
 #if 0
-	return networks[p_nit->i_network_id].take_nit(p_nit);
+	return nw->take_nit(p_nit);
 #else
-	bool ret = networks[p_nit->i_network_id].take_nit(p_nit);
+	bool ret = nw->take_nit(p_nit);
 	const decoded_nit_t *decoded_nit = get_decoded_nit();
 	if ((decoded_nit) && (decoded_nit->ts_list.count(decoded_pat.ts_id))) {
 		uint16_t other_orig_network_id = ((decoded_nit_t*)decoded_nit)->ts_list[decoded_pat.ts_id].orig_network_id;
 
-		networks[p_nit->i_network_id].orig_network_id = other_orig_network_id;
+		nw->orig_network_id = other_orig_network_id;
 #if 0
 		return networks[other_orig_network_id].take_nit(p_nit);
 #endif
@@ -1045,14 +1016,14 @@ bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
 const decoded_sdt_t *decode_network::get_decoded_sdt(uint16_t ts_id) const
 {
 	map_decoded_network_services::const_iterator it = decoded_network_services.find(ts_id);
-	return (it == decoded_network_services.end()) ? NULL : it->second.get_decoded_sdt();
+	return (it == decoded_network_services.end()) ? NULL : it->second->get_decoded_sdt();
 	//return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL;
 }
 
 const map_decoded_eit *decode_network::get_decoded_eit(uint16_t ts_id) const
 {
 	map_decoded_network_services::const_iterator it = decoded_network_services.find(ts_id);
-	return (it == decoded_network_services.end()) ? NULL : it->second.get_decoded_eit();
+	return (it == decoded_network_services.end()) ? NULL : it->second->get_decoded_eit();
 	//return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id].decoded_eit : NULL;
 }
 
@@ -1151,20 +1122,20 @@ bool decode::take_sdt_actual(dvbpsi_sdt_t* p_sdt)
 {
 	orig_network_id = p_sdt->i_network_id;
 
-	decode_network &nw = networks[orig_network_id];
+	decode_network *nw = fetch_network(orig_network_id);
 
-	nw.orig_network_id = orig_network_id;
+	nw->orig_network_id = orig_network_id;
 
-	return nw.take_sdt(p_sdt);
+	return nw->take_sdt(p_sdt);
 }
 
 bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 {
-	decode_network &nw = networks[p_sdt->i_network_id];
+	decode_network *nw = fetch_network(p_sdt->i_network_id);
 
-	nw.orig_network_id = p_sdt->i_network_id;
+	nw->orig_network_id = p_sdt->i_network_id;
 
-	return nw.take_sdt(p_sdt);
+	return nw->take_sdt(p_sdt);
 }
 
 bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
@@ -1286,7 +1257,8 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	table_id_to_eit_x(p_eit->i_table_id, &eit_x);
 #endif
 
-	return networks[p_eit->i_network_id].take_eit(p_eit, eit_x);
+	decode_network *nw = fetch_network(p_eit->i_network_id);
+	return nw->take_eit(p_eit, eit_x);
 }
 
 bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
@@ -1943,12 +1915,12 @@ bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
 
 bool decode::eit_x_complete_dvb_pf()
 {
-	return networks.count(orig_network_id) ? networks[orig_network_id].eit_x_complete_dvb_pf(decoded_pat.ts_id) : false;
+	return networks.count(orig_network_id) ? networks[orig_network_id]->eit_x_complete_dvb_pf(decoded_pat.ts_id) : false;
 }
 
 bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 {
-	return networks.count(orig_network_id) ? networks[orig_network_id].eit_x_complete_dvb_sched(decoded_pat.ts_id, current_eit_x) : false;
+	return networks.count(orig_network_id) ? networks[orig_network_id]->eit_x_complete_dvb_sched(decoded_pat.ts_id, current_eit_x) : false;
 }
 
 bool decode_network_service::eit_x_complete_dvb_pf()
@@ -2018,7 +1990,7 @@ bool decode::got_all_eit(int limit)
 const decode_network* decode::get_decoded_network() const
 {
 	map_network_decoder::const_iterator it = networks.find(orig_network_id);
-	return (it == networks.end()) ? NULL : &it->second;
+	return (it == networks.end()) ? NULL : it->second;
 	//return networks.count(orig_network_id) ? &networks[orig_network_id] : NULL;
 }
 
@@ -2032,7 +2004,7 @@ uint16_t decode::get_lcn(uint16_t service_id) const
 	// XXX: FIXME: must refactor decode::get_lcn() & LCN descriptor 0x83
 	map_network_decoder::const_iterator it = networks.find(network_id);
 	if (it != networks.end()) {
-		const dvbtee::decode::Descriptor *d = it->second.descriptors.last(0x83);
+		const dvbtee::decode::Descriptor *d = it->second->descriptors.last(0x83);
 		if (d) lcn = d->get<uint16_t>(service_id);
 	}
 	return lcn;
@@ -2042,21 +2014,21 @@ uint16_t decode::get_lcn(uint16_t service_id) const
 const map_decoded_eit* decode::get_decoded_eit() const
 {
 	map_network_decoder::const_iterator it = networks.find(orig_network_id);
-	return (it == networks.end()) ? NULL : it->second.get_decoded_eit(decoded_pat.ts_id);
+	return (it == networks.end()) ? NULL : it->second->get_decoded_eit(decoded_pat.ts_id);
 	//return networks.count(orig_network_id) ? networks[orig_network_id].get_decoded_eit(decoded_pat.ts_id) : NULL;
 }
 
 const decoded_sdt_t* decode::get_decoded_sdt() const
 {
 	map_network_decoder::const_iterator it = networks.find(orig_network_id);
-	return (it == networks.end()) ? NULL : it->second.get_decoded_sdt(decoded_pat.ts_id);
+	return (it == networks.end()) ? NULL : it->second->get_decoded_sdt(decoded_pat.ts_id);
 	//return networks.count(orig_network_id) ? networks[orig_network_id].get_decoded_sdt(decoded_pat.ts_id) : NULL;
 }
 
 const decoded_nit_t* decode::get_decoded_nit() const
 {
 	map_network_decoder::const_iterator it = networks.find(network_id);
-	return (it == networks.end()) ? NULL : it->second.get_decoded_nit();
+	return (it == networks.end()) ? NULL : it->second->get_decoded_nit();
 	//return networks.count(network_id) ? networks[network_id].get_decoded_nit() : NULL;
 }
 
