@@ -95,7 +95,7 @@ struct PsiTable {
 #else
     template<typename T> void Set(TableTypeCarrier<T> inT) { m_priv = &inT; }
 #endif
-    template<typename T> T* Get() { return ((TableTypeCarrier<T>*)m_priv)->Get(); }
+    template<typename T> T* Get() { return (!m_priv) ? NULL : ((TableTypeCarrier<T>*)m_priv)->Get(); }
 
 private:
     TableTypeCarrierBase* m_priv;
