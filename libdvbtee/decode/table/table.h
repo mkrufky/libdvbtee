@@ -139,7 +139,7 @@ public:
 #if PsiTable_CONSTRUCTORTEMPLATE
 	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
-		return (update<T,C>(tableid, p_table)) ? true : add(p_table, watcher);
+		return (update<T,C>(tableid, p_table)) ? true : add(tableid, p_table, watcher);
 	}
 #else
 	bool setOnly(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
