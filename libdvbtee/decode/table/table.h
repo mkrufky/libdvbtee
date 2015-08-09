@@ -89,6 +89,7 @@ private:
 
 #define PsiTable_CONSTRUCTORTEMPLATE 1
 struct PsiTable {
+    explicit PsiTable() : m_priv(NULL) { }
 #if PsiTable_CONSTRUCTORTEMPLATE
     template<typename T> PsiTable(TableTypeCarrier<T> inT) { m_priv = &inT; }
 #else
