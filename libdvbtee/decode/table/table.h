@@ -80,7 +80,7 @@ class TableTypeCarrierBase {};
 template<class T>
 class TableTypeCarrier: public TableTypeCarrierBase {
 public:
-	TableTypeCarrier(T* p) : m_p(p) {}
+	explicit TableTypeCarrier(T* p) : m_p(p) {}
 
 	T* Get() { return m_p; }
 private:
@@ -91,7 +91,7 @@ private:
 struct PsiTable {
     explicit PsiTable() : m_priv(NULL) { }
 #if PsiTable_CONSTRUCTORTEMPLATE
-    template<typename T> PsiTable(TableTypeCarrier<T> inT) { m_priv = &inT; }
+    template<typename T> explicit PsiTable(TableTypeCarrier<T> inT) { m_priv = &inT; }
 #else
     template<typename T> void Set(TableTypeCarrier<T> inT) { m_priv = &inT; }
 #endif
@@ -110,12 +110,21 @@ public:
 	bool add(uint8_t, PsiTable, TableWatcher* watcher = NULL);
 
 	template<typename T>
-	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL) { return add(tableid, PsiTable(TableTypeCarrier<T>(p_table)), watcher); }
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
+	{
+		return add(tableid, PsiTable(TableTypeCarrier<T>(p_table)), watcher);
+	}
 #else
 	bool add(uint8_t, PsiTable&, TableWatcher* watcher = NULL);
 
 	template<typename T>
-	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL) { PsiTable psiTable; psiTable.Set<T>(p_table); return add(tableid, psiTable, watcher); }
+	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
+	{
+		PsiTable psiTable;
+		TableTypeCarrier<T> inT(p_table);
+		psiTable.Set<T>(inT);
+		return add(tableid, psiTable, watcher);
+	}
 #endif
 
 	template <typename T> bool add(T*, TableWatcher* w = NULL);
@@ -148,7 +157,8 @@ public:
 		if (update<T,C>(tableid, p_table)) return true;
 
 		PsiTable psiTable;
-		psiTable.Set<T>(p_table);
+		TableTypeCarrier<T> inT(p_table);
+		psiTable.Set<T>(inT);
 		return add(tableid, psiTable, watcher);
 	}
 #endif
