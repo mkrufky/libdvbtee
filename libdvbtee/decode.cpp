@@ -85,7 +85,11 @@ void clear_decoded_networks()
 	networks.clear();
 }
 
-decode_network_service::decode_network_service(Decoder *parent, std::string &name)
+decode_network_service::decode_network_service(
+#if !OLD_DECODER
+					       Decoder *parent, std::string &name
+#endif
+					       )
 #if OLD_DECODER
   : services_w_eit_pf(0)
 #else
@@ -182,7 +186,11 @@ bool decode_network_service::updateSDT(dvbtee::decode::Table *table)
 }
 #endif
 
-decode_network::decode_network(Decoder *parent, std::string &name)
+decode_network::decode_network(
+#if !OLD_DECODER
+			       Decoder *parent, std::string &name
+#endif
+			       )
 #if OLD_DECODER
   : orig_network_id(0)
 #else
@@ -223,7 +231,11 @@ decode_network_service *decode_network::fetch_network_service(uint16_t ts_id)
 	if (it != decoded_network_services.end()) {
 		ret = it->second;
 	} else {
-		ret = new decode_network_service(this, name);
+		ret = new decode_network_service(
+#if !OLD_DECODER
+						 this, name
+#endif
+						 );
 		decoded_network_services[ts_id] = ret;
 	}
 
@@ -394,7 +406,11 @@ decode_network *decode::fetch_network(uint16_t nw_id)
 	if (it != networks.end()) {
 		ret = it->second;
 	} else {
-		ret = new decode_network(this, name);
+		ret = new decode_network(
+#if !OLD_DECODER
+					 this, name
+#endif
+					 );
 		networks[nw_id] = ret;
 	}
 
@@ -1997,7 +2013,7 @@ const decode_network* decode::get_decoded_network() const
 uint16_t decode::get_lcn(uint16_t service_id) const
 {
 #if OLD_DECODER
-	return networks.count(network_id) ? networks[network_id].descriptors.lcn[service_id]: 0;
+	return networks.count(network_id) ? networks[network_id]->descriptors.lcn[service_id]: 0;
 #else
 	uint16_t lcn = 0;
 

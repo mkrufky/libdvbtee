@@ -310,7 +310,11 @@ class decode_network_service
 #endif
 {
 public:
-	decode_network_service(Decoder *parent, std::string &name);
+	decode_network_service(
+#if !OLD_DECODER
+			       Decoder *parent, std::string &name
+#endif
+			       );
 	~decode_network_service();
 
 #if !OLD_DECODER
@@ -356,7 +360,12 @@ class decode_network
 #endif
 {
 public:
-	decode_network(Decoder *parent, std::string &name);
+	decode_network(
+#if !OLD_DECODER
+		       Decoder *parent, std::string &name
+#endif
+		       );
+
 	~decode_network();
 
 	decode_network_service *fetch_network_service(uint16_t ts_id);
