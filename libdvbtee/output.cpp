@@ -619,50 +619,6 @@ int output_stream::change_file()
 }
 
 /**
-    Search for printf format sequence in string.
-
-    @param char* str target string.
-    @return bool
-**/
-bool output_stream::detect_printf_seq(const std::string& str) {
-    std::string::size_type last_pos = 0;
-    
-    do {
-        last_pos = str.find('%', last_pos);
-        
-        if (last_pos == std::string::npos)
-            break; // Not found anythin.
-        
-        if (last_pos == str.length() - 1)
-            break; // Found stray '%' at the end of the string.
-        
-        char ch = str[last_pos + 1];
-        
-        if (ch == '%') // double percent -> escaped %. Go on for next. 
-        {
-            last_pos += 2;
-            continue;
-        }
-        
-        while (
-            last_pos < str.length()
-            && std::string("0123456789").find(ch) != std::string::npos
-        ) {
-            last_pos++;
-            ch = str[last_pos+1];
-        }
-        
-        if (ch == 'd')
-        {
-            return true;
-        }
-        last_pos++;
-    } while (last_pos < str.length());
-    
-    return false;
-}
-
-/**
     Get file size by file descriptor 
 
     @param int fd file descriptor
@@ -675,6 +631,12 @@ long output_stream::get_file_size(int fd)
     return rc == 0 ? stat_buf.st_size : -1;
 }
 
+/**
+    Filter function for scandir
+
+    @param  dirent d dir entry
+    @return int 0 to remove file from result
+**/
 int filter_dir(const struct dirent *d)
 {
     if (
@@ -687,6 +649,41 @@ int filter_dir(const struct dirent *d)
     return 1;
 }
 
+unsigned int output_stream::pickup_target_file_index()
+{
+    struct dirent **namelist;
+    int n, i;
+    
+    n = scandir(target_file_name, &namelist, filter_dir, versionsort);
+    
+    
+    if (n < 0) {
+        perror("scandir");
+        return 0;
+    };
+    
+    std::string filename = namelist[n-1]->d_name;
+    
+    free(namelist);
+    
+    size_t lastdot = filename.find_last_of(".");
+    if (lastdot == std::string::npos) {
+        i = strtoul(filename.c_str(), NULL, 0);
+        
+    } else {        
+        i = strtoul(filename.substr(0, lastdot).c_str(), NULL, 0); 
+    }
+    
+    dprintf("Index detected: %d", i);
+    
+    return (i + 1);
+}
+
+/**
+    Check output directory size and remove files with lowest indexes if needed
+
+    @return void
+**/
 void output_stream::cleanup_target_dir()
 {
     if (target_fseq_size_limit == 0) {
@@ -836,7 +833,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 
 	if (b_file) {
             target_file_name       = ip;
-            target_file_name_index = 0;
+            target_file_name_index = output_stream::pickup_target_file_index();
             
             if (change_file() < 0) {
                 return -1;

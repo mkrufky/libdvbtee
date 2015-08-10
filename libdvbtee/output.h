@@ -89,6 +89,7 @@ public:
 	void stop();
 	inline void stop_after_drain() { if (drain()) stop(); }
 	int change_file();
+        unsigned int pickup_target_file_index();
         
         void rotate(unsigned long int file, unsigned long int fseq) {
             target_file_size_limit = file;
