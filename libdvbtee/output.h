@@ -89,8 +89,14 @@ public:
 	void stop();
 	inline void stop_after_drain() { if (drain()) stop(); }
 	int change_file();
-        void rotate(unsigned long int limit) { target_file_size_limit = limit; }
+        
+        void rotate(unsigned long int file, unsigned long int fseq) {
+            target_file_size_limit = file;
+            target_fseq_size_limit = fseq;
+        }
+        
 	bool detect_printf_seq(const std::string&);
+        void cleanup_target_dir();
 	void close_file();
 
 	bool push(uint8_t*, int);
@@ -122,7 +128,7 @@ private:
         
 	char*             target_file_name;
 	unsigned int      target_file_name_index;
-        unsigned long int target_file_size_limit;
+        unsigned long int target_file_size_limit, target_fseq_size_limit;
 
 	rbuf ringbuffer;
 
@@ -197,7 +203,10 @@ public:
 	int add_http_server(int);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
-        void rotate(unsigned long int limit) { file_size_limit = limit; }
+        void rotate(unsigned long int file, unsigned long int fseq) {
+            file_size_limit = file;
+            fseq_size_limit = fseq;
+        }
 
 	bool check();
 
@@ -229,7 +238,7 @@ private:
 
 	enum output_options options;
         
-        unsigned long int file_size_limit;
+        unsigned long int file_size_limit, fseq_size_limit;
 
 	unsigned long int count_in, count_out;
 

@@ -299,7 +299,8 @@ void usage(bool help, char *myname)
 		"-I\t\trequest a service and its associated PES streams by its service id\n  "
 		"-E\t\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-o\t\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
-		"-r[limit]\tRotate output file when size limit reached.\n\t\tUsed together with -ofile... option \n\t\tLimit specified in bytes, default is 1048576 (1 MB).\n  "
+		"-r[limit]\tRotate output file when size limit reached.\n\t\tUse together with -ofile... option \n\t\tLimit specified in bytes, default is 1048576 (1 MB).\n  "
+		"-l[limit]\tSet output files sequence size limit\n\t\tWorks only together with -r option\n\t\tLimit specified in bytes, default is unlimited.\n  "
 		"-O\t\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
 		"-H\t\tuse a HdHomeRun device, optional arg to specify the device string\n  "
 		"-j\t\tenable json output of decoded tables & descriptors%s\n  "
@@ -367,8 +368,8 @@ int main(int argc, char **argv)
 	unsigned int wait_event  = 0;
 	int eit_limit            = -1;
         
-        bool b_output_file_rotate                = false;
-        unsigned long int output_file_size_limit = 1048576; // 1MB
+        unsigned long int output_file_size_limit = 0;
+        unsigned long int output_fseq_size_limit = 0;
         
 	tune *tuner = NULL;
 
@@ -392,7 +393,7 @@ int main(int argc, char **argv)
 	char hdhrname[256];
 	memset(&hdhrname, 0, sizeof(hdhrname));
 
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:js::S::E::o::O:r::d::H::h?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:js::S::E::o::O:r::l::d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -481,12 +482,25 @@ int main(int argc, char **argv)
                         break;
                     }
                     
-                    b_output_file_rotate = true;
+                    output_file_size_limit = 1048576; // 1MB default value
                     
                     if (optarg) {
                         //TODO: detect human readable values
                         //      (1M = 1 MB, 10K = 10KB, ...)
                         output_file_size_limit = strtoul(optarg, NULL, 0);
+                    }
+                    
+                    break;
+		case 'l': /* limit size of output files sequence */
+                    if (output_file_size_limit == 0) {
+                        break;
+                    }
+                    
+                    
+                    if (optarg) {
+                        //TODO: detect human readable values
+                        //      (1M = 1 MB, 10K = 10KB, ...)
+                        output_fseq_size_limit = strtoul(optarg, NULL, 0);
                     }
                     
                     break;
@@ -600,26 +614,25 @@ int main(int argc, char **argv)
 	}
                 
 	if (b_output_file) {
+            fprintf(stderr, "output_file_size_limit: %lu, output_fseq_size_limit: %lu\n", output_file_size_limit, output_fseq_size_limit);
+            
+            
             if (b_READ_TUNER) { // FIXME
                 for (
                     map_tuners::const_iterator iter = context.tuners.begin();
                     iter != context.tuners.end();
                     ++iter
                 ) {
-                    if (b_output_file_rotate) {
-                        iter->second->feeder.parser.out.rotate(
-                            output_file_size_limit
-                        );
-                    }
+                    iter->second->feeder.parser.out.rotate(
+                        output_file_size_limit, output_fseq_size_limit
+                    );
                     
                     iter->second->feeder.parser.add_output(outfilename);
                 }
             } else {
-                if (b_output_file_rotate) {
-                    context._file_feeder.parser.out.rotate(
-                        output_file_size_limit
-                    );
-                }
+                context._file_feeder.parser.out.rotate(
+                    output_file_size_limit, output_fseq_size_limit
+                );
                 context._file_feeder.parser.add_output(outfilename);
             }
 	} // if (b_output_file)
