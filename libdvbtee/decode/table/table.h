@@ -87,7 +87,7 @@ private:
 	T* m_p;
 };
 
-#define PsiTable_CONSTRUCTORTEMPLATE 1
+#define PsiTable_CONSTRUCTORTEMPLATE 0
 struct PsiTable {
     explicit PsiTable() : m_priv(NULL) { }
 #if PsiTable_CONSTRUCTORTEMPLATE
