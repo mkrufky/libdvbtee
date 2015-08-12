@@ -39,12 +39,12 @@ namespace decode {
 class vct: public Table/*<dvbpsi_atsc_vct_t>*/ {
 public:
 	vct(Decoder *, TableWatcher*);
-	vct(Decoder *, TableWatcher*, dvbpsi_atsc_vct_t*);
+	vct(Decoder *, TableWatcher*, const dvbpsi_atsc_vct_t * const);
 	virtual ~vct();
 
-	void store(dvbpsi_atsc_vct_t*);
+	void store(const dvbpsi_atsc_vct_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_atsc_vct_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_atsc_vct_t * const t, TableWatcher *w = NULL);
 
 	const decoded_vct_t& getDecodedVCT() const { return decoded_vct; }
 
@@ -54,7 +54,7 @@ private:
 
 class vctCh: public TableDataComponent {
 public:
-	vctCh(decoded_vct_t&, Decoder*, dvbpsi_atsc_vct_channel_t*);
+	vctCh(decoded_vct_t&, Decoder*, const dvbpsi_atsc_vct_channel_t * const);
 	virtual ~vctCh();
 };
 

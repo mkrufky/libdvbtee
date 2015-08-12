@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "EIT";
 
 static std::string EITEV = "EITEV";
 
-void atsc_eit::store(dvbpsi_atsc_eit_t *p_atsc_eit)
+void atsc_eit::store(const dvbpsi_atsc_eit_t * const p_atsc_eit)
 #define EIT_DBG 1
 {
 	//XXX: FIXME: decoded_atsc_eit_t &cur_atsc_eit = decoded_atsc_eit[atsc_eit_x][p_atsc_eit->i_source_id];
@@ -90,7 +90,7 @@ void atsc_eit::store(dvbpsi_atsc_eit_t *p_atsc_eit)
 
 	Array events;
 
-	dvbpsi_atsc_eit_event_t* p_event = p_atsc_eit->p_first_event;
+	const dvbpsi_atsc_eit_event_t *p_event = p_atsc_eit->p_first_event;
 	while (p_event) {
 
 		atsc_eitEV *atsc_eitEv = new atsc_eitEV(decoded_eit, this, p_event);
@@ -115,7 +115,7 @@ void atsc_eit::store(dvbpsi_atsc_eit_t *p_atsc_eit)
 }
 
 
-atsc_eitEV::atsc_eitEV(decoded_atsc_eit_t &decoded_atsc_eit, Decoder *parent, dvbpsi_atsc_eit_event_t *p_event)
+atsc_eitEV::atsc_eitEV(decoded_atsc_eit_t &decoded_atsc_eit, Decoder *parent, const dvbpsi_atsc_eit_event_t * const p_event)
 : TableDataComponent(parent, EITEV)
 {
 	decoded_atsc_eit_event_t &cur_event = decoded_atsc_eit.events[p_event->i_event_id];
@@ -159,7 +159,7 @@ atsc_eitEV::~atsc_eitEV()
 }
 
 
-bool atsc_eit::ingest(TableStore *s, dvbpsi_atsc_eit_t *t, TableWatcher *w)
+bool atsc_eit::ingest(TableStore *s, const dvbpsi_atsc_eit_t * const t, TableWatcher *w)
 {
 #if 1
 #if 0
@@ -185,9 +185,9 @@ bool atsc_eit::ingest(TableStore *s, dvbpsi_atsc_eit_t *t, TableWatcher *w)
 		}
 	}
 #endif
-	return s->add<dvbpsi_atsc_eit_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_atsc_eit_t>(TABLEID, t, w);
 #else
-	return s->setOnly<dvbpsi_atsc_eit_t, atsc_eit>(TABLEID, t, w);
+	return s->setOnly<const dvbpsi_atsc_eit_t, atsc_eit>(TABLEID, t, w);
 #endif
 }
 
@@ -198,7 +198,7 @@ atsc_eit::atsc_eit(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-atsc_eit::atsc_eit(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_eit_t *p_atsc_eit)
+atsc_eit::atsc_eit(Decoder *parent, TableWatcher *watcher, const dvbpsi_atsc_eit_t * const p_atsc_eit)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_atsc_eit);
@@ -209,4 +209,4 @@ atsc_eit::~atsc_eit()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_atsc_eit_t, atsc_eit);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_eit_t, atsc_eit);

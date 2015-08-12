@@ -39,7 +39,7 @@ using namespace valueobj;
 
 static std::string TABLE_NAME = "TOT";
 
-void tot::store(dvbpsi_tot_t *p_tot)
+void tot::store(const dvbpsi_tot_t * const p_tot)
 {
 	if (!p_tot) return;
 
@@ -64,9 +64,9 @@ void tot::store(dvbpsi_tot_t *p_tot)
 	}
 }
 
-bool tot::ingest(TableStore *s, dvbpsi_tot_t *t, TableWatcher *w)
+bool tot::ingest(TableStore *s, const dvbpsi_tot_t * const t, TableWatcher *w)
 {
-	return s->setOnly<dvbpsi_tot_t, tot>(TABLEID, t, w);
+	return s->setOnly<const dvbpsi_tot_t, tot>(TABLEID, t, w);
 }
 
 
@@ -76,7 +76,7 @@ tot::tot(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-tot::tot(Decoder *parent, TableWatcher *watcher, dvbpsi_tot_t *p_tot)
+tot::tot(Decoder *parent, TableWatcher *watcher, const dvbpsi_tot_t * const p_tot)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_tot);
@@ -87,4 +87,4 @@ tot::~tot()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_tot_t, tot);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_tot_t, tot);

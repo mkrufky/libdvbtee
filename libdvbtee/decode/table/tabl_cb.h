@@ -39,12 +39,12 @@ namespace decode {
 class atsc_eit: public Table/*<dvbpsi_atsc_eit_t>*/ {
 public:
 	atsc_eit(Decoder *, TableWatcher*);
-	atsc_eit(Decoder *, TableWatcher*, dvbpsi_atsc_eit_t*);
+	atsc_eit(Decoder *, TableWatcher*, const dvbpsi_atsc_eit_t * const);
 	virtual ~atsc_eit();
 
-	void store(dvbpsi_atsc_eit_t*);
+	void store(const dvbpsi_atsc_eit_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_atsc_eit_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_atsc_eit_t * const t, TableWatcher *w = NULL);
 
 	const decoded_atsc_eit_t& getDecodedEIT() const { return decoded_eit; }
 
@@ -54,7 +54,7 @@ private:
 
 class atsc_eitEV: public TableDataComponent {
 public:
-	atsc_eitEV(decoded_atsc_eit_t&, Decoder*, dvbpsi_atsc_eit_event_t*);
+	atsc_eitEV(decoded_atsc_eit_t&, Decoder*, const dvbpsi_atsc_eit_event_t * const);
 	virtual ~atsc_eitEV();
 };
 

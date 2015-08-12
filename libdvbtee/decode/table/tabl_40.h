@@ -39,12 +39,12 @@ namespace decode {
 class nit: public Table/*<dvbpsi_nit_t>*/ {
 public:
 	nit(Decoder *, TableWatcher*);
-	nit(Decoder *, TableWatcher*, dvbpsi_nit_t*);
+	nit(Decoder *, TableWatcher*, const dvbpsi_nit_t * const);
 	virtual ~nit();
 
-	void store(dvbpsi_nit_t*);
+	void store(const dvbpsi_nit_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_nit_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_nit_t * const t, TableWatcher *w = NULL);
 
 	const decoded_nit_t& getDecodedNIT() const { return decoded_nit; }
 
@@ -54,7 +54,7 @@ private:
 
 class nitTS: public TableDataComponent {
 public:
-	nitTS(decoded_nit_t&, Decoder*, dvbpsi_nit_ts_t*);
+	nitTS(decoded_nit_t&, Decoder*, const dvbpsi_nit_ts_t * const);
 	virtual ~nitTS();
 };
 

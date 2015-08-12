@@ -39,12 +39,12 @@ namespace decode {
 class atsc_ett: public Table/*<dvbpsi_atsc_ett_t>*/ {
 public:
 	atsc_ett(Decoder *, TableWatcher*);
-	atsc_ett(Decoder *, TableWatcher*, dvbpsi_atsc_ett_t*);
+	atsc_ett(Decoder *, TableWatcher*, const dvbpsi_atsc_ett_t * const);
 	virtual ~atsc_ett();
 
-	void store(dvbpsi_atsc_ett_t*);
+	void store(const dvbpsi_atsc_ett_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_atsc_ett_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_atsc_ett_t * const t, TableWatcher *w = NULL);
 
 	const decoded_atsc_ett_t& getDecodedETT() const { return decoded_ett; }
 

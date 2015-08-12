@@ -39,12 +39,12 @@ namespace decode {
 class pmt: public Table/*<dvbpsi_pmt_t>*/ {
 public:
 	pmt(Decoder *, TableWatcher*);
-	pmt(Decoder *, TableWatcher*, dvbpsi_pmt_t*);
+	pmt(Decoder *, TableWatcher*, const dvbpsi_pmt_t * const);
 	virtual ~pmt();
 
-	void store(dvbpsi_pmt_t*);
+	void store(const dvbpsi_pmt_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_pmt_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_pmt_t * const t, TableWatcher *w = NULL);
 
 	const decoded_pmt_t& getDecodedPMT() const { return decoded_pmt; }
 
@@ -54,7 +54,7 @@ private:
 
 class pmtES: public TableDataComponent {
 public:
-	pmtES(decoded_pmt_t&, Decoder*, dvbpsi_pmt_es_t*);
+	pmtES(decoded_pmt_t&, Decoder*, const dvbpsi_pmt_es_t * const);
 	virtual ~pmtES();
 };
 

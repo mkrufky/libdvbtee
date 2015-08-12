@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "NIT";
 
 static std::string NITTS = "NITTS";
 
-void nit::store(dvbpsi_nit_t *p_nit)
+void nit::store(const dvbpsi_nit_t * const p_nit)
 #define NIT_DBG 1
 {
 //	if ((decoded_nit->version    == p_nit->i_version) &&
@@ -66,7 +66,7 @@ void nit::store(dvbpsi_nit_t *p_nit)
 
 	Array ts_list;
 
-	dvbpsi_nit_ts_t* p_ts = p_nit->p_first_ts;
+	const dvbpsi_nit_ts_t * p_ts = p_nit->p_first_ts;
 #if NIT_DBG
 	if (p_ts)
 		fprintf(stderr, "   ts_id | orig_network_id\n");
@@ -89,7 +89,7 @@ void nit::store(dvbpsi_nit_t *p_nit)
 	}
 }
 
-nitTS::nitTS(decoded_nit_t& decoded_nit, Decoder *parent, dvbpsi_nit_ts_t *p_ts)
+nitTS::nitTS(decoded_nit_t& decoded_nit, Decoder *parent, const dvbpsi_nit_ts_t *p_ts)
 : TableDataComponent(parent, NITTS)
 {
 	if (!p_ts) return;
@@ -120,7 +120,7 @@ nitTS::~nitTS()
 }
 
 
-bool nit::ingest(TableStore *s, dvbpsi_nit_t *t, TableWatcher *w)
+bool nit::ingest(TableStore *s, const dvbpsi_nit_t * const t, TableWatcher *w)
 {
 	const std::vector<Table*> nits = s->get(TABLEID);
 	for (std::vector<Table*>::const_iterator it = nits.begin(); it != nits.end(); ++it) {
@@ -134,7 +134,7 @@ bool nit::ingest(TableStore *s, dvbpsi_nit_t *t, TableWatcher *w)
 			return true;
 		}
 	}
-	return s->add<dvbpsi_nit_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_nit_t>(TABLEID, t, w);
 }
 
 
@@ -144,7 +144,7 @@ nit::nit(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-nit::nit(Decoder *parent, TableWatcher *watcher, dvbpsi_nit_t *p_nit)
+nit::nit(Decoder *parent, TableWatcher *watcher, const dvbpsi_nit_t * const p_nit)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_nit);
@@ -155,4 +155,4 @@ nit::~nit()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_nit_t, nit);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_nit_t, nit);

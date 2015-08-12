@@ -37,12 +37,12 @@ namespace decode {
 class tot: public Table/*<dvbpsi_tot_t>*/ {
 public:
 	tot(Decoder *, TableWatcher*);
-	tot(Decoder *, TableWatcher*, dvbpsi_tot_t*);
+	tot(Decoder *, TableWatcher*, const dvbpsi_tot_t * const);
 	virtual ~tot();
 
-	void store(dvbpsi_tot_t*);
+	void store(const dvbpsi_tot_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_tot_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_tot_t * const t, TableWatcher *w = NULL);
 };
 
 }

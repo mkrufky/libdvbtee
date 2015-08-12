@@ -39,12 +39,12 @@ namespace decode {
 class pat: public Table/*<dvbpsi_pat_t>*/ {
 public:
 	pat(Decoder *, TableWatcher*);
-	pat(Decoder *, TableWatcher*, dvbpsi_pat_t*);
+	pat(Decoder *, TableWatcher*, const dvbpsi_pat_t * const);
 	virtual ~pat();
 
-	void store(dvbpsi_pat_t*);
+	void store(const dvbpsi_pat_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_pat_t * const t, TableWatcher *w = NULL);
 #if 0
 	const uint16_t& getTsId() const { return decoded_pat.ts_id; }
 	const uint8_t& getVersion() const { return decoded_pat.version; }
@@ -58,7 +58,7 @@ private:
 
 class patProgram: public TableDataComponent {
 public:
-	patProgram(Decoder*, dvbpsi_pat_program_t*);
+	patProgram(Decoder*, const dvbpsi_pat_program_t * const);
 	virtual ~patProgram();
 #if 0
 	std::pair<uint16_t, uint16_t> getPair();

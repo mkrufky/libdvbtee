@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "EIT";
 
 static std::string EITTS = "EITTS";
 
-void eit::store(dvbpsi_eit_t *p_eit)
+void eit::store(const dvbpsi_eit_t * const p_eit)
 #define EIT_DBG 1
 {
 #if USING_DVBPSI_VERSION_0
@@ -84,7 +84,7 @@ void eit::store(dvbpsi_eit_t *p_eit)
 
 	Array events;
 
-	dvbpsi_eit_event_t* p_event = p_eit->p_first_event;
+	const dvbpsi_eit_event_t *p_event = p_eit->p_first_event;
 	while (p_event) {
 
 		eitEV *eitEv = new eitEV(decoded_eit, this, p_event);
@@ -104,7 +104,7 @@ void eit::store(dvbpsi_eit_t *p_eit)
 	}
 }
 
-eitEV::eitEV(decoded_eit_t& decoded_eit, Decoder *parent, dvbpsi_eit_event_t *p_event)
+eitEV::eitEV(decoded_eit_t& decoded_eit, Decoder *parent, const dvbpsi_eit_event_t * const p_event)
 : TableDataComponent(parent, EITTS)
 {
 	if (!p_event) return;
@@ -149,7 +149,7 @@ eitEV::~eitEV()
 }
 
 
-bool eit::ingest(TableStore *s, dvbpsi_eit_t *t, TableWatcher *w)
+bool eit::ingest(TableStore *s, const dvbpsi_eit_t * const t, TableWatcher *w)
 {
 #if USING_DVBPSI_VERSION_0
 	uint16_t __service_id = t->i_service_id;
@@ -168,7 +168,7 @@ bool eit::ingest(TableStore *s, dvbpsi_eit_t *t, TableWatcher *w)
 			return true;
 		}
 	}
-	return s->add<dvbpsi_eit_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_eit_t>(TABLEID, t, w);
 }
 
 
@@ -178,7 +178,7 @@ eit::eit(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-eit::eit(Decoder *parent, TableWatcher *watcher, dvbpsi_eit_t *p_eit)
+eit::eit(Decoder *parent, TableWatcher *watcher, const dvbpsi_eit_t * const p_eit)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_eit);
@@ -189,4 +189,4 @@ eit::~eit()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_eit_t, eit);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_eit_t, eit);

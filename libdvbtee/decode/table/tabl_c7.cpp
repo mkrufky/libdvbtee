@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "MGT";
 
 static std::string MGTTB = "MGTTB";
 
-void mgt::store(dvbpsi_atsc_mgt_t *p_mgt)
+void mgt::store(const dvbpsi_atsc_mgt_t * const p_mgt)
 #define MGT_DBG 1
 {
 //	if ((decoded_mgt.version == p_mgt->i_version) &&
@@ -59,7 +59,7 @@ void mgt::store(dvbpsi_atsc_mgt_t *p_mgt)
 
 	Array tables;
 
-	dvbpsi_atsc_mgt_table_t* p_table = p_mgt->p_first_table;
+	const dvbpsi_atsc_mgt_table_t *p_table = p_mgt->p_first_table;
 #if MGT_DBG
 	if (p_table)
 		fprintf(stderr, "  table type |   pid  | ver | bytes\n");
@@ -87,7 +87,7 @@ void mgt::store(dvbpsi_atsc_mgt_t *p_mgt)
 }
 
 
-bool mgt::ingest(TableStore *s, dvbpsi_atsc_mgt_t *t, TableWatcher *w)
+bool mgt::ingest(TableStore *s, const dvbpsi_atsc_mgt_t * const t, TableWatcher *w)
 {
 #if 0
 #if USING_DVBPSI_VERSION_0
@@ -107,9 +107,9 @@ bool mgt::ingest(TableStore *s, dvbpsi_atsc_mgt_t *t, TableWatcher *w)
 			return true;
 		}
 	}
-	return s->add<dvbpsi_atsc_mgt_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_atsc_mgt_t>(TABLEID, t, w);
 #else
-	return s->setOnly<dvbpsi_atsc_mgt_t, mgt>(TABLEID, t, w);
+	return s->setOnly<const dvbpsi_atsc_mgt_t, mgt>(TABLEID, t, w);
 #endif
 }
 
@@ -120,7 +120,7 @@ mgt::mgt(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-mgt::mgt(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_mgt_t *p_mgt)
+mgt::mgt(Decoder *parent, TableWatcher *watcher, const dvbpsi_atsc_mgt_t * const p_mgt)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_mgt);
@@ -132,7 +132,7 @@ mgt::~mgt()
 }
 
 
-mgtTb::mgtTb(decoded_mgt_t &decoded_mgt, Decoder *parent, dvbpsi_atsc_mgt_table_t *p_table)
+mgtTb::mgtTb(decoded_mgt_t &decoded_mgt, Decoder *parent, const dvbpsi_atsc_mgt_table_t * const p_table)
 : TableDataComponent(parent, MGTTB)
 {
 #if MGT_DBG
@@ -168,4 +168,4 @@ mgtTb::~mgtTb()
 
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_atsc_mgt_t, mgt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_mgt_t, mgt);

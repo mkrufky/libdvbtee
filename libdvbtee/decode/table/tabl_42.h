@@ -39,12 +39,12 @@ namespace decode {
 class sdt: public Table/*<dvbpsi_sdt_t>*/ {
 public:
 	sdt(Decoder *, TableWatcher*);
-	sdt(Decoder *, TableWatcher*, dvbpsi_sdt_t*);
+	sdt(Decoder *, TableWatcher*, const dvbpsi_sdt_t * const);
 	virtual ~sdt();
 
-	void store(dvbpsi_sdt_t*);
+	void store(const dvbpsi_sdt_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_sdt_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_sdt_t * const t, TableWatcher *w = NULL);
 
 	const decoded_sdt_t& getDecodedSDT() const { return decoded_sdt; }
 
@@ -66,7 +66,7 @@ private:
 
 class sdtSVC: public TableDataComponent {
 public:
-	sdtSVC(decoded_sdt_service_t&, Decoder*, dvbpsi_sdt_service_t*);
+	sdtSVC(decoded_sdt_service_t&, Decoder*, const dvbpsi_sdt_service_t * const);
 	virtual ~sdtSVC();
 };
 

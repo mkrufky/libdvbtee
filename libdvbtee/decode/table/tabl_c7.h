@@ -39,12 +39,12 @@ namespace decode {
 class mgt: public Table/*<dvbpsi_atsc_mgt_t>*/ {
 public:
 	mgt(Decoder *, TableWatcher*);
-	mgt(Decoder *, TableWatcher*, dvbpsi_atsc_mgt_t*);
+	mgt(Decoder *, TableWatcher*, const dvbpsi_atsc_mgt_t * const);
 	virtual ~mgt();
 
-	void store(dvbpsi_atsc_mgt_t*);
+	void store(const dvbpsi_atsc_mgt_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_atsc_mgt_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_atsc_mgt_t * const t, TableWatcher *w = NULL);
 
 	const decoded_mgt_t& getDecodedMGT() const { return decoded_mgt; }
 
@@ -54,7 +54,7 @@ private:
 
 class mgtTb: public TableDataComponent {
 public:
-	mgtTb(decoded_mgt_t&, Decoder*, dvbpsi_atsc_mgt_table_t *);
+	mgtTb(decoded_mgt_t&, Decoder*, const dvbpsi_atsc_mgt_table_t * const);
 	virtual ~mgtTb();
 };
 

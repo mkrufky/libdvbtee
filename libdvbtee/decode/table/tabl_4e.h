@@ -39,12 +39,12 @@ namespace decode {
 class eit: public Table/*<dvbpsi_eit_t>*/ {
 public:
 	eit(Decoder *, TableWatcher*);
-	eit(Decoder *, TableWatcher*, dvbpsi_eit_t*);
+	eit(Decoder *, TableWatcher*, const dvbpsi_eit_t * const);
 	virtual ~eit();
 
-	void store(dvbpsi_eit_t*);
+	void store(const dvbpsi_eit_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_eit_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_eit_t * const t, TableWatcher *w = NULL);
 
 	const decoded_eit_t& getDecodedEIT() const { return decoded_eit; }
 
@@ -54,7 +54,7 @@ private:
 
 class eitEV: public TableDataComponent {
 public:
-	eitEV(decoded_eit_t&, Decoder*, dvbpsi_eit_event_t *);
+	eitEV(decoded_eit_t&, Decoder*, const dvbpsi_eit_event_t * const);
 	virtual ~eitEV();
 };
 

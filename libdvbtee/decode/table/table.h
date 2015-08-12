@@ -80,11 +80,11 @@ class TableTypeCarrierBase {};
 template<class T>
 class TableTypeCarrier: public TableTypeCarrierBase {
 public:
-	explicit TableTypeCarrier(T* p) : m_p(p) {}
+	explicit TableTypeCarrier(const T * const p) : m_p(p) {}
 
-	T* Get() { return m_p; }
+	const T * const Get() const { return m_p; }
 private:
-	T* m_p;
+	const T * const m_p;
 };
 
 #define PsiTable_CONSTRUCTORTEMPLATE 0
@@ -95,7 +95,7 @@ struct PsiTable {
 #else
     template<typename T> void Set(TableTypeCarrier<T> inT) { m_priv = &inT; }
 #endif
-    template<typename T> T* Get() { return (!m_priv) ? NULL : ((TableTypeCarrier<T>*)m_priv)->Get(); }
+    template<typename T> const T * const Get() const { return (!m_priv) ? NULL : ((TableTypeCarrier<T>*)m_priv)->Get(); }
 
 private:
     TableTypeCarrierBase* m_priv;

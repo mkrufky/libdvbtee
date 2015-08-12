@@ -39,7 +39,7 @@ using namespace valueobj;
 
 static std::string TABLE_NAME = "STT";
 
-void stt::store(dvbpsi_atsc_stt_t *p_stt)
+void stt::store(const dvbpsi_atsc_stt_t * const p_stt)
 {
 	if (!p_stt) return;
 
@@ -64,9 +64,9 @@ void stt::store(dvbpsi_atsc_stt_t *p_stt)
 	}
 }
 
-bool stt::ingest(TableStore *s, dvbpsi_atsc_stt_t *t, TableWatcher *w)
+bool stt::ingest(TableStore *s, const dvbpsi_atsc_stt_t * const t, TableWatcher *w)
 {
-	return s->setOnly<dvbpsi_atsc_stt_t, stt>(TABLEID, t, w);
+	return s->setOnly<const dvbpsi_atsc_stt_t, stt>(TABLEID, t, w);
 }
 
 
@@ -76,7 +76,7 @@ stt::stt(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-stt::stt(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_stt_t *p_stt)
+stt::stt(Decoder *parent, TableWatcher *watcher, const dvbpsi_atsc_stt_t * const p_stt)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_stt);
@@ -87,4 +87,4 @@ stt::~stt()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_atsc_stt_t, stt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_stt_t, stt);

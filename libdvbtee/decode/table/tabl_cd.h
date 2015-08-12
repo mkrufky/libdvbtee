@@ -35,12 +35,12 @@ namespace decode {
 class stt: public Table/*<dvbpsi_atsc_stt_t>*/ {
 public:
 	stt(Decoder *, TableWatcher*);
-	stt(Decoder *, TableWatcher*, dvbpsi_atsc_stt_t*);
+	stt(Decoder *, TableWatcher*, const dvbpsi_atsc_stt_t * const);
 	virtual ~stt();
 
-	void store(dvbpsi_atsc_stt_t*);
+	void store(const dvbpsi_atsc_stt_t * const);
 
-	static bool ingest(TableStore *s, dvbpsi_atsc_stt_t *t, TableWatcher *w = NULL);
+	static bool ingest(TableStore *s, const dvbpsi_atsc_stt_t * const t, TableWatcher *w = NULL);
 };
 
 }

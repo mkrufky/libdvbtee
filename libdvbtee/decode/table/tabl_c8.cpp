@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "VCT";
 
 static std::string VCTCH = "VCTCH";
 
-void vct::store(dvbpsi_atsc_vct_t *p_vct)
+void vct::store(const dvbpsi_atsc_vct_t * const p_vct)
 #define VCT_DBG 1
 {
 #if USING_DVBPSI_VERSION_0
@@ -66,7 +66,7 @@ void vct::store(dvbpsi_atsc_vct_t *p_vct)
 
 	Array channels;
 
-	dvbpsi_atsc_vct_channel_t* p_channel = p_vct->p_first_channel;
+	const dvbpsi_atsc_vct_channel_t *p_channel = p_vct->p_first_channel;
 #if VCT_DBG
 	if (p_channel)
 		fprintf(stderr, "  channel | service_id | source_id | service_name\n");
@@ -90,7 +90,7 @@ void vct::store(dvbpsi_atsc_vct_t *p_vct)
 }
 
 
-bool vct::ingest(TableStore *s, dvbpsi_atsc_vct_t *t, TableWatcher *w)
+bool vct::ingest(TableStore *s, const dvbpsi_atsc_vct_t * const t, TableWatcher *w)
 {
 #if 0
 #if USING_DVBPSI_VERSION_0
@@ -110,9 +110,9 @@ bool vct::ingest(TableStore *s, dvbpsi_atsc_vct_t *t, TableWatcher *w)
 			return true;
 		}
 	}
-	return s->add<dvbpsi_atsc_vct_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_atsc_vct_t>(TABLEID, t, w);
 #else
-	return s->setOnly<dvbpsi_atsc_vct_t, vct>(TABLEID, t, w);
+	return s->setOnly<const dvbpsi_atsc_vct_t, vct>(TABLEID, t, w);
 #endif
 }
 
@@ -123,7 +123,7 @@ vct::vct(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-vct::vct(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_vct_t *p_vct)
+vct::vct(Decoder *parent, TableWatcher *watcher, const dvbpsi_atsc_vct_t * const p_vct)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_vct);
@@ -135,7 +135,7 @@ vct::~vct()
 }
 
 
-vctCh::vctCh(decoded_vct_t &decoded_vct, Decoder *parent, dvbpsi_atsc_vct_channel_t *p_channel)
+vctCh::vctCh(decoded_vct_t &decoded_vct, Decoder *parent, const dvbpsi_atsc_vct_channel_t * const p_channel)
 : TableDataComponent(parent, VCTCH)
 {
 	decoded_vct_channel_t &cur_channel = decoded_vct.channels[p_channel->i_program_number];
@@ -221,4 +221,4 @@ vctCh::~vctCh()
 
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_atsc_vct_t, vct);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_vct_t, vct);

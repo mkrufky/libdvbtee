@@ -41,7 +41,7 @@ static std::string TABLE_NAME = "SDT";
 
 static std::string SDTSVC = "SDTSVC";
 
-void sdt::store(dvbpsi_sdt_t *p_sdt)
+void sdt::store(const dvbpsi_sdt_t * const p_sdt)
 #define SDT_DBG 1
 {
 #if USING_DVBPSI_VERSION_0
@@ -79,7 +79,7 @@ void sdt::store(dvbpsi_sdt_t *p_sdt)
 	services_w_eit_sched = 0;
 
 	//fprintf(stderr, "  service_id | service_name");
-	dvbpsi_sdt_service_t* p_service = p_sdt->p_first_service;
+	const dvbpsi_sdt_service_t *p_service = p_sdt->p_first_service;
 	if (p_service)
 		dprintf(" svcId | EIT avail |  provider  | service name");
 	while (p_service) {
@@ -109,7 +109,7 @@ void sdt::store(dvbpsi_sdt_t *p_sdt)
 	}
 }
 
-sdtSVC::sdtSVC(decoded_sdt_service_t& cur_service, Decoder *parent, dvbpsi_sdt_service_t *p_service)
+sdtSVC::sdtSVC(decoded_sdt_service_t& cur_service, Decoder *parent, const dvbpsi_sdt_service_t * const p_service)
 : TableDataComponent(parent, SDTSVC)
 {
 	if (!p_service) return;
@@ -159,7 +159,7 @@ sdtSVC::~sdtSVC()
 }
 
 
-bool sdt::ingest(TableStore *s, dvbpsi_sdt_t *t, TableWatcher *w)
+bool sdt::ingest(TableStore *s, const dvbpsi_sdt_t * const t, TableWatcher *w)
 {
 	const std::vector<Table*> sdts = s->get(TABLEID);
 	for (std::vector<Table*>::const_iterator it = sdts.begin(); it != sdts.end(); ++it) {
@@ -173,7 +173,7 @@ bool sdt::ingest(TableStore *s, dvbpsi_sdt_t *t, TableWatcher *w)
 			return true;
 		}
 	}
-	return s->add<dvbpsi_sdt_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_sdt_t>(TABLEID, t, w);
 }
 
 
@@ -185,7 +185,7 @@ sdt::sdt(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-sdt::sdt(Decoder *parent, TableWatcher *watcher, dvbpsi_sdt_t *p_sdt)
+sdt::sdt(Decoder *parent, TableWatcher *watcher, const dvbpsi_sdt_t * const p_sdt)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
  , services_w_eit_pf(0)
  , services_w_eit_sched(0)
@@ -198,4 +198,4 @@ sdt::~sdt()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_sdt_t, sdt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_sdt_t, sdt);

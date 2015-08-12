@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "ETT";
 
 static std::string ETTEV = "ETTEV";
 
-void atsc_ett::store(dvbpsi_atsc_ett_t *p_ett)
+void atsc_ett::store(const dvbpsi_atsc_ett_t * const p_ett)
 #define ETT_DBG 1
 {
 	//XXX: FIXME: decoded_atsc_ett_t &cur_ett = decoded_ett[p_ett->i_etm_id];
@@ -89,7 +89,7 @@ void atsc_ett::store(dvbpsi_atsc_ett_t *p_ett)
 }
 
 
-bool atsc_ett::ingest(TableStore *s, dvbpsi_atsc_ett_t *t, TableWatcher *w)
+bool atsc_ett::ingest(TableStore *s, const dvbpsi_atsc_ett_t * const t, TableWatcher *w)
 {
 #if 1
 #if USING_DVBPSI_VERSION_0
@@ -109,9 +109,9 @@ bool atsc_ett::ingest(TableStore *s, dvbpsi_atsc_ett_t *t, TableWatcher *w)
 			return true;
 		}
 	}
-	return s->add<dvbpsi_atsc_ett_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_atsc_ett_t>(TABLEID, t, w);
 #else
-	return s->setOnly<dvbpsi_atsc_ett_t, atsc_ett>(TABLEID, t, w);
+	return s->setOnly<const dvbpsi_atsc_ett_t, atsc_ett>(TABLEID, t, w);
 #endif
 }
 
@@ -122,7 +122,7 @@ atsc_ett::atsc_ett(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-atsc_ett::atsc_ett(Decoder *parent, TableWatcher *watcher, dvbpsi_atsc_ett_t *p_atsc_ett)
+atsc_ett::atsc_ett(Decoder *parent, TableWatcher *watcher, const dvbpsi_atsc_ett_t * const p_atsc_ett)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_atsc_ett);
@@ -133,4 +133,4 @@ atsc_ett::~atsc_ett()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_atsc_ett_t, atsc_ett);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_ett_t, atsc_ett);

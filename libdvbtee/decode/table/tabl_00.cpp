@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "PAT";
 
 static std::string PATPROGRAM = "PATPROGRAM";
 
-void pat::store(dvbpsi_pat_t *p_pat)
+void pat::store(const dvbpsi_pat_t * const p_pat)
 #define PAT_DBG 1
 {
 	if (!p_pat) return;
@@ -58,7 +58,7 @@ void pat::store(dvbpsi_pat_t *p_pat)
 
 	Array programs("number");
 
-	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
+	const dvbpsi_pat_program_t *p_program = p_pat->p_first_program;
 	while (p_program) {
 		patProgram *program = new patProgram(this, p_program);
 		if (program->isValid()) {
@@ -82,7 +82,7 @@ void pat::store(dvbpsi_pat_t *p_pat)
 	}
 }
 
-patProgram::patProgram(Decoder *parent, dvbpsi_pat_program_t *p_program)
+patProgram::patProgram(Decoder *parent, const dvbpsi_pat_program_t * const p_program)
 : TableDataComponent(parent, PATPROGRAM)
 {
 	if (!p_program) return;
@@ -109,9 +109,9 @@ std::pair<uint16_t, uint16_t> patProgram::getPair()
 }
 #endif
 
-bool pat::ingest(TableStore *s, dvbpsi_pat_t *t, TableWatcher *w)
+bool pat::ingest(TableStore *s, const dvbpsi_pat_t * const t, TableWatcher *w)
 {
-	return s->setOnly<dvbpsi_pat_t, pat>(TABLEID, t, w);
+	return s->setOnly<const dvbpsi_pat_t, pat>(TABLEID, t, w);
 }
 
 
@@ -121,7 +121,7 @@ pat::pat(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-pat::pat(Decoder *parent, TableWatcher *watcher, dvbpsi_pat_t *p_pat)
+pat::pat(Decoder *parent, TableWatcher *watcher, const dvbpsi_pat_t * const p_pat)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_pat);
@@ -132,4 +132,4 @@ pat::~pat()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_pat_t, pat);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_pat_t, pat);

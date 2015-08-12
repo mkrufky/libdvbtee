@@ -40,7 +40,7 @@ static std::string TABLE_NAME = "PMT";
 
 static std::string PMTES = "PMTES";
 
-void pmt::store(dvbpsi_pmt_t *p_pmt)
+void pmt::store(const dvbpsi_pmt_t * const p_pmt)
 #define PMT_DBG 1
 {
 #if PMT_DBG
@@ -63,7 +63,7 @@ void pmt::store(dvbpsi_pmt_t *p_pmt)
 #if PMT_DBG
 	fprintf(stderr, "  es_pid | type\n");
 #endif
-	dvbpsi_pmt_es_t* p_es = p_pmt->p_first_es;
+	const dvbpsi_pmt_es_t * p_es = p_pmt->p_first_es;
 	while (p_es) {
 		pmtES * pmtes = new pmtES(decoded_pmt, this, p_es);
 		if (pmtes->isValid())
@@ -82,7 +82,7 @@ void pmt::store(dvbpsi_pmt_t *p_pmt)
 	}
 }
 
-pmtES::pmtES(decoded_pmt_t& decoded_pmt, Decoder *parent, dvbpsi_pmt_es_t *p_es)
+pmtES::pmtES(decoded_pmt_t& decoded_pmt, Decoder *parent, const dvbpsi_pmt_es_t * const p_es)
 : TableDataComponent(parent, PMTES)
 {
 	if (!p_es) return;
@@ -135,7 +135,7 @@ pmtES::~pmtES()
 }
 
 
-bool pmt::ingest(TableStore *s, dvbpsi_pmt_t *t, TableWatcher *w)
+bool pmt::ingest(TableStore *s, const dvbpsi_pmt_t * const t, TableWatcher *w)
 {
 	const std::vector<Table*> pmts = s->get(TABLEID);
 	for (std::vector<Table*>::const_iterator it = pmts.begin(); it != pmts.end(); ++it) {
@@ -149,7 +149,7 @@ bool pmt::ingest(TableStore *s, dvbpsi_pmt_t *t, TableWatcher *w)
 			return true;
 		}
 	}
-	return s->add<dvbpsi_pmt_t>(TABLEID, t, w);
+	return s->add<const dvbpsi_pmt_t>(TABLEID, t, w);
 }
 
 
@@ -159,7 +159,7 @@ pmt::pmt(Decoder *parent, TableWatcher *watcher)
 	//store table later (probably repeatedly)
 }
 
-pmt::pmt(Decoder *parent, TableWatcher *watcher, dvbpsi_pmt_t *p_pmt)
+pmt::pmt(Decoder *parent, TableWatcher *watcher, const dvbpsi_pmt_t * const p_pmt)
  : Table(parent, TABLE_NAME, TABLEID, watcher)
 {
 	store(p_pmt);
@@ -170,4 +170,4 @@ pmt::~pmt()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, dvbpsi_pmt_t, pmt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_pmt_t, pmt);
