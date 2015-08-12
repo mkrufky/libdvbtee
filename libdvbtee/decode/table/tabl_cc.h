@@ -24,7 +24,7 @@
 
 #include "table.h"
 
-#ifndef _DVBPSI_ETT_H_
+#ifndef _ATSC_ETT_H
 #include "dvbpsi/atsc_ett.h"
 #endif
 

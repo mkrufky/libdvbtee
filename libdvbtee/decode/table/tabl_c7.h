@@ -24,7 +24,7 @@
 
 #include "table.h"
 
-#ifndef _DVBPSI_MGT_H_
+#ifndef _ATSC_MGT_H
 #include "dvbpsi/atsc_mgt.h"
 #endif
 
