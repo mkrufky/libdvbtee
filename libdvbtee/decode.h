@@ -324,8 +324,8 @@ public:
 	bool updateSDT(dvbtee::decode::Table *table);
 #endif
 
-	bool take_eit(dvbpsi_eit_t*, uint8_t);
-	bool take_sdt(dvbpsi_sdt_t*);
+	bool take_eit(const dvbpsi_eit_t * const, uint8_t);
+	bool take_sdt(const dvbpsi_sdt_t * const);
 
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_pf();
@@ -376,12 +376,12 @@ public:
 	bool updateNIT(dvbtee::decode::Table *table);
 #endif
 
-	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return fetch_network_service(p_eit->i_ts_id)->take_eit(p_eit, eit_x); }
-	bool take_nit(dvbpsi_nit_t*);
+	bool take_eit(const dvbpsi_eit_t * const p_eit, uint8_t eit_x) { return fetch_network_service(p_eit->i_ts_id)->take_eit(p_eit, eit_x); }
+	bool take_nit(const dvbpsi_nit_t * const);
 #if USING_DVBPSI_VERSION_0
-	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return fetch_network_service(p_sdt->i_ts_id)->take_sdt(p_sdt); }
+	bool take_sdt(const dvbpsi_sdt_t * const p_sdt) { return fetch_network_service(p_sdt->i_ts_id)->take_sdt(p_sdt); }
 #else
-	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return fetch_network_service(p_sdt->i_extension)->take_sdt(p_sdt); }
+	bool take_sdt(const dvbpsi_sdt_t * const p_sdt) { return fetch_network_service(p_sdt->i_extension)->take_sdt(p_sdt); }
 #endif
 
 	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) const;
@@ -475,22 +475,22 @@ public:
 	bool updateETT(dvbtee::decode::Table *table);
 #endif
 
-	bool take_pat(dvbpsi_pat_t*);
-	bool take_pmt(dvbpsi_pmt_t*);
-	bool take_eit(dvbpsi_eit_t*);
-	bool take_nit_actual(dvbpsi_nit_t*);
-	bool take_nit_other(dvbpsi_nit_t*);
-	bool take_sdt_actual(dvbpsi_sdt_t*);
-	bool take_sdt_other(dvbpsi_sdt_t*);
-	bool take_tot(dvbpsi_tot_t*);
+	bool take_pat(const dvbpsi_pat_t * const);
+	bool take_pmt(const dvbpsi_pmt_t * const);
+	bool take_eit(const dvbpsi_eit_t * const);
+	bool take_nit_actual(const dvbpsi_nit_t * const);
+	bool take_nit_other(const dvbpsi_nit_t * const);
+	bool take_sdt_actual(const dvbpsi_sdt_t * const);
+	bool take_sdt_other(const dvbpsi_sdt_t * const);
+	bool take_tot(const dvbpsi_tot_t * const);
 #if !USING_DVBPSI_VERSION_0
-	bool take_vct(dvbpsi_atsc_vct_t*);
-	bool take_eit(dvbpsi_atsc_eit_t*);
-	bool take_ett(dvbpsi_atsc_ett_t*);
-	bool take_stt(dvbpsi_atsc_stt_t*);
-	bool take_mgt(dvbpsi_atsc_mgt_t*);
+	bool take_vct(const dvbpsi_atsc_vct_t * const);
+	bool take_eit(const dvbpsi_atsc_eit_t * const);
+	bool take_ett(const dvbpsi_atsc_ett_t * const);
+	bool take_stt(const dvbpsi_atsc_stt_t * const);
+	bool take_mgt(const dvbpsi_atsc_mgt_t * const);
 #ifdef RRT
-	bool take_rrt(dvbpsi_atsc_mgt_t*);
+	bool take_rrt(const dvbpsi_atsc_mgt_t * const);
 #endif
 #endif
 	bool complete_pmt() const;

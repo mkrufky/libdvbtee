@@ -608,7 +608,7 @@ bool decode::updateETT(dvbtee::decode::Table *table)
 
 /* -- STREAM TIME -- */
 #if !USING_DVBPSI_VERSION_0
-bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
+bool decode::take_stt(const dvbpsi_atsc_stt_t * const p_stt)
 {
 #if OLD_DECODER
 	stream_time = atsc_datetime_utc(p_stt->i_system_time);
@@ -624,7 +624,7 @@ bool decode::take_stt(dvbpsi_atsc_stt_t* p_stt)
 }
 #endif
 
-bool decode::take_tot(dvbpsi_tot_t* p_tot)
+bool decode::take_tot(const dvbpsi_tot_t * const p_tot)
 {
 #if OLD_DECODER
 	stream_time = datetime_utc(p_tot->i_utc_time);
@@ -640,7 +640,7 @@ bool decode::take_tot(dvbpsi_tot_t* p_tot)
 }
 
 /* -- TABLE HANDLERS -- */
-bool decode::take_pat(dvbpsi_pat_t* p_pat)
+bool decode::take_pat(const dvbpsi_pat_t * const p_pat)
 #define PAT_DBG 1
 {
 	if ((decoded_pat.version == p_pat->i_version) &&
@@ -660,7 +660,7 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 	decoded_pat.version = p_pat->i_version;
 	decoded_pat.programs.clear();
 
-	dvbpsi_pat_program_t* p_program = p_pat->p_first_program;
+	const dvbpsi_pat_program_t *p_program = p_pat->p_first_program;
 	while (p_program) {
 //		if (p_program->i_number > 0)
 		decoded_pat.programs[p_program->i_number] = p_program->i_pid;
@@ -679,7 +679,7 @@ bool decode::take_pat(dvbpsi_pat_t* p_pat)
 #endif
 }
 
-bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
+bool decode::take_pmt(const dvbpsi_pmt_t * const p_pmt)
 {
 	decoded_pmt_t &cur_decoded_pmt = decoded_pmt[p_pmt->i_program_number];
 
@@ -704,7 +704,7 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 
 	fprintf(stderr, "  es_pid | type\n");
 
-	dvbpsi_pmt_es_t* p_es = p_pmt->p_first_es;
+	const dvbpsi_pmt_es_t *p_es = p_pmt->p_first_es;
 	while (p_es) {
 
 		ts_elementary_stream_t &cur_es = cur_decoded_pmt.es_streams[p_es->i_pid];
@@ -758,7 +758,7 @@ bool decode::take_pmt(dvbpsi_pmt_t* p_pmt)
 }
 
 #if !USING_DVBPSI_VERSION_0
-bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
+bool decode::take_vct(const dvbpsi_atsc_vct_t * const p_vct)
 #define VCT_DBG 1
 {
 #if USING_DVBPSI_VERSION_0
@@ -783,7 +783,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 	decoded_vct.cable_vct = p_vct->b_cable_vct;
 	decoded_vct.channels.clear();
 
-	dvbpsi_atsc_vct_channel_t* p_channel = p_vct->p_first_channel;
+	const dvbpsi_atsc_vct_channel_t *p_channel = p_vct->p_first_channel;
 #if VCT_DBG
 	if (p_channel)
 		fprintf(stderr, "  channel | service_id | source_id | service_name\n");
@@ -872,7 +872,7 @@ bool decode::take_vct(dvbpsi_atsc_vct_t* p_vct)
 #endif
 }
 
-bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
+bool decode::take_mgt(const dvbpsi_atsc_mgt_t * const p_mgt)
 #define MGT_DBG 1
 {
 	if ((decoded_mgt.version == p_mgt->i_version) &&
@@ -888,7 +888,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 	decoded_mgt.version = p_mgt->i_version;
 	decoded_mgt.tables.clear();
 
-	dvbpsi_atsc_mgt_table_t* p_table = p_mgt->p_first_table;
+	const dvbpsi_atsc_mgt_table_t *p_table = p_mgt->p_first_table;
 #if MGT_DBG
 	if (p_table)
 		fprintf(stderr, "  table type |   pid  | ver | bytes\n");
@@ -927,7 +927,7 @@ bool decode::take_mgt(dvbpsi_atsc_mgt_t* p_mgt)
 #endif
 
 #if OLD_DECODER
-static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, /*dvbtee::decode::DescriptorStore*/ desc* descriptors)
+static bool __take_nit(const dvbpsi_nit_t * const p_nit, decoded_nit_t* decoded_nit, /*dvbtee::decode::DescriptorStore*/ desc* descriptors)
 #define NIT_DBG 1
 {
 	if ((decoded_nit->version    == p_nit->i_version) &&
@@ -944,7 +944,7 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, /*dvbtee
 	decoded_nit->version    = p_nit->i_version;
 	decoded_nit->network_id = p_nit->i_network_id;
 
-	dvbpsi_nit_ts_t* p_ts = p_nit->p_first_ts;
+	const dvbpsi_nit_ts_t *p_ts = p_nit->p_first_ts;
 #if NIT_DBG
 	if (p_ts)
 		fprintf(stderr, "   ts_id | orig_network_id\n");
@@ -973,7 +973,7 @@ static bool __take_nit(dvbpsi_nit_t* p_nit, decoded_nit_t* decoded_nit, /*dvbtee
 }
 #endif
 
-bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
+bool decode::take_nit_actual(const dvbpsi_nit_t * const p_nit)
 {
 	network_id = p_nit->i_network_id;
 
@@ -995,7 +995,7 @@ bool decode::take_nit_actual(dvbpsi_nit_t* p_nit)
 #endif
 }
 
-bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
+bool decode::take_nit_other(const dvbpsi_nit_t * const p_nit)
 {
 	decode_network *nw = fetch_network(p_nit->i_network_id);
 #if 0
@@ -1015,7 +1015,7 @@ bool decode::take_nit_other(dvbpsi_nit_t* p_nit)
 #endif
 }
 
-bool decode_network::take_nit(dvbpsi_nit_t* p_nit)
+bool decode_network::take_nit(const dvbpsi_nit_t * const p_nit)
 {
 #if OLD_DECODER
 	return __take_nit(p_nit, &decoded_nit, &descriptors);
@@ -1044,7 +1044,7 @@ const map_decoded_eit *decode_network::get_decoded_eit(uint16_t ts_id) const
 }
 
 #if OLD_DECODER
-static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, /*dvbtee::decode::DescriptorStore*/ desc* descriptors,
+static bool __take_sdt(const dvbpsi_sdt_t * const p_sdt, decoded_sdt_t* decoded_sdt, /*dvbtee::decode::DescriptorStore*/ desc* descriptors,
 		       unsigned int* services_w_eit_pf, unsigned int* services_w_eit_sched)
 #define SDT_DBG 1
 {
@@ -1075,7 +1075,7 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, /*dvbtee
 	unsigned int _services_w_eit_pf    = 0;
 	unsigned int _services_w_eit_sched = 0;
 	//fprintf(stderr, "  service_id | service_name");
-	dvbpsi_sdt_service_t* p_service = p_sdt->p_first_service;
+	const dvbpsi_sdt_service_t *p_service = p_sdt->p_first_service;
 	while (p_service) {
 
 		decoded_sdt_service_t &cur_service = decoded_sdt->services[p_service->i_service_id];
@@ -1134,7 +1134,7 @@ static bool __take_sdt(dvbpsi_sdt_t* p_sdt, decoded_sdt_t* decoded_sdt, /*dvbtee
 }
 #endif
 
-bool decode::take_sdt_actual(dvbpsi_sdt_t* p_sdt)
+bool decode::take_sdt_actual(const dvbpsi_sdt_t * const p_sdt)
 {
 	orig_network_id = p_sdt->i_network_id;
 
@@ -1145,7 +1145,7 @@ bool decode::take_sdt_actual(dvbpsi_sdt_t* p_sdt)
 	return nw->take_sdt(p_sdt);
 }
 
-bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
+bool decode::take_sdt_other(const dvbpsi_sdt_t * const p_sdt)
 {
 	decode_network *nw = fetch_network(p_sdt->i_network_id);
 
@@ -1154,7 +1154,7 @@ bool decode::take_sdt_other(dvbpsi_sdt_t* p_sdt)
 	return nw->take_sdt(p_sdt);
 }
 
-bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
+bool decode_network_service::take_sdt(const dvbpsi_sdt_t * const p_sdt)
 {
 #if OLD_DECODER
 	return __take_sdt(p_sdt, &decoded_sdt, &descriptors,
@@ -1165,7 +1165,7 @@ bool decode_network_service::take_sdt(dvbpsi_sdt_t* p_sdt)
 }
 
 #if OLD_DECODER
-bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, /*dvbtee::decode::DescriptorStore*/ desc* descriptors, uint8_t eit_x)
+bool __take_eit(const dvbpsi_eit_t * const p_eit, map_decoded_eit *decoded_eit, /*dvbtee::decode::DescriptorStore*/ desc* descriptors, uint8_t eit_x)
 {
 #if USING_DVBPSI_VERSION_0
 	uint16_t __service_id = p_eit->i_service_id;
@@ -1193,7 +1193,7 @@ bool __take_eit(dvbpsi_eit_t* p_eit, map_decoded_eit *decoded_eit, /*dvbtee::dec
 	cur_eit.network_id    = p_eit->i_network_id;
 	cur_eit.last_table_id = p_eit->i_last_table_id;
 
-	dvbpsi_eit_event_t* p_event = p_eit->p_first_event;
+	const dvbpsi_eit_event_t *p_event = p_eit->p_first_event;
 	while (p_event) {
 
 		decoded_eit_event_t &cur_event = cur_eit.events[p_event->i_event_id];
@@ -1264,7 +1264,7 @@ static inline bool table_id_to_eit_x(uint8_t table_id, uint8_t *eit_x)
 #endif
 }
 
-bool decode::take_eit(dvbpsi_eit_t* p_eit)
+bool decode::take_eit(const dvbpsi_eit_t * const p_eit)
 {
 	/* we want our own eit_x here - we don't need to store this in our class, the stored eit_x is for ATSC */
 	/* prevent warning: ‘eit_x’ may be used uninitialized in this function [-Wmaybe-uninitialized] */
@@ -1277,7 +1277,7 @@ bool decode::take_eit(dvbpsi_eit_t* p_eit)
 	return nw->take_eit(p_eit, eit_x);
 }
 
-bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
+bool decode_network_service::take_eit(const dvbpsi_eit_t * const p_eit, uint8_t eit_x)
 {
 #if OLD_DECODER
 	return __take_eit(p_eit, decoded_eit, &descriptors, eit_x);
@@ -1288,7 +1288,7 @@ bool decode_network_service::take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x)
 }
 
 #if !USING_DVBPSI_VERSION_0
-bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
+bool decode::take_eit(const dvbpsi_atsc_eit_t * const p_eit)
 {
 	decoded_atsc_eit_t &cur_atsc_eit = decoded_atsc_eit[eit_x][p_eit->i_source_id];
 
@@ -1325,7 +1325,7 @@ bool decode::take_eit(dvbpsi_atsc_eit_t* p_eit)
 	cur_atsc_eit.version   = p_eit->i_version;
 	cur_atsc_eit.source_id = p_eit->i_source_id;
 
-	dvbpsi_atsc_eit_event_t* p_event = p_eit->p_first_event;
+	const dvbpsi_atsc_eit_event_t *p_event = p_eit->p_first_event;
 	while (p_event) {
 
 		decoded_atsc_eit_event_t &cur_event = cur_atsc_eit.events[p_event->i_event_id];
@@ -1853,7 +1853,7 @@ unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message,
 }
 
 #if !USING_DVBPSI_VERSION_0
-bool decode::take_ett(dvbpsi_atsc_ett_t* p_ett)
+bool decode::take_ett(const dvbpsi_atsc_ett_t * const p_ett)
 {
 #if OLD_DECODER
 	decoded_atsc_ett_t &cur_ett = decoded_ett[p_ett->i_etm_id];
@@ -2084,7 +2084,7 @@ bool decode::complete_psip()
 			break;
 		}
 		if ((b_attach_demux) && (NULL == h_demux[iter->second.pid]))
-			h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
+			h_demux[iter->second.pid] = const dvbpsi_AttachDemux(attach_table, this);
 			/* else already attached */
 #endif
 	}
