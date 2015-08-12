@@ -3,6 +3,10 @@ INCLUDEPATH += $$PWD
 include ( value/value.pri )
 include ( decode/decode.pri )
 
+QMAKE_CXXFLAGS += -DOLD_DECODER=0
+# include desc.cpp but not DECODER_SOURCES when OLD_DECODER=1
+# SOURCES += desc.cpp
+
 SOURCES += \
     $$DECODER_SOURCES \
     atsctext.cpp \
