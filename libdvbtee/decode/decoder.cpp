@@ -171,7 +171,9 @@ NullDecoder::NullDecoder(Decoder *parent, std::string &name)
 
 NullDecoder::~NullDecoder()
 {
-
+#if 0
+	showChildren();
+#endif
 }
 
 int NullDecoder::getMapIndex() const
