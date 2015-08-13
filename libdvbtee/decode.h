@@ -76,7 +76,7 @@ typedef struct ts_elementary_stream_s
 	// from ISO639 language descriptor 0A:
 	unsigned char iso_639_code[4];
 
-	ts_elementary_stream_s() { memset(iso_639_code, 0, sizeof(iso_639_code)); }
+	ts_elementary_stream_s() : type(0xff), pid(0xffff) { memset(iso_639_code, 0, sizeof(iso_639_code)); }
 } ts_elementary_stream_t; // FIXME: rename this later
 
 typedef std::map<uint16_t, ts_elementary_stream_t> map_ts_elementary_streams; /* arbitrary idx(pid), ts_elementary_stream_t */
@@ -271,8 +271,8 @@ public:
 	decode_network_service(const decode_network_service&);
 	decode_network_service& operator= (const decode_network_service&);
 
-	bool take_eit(dvbpsi_eit_t*, uint8_t);
-	bool take_sdt(dvbpsi_sdt_t*);
+	bool take_eit(const dvbpsi_eit_t * const, uint8_t);
+	bool take_sdt(const dvbpsi_sdt_t * const);
 
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
 	bool eit_x_complete_dvb_pf();
@@ -299,12 +299,12 @@ public:
 	decode_network(const decode_network&);
 	decode_network& operator= (const decode_network&);
 
-	bool take_eit(dvbpsi_eit_t* p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); }
-	bool take_nit(dvbpsi_nit_t*);
+	bool take_eit(const dvbpsi_eit_t * const p_eit, uint8_t eit_x) { return decoded_network_services[p_eit->i_ts_id].take_eit(p_eit, eit_x); }
+	bool take_nit(const dvbpsi_nit_t * const);
 #if USING_DVBPSI_VERSION_0
-	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); }
+	bool take_sdt(const dvbpsi_sdt_t * const p_sdt) { return decoded_network_services[p_sdt->i_ts_id].take_sdt(p_sdt); }
 #else
-	bool take_sdt(dvbpsi_sdt_t* p_sdt) { return decoded_network_services[p_sdt->i_extension].take_sdt(p_sdt); }
+	bool take_sdt(const dvbpsi_sdt_t * const p_sdt) { return decoded_network_services[p_sdt->i_extension].take_sdt(p_sdt); }
 #endif
 
 	const decoded_sdt_t*   get_decoded_sdt(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? &decoded_network_services[ts_id].decoded_sdt : NULL; }
@@ -374,22 +374,22 @@ public:
 	decode(const decode&);
 	decode& operator= (const decode&);
 
-	bool take_pat(dvbpsi_pat_t*);
-	bool take_pmt(dvbpsi_pmt_t*);
-	bool take_eit(dvbpsi_eit_t*);
-	bool take_nit_actual(dvbpsi_nit_t*);
-	bool take_nit_other(dvbpsi_nit_t*);
-	bool take_sdt_actual(dvbpsi_sdt_t*);
-	bool take_sdt_other(dvbpsi_sdt_t*);
-	bool take_tot(dvbpsi_tot_t*);
+	bool take_pat(const dvbpsi_pat_t * const);
+	bool take_pmt(const dvbpsi_pmt_t * const);
+	bool take_eit(const dvbpsi_eit_t * const);
+	bool take_nit_actual(const dvbpsi_nit_t * const);
+	bool take_nit_other(const dvbpsi_nit_t * const);
+	bool take_sdt_actual(const dvbpsi_sdt_t * const);
+	bool take_sdt_other(const dvbpsi_sdt_t * const);
+	bool take_tot(const dvbpsi_tot_t * const);
 #if !USING_DVBPSI_VERSION_0
-	bool take_vct(dvbpsi_atsc_vct_t*);
-	bool take_eit(dvbpsi_atsc_eit_t*);
-	bool take_ett(dvbpsi_atsc_ett_t*);
-	bool take_stt(dvbpsi_atsc_stt_t*);
-	bool take_mgt(dvbpsi_atsc_mgt_t*);
+	bool take_vct(const dvbpsi_atsc_vct_t * const);
+	bool take_eit(const dvbpsi_atsc_eit_t * const);
+	bool take_ett(const dvbpsi_atsc_ett_t * const);
+	bool take_stt(const dvbpsi_atsc_stt_t * const);
+	bool take_mgt(const dvbpsi_atsc_mgt_t * const);
 #ifdef RRT
-	bool take_rrt(dvbpsi_atsc_mgt_t*);
+	bool take_rrt(const dvbpsi_atsc_mgt_t * const);
 #endif
 #endif
 	bool complete_pmt();
