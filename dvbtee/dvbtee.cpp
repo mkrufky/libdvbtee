@@ -191,7 +191,11 @@ void stop_server(struct dvbtee_context* context)
 	return;
 }
 
-int start_server(struct dvbtee_context* context, unsigned int flags)
+int start_server(
+    struct dvbtee_context* context,
+    unsigned int flags,
+    uint16_t port
+)
 {
 	context->server = new serve;
 
@@ -206,7 +210,7 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 			iter->second->feeder.parser.out.add_http_server(SERVE_DEFAULT_PORT+1+iter->first);
 	}
 
-	return context->server->start();
+	return context->server->start(port);
 }
 
 void multiscan(struct dvbtee_context* context, unsigned int scan_method,
@@ -283,25 +287,26 @@ void usage(bool help, char *myname)
 {
 	fprintf(stderr, "built against libdvbpsi version %s\n\n", parse_libdvbpsi_version);
 	fprintf(stderr, "  "
-		"-a\tadapter id\n  "
-		"-A\t(1 for ATSC, 2 for ClearQAM)\n  "
-		"-b\tdisplay bitrates & statistics\n  "
-		"-c\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan minimum channel\n  "
-		"-C\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan maximum channel\n  "
-		"-f\tfrontend id\n  "
-		"-F\tfilename to use as input\n  "
-		"-t\ttimeout\n  "
-		"-T\tnumber of tuners (dvb adapters) allowed to use, 0 for all\n  "
-		"-s\tscan, optional arg when using multiple tuners: \n\t1 for speed, 2 for redundancy, \n\t3 for speed AND redundancy, \n\t4 for optimized speed / partial redundancy\n  "
-		"-S\tserver mode, optional arg 1 for command server, \n\t2 for http stream server, 3 for both\n  "
-		"-i\tpull local/remote tcp/udp port for data\n  "
-		"-I\trequest a service and its associated PES streams by its service id\n  "
-		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
-		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
-		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
-		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
-		"-d\tdebug level\n  "
-		"-h\tdisplay additional help\n\n");
+		"-a\t\tadapter id\n  "
+		"-A\t\t(1 for ATSC, 2 for ClearQAM)\n  "
+		"-b\t\tdisplay bitrates & statistics\n  "
+		"-c\t\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan minimum channel\n  "
+		"-C\t\tchannel to tune /\n\tcomma (,) separated list of channels to scan /\n\tscan maximum channel\n  "
+		"-f\t\tfrontend id\n  "
+		"-F\t\tfilename to use as input\n  "
+		"-t\t\ttimeout\n  "
+		"-T\t\tnumber of tuners (dvb adapters) allowed to use, 0 for all\n  "
+		"-s\t\tscan, optional arg when using multiple tuners: \n\t\t1 for speed, 2 for redundancy, \n\t\t3 for speed AND redundancy, \n\t\t4 for optimized speed / partial redundancy\n  "
+		"-S\t\tserver mode, optional arg 1 for command server, \n\t\t2 for http stream server, 3 for both\n  "
+		"-p<PORT>\tServer port\n  "
+		"-i\t\tpull local/remote tcp/udp port for data\n  "
+		"-I\t\trequest a service and its associated PES streams by its service id\n  "
+		"-E\t\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
+		"-o\t\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
+		"-O\t\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
+		"-H\t\tuse a HdHomeRun device, optional arg to specify the device string\n  "
+		"-d\t\tdebug level\n  "
+		"-h\t\tdisplay additional help\n\n");
 	if (help)
 		fprintf(stderr,
 		"To tune to service id 1 of physical channel 33 and stream it to a udp port:\n  "
@@ -362,7 +367,6 @@ int main(int argc, char **argv)
 
 	unsigned int wait_event  = 0;
 	int eit_limit            = -1;
-
 	tune *tuner = NULL;
 
 	enum output_options out_opt = (enum output_options)-1;
@@ -385,7 +389,7 @@ int main(int argc, char **argv)
 	char hdhrname[256];
 	memset(&hdhrname, 0, sizeof(hdhrname));
 
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:d::H::h?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:p::d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -469,6 +473,26 @@ int main(int argc, char **argv)
 			} else
 				b_output_stdout = true;
 			break;
+		case 'p': /* http server port */
+                        if (!b_serve) {
+                                fprintf(
+                                        stderr,
+                                        "-p option ignored. Server not enabled\n"
+                                );
+                                break;
+                        }
+                        
+                        if (!optarg) {
+                                fprintf(
+                                        stderr,
+                                        "-p option ignored. port not specified\n"
+                                );
+                                break;
+                        }
+
+                        server_port = strtoul(optarg, NULL, 0);
+
+                        break;
 		case 'O': /* output options */
 			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
 			break;
@@ -589,7 +613,9 @@ int main(int argc, char **argv)
 			context._file_feeder.parser.add_stdout();
 	}
 	if (b_serve)
-		start_server(&context, serv_flags | (scan_flags << 2));
+		start_server(
+                        &context, serv_flags | (scan_flags << 2), server_port
+                );
 
 	if ((scan_min) && (!scan_max))
 		scan_max = scan_min;
