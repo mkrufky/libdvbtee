@@ -364,6 +364,8 @@ int main(int argc, char **argv)
 
 	int num_tuners           = -1;
 	unsigned int timeout     = 0;
+        
+        unsigned int server_port = SERVE_DEFAULT_PORT;
 
 	unsigned int wait_event  = 0;
 	int eit_limit            = -1;
