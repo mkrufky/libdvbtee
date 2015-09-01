@@ -43,7 +43,10 @@ desc_a0::desc_a0(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 {
 	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
-	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_ExtendedChannelNameDr(p_descriptor);
+#if (DVBPSI_VERSION_INT < ((2<<16)+(0<<8)+0))
+#define dvbpsi_DecodeExtendedChannelNameDr dvbpsi_ExtendedChannelNameDr
+#endif
+	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_DecodeExtendedChannelNameDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
 	unsigned char name[256] = { 0 };
