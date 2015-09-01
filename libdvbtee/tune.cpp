@@ -268,9 +268,7 @@ int tune::start_scan(unsigned int mode, unsigned int min, unsigned int max, bool
 	if (mode != SCAN_QAM)
 		mode = SCAN_VSB;
 
-	scan_mode = mode;
-
-	switch (scan_mode) {
+	switch (mode) {
 	default:
 	case SCAN_VSB:
 		scan_min = (min) ? min : 2;
@@ -332,7 +330,7 @@ int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, tun
 	if (!mode)
 		mode = SCAN_VSB;
 
-	if (0 != start_scan(scan_mode, channel_list, epg, t_iface))
+	if (0 != start_scan(mode, channel_list, epg, t_iface))
 		return -1;
 
 	if (wait_for_results) {
@@ -350,11 +348,11 @@ int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int ma
 	if (!mode)
 		mode = SCAN_VSB;
 
-	for (scan_mode = SCAN_VSB; scan_mode <= SCAN_QAM; scan_mode++) if (mode & scan_mode) {
+	for (int scan_mode_iter = SCAN_VSB; scan_mode_iter <= SCAN_QAM; scan_mode_iter++) if (mode & scan_mode_iter) {
 
 		count = 0;
 
-		if (0 != start_scan(scan_mode, min, max, epg, t_iface))
+		if (0 != start_scan(scan_mode_iter, min, max, epg, t_iface))
 			return -1;
 
 		if (wait_for_results) {

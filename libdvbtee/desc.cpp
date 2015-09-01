@@ -357,7 +357,10 @@ bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_ExtendedChannelName)
 		return false;
 
-	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_ExtendedChannelNameDr(p_descriptor);
+#if (DVBPSI_VERSION_INT < ((2<<16)+(0<<8)+0))
+#define dvbpsi_DecodeExtendedChannelNameDr dvbpsi_ExtendedChannelNameDr
+#endif
+	dvbpsi_extended_channel_name_dr_t *dr = dvbpsi_DecodeExtendedChannelNameDr(p_descriptor);
 	if (desc_dr_failed(dr)) return false;
 
 	unsigned char name[256];
