@@ -5,6 +5,7 @@ DESCRIPTOR_REQ_DVBPSI_V1_SOURCES = \
     $$PWD/desc_81.cpp \
     $$PWD/desc_83.cpp \
     $$PWD/desc_86.cpp \
+    $$PWD/desc_87.cpp \
     $$PWD/desc_a0.cpp \
     $$PWD/desc_a1.cpp
 
@@ -23,6 +24,7 @@ HEADERS += \
     $$PWD/desc_81.h \
     $$PWD/desc_83.h \
     $$PWD/desc_86.h \
+    $$PWD/desc_87.h \
     $$PWD/desc_a0.h \
     $$PWD/desc_a1.h \
     $$PWD/descriptor.h

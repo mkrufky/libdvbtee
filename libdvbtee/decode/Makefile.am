@@ -35,6 +35,7 @@ libdvbtee_decode_la_SOURCES += \
                               descriptor/desc_81.cpp \
                               descriptor/desc_83.cpp \
                               descriptor/desc_86.cpp \
+                              descriptor/desc_87.cpp \
                               descriptor/desc_a0.cpp \
                               descriptor/desc_a1.cpp \
                               table/tabl_c7.h \
@@ -46,6 +47,7 @@ libdvbtee_decode_la_SOURCES += \
                               descriptor/desc_81.h \
                               descriptor/desc_83.h \
                               descriptor/desc_86.h \
+                              descriptor/desc_87.h \
                               descriptor/desc_a0.h \
                               descriptor/desc_a1.h
 
