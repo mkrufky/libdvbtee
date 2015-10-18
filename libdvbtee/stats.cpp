@@ -28,7 +28,7 @@
 
 #define DBG 0
 
-#define dprintf(fmt, arg...) __dprintf(DBG_STATS, "(%s) "fmt, parent, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_STATS, "(%s) "fmt, parent, ##arg)
 
 stats::stats(const char *caller)
   : tei_count(0)
@@ -39,24 +39,24 @@ stats::stats(const char *caller)
   , statistics_cb(NULL)
   , statistics_priv(NULL)
 {
-	dprintf("(%s)", parent);
+	dPrintf("(%s)", parent);
 }
 
 stats::~stats()
 {
-	dprintf("(%s)", parent);
+	dPrintf("(%s)", parent);
 	show(false);
 }
 
 #if 0
 stats::stats(const stats&)
 {
-	dprintf("(%s, copy)", parent);
+	dPrintf("(%s, copy)", parent);
 }
 
 stats& stats::operator= (const stats& cSource)
 {
-	dprintf("(%s, operator=)", parent);
+	dPrintf("(%s, operator=)", parent);
 
 	if (this == &cSource)
 		return *this;
@@ -112,15 +112,15 @@ void stats::show(bool per_sec)
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
 		char a[16];
 		char b[16];
-		dprintf("pid %04x %5" PRIu64 " p%s  %sb%s  %sbit",
+		dPrintf("pid %04x %5" PRIu64 " p%s  %sb%s  %sbit",
 			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
 			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
 			stats_scale_unit(b, sizeof(b), iter->second * 8));
 	}
 	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		dprintf("pid %04x\t%" PRIu64 " continuity errors (%" PRIu64 "%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
+		dPrintf("pid %04x\t%" PRIu64 " continuity errors (%" PRIu64 "%%)", iter->first, iter->second, ((!iter->second) || (!statistics[iter->first])) ? 0 : (!statistics.count(iter->first)) ? 0 : (100 * iter->second / (statistics[iter->first] / 188)));
 
-	if (tei_count) dprintf("tei count: %" PRIu64 " (%" PRIu64 "%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
+	if (tei_count) dPrintf("tei count: %" PRIu64 " (%" PRIu64 "%%)", tei_count, (!statistics[0x2000]) ? 0 : (18800 * tei_count / statistics[0x2000]));
 }
 
 void stats::push_pid(int c, const uint16_t pid)
@@ -238,7 +238,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 				if (!(hdr.adaptation_flags & 0x02) && (adapt.discontinuity)) {
 					push_discontinuity(hdr.pid);
 #if DBG
-					dprintf("CONTINUITY ERROR pid: %04x cur: 0x%x prev 0x%x", hdr.pid, hdr.continuity_ctr, continuity[hdr.pid]);
+					dPrintf("CONTINUITY ERROR pid: %04x cur: 0x%x prev 0x%x", hdr.pid, hdr.continuity_ctr, continuity[hdr.pid]);
 #endif
 				}
 			}
@@ -252,7 +252,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.PCR, &pcr_base, &pcr_ext);
-			dprintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
+			dPrintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
 
 #if DBG
 			stats_map::const_iterator iter = last_pcr_base.find(hdr.pid);
@@ -267,10 +267,10 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.OPCR, &pcr_base, &pcr_ext);
-			dprintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
+			dPrintf("PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d", hdr.pid, pcr_base, pcr_ext);
 		}
 		if (adapt.splicing_point) {
-			dprintf("PID: 0x%04x, splicing countdown: %d", hdr.pid, adapt.splicing_countdown);
+			dPrintf("PID: 0x%04x, splicing countdown: %d", hdr.pid, adapt.splicing_countdown);
 		}
 	}
 

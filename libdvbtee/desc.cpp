@@ -45,7 +45,7 @@
 
 #include "desc.h"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 #define DT_ISO639Language             0x0a
 #define DT_Service                    0x48
@@ -61,19 +61,19 @@
 #define desc_dr_failed(dr)			\
   ({						\
     bool __ret = !dr;				\
-    if (__ret) dprintf("decoder failed!");	\
+    if (__ret) dPrintf("decoder failed!");	\
     __ret;					\
   })
 
 desc::desc()
 //  : f_kill_thread(false)
 {
-	dprintf("()");
+	dPrintf("()");
 }
 
 desc::~desc()
 {
-	dprintf("()");
+	dPrintf("()");
 }
 
 bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
@@ -92,7 +92,7 @@ bool desc::iso639language(dvbpsi_descriptor_t* p_descriptor)
 		dr0a->iso_639_code[1] = dr->code[i].iso_639_code[1];
 		dr0a->iso_639_code[2] = dr->code[i].iso_639_code[2];
 
-		dprintf("%c%c%c %x",
+		dPrintf("%c%c%c %x",
 			dr->code[i].iso_639_code[0],
 			dr->code[i].iso_639_code[1],
 			dr->code[i].iso_639_code[2],
@@ -113,7 +113,7 @@ bool desc::service(dvbpsi_descriptor_t* p_descriptor)
 	get_descriptor_text(dr->i_service_provider_name, dr->i_service_provider_name_length, provider_name);
 	get_descriptor_text(dr->i_service_name,          dr->i_service_name_length,          service_name);
 
-	dprintf("%s, %s", provider_name, service_name);
+	dPrintf("%s, %s", provider_name, service_name);
 
 	return true;
 }
@@ -130,7 +130,7 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, _4d.name);
 	get_descriptor_text(dr->i_text, dr->i_text_length, _4d.text);
 
-	dprintf("%s, %s, %s", _4d.lang, _4d.name, _4d.text);
+	dPrintf("%s, %s, %s", _4d.lang, _4d.name, _4d.text);
 
 	return true;
 }
@@ -149,7 +149,7 @@ bool desc::freq_list(dvbpsi_descriptor_t* p_descriptor)
 #if 0
 		= dr->p_center_frequencies[i]
 #else
-		dprintf("%d", dr->p_center_frequencies[i]);
+		dPrintf("%d", dr->p_center_frequencies[i]);
 #endif
 	}
 #endif
@@ -276,21 +276,21 @@ bool desc::ac3_audio(dvbpsi_descriptor_t* p_descriptor)
 	dvbpsi_ac3_audio_dr_t* dr = dvbpsi_DecodeAc3AudioDr(p_descriptor);
 	if (desc_dr_failed(dr)) return false;
 
-	dprintf("sample rate: %s", sample_rate(dr->i_sample_rate_code));
-	dprintf("bsid: %02x", dr->i_bsid);
-	dprintf("bit rate code: %02x", dr->i_bit_rate_code);
-	dprintf("surround mode: %s", surround_mode(dr->i_surround_mode));
-	dprintf("bsmod: %02x", dr->i_bsmod);
-	dprintf("num channels: %s", num_channels(dr->i_num_channels));
-	dprintf("full svc: %s", (dr->b_full_svc) ? "true" : "false");
-	dprintf("description: %s", dr->text);
+	dPrintf("sample rate: %s", sample_rate(dr->i_sample_rate_code));
+	dPrintf("bsid: %02x", dr->i_bsid);
+	dPrintf("bit rate code: %02x", dr->i_bit_rate_code);
+	dPrintf("surround mode: %s", surround_mode(dr->i_surround_mode));
+	dPrintf("bsmod: %02x", dr->i_bsmod);
+	dPrintf("num channels: %s", num_channels(dr->i_num_channels));
+	dPrintf("full svc: %s", (dr->b_full_svc) ? "true" : "false");
+	dPrintf("description: %s", dr->text);
 	if (dr->b_language_flag)
-		dprintf("language: %c%c%c",
+		dPrintf("language: %c%c%c",
 			dr->language[0],
 			dr->language[1],
 			dr->language[2]);
 	if (dr->b_language_flag_2)
-		dprintf("language_2: %c%c%c",
+		dPrintf("language_2: %c%c%c",
 			dr->language_2[0],
 			dr->language_2[1],
 			dr->language_2[2]);
@@ -313,7 +313,7 @@ bool desc::_lcn(dvbpsi_descriptor_t* p_descriptor)
 		= lcn->p_entries[i].i_logical_channel_number;
 #else
 		lcn[dr->p_entries[i].i_service_id] = dr->p_entries[i].i_logical_channel_number;
-		dprintf("%d, %d", dr->p_entries[i].i_service_id, lcn[dr->p_entries[i].i_service_id]);
+		dPrintf("%d, %d", dr->p_entries[i].i_service_id, lcn[dr->p_entries[i].i_service_id]);
 #endif
 	}
 #endif
@@ -332,10 +332,10 @@ bool desc::caption_service(dvbpsi_descriptor_t* p_descriptor)
 	for (int i = 0; i < dr->i_number_of_services; i ++) {
 		dvbpsi_caption_service_t *service = &dr->services[0];
 		if (!service) {
-			dprintf("error!");
+			dPrintf("error!");
 			break;
 		}
-		dprintf("%d / %04x, %s line21 field: %d %d %s%s%c%c%c",
+		dPrintf("%d / %04x, %s line21 field: %d %d %s%s%c%c%c",
 			service->i_caption_service_number,
 			service->i_caption_service_number,
 			(service->b_digital_cc) ? "708" : "608",
@@ -367,7 +367,7 @@ bool desc::extended_channel_name(dvbpsi_descriptor_t* p_descriptor)
 	memset(name, 0, sizeof(name));
 	decode_multiple_string(dr->i_long_channel_name, dr->i_long_channel_name_length, name, sizeof(name));
 
-	dprintf("%s", name);
+	dPrintf("%s", name);
 #endif
 	return true;
 }
@@ -384,13 +384,13 @@ bool desc::service_location(dvbpsi_descriptor_t* p_descriptor)
 	for (int i = 0; i < dr->i_number_elements; i ++) {
 		dvbpsi_service_location_element_t *element = &dr->elements[i];
 		if (!element) {
-			dprintf("error!");
+			dPrintf("error!");
 			break;
 		}
 		_a1[element->i_elementary_pid].elementary_pid = element->i_elementary_pid;
 		_a1[element->i_elementary_pid].stream_type    = element->i_stream_type;
 		memcpy(_a1[element->i_elementary_pid].iso_639_code, element->i_iso_639_code, 3);
-		dprintf("pid: 0x%04x, type %02x: %s, %c%c%c", element->i_elementary_pid,
+		dPrintf("pid: 0x%04x, type %02x: %s, %c%c%c", element->i_elementary_pid,
 			element->i_stream_type, streamtype_name(element->i_stream_type),
 			element->i_iso_639_code[0],
 			element->i_iso_639_code[1],
@@ -432,7 +432,7 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 			service_location(p_descriptor);
 			break;
 		default:
-			dprintf("unknown descriptor tag: %02x", p_descriptor->i_tag);
+			dPrintf("unknown descriptor tag: %02x", p_descriptor->i_tag);
 			break;
 		}
 		p_descriptor = p_descriptor->p_next;

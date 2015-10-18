@@ -39,7 +39,7 @@
 # endif
 #endif
 
-#define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_OUTPUT, fmt, ##arg)
 
 #define DOUBLE_BUFFER 0
 #define PREVENT_RBUF_DEADLOCK 0
@@ -180,7 +180,7 @@ int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool 
 	if (socket < 0)
 		return socket;
 #if DBG
-	dprintf("(length:%d)", (int)length);
+	dPrintf("(length:%d)", (int)length);
 #endif
 	if ((length) || (send_zero_length)) {
 		int ret = 0;
@@ -227,7 +227,7 @@ output_stream::output_stream()
   , stream_cb_priv(NULL)
   , have_pat(false)
 {
-	dprintf("()");
+	dPrintf("()");
 	memset(&name, 0, sizeof(name));
 	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
@@ -235,17 +235,17 @@ output_stream::output_stream()
 
 output_stream::~output_stream()
 {
-	dprintf("(%d)", sock);
+	dPrintf("(%d)", sock);
 
 	stop();
 
-	dprintf("(stream) %lu packets in, %lu packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
+	dPrintf("(stream) %lu packets in, %lu packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 }
 
 #if 1
 output_stream::output_stream(const output_stream&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
@@ -265,7 +265,7 @@ output_stream::output_stream(const output_stream&)
 
 output_stream& output_stream::operator= (const output_stream& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -301,7 +301,7 @@ void* output_stream::output_stream_thread()
 	uint8_t *data = NULL;
 	int buf_size, ret = 0;
 
-	dprintf("(%d)", sock);
+	dPrintf("(%d)", sock);
 #if 1
 	switch (stream_method) {
 	case OUTPUT_STREAM_HTTP:
@@ -344,7 +344,7 @@ void* output_stream::output_stream_thread()
 #endif
 		count_out += buf_size;
 #if 0
-		dprintf("(thread-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
+		dPrintf("(thread-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 #endif
 	}
 
@@ -367,7 +367,7 @@ fail:
 int output_stream::start()
 {
 	if (f_streaming) {
-		dprintf("(%d) already streaming", sock);
+		dPrintf("(%d) already streaming", sock);
 		return 0;
 	}
 	if ((sock < 0) &&
@@ -376,7 +376,7 @@ int output_stream::start()
 	     (stream_method != OUTPUT_STREAM_STDOUT)))
 		return sock;
 
-	dprintf("(%d)", sock);
+	dPrintf("(%d)", sock);
 
 	ringbuffer.set_capacity(OUTPUT_STREAM_BUF_SIZE);
 
@@ -389,7 +389,7 @@ int output_stream::start()
 
 bool output_stream::drain()
 {
-	dprintf("(%d)", sock);
+	dPrintf("(%d)", sock);
 
 	if (!f_streaming)
 		return false;
@@ -404,7 +404,7 @@ bool output_stream::drain()
 
 void output_stream::stop()
 {
-	dprintf("(%d)", sock);
+	dPrintf("(%d)", sock);
 
 	stop_without_wait();
 
@@ -418,9 +418,9 @@ bool output_stream::check()
 {
 	bool ret = (f_streaming | ((0 == count_in + count_out)));
 	if (!ret)
-		dprintf("(%d: %s) not streaming!", sock, name);
+		dPrintf("(%d: %s) not streaming!", sock, name);
 	else {
-		dprintf("(%d: %s) %s %lu in, %lu out",
+		dPrintf("(%d: %s) %s %lu in, %lu out",
 			sock, name,
 			(stream_method == OUTPUT_STREAM_UDP) ? "UDP" :
 			(stream_method == OUTPUT_STREAM_TCP) ? "TCP" :
@@ -432,7 +432,7 @@ bool output_stream::check()
 			count_in / 188, count_out / 188);
 #if 1//DBG
 		if (pids.size()) {
-			dprintf("(%d: %s) subscribed to the following pids:", sock, name);
+			dPrintf("(%d: %s) subscribed to the following pids:", sock, name);
 			for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
 				fprintf(stderr, "%d, ", iter->first);
 			fprintf(stderr, "\n");
@@ -472,13 +472,13 @@ bool output_stream::push(uint8_t* p_data, int size)
 			} else {
 				fprintf(stderr, "%s> FAILED: %d bytes dropped\n", __func__, size);
 #if 0
-				dprintf("(push-false-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
+				dPrintf("(push-false-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 #endif
 				return false;
 			}
 	else count_in += size;
 #if 0
-	dprintf("(push-true-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
+	dPrintf("(push-true-stream) %d packets in, %d packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 #endif
 	}
 	return true;
@@ -489,7 +489,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 	int ret = -1;
 
 	if ((!p_data) || (!size))
-		dprintf("no data to stream!!!");
+		dPrintf("no data to stream!!!");
 	/* stream data to target */
 	else switch (stream_method) {
 	case OUTPUT_STREAM_UDP:
@@ -545,7 +545,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 
 void output_stream::close_file()
 {
-	dprintf("(%d, %s)", sock, name);
+	dPrintf("(%d, %s)", sock, name);
 
 	if (sock >= 0) {
 		close(sock);
@@ -590,7 +590,7 @@ int output_stream::add(int socket, unsigned int method, map_pidtype &pids)
 
 int output_stream::add_stdout(map_pidtype &pids)
 {
-	dprintf("dumping to stdout...");
+	dPrintf("dumping to stdout...");
 	ringbuffer.reset();
 	stream_method = OUTPUT_STREAM_STDOUT;
 	strncpy(name, "STDOUT", sizeof(name));
@@ -606,7 +606,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 	bool b_udp = false;
 	bool b_file = false;
 
-	dprintf("(-->%s)", target);
+	dPrintf("(-->%s)", target);
 
 	size_t len = strlen(target);
 	strncpy(name, target, sizeof(name)-1);
@@ -646,7 +646,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 		close(sock);
 
 	if (b_file) {
-		dprintf("opening %s...", ip);
+		dPrintf("opening %s...", ip);
 		if ((sock = open(ip, O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0) {
 			perror("file failed");
 			return -1;
@@ -691,7 +691,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 		perror("socket failed");
 		return -1;
 	}
-	dprintf("~(-->%s)", target);
+	dPrintf("~(-->%s)", target);
 
 	return set_pids(pids);
 }
@@ -722,26 +722,26 @@ output::output()
   , count_in(0)
   , count_out(0)
 {
-	dprintf("()");
+	dPrintf("()");
 
 	output_streams.clear();
 }
 
 output::~output()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	stop();
 
 	output_streams.clear();
 
-	dprintf("(intermediate) %lu packets in, %lu packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
+	dPrintf("(intermediate) %lu packets in, %lu packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 }
 
 #if 1
 output::output(const output&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
@@ -758,7 +758,7 @@ output::output(const output&)
 
 output& output::operator= (const output& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -814,9 +814,9 @@ void* output::output_thread()
 					iter->second.push(data, buf_size);
 #if 0
 				else {
-					dprintf("erasing idle output stream...");
+					dPrintf("erasing idle output stream...");
 					output_streams.erase(iter->first);
-					dprintf("garbage collection complete");
+					dPrintf("garbage collection complete");
 				}
 #endif
 			}
@@ -844,7 +844,7 @@ void output::add_http_client(int socket)
 
 int output::add_http_server(int port)
 {
-	dprintf("(%d)", port);
+	dPrintf("(%d)", port);
 	listener.set_interface(this);
 	return listener.start(port);
 }
@@ -858,7 +858,7 @@ int output::get_pids(map_pidtype &result)
 
 bool output::check()
 {
-	dprintf("()");
+	dPrintf("()");
 	unsigned int dead = 0;
 	bool ret = false;
 
@@ -869,7 +869,7 @@ bool output::check()
 			dead++;
 	}
 	if (dead) {
-		dprintf("%d dead streams found", dead);
+		dPrintf("%d dead streams found", dead);
 		reclaim_resources();
 	}
 
@@ -877,7 +877,7 @@ bool output::check()
 	map_pidtype pids;
 	get_pids(pids);
 	if (pids.size()) {
-		dprintf("subscribed to the following pids:");
+		dPrintf("subscribed to the following pids:");
 		for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
 			fprintf(stderr, "%d, ", iter->first);
 		fprintf(stderr, "\n");
@@ -890,12 +890,12 @@ bool output::check()
 
 void output::reclaim_resources()
 {
-	dprintf("()");
+	dPrintf("()");
 	bool erased = false;
 
 	for (output_stream_map::iterator iter = output_streams.begin(); iter != output_streams.end(); ++iter) {
 		if (!iter->second.check()) {
-			dprintf("erasing idle output stream...");
+			dPrintf("erasing idle output stream...");
 			output_streams.erase(iter->first);
 			/* stop the loop if we erased any targets */
 			erased = true;
@@ -909,7 +909,7 @@ void output::reclaim_resources()
 
 int output::start()
 {
-	dprintf("()");
+	dPrintf("()");
 
 #if DOUBLE_BUFFER
 	int ret = 0;
@@ -918,7 +918,7 @@ int output::start()
 		goto nobuffer;
 
 	if (f_streaming) {
-		dprintf("() already streaming!");
+		dPrintf("() already streaming!");
 		goto nobuffer;
 	}
 	ret = pthread_create(&h_thread, NULL, output_thread, this);
@@ -945,7 +945,7 @@ fail:
 
 void output::stop()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	stop_without_wait();
 
@@ -964,12 +964,12 @@ void output::stop()
 
 void output::stop(int id)
 {
-	dprintf("(%d)", id);
+	dPrintf("(%d)", id);
 
 	if (output_streams.count(id))
 		output_streams[id].stop();
 	else
-		dprintf("no such stream id: %d", id);
+		dPrintf("no such stream id: %d", id);
 
 	return;
 }
@@ -989,9 +989,9 @@ bool output::push(uint8_t* p_data, int size)
 			iter->second.push(p_data, size);
 #if 0
 		else {
-			dprintf("erasing idle output stream...");
+			dPrintf("erasing idle output stream...");
 			output_streams.erase(iter->first);
-			dprintf("garbage collection complete");
+			dPrintf("garbage collection complete");
 		}
 #endif
 	}
@@ -1013,9 +1013,9 @@ int output::add_stdout(map_pidtype &pids)
 	if (ret == 0)
 		num_targets++;
 	else
-		dprintf("failed to add target #%d", target_id);
+		dPrintf("failed to add target #%d", target_id);
 
-	dprintf("~(%d->STDOUT)", target_id);
+	dPrintf("~(%d->STDOUT)", target_id);
 
 	return (ret == 0) ? target_id : ret;
 }
@@ -1026,7 +1026,7 @@ int output::add(void* priv, stream_callback callback, map_pidtype &pids)
 
 		int search_id = search(priv, callback);
 		if (search_id >= 0) {
-			dprintf("target callback already exists #%d", search_id);
+			dPrintf("target callback already exists #%d", search_id);
 			return search_id;
 		}
 		int target_id = num_targets;
@@ -1035,9 +1035,9 @@ int output::add(void* priv, stream_callback callback, map_pidtype &pids)
 		if (ret == 0)
 			num_targets++;
 		else
-			dprintf("failed to add target #%d", target_id);
+			dPrintf("failed to add target #%d", target_id);
 
-		dprintf("~(%d->FUNC)", target_id);
+		dPrintf("~(%d->FUNC)", target_id);
 
 		return (ret == 0) ? target_id : ret;
 	}
@@ -1050,7 +1050,7 @@ int output::add(output_stream_iface *iface, map_pidtype &pids)
 
 		int search_id = search(iface);
 		if (search_id >= 0) {
-			dprintf("target interface already exists #%d", search_id);
+			dPrintf("target interface already exists #%d", search_id);
 			return search_id;
 		}
 		int target_id = num_targets;
@@ -1059,9 +1059,9 @@ int output::add(output_stream_iface *iface, map_pidtype &pids)
 		if (ret == 0)
 			num_targets++;
 		else
-			dprintf("failed to add target #%d", target_id);
+			dPrintf("failed to add target #%d", target_id);
 
-		dprintf("~(%d->INTF)", target_id);
+		dPrintf("~(%d->INTF)", target_id);
 
 		return (ret == 0) ? target_id : ret;
 	}
@@ -1074,7 +1074,7 @@ int output::add(int socket, unsigned int method, map_pidtype &pids)
 
 		int search_id = search(socket, method);
 		if (search_id >= 0) {
-			dprintf("target socket already exists #%d", search_id);
+			dPrintf("target socket already exists #%d", search_id);
 			return search_id;
 		}
 		int target_id = num_targets;
@@ -1083,9 +1083,9 @@ int output::add(int socket, unsigned int method, map_pidtype &pids)
 		if (ret == 0)
 			num_targets++;
 		else
-			dprintf("failed to add target #%d", target_id);
+			dPrintf("failed to add target #%d", target_id);
 
-		dprintf("~(%d->SOCKET[%d])", target_id, socket);
+		dPrintf("~(%d->SOCKET[%d])", target_id, socket);
 
 		return (ret == 0) ? target_id : ret;
 	}
@@ -1116,21 +1116,21 @@ int output::__add(char* target, map_pidtype &pids)
 {
 	int search_id = search(target);
 	if (search_id >= 0) {
-		dprintf("target already exists #%d: %s", search_id, target);
+		dPrintf("target already exists #%d: %s", search_id, target);
 		return search_id;
 	}
 	int target_id = num_targets;
 
-	dprintf("(%d->%s)", target_id, target);
+	dPrintf("(%d->%s)", target_id, target);
 
 	/* push data into output buffer */
 	int ret = output_streams[target_id].add(target, pids);
 	if (ret == 0)
 		num_targets++;
 	else
-		dprintf("failed to add target #%d: %s", target_id, target);
+		dPrintf("failed to add target #%d: %s", target_id, target);
 
-	dprintf("~(%d->%s)", target_id, target);
+	dPrintf("~(%d->%s)", target_id, target);
 
 	return (ret == 0) ? target_id : ret;
 }

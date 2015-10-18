@@ -25,7 +25,7 @@
 #include "log.h"
 #define CLASS_MODULE "rbuf"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_OUTPUT, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_OUTPUT, fmt, ##arg)
 
 rbuf::rbuf()
   : capacity(0)
@@ -33,13 +33,13 @@ rbuf::rbuf()
   , idx_read(0)
   , idx_write(0)
 {
-	dprintf("()");
+	dPrintf("()");
 	pthread_mutex_init(&mutex, 0);
 }
 
 rbuf::~rbuf()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	dealloc();
 
@@ -48,7 +48,7 @@ rbuf::~rbuf()
 
 rbuf::rbuf(const rbuf&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 	p_data    = NULL;
 	capacity  = 0;
 	idx_read  = 0;
@@ -57,7 +57,7 @@ rbuf::rbuf(const rbuf&)
 
 rbuf& rbuf::operator= (const rbuf& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -72,7 +72,7 @@ rbuf& rbuf::operator= (const rbuf& cSource)
 
 void rbuf::dealloc()
 {
-	dprintf("()");
+	dPrintf("()");
 	pthread_mutex_lock(&mutex);
 
 	if (p_data)
@@ -87,7 +87,7 @@ void rbuf::dealloc()
 
 void rbuf::set_capacity(int cap)
 {
-	dprintf("(%d)", cap);
+	dPrintf("(%d)", cap);
 	pthread_mutex_lock(&mutex);
 
 	if (p_data)
@@ -102,7 +102,7 @@ void rbuf::set_capacity(int cap)
 int rbuf::get_capacity()
 {
 #if DBG
-	dprintf("(%d)", capacity);
+	dPrintf("(%d)", capacity);
 #endif
 	return capacity;
 }
@@ -110,7 +110,7 @@ int rbuf::get_capacity()
 int rbuf::get_size()
 {
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 	pthread_mutex_lock(&mutex);
 
@@ -123,7 +123,7 @@ int rbuf::get_size()
 
 void rbuf::reset()
 {
-	dprintf("()");
+	dPrintf("()");
 	pthread_mutex_lock(&mutex);
 
 	__reset();
@@ -134,12 +134,12 @@ void rbuf::reset()
 bool rbuf::check()
 {
 	if (!capacity) {
-		dprintf("capacity not set!!!");
+		dPrintf("capacity not set!!!");
 		return false;
 	}
 	int size = get_size();
 
-	dprintf("%d.%02d%% usage (%d / %d)",
+	dPrintf("%d.%02d%% usage (%d / %d)",
 		100 * size / capacity,
 		100 * (100 * size % capacity) / capacity,
 		size, capacity);

@@ -33,16 +33,16 @@
 
 bool fshowtime;
 
-#define dprintf(fmt, arg...)					\
+#define dPrintf(fmt, arg...)					\
 do {								\
-	__dprintf(DBG_DECODE, fmt, ##arg);			\
+	__dPrintf(DBG_DECODE, fmt, ##arg);			\
 	fshowtime = true;					\
 } while (0)
 
 #define dbg_time(fmt, arg...)					\
 do {								\
 	if ((fshowtime) | (dbg & DBG_TIME)) {			\
-		__dprintf((DBG_DECODE | DBG_TIME), fmt, ##arg);	\
+		__dPrintf((DBG_DECODE | DBG_TIME), fmt, ##arg);	\
 		fshowtime = false;				\
 	}							\
 } while (0)
@@ -50,14 +50,14 @@ do {								\
 decode_report::decode_report()
 {
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 }
 
 decode_report::~decode_report()
 {
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 }
 
@@ -72,7 +72,7 @@ decode_network_service::decode_network_service()
   : services_w_eit_pf(0)
   , services_w_eit_sched(0)
 {
-	dprintf("()");
+	dPrintf("()");
 
 	memset(&decoded_sdt, 0, sizeof(decoded_sdt_t));
 	decoded_sdt.services.clear();
@@ -89,7 +89,7 @@ decode_network_service::decode_network_service()
 
 decode_network_service::~decode_network_service()
 {
-	dprintf("(%05d|%05d)",
+	dPrintf("(%05d|%05d)",
 		decoded_sdt.network_id, decoded_sdt.ts_id);
 
 	decoded_sdt.services.clear();
@@ -106,7 +106,7 @@ decode_network_service::~decode_network_service()
 
 decode_network_service::decode_network_service(const decode_network_service&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 
 	services_w_eit_pf = 0;
 	services_w_eit_sched = 0;
@@ -126,7 +126,7 @@ decode_network_service::decode_network_service(const decode_network_service&)
 
 decode_network_service& decode_network_service::operator= (const decode_network_service& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -152,7 +152,7 @@ decode_network_service& decode_network_service::operator= (const decode_network_
 decode_network::decode_network()
   : orig_network_id(0)
 {
-	dprintf("()");
+	dPrintf("()");
 
 	memset(&decoded_nit, 0, sizeof(decoded_nit_t));
 
@@ -166,10 +166,10 @@ decode_network::decode_network()
 decode_network::~decode_network()
 {
 #if 0
-	dprintf("(%05d|%05d)",
+	dPrintf("(%05d|%05d)",
 		decoded_nit.network_id, decoded_sdt.network_id);
 #else
-	dprintf("(%05d|%05d) %zu",
+	dPrintf("(%05d|%05d) %zu",
 		decoded_nit.network_id, orig_network_id,
 		decoded_network_services.size());
 #endif
@@ -183,7 +183,7 @@ decode_network::~decode_network()
 
 decode_network::decode_network(const decode_network&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 
 	orig_network_id = 0;
 
@@ -198,7 +198,7 @@ decode_network::decode_network(const decode_network&)
 
 decode_network& decode_network::operator= (const decode_network& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -223,7 +223,7 @@ decode::decode()
   , eit_x(0)
   , physical_channel(0)
 {
-	dprintf("()");
+	dPrintf("()");
 
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
 	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
@@ -258,7 +258,7 @@ decode::decode()
 
 decode::~decode()
 {
-	dprintf("(%04x|%05d)",
+	dPrintf("(%04x|%05d)",
 		decoded_pat.ts_id, decoded_pat.ts_id);
 
 	for (int i = 0; i < 128; i++) {
@@ -286,7 +286,7 @@ decode::~decode()
 
 decode::decode(const decode&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 
 	memset(&decoded_pat, 0, sizeof(decoded_pat_t));
 	memset(&decoded_vct, 0, sizeof(decoded_vct_t));
@@ -328,7 +328,7 @@ decode::decode(const decode&)
 
 decode& decode::operator= (const decode& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -405,7 +405,7 @@ bool decode::take_pat(const dvbpsi_pat_t * const p_pat)
 	if ((decoded_pat.version == p_pat->i_version) &&
 	    (decoded_pat.ts_id   == p_pat->i_ts_id)) {
 
-		dprintf("v%d, ts_id: %d: ALREADY DECODED",
+		dPrintf("v%d, ts_id: %d: ALREADY DECODED",
 			p_pat->i_version, p_pat->i_ts_id);
 		return false;
 	}
@@ -441,7 +441,7 @@ bool decode::take_pmt(const dvbpsi_pmt_t * const p_pmt)
 	if ((cur_decoded_pmt.version == p_pmt->i_version) &&
 	    (cur_decoded_pmt.program == p_pmt->i_program_number)) {
 
-		dprintf("v%d, service_id %d, pcr_pid %d: ALREADY DECODED",
+		dPrintf("v%d, service_id %d, pcr_pid %d: ALREADY DECODED",
 			p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
 		return false;
 	}
@@ -520,7 +520,7 @@ bool decode::take_vct(const dvbpsi_atsc_vct_t * const p_vct)
 	if ((decoded_vct.version == p_vct->i_version) &&
 	    (decoded_vct.ts_id   == __ts_id)) {
 
-		dprintf("v%d, ts_id %d, b_cable_vct %d: ALREADY DECODED",
+		dPrintf("v%d, ts_id %d, b_cable_vct %d: ALREADY DECODED",
 			p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 		return false;
 	}
@@ -561,7 +561,7 @@ bool decode::take_vct(const dvbpsi_atsc_vct_t * const p_vct)
 		cur_channel.source_id         = p_channel->i_source_id;
 
 		//FIXME: descriptors
-		dprintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
+		dPrintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
 		descriptors.decode(p_channel->p_first_descriptor);
 
 		desc local_descriptors;
@@ -575,7 +575,7 @@ bool decode::take_vct(const dvbpsi_atsc_vct_t * const p_vct)
 			if (decoded_pmt.count(p_channel->i_program_number)) {
 				memcpy(decoded_pmt[p_channel->i_program_number].es_streams[iter_dra1->second.elementary_pid].iso_639_code,
 				       iter_dra1->second.iso_639_code, sizeof(iter_dra1->second.iso_639_code));
-				dprintf("copied service location descriptor from VCT into PMT");
+				dPrintf("copied service location descriptor from VCT into PMT");
 			}
 #endif
 			if (!languages.empty()) languages.append(", ");
@@ -597,7 +597,7 @@ bool decode::take_vct(const dvbpsi_atsc_vct_t * const p_vct)
 		p_channel = p_channel->p_next;
 	}
 	//FIXME: descriptors
-	dprintf("parsing channel descriptors for mux:");
+	dPrintf("parsing channel descriptors for mux:");
 	descriptors.decode(p_vct->p_first_descriptor);
 
 	return true;
@@ -609,7 +609,7 @@ bool decode::take_mgt(const dvbpsi_atsc_mgt_t * const p_mgt)
 	if ((decoded_mgt.version == p_mgt->i_version) &&
 	    (!decoded_mgt.tables.empty())) {
 
-		dprintf("v%d: ALREADY DECODED", p_mgt->i_version);
+		dPrintf("v%d: ALREADY DECODED", p_mgt->i_version);
 		return false;
 	}
 #if MGT_DBG
@@ -659,7 +659,7 @@ static bool __take_nit(const dvbpsi_nit_t * const p_nit, decoded_nit_t* decoded_
 	if ((decoded_nit->version    == p_nit->i_version) &&
 	    (decoded_nit->network_id == p_nit->i_network_id)) {
 
-		dprintf("v%d, network_id %d: ALREADY DECODED",
+		dPrintf("v%d, network_id %d: ALREADY DECODED",
 			p_nit->i_version, p_nit->i_network_id);
 		return false;
 	}
@@ -754,13 +754,13 @@ static bool __take_sdt(const dvbpsi_sdt_t * const p_sdt, decoded_sdt_t* decoded_
 	if ((decoded_sdt->version    == p_sdt->i_version) &&
 	    (decoded_sdt->network_id == p_sdt->i_network_id)) {
 
-		dprintf("v%d | ts_id %d | network_id %d: ALREADY DECODED",
+		dPrintf("v%d | ts_id %d | network_id %d: ALREADY DECODED",
 			p_sdt->i_version,
 			__ts_id,
 			p_sdt->i_network_id);
 		return false;
 	}
-	dprintf("v%02d | ts_id %05d | network_id %05d\n"
+	dPrintf("v%02d | ts_id %05d | network_id %05d\n"
 		/*"------------------------------------"*/,
 		p_sdt->i_version,
 		__ts_id,
@@ -801,7 +801,7 @@ static bool __take_sdt(const dvbpsi_sdt_t * const p_sdt, decoded_sdt_t* decoded_
 			sizeof(cur_service.service_name)-1);
 		cur_service.service_name[sizeof(cur_service.service_name)-1] = '\0';
 
-		dprintf("%05d | %s %s | %s - %s",
+		dPrintf("%05d | %s %s | %s - %s",
 			cur_service.service_id,
 			(cur_service.f_eit_present) ? "p/f" : "   ",
 			(cur_service.f_eit_sched) ? "sched" : "     ",
