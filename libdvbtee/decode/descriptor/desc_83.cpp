@@ -25,7 +25,7 @@
 
 #define CLASS_MODULE "[lcn]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -49,7 +49,7 @@ desc_83::desc_83(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 		set(dr->p_entries[i].i_service_id, dr->p_entries[i].i_logical_channel_number);
 	}
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

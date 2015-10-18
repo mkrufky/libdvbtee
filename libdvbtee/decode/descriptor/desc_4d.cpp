@@ -27,7 +27,7 @@
 
 #define CLASS_MODULE "[short event]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -56,7 +56,7 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	set("name", std::string((const char*)name));
 	set("text", std::string((const char*)text));
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

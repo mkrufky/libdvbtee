@@ -31,8 +31,8 @@
 
 #define CLASS_MODULE "[SDT]"
 
-//#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
-#define dprintf(fmt, arg...) fprintf(stderr, fmt"\n", ##arg)
+//#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) fprintf(stderr, fmt"\n", ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -52,7 +52,7 @@ void sdt::store(const dvbpsi_sdt_t * const p_sdt)
 //	if ((decoded_sdt->version    == p_sdt->i_version) &&
 //	    (decoded_sdt->network_id == p_sdt->i_network_id)) {
 
-//		dprintf("SDT v%d | ts_id %d | network_id %d: ALREADY DECODED",
+//		dPrintf("SDT v%d | ts_id %d | network_id %d: ALREADY DECODED",
 //			p_sdt->i_version,
 //			__ts_id,
 //			p_sdt->i_network_id);
@@ -81,7 +81,7 @@ void sdt::store(const dvbpsi_sdt_t * const p_sdt)
 	//fprintf(stderr, "  service_id | service_name");
 	const dvbpsi_sdt_service_t *p_service = p_sdt->p_first_service;
 	if (p_service)
-		dprintf(" svcId | EIT avail |  provider  | service name");
+		dPrintf(" svcId | EIT avail |  provider  | service name");
 	while (p_service) {
 
 		decoded_sdt_service_t &cur_service = decoded_sdt.services[p_service->i_service_id];
@@ -101,7 +101,7 @@ void sdt::store(const dvbpsi_sdt_t * const p_sdt)
 	setValid(true);
 
 #if 0
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 #endif
 
 	if ((/*changed*/true) && (m_watcher)) {
@@ -143,7 +143,7 @@ sdtSVC::sdtSVC(decoded_sdt_service_t& cur_service, Decoder *parent, const dvbpsi
 			sizeof(cur_service.service_name)-1);
 	}
 
-	dprintf(" %05d | %s %s | %s - %s",
+	dPrintf(" %05d | %s %s | %s - %s",
 		cur_service.service_id,
 		(cur_service.f_eit_present) ? "p/f" : "   ",
 		(cur_service.f_eit_sched) ? "sched" : "     ",
@@ -166,7 +166,7 @@ bool sdt::ingest(TableStore *s, const dvbpsi_sdt_t * const t, TableWatcher *w)
 		sdt *thisSDT = (sdt*)*it;
 		if (thisSDT->get<uint16_t>("networkId") == t->i_network_id) {
 			if (thisSDT->get<uint16_t>("version") == t->i_version) {
-				dprintf("SDT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
+				dPrintf("SDT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
 				return false;
 			}
 			thisSDT->store(t);

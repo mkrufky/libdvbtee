@@ -25,7 +25,7 @@
 
 #define CLASS_MODULE "[ac-3 audio]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -46,21 +46,21 @@ desc_81::desc_81(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	dvbpsi_ac3_audio_dr_t* dr = dvbpsi_DecodeAc3AudioDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 #if 0
-	dprintf("sample rate: %s", sample_rate(dr->i_sample_rate_code));
-	dprintf("bsid: %02x", dr->i_bsid);
-	dprintf("bit rate code: %02x", dr->i_bit_rate_code);
-	dprintf("surround mode: %s", surround_mode(dr->i_surround_mode));
-	dprintf("bsmod: %02x", dr->i_bsmod);
-	dprintf("num channels: %s", num_channels(dr->i_num_channels));
-	dprintf("full svc: %s", (dr->b_full_svc) ? "true" : "false");
-	dprintf("description: %s", dr->text);
+	dPrintf("sample rate: %s", sample_rate(dr->i_sample_rate_code));
+	dPrintf("bsid: %02x", dr->i_bsid);
+	dPrintf("bit rate code: %02x", dr->i_bit_rate_code);
+	dPrintf("surround mode: %s", surround_mode(dr->i_surround_mode));
+	dPrintf("bsmod: %02x", dr->i_bsmod);
+	dPrintf("num channels: %s", num_channels(dr->i_num_channels));
+	dPrintf("full svc: %s", (dr->b_full_svc) ? "true" : "false");
+	dPrintf("description: %s", dr->text);
 	if (dr->b_language_flag)
-		dprintf("language: %c%c%c",
+		dPrintf("language: %c%c%c",
 			dr->language[0],
 			dr->language[1],
 			dr->language[2]);
 	if (dr->b_language_flag_2)
-		dprintf("language_2: %c%c%c",
+		dPrintf("language_2: %c%c%c",
 			dr->language_2[0],
 			dr->language_2[1],
 			dr->language_2[2]);
@@ -84,7 +84,7 @@ desc_81::desc_81(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 		set("language2", std::string(lang));
 	}
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

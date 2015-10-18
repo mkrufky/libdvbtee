@@ -26,7 +26,7 @@
 #define CLASS_MODULE "[iso639 lang]"
 //#define CLASS_MODULE "desc_0a"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -59,7 +59,7 @@ desc_0a::desc_0a(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	set("ISO639Lang", languages);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

@@ -31,7 +31,7 @@
 
 #define CLASS_MODULE "[MGT]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -46,7 +46,7 @@ void mgt::store(const dvbpsi_atsc_mgt_t * const p_mgt)
 //	if ((decoded_mgt.version == p_mgt->i_version) &&
 //	    (!decoded_mgt.tables.empty())) {
 
-//		dprintf("v%d: ALREADY DECODED", p_mgt->i_version);
+//		dPrintf("v%d: ALREADY DECODED", p_mgt->i_version);
 //		return false;
 //	}
 #if MGT_DBG
@@ -79,7 +79,7 @@ void mgt::store(const dvbpsi_atsc_mgt_t * const p_mgt)
 
 	setValid(true);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
@@ -100,7 +100,7 @@ bool mgt::ingest(TableStore *s, const dvbpsi_atsc_mgt_t * const t, TableWatcher 
 		mgt *thisMGT = (mgt*)*it;
 		if (thisMGT->get<uint16_t>("tsId") == __ts_id) {
 			if (thisMGT->get<uint16_t>("version") == t->i_version) {
-				dprintf("MGT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
+				dPrintf("MGT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
 				return false;
 			}
 			thisMGT->store(t);

@@ -27,7 +27,7 @@
 
 #define CLASS_MODULE "[service]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -53,7 +53,7 @@ desc_48::desc_48(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	set("providerName", std::string((const char*)provider_name));
 	set("serviceName", std::string((const char*)service_name));
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

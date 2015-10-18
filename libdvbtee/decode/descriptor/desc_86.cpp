@@ -25,7 +25,7 @@
 
 #define CLASS_MODULE "[caption service]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -47,7 +47,7 @@ desc_86::desc_86(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	for (int i = 0; i < dr->i_number_of_services; i ++) {
 		dvbpsi_caption_service_t *service = &dr->services[0];
 		if (!service) {
-			dprintf("error!");
+			dPrintf("error!");
 			break;
 		}
 		Object obj;
@@ -67,7 +67,7 @@ desc_86::desc_86(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	set("CaptionService", captionService);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

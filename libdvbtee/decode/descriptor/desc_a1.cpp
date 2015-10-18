@@ -30,7 +30,7 @@
 #define CLASS_MODULE "[service location]"
 //#define CLASS_MODULE "desc_a1"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -52,7 +52,7 @@ desc_a1::desc_a1(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	for (int i = 0; i < dr->i_number_elements; i ++) {
 		dvbpsi_service_location_element_t *element = &dr->elements[i];
 		if (!element) {
-			dprintf("error!");
+			dPrintf("error!");
 			break;
 		}
 
@@ -71,7 +71,7 @@ desc_a1::desc_a1(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	}
 	set("serviceLocation", locations);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

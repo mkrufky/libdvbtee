@@ -31,7 +31,7 @@
 
 #define CLASS_MODULE "[PAT]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -75,7 +75,7 @@ void pat::store(const dvbpsi_pat_t * const p_pat)
 
 	setValid(true);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);

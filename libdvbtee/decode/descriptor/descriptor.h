@@ -36,14 +36,14 @@
 ({ \
 	bool __ret = (t == e); \
 	if (!__ret) \
-		__dprintf(DBG_DESC, "FAIL: 0x%02x != 0x%02x", t, e); \
+		__dPrintf(DBG_DESC, "FAIL: 0x%02x != 0x%02x", t, e); \
 	__ret; \
 })
 
 #define desc_dr_failed(dr) \
 ({ \
 	bool __ret = !dr; \
-	if (__ret) dprintf("decoder failed!"); \
+	if (__ret) dPrintf("decoder failed!"); \
 	__ret; \
 })
 

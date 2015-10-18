@@ -421,7 +421,7 @@ decode_network *decode::fetch_network(uint16_t nw_id)
 /* TableWatcher */
 void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 {
-	dprintf("0x%02x", tId);
+	dPrintf("0x%02x", tId);
 
 	switch (tId) {
 	case 0x00: /* PAT */
@@ -467,7 +467,7 @@ bool decode::updatePAT(dvbtee::decode::Table *table)
 #else
 	decoded_pat = patTable->getDecodedPAT();
 #endif
-	dprintf("tsid %04x, ver %02x, %zu programs", decoded_pat.ts_id, decoded_pat.version, decoded_pat.programs.size());
+	dPrintf("tsid %04x, ver %02x, %zu programs", decoded_pat.ts_id, decoded_pat.version, decoded_pat.programs.size());
 
 	for (map_decoded_pat_programs::const_iterator iter = decoded_pat.programs.begin();
 		iter != decoded_pat.programs.end(); ++iter)

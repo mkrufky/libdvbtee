@@ -32,7 +32,7 @@
 
 #define CLASS_MODULE "[System Time Table (ATSC)]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -57,7 +57,7 @@ void stt::store(const dvbpsi_atsc_stt_t * const p_stt)
 
 	setValid(true);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	if ((o_time != m_time) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);

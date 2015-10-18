@@ -31,7 +31,7 @@
 
 #define CLASS_MODULE "[EIT]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -107,7 +107,7 @@ void atsc_eit::store(const dvbpsi_atsc_eit_t * const p_atsc_eit)
 
 	setValid(true);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
@@ -175,7 +175,7 @@ bool atsc_eit::ingest(TableStore *s, const dvbpsi_atsc_eit_t * const t, TableWat
 			if (thisEIT->get<uint8_t>("version") == t->i_version) {
 				if (thisEIT->get<uint8_t>("tableId") == t->i_table_id) {
 					if (thisEIT->get<uint16_t>("extension") == t->i_extension) {
-						dprintf("EIT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
+						dPrintf("EIT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
 						return false;
 					}
 				}

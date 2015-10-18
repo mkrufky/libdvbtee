@@ -29,7 +29,7 @@
 
 #define CLASS_MODULE "[ext channel name]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -54,7 +54,7 @@ desc_a0::desc_a0(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	set("extChannelName", std::string((const char *)name));
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	setValid(true);
 }

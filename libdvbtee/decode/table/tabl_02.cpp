@@ -31,7 +31,7 @@
 
 #define CLASS_MODULE "[PMT]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -75,7 +75,7 @@ void pmt::store(const dvbpsi_pmt_t * const p_pmt)
 
 	setValid(true);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
@@ -142,7 +142,7 @@ bool pmt::ingest(TableStore *s, const dvbpsi_pmt_t * const t, TableWatcher *w)
 		pmt *thisPMT = (pmt*)*it;
 		if (thisPMT->get<uint16_t>("program") == t->i_program_number) {
 			if (thisPMT->get<uint16_t>("version") == t->i_version) {
-				dprintf("PMT v%d, service_id %d, pcr_pid %d: ALREADY DECODED", t->i_version, t->i_program_number, t->i_pcr_pid);
+				dPrintf("PMT v%d, service_id %d, pcr_pid %d: ALREADY DECODED", t->i_version, t->i_program_number, t->i_pcr_pid);
 				return false;
 			}
 			thisPMT->store(t);

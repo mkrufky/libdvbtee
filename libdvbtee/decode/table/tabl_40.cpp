@@ -31,7 +31,7 @@
 
 #define CLASS_MODULE "[NIT]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -46,7 +46,7 @@ void nit::store(const dvbpsi_nit_t * const p_nit)
 //	if ((decoded_nit->version    == p_nit->i_version) &&
 //	    (decoded_nit->network_id == p_nit->i_network_id)) {
 
-//		dprintf("v%d, network_id %d: ALREADY DECODED",
+//		dPrintf("v%d, network_id %d: ALREADY DECODED",
 //			p_nit->i_version, p_nit->i_network_id);
 //		return false;
 //	}
@@ -82,7 +82,7 @@ void nit::store(const dvbpsi_nit_t * const p_nit)
 
 	setValid(true);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
@@ -127,7 +127,7 @@ bool nit::ingest(TableStore *s, const dvbpsi_nit_t * const t, TableWatcher *w)
 		nit *thisNIT = (nit*)*it;
 		if (thisNIT->get<uint16_t>("networkId") == t->i_network_id) {
 			if (thisNIT->get<uint16_t>("version") == t->i_version) {
-				dprintf("NIT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
+				dPrintf("NIT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
 				return false;
 			}
 			thisNIT->store(t);

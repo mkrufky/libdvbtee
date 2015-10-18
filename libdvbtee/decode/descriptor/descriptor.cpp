@@ -23,7 +23,7 @@
 
 #define CLASS_MODULE "DESCRIPTOR"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DESC, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DESC, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -143,7 +143,7 @@ void DescriptorStore::decode(dvbpsi_descriptor_t *p_descriptor)
 {
 	while (p_descriptor) {
 		if (!add(p_descriptor))
-			dprintf("failed to decode descriptor! tag: %02x", p_descriptor->i_tag);
+			dPrintf("failed to decode descriptor! tag: %02x", p_descriptor->i_tag);
 		p_descriptor = p_descriptor->p_next;
 	}
 }

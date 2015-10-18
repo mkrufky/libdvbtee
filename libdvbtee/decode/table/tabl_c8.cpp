@@ -31,7 +31,7 @@
 
 #define CLASS_MODULE "[VCT]"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DECODE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -60,7 +60,7 @@ void vct::store(const dvbpsi_atsc_vct_t * const p_vct)
 	decoded_vct.cable_vct = p_vct->b_cable_vct;
 	decoded_vct.channels.clear();
 
-	dprintf("parsing channel descriptors for mux:");
+	dPrintf("parsing channel descriptors for mux:");
 	descriptors.decode(p_vct->p_first_descriptor);
 	if (descriptors.size()) set<Array>("descriptors", descriptors);
 
@@ -82,7 +82,7 @@ void vct::store(const dvbpsi_atsc_vct_t * const p_vct)
 
 	setValid(true);
 
-	dprintf("%s", toJson().c_str());
+	dPrintf("%s", toJson().c_str());
 
 	if ((/*changed*/true) && (m_watcher)) {
 		m_watcher->updateTable(TABLEID, (Table*)this);
@@ -103,7 +103,7 @@ bool vct::ingest(TableStore *s, const dvbpsi_atsc_vct_t * const t, TableWatcher 
 		vct *thisVCT = (vct*)*it;
 		if (thisVCT->get<uint16_t>("tsId") == __ts_id) {
 			if (thisVCT->get<uint16_t>("version") == t->i_version) {
-				dprintf("VCT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
+				dPrintf("VCT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
 				return false;
 			}
 			thisVCT->store(t);
@@ -177,7 +177,7 @@ vctCh::vctCh(decoded_vct_t &decoded_vct, Decoder *parent, const dvbpsi_atsc_vct_
 
 	set("sourceId",         p_channel->i_source_id);
 
-	dprintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
+	dPrintf("parsing channel descriptors for service: %d", p_channel->i_program_number);
 	descriptors.decode(p_channel->p_first_descriptor);
 	if (descriptors.size()) set<Array>("descriptors", descriptors);
 
