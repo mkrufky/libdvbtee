@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2015 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -24,6 +24,8 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
+#include <string>
 
 #define DBG_DECODE	1
 #define DBG_PARSE	2
@@ -46,5 +48,39 @@ extern unsigned int dbg;
 		__printf(stderr, "%d "CLASS_MODULE"::%s: " fmt "\n", 	\
 				 (int)time(NULL), __func__, ##arg);	\
 } while (0)
+
+class dbgFn {
+public:
+    dbgFn(const char *str = NULL);
+    ~dbgFn();
+private:
+    void log(const char *pre);
+
+    std::string m_str;
+};
+
+#define PRETTY_FILE() ({ \
+    const char *__needle = "../"; \
+    const char *__fname = __FILE__; \
+    const char *__ret; \
+    if (__fname == strstr(__fname, __needle)) { \
+        __ret = __fname + strlen(__needle); \
+    } \
+    else { \
+        __ret = __fname; \
+    } \
+    __ret; })
+
+#define DBGFN() \
+    std::string __dbgfnstr; \
+    char __lineNumb[6] = { 0 }; \
+    snprintf(__lineNumb, sizeof(__lineNumb), "%d", __LINE__); \
+    __dbgfnstr.append(PRETTY_FILE()); \
+    __dbgfnstr.append(": "); \
+    __dbgfnstr.append(__func__); \
+    __dbgfnstr.append(": "); \
+    __dbgfnstr.append(__lineNumb); \
+    __dbgfnstr.append("()"); \
+    dbgFn DbgFn(__dbgfnstr.c_str());
 
 #endif /* __LOG_H__ */

@@ -27,7 +27,8 @@ SOURCES += channels.cpp \
     hdhr_tuner.cpp \
     atsctext.cpp \
     hlsfeed.cpp \
-    curlhttpget.cpp
+    curlhttpget.cpp \
+    log.cpp
 
 HEADERS += atsctext.h \
     channels.h \
