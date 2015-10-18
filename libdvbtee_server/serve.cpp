@@ -39,7 +39,7 @@ unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 
 #define CLASS_MODULE "server"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_SERVE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_SERVE, fmt, ##arg)
 
 	tuner_map  tuners;
 	feeder_map feeders;
@@ -50,7 +50,7 @@ static tune *find_first_idle_tuner()
 {
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
-			dprintf("tuner %d is available", iter->first);
+			dPrintf("tuner %d is available", iter->first);
 			return iter->second;
 		}
 	return NULL;
@@ -62,7 +62,7 @@ static tune *find_idle_tuner()
 	time_t last_touched = 0;
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if ((iter->second->is_idle()) || (!iter->second->feeder.parser.check())) {
-			dprintf("tuner %d is available", iter->first);
+			dPrintf("tuner %d is available", iter->first);
 			if ((!tuner) || (iter->second->last_touched() > last_touched)) {
 				tuner = iter->second;
 				last_touched = iter->second->last_touched();
@@ -75,7 +75,7 @@ static tune *find_tuned_tuner(unsigned int phy)
 {
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if ((iter->second->is_lock()) && (phy == iter->second->get_channel())) {
-			dprintf("tuner %d is locked to physical channel %d", iter->first, phy);
+			dPrintf("tuner %d is locked to physical channel %d", iter->first, phy);
 			return iter->second;
 		}
 	return NULL;
@@ -165,7 +165,7 @@ bool serve::get_channels(parse_iface *iface, unsigned int tuner_id)
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
-		dprintf("NO TUNER!\n");
+		dPrintf("NO TUNER!\n");
 		return false;
 	}
 
@@ -182,7 +182,7 @@ bool serve::get_epg(decode_report *iface)
 	unsigned int tuner_id = 0; // FIXME
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
-		dprintf("NO TUNER!\n");
+		dPrintf("NO TUNER!\n");
 		return false;
 	}
 
@@ -195,13 +195,13 @@ bool serve::scan(unsigned int flags, tune_iface *t_iface, parse_iface *p_iface, 
 {
 	tune* tuner = (tuners.count(tuner_id)) ? tuners[tuner_id] : NULL;
 	if (!tuner) {
-		dprintf("NO TUNER!\n");
+		dPrintf("NO TUNER!\n");
 		return false;
 	}
 
 	bool wait_for_results = (p_iface != NULL) ? true : false;
 
-	dprintf("scanning for services...");
+	dPrintf("scanning for services...");
 
 	return cmd_tuner_scan(tuner, NULL, false, wait_for_results, flags, t_iface, p_iface);
 }
@@ -296,20 +296,20 @@ serve_client::serve_client()
   , streamback_started(false)
   , streamback_newchannel(false)
 {
-	dprintf("()");
+	dPrintf("()");
 	services.clear();
 }
 
 serve_client::~serve_client()
 {
-	dprintf("(%d)", sock_fd);
+	dPrintf("(%d)", sock_fd);
 	stop();
 }
 
 #if 1
 serve_client::serve_client(const serve_client&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	server = NULL;
@@ -325,7 +325,7 @@ serve_client::serve_client(const serve_client&)
 
 serve_client& serve_client::operator= (const serve_client& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -349,7 +349,7 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 
 void serve_client::close_socket()
 {
-	dprintf("(%d)", sock_fd);
+	dPrintf("(%d)", sock_fd);
 
 	if (sock_fd >= 0) {
 		close(sock_fd);
@@ -359,7 +359,7 @@ void serve_client::close_socket()
 
 void serve_client::stop()
 {
-	dprintf("(%d)", sock_fd);
+	dPrintf("(%d)", sock_fd);
 
 	stop_without_wait();
 
@@ -371,7 +371,7 @@ void serve_client::stop()
 
 int serve_client::start()
 {
-	dprintf("(%d)", sock_fd);
+	dPrintf("(%d)", sock_fd);
 
 	f_kill_thread = false;
 
@@ -408,7 +408,7 @@ void* serve_client::client_thread()
 
 	snprintf(cli_prompt, sizeof(cli_prompt), "%s> ", hostname);
 
-	dprintf("(%d)", sock_fd);
+	dPrintf("(%d)", sock_fd);
 #if 0
 	data_fmt = SERVE_DATA_FMT_NONE;
 #endif
@@ -417,7 +417,7 @@ void* serve_client::client_thread()
 		rxlen = recv(sock_fd, buf, sizeof(buf)-1, MSG_DONTWAIT);
 		if (rxlen > 0) {
 			buf[rxlen] = '\0';
-			dprintf("(%d): %s", sock_fd, buf);
+			dPrintf("(%d): %s", sock_fd, buf);
 
 			http = (strstr(buf, "HTTP")) ? true : false;
 			httpget = ((http) && (strstr(buf, "GET")));
@@ -484,7 +484,7 @@ serve::serve()
   , f_reclaim_resources(true)
   , f_cli_enabled(true)
 {
-	dprintf("()");
+	dPrintf("()");
 	tuners.clear();
 	feed_servers.clear();
 	scan_flags.clear();
@@ -493,7 +493,7 @@ serve::serve()
 
 serve::~serve()
 {
-	dprintf("()");
+	dPrintf("()");
 	stop_monitor();
 	stop();
 
@@ -505,12 +505,12 @@ serve::~serve()
 #if 0
 serve::serve(const serve&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 }
 
 serve& serve::operator= (const serve& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -521,7 +521,7 @@ serve& serve::operator= (const serve& cSource)
 
 int serve::start_monitor()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	f_kill_thread = false;
 
@@ -561,7 +561,7 @@ void serve_client::streamback(const uint8_t *str, size_t length)
 
 void serve_client::epg_header_footer(bool header, bool channel)
 {
-	dprintf("()");
+	dPrintf("()");
 	if ((header) && (!channel)) streamback_started = true;
 	if (!streamback_started) return;
 	if ((header) && (channel)) streamback_newchannel = true;
@@ -622,7 +622,7 @@ static inline const char *weekday(int x)
 
 void serve_client::epg_event(decoded_event_t &e)
 {
-	dprintf("()");
+	dPrintf("()");
 	if (!streamback_started) return;
 #if 1
 	if (streamback_newchannel) {
@@ -712,7 +712,7 @@ int serve::start(struct libdvbtee_server_config *cfg)
 
 int serve::start(uint16_t port_requested)
 {
-	dprintf("(%d)", port_requested);
+	dPrintf("(%d)", port_requested);
 
 	listener.set_interface(this);
 
@@ -721,7 +721,7 @@ int serve::start(uint16_t port_requested)
 
 void serve::stop()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	listener.stop();
 
@@ -732,24 +732,24 @@ bool serve_client::check()
 {
 	bool ret = socket_active();
 	if (!ret)
-		dprintf("(%d) socket idle!", sock_fd);
+		dPrintf("(%d) socket idle!", sock_fd);
 	else {
 		if (data_fmt == SERVE_DATA_FMT_CLI) any_cli = true;
 
-		dprintf("(%d) format = %s", sock_fd, data_fmt_str(data_fmt));
+		dPrintf("(%d) format = %s", sock_fd, data_fmt_str(data_fmt));
 	}
 	return ret;
 }
 
 void serve::reclaim_server_resources()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	bool erased = false;
 
 	for (serve_client_map::iterator iter = client_map.begin(); iter != client_map.end(); ++iter)
 		if (!iter->second.check()) {
-			dprintf("erasing idle client...");
+			dPrintf("erasing idle client...");
 			client_map.erase(iter->first);
 			/* stop the loop if we erased any targets */
 			erased = true;
@@ -763,7 +763,7 @@ void serve::reclaim_server_resources()
 
 void serve::reclaim_tuner_resources()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	for (tuner_map::iterator iter = tuners.begin(); iter != tuners.end(); ++iter)
 		if (iter->second->check()) {
@@ -772,10 +772,10 @@ void serve::reclaim_tuner_resources()
 			if ((!iter->second->feeder.parser.check()) &&
 			    ((f_reclaim_resources) && (!any_cli)) &&
 			    ((iter->second->is_feed()) && (iter->second->last_touched() > 15)) ) {
-				dprintf("reclaiming idle resource:");
-				dprintf("stopping data feed...");
+				dPrintf("reclaiming idle resource:");
+				dPrintf("stopping data feed...");
 				iter->second->stop_feed();
-				dprintf("closing frontend...");
+				dPrintf("closing frontend...");
 				iter->second->close_fe();
 			}
 		}
@@ -783,7 +783,7 @@ void serve::reclaim_tuner_resources()
 
 bool serve::check()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	any_cli = false;
 
@@ -1038,7 +1038,7 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, parse_iface *iface)
 
 	FILE *channels_conf = fopen(filepath, "r");
 	if (channels_conf) {
-		dprintf("reading %s...", filepath);
+		dPrintf("reading %s...", filepath);
 
 		char line[256] = { 0 };
 		while (fgets(line, sizeof(line), channels_conf)) {

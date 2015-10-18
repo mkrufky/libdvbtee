@@ -30,7 +30,7 @@
 #include "log.h"
 #define CLASS_MODULE "tune"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_TUNE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_TUNE, fmt, ##arg)
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
@@ -49,13 +49,13 @@ tune::tune()
   , last_query((time_t)0)
   , m_iface(NULL)
 {
-	dprintf("()");
+	dPrintf("()");
 //	channels.clear();
 }
 
 tune::~tune()
 {
-	dprintf("()");
+	dPrintf("()");
 	stop_feed();
 	close_fe();
 //	channels.clear();
@@ -63,7 +63,7 @@ tune::~tune()
 
 tune::tune(const tune&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 
 //	channels.clear();
 	feeder.parser.cleanup();
@@ -82,7 +82,7 @@ tune::tune(const tune&)
 
 tune& tune::operator= (const tune& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -147,7 +147,7 @@ time_t tune::last_touched() // sec_ago
 	time(&timenow);
 	time_t ret = timenow - time_touched;
 	if (timenow - last_query)
-		dprintf("last touched %ld seconds ago", ret);
+		dPrintf("last touched %ld seconds ago", ret);
 	time(&last_query);
 	return ret;
 }

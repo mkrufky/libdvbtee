@@ -41,7 +41,7 @@ extern unsigned int dbg;
 
 #define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
 
-#define __dprintf(lvl, fmt, arg...) do {				\
+#define __dPrintf(lvl, fmt, arg...) do {				\
 	if (dbg & lvl)							\
 		__printf(stderr, "%d "CLASS_MODULE"::%s: " fmt "\n", 	\
 				 (int)time(NULL), __func__, ##arg);	\

@@ -37,7 +37,7 @@ const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
 static map_decoder   decoders;
 #endif
 
-#define dprintf(fmt, arg...) __dprintf(DBG_PARSE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_PARSE, fmt, ##arg)
 
 #define PID_PAT  0x00
 #define PID_CAT  0x01
@@ -120,7 +120,7 @@ void printpids()
 bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 {
 	(void)p_stt;
-	dprintf("(%s)", (decoded) ? "post" : "pre");
+	dPrintf("(%s)", (decoded) ? "post" : "pre");
 
 	if (decoded) return true;
 
@@ -131,7 +131,7 @@ bool parse::take_stt(dvbpsi_atsc_stt_t* p_stt, bool decoded)
 bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 {
 	(void)p_tot;
-	dprintf("(%s)", (decoded) ? "post" : "pre");
+	dPrintf("(%s)", (decoded) ? "post" : "pre");
 
 	if (decoded) return true;
 
@@ -173,7 +173,7 @@ void parse::rewrite_pat()
 
 void parse::process_pat(const decoded_pat_t *decoded_pat)
 {
-	dprintf("()");
+	dPrintf("()");
 	for (map_decoded_pat_programs::const_iterator iter = decoded_pat->programs.begin();
 	     iter != decoded_pat->programs.end(); ++iter)
 		if (iter->first > 0) {// FIXME: > 0 ???
@@ -198,7 +198,7 @@ void parse::process_pat(const decoded_pat_t *decoded_pat)
 
 bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 {
-	dprintf("(%s): v%d, ts_id: %d",
+	dPrintf("(%s): v%d, ts_id: %d",
 		(decoded) ? "post" : "pre",
 		p_pat->i_version, p_pat->i_ts_id);
 
@@ -229,7 +229,7 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 
 void parse::process_pmt(const decoded_pmt_t *pmt)
 {
-	dprintf(": v%d, service_id %d, pcr_pid %d",
+	dPrintf(": v%d, service_id %d, pcr_pid %d",
 		pmt->version, pmt->program, pmt->pcr_pid);
 
 	for (map_ts_elementary_streams::const_iterator iter_pmt_es = pmt->es_streams.begin();
@@ -242,7 +242,7 @@ void parse::process_pmt(const decoded_pmt_t *pmt)
 
 bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 {
-	dprintf("(%s): v%d, service_id %d, pcr_pid %d",
+	dPrintf("(%s): v%d, service_id %d, pcr_pid %d",
 		(decoded) ? "post" : "pre",
 		p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
 
@@ -267,7 +267,7 @@ bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 #else
 	uint16_t __ts_id = p_vct->i_extension;
 #endif
-	dprintf("(%s): v%d, ts_id %d, b_cable_vct %d",
+	dPrintf("(%s): v%d, ts_id %d, b_cable_vct %d",
 		(decoded) ? "post" : "pre",
 		p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 
@@ -367,7 +367,7 @@ void parse::process_mgt(bool attach)
 
 bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 {
-	dprintf("(%s): v%d",
+	dPrintf("(%s): v%d",
 		(decoded) ? "post" : "pre",
 		p_mgt->i_version);
 
@@ -385,7 +385,7 @@ bool parse::take_mgt(dvbpsi_atsc_mgt_t* p_mgt, bool decoded)
 
 bool parse::take_nit_actual(dvbpsi_nit_t* p_nit, bool decoded)
 {
-	dprintf("(%s): v%d, network_id %d",
+	dPrintf("(%s): v%d, network_id %d",
 		(decoded) ? "post" : "pre",
 		p_nit->i_version, p_nit->i_network_id);
 
@@ -398,7 +398,7 @@ bool parse::take_nit_actual(dvbpsi_nit_t* p_nit, bool decoded)
 
 bool parse::take_nit_other(dvbpsi_nit_t* p_nit, bool decoded)
 {
-	dprintf("(%s): v%d, network_id %d",
+	dPrintf("(%s): v%d, network_id %d",
 		(decoded) ? "post" : "pre",
 		p_nit->i_version, p_nit->i_network_id);
 
@@ -416,7 +416,7 @@ bool parse::take_sdt_actual(dvbpsi_sdt_t* p_sdt, bool decoded)
 #else
 	uint16_t __ts_id = p_sdt->i_extension;
 #endif
-	dprintf("(%s): v%d | ts_id %d | network_id %d",
+	dPrintf("(%s): v%d | ts_id %d | network_id %d",
 		(decoded) ? "post" : "pre",
 		p_sdt->i_version, __ts_id, p_sdt->i_network_id);
 
@@ -437,7 +437,7 @@ bool parse::take_sdt_other(dvbpsi_sdt_t* p_sdt, bool decoded)
 #else
 	uint16_t __ts_id = p_sdt->i_extension;
 #endif
-	dprintf("(%s): v%d | ts_id %d | network_id %d",
+	dPrintf("(%s): v%d | ts_id %d | network_id %d",
 		(decoded) ? "post" : "pre",
 		p_sdt->i_version, __ts_id, p_sdt->i_network_id);
 #if 0
@@ -459,7 +459,7 @@ bool parse::take_eit(dvbpsi_eit_t* p_eit, bool decoded)
 #else
 	uint16_t __ts_id = p_eit->i_extension;
 #endif
-	dprintf("(%s): v%d, service_id %d",
+	dPrintf("(%s): v%d, service_id %d",
 		(decoded) ? "post" : "pre",
 		p_eit->i_version, __ts_id);
 
@@ -471,7 +471,7 @@ bool parse::take_eit(dvbpsi_eit_t* p_eit, bool decoded)
 #if !USING_DVBPSI_VERSION_0
 bool parse::take_eit(dvbpsi_atsc_eit_t* p_eit, bool decoded)
 {
-	dprintf("(%s): v%d, source_id %d",
+	dPrintf("(%s): v%d, source_id %d",
 		(decoded) ? "post" : "pre",
 		p_eit->i_version, p_eit->i_source_id);
 
@@ -482,7 +482,7 @@ bool parse::take_eit(dvbpsi_atsc_eit_t* p_eit, bool decoded)
 
 bool parse::take_ett(dvbpsi_atsc_ett_t* p_ett, bool decoded)
 {
-	dprintf("(%s): v%d, ID: %d",
+	dPrintf("(%s): v%d, ID: %d",
 		(decoded) ? "post" : "pre",
 		p_ett->i_version, p_ett->i_etm_id);
 
@@ -733,7 +733,7 @@ parse::parse()
 #endif
 			" - http://github.com/mkrufky/libdvbtee\n\n");
 	hello = true;
-	dprintf("()");
+	dPrintf("()");
 
 	memset(&new_channel_info, 0, sizeof(channel_info_t));
 
@@ -764,7 +764,7 @@ parse::parse()
 
 parse::~parse()
 {
-	dprintf("()");
+	dPrintf("()");
 #if DBG
 	xine_dump();
 #endif
@@ -783,7 +783,7 @@ parse::~parse()
 
 void parse::detach_demux()
 {
-	dprintf("()");
+	dPrintf("()");
 
 #if USING_DVBPSI_VERSION_0
 	for (map_dvbpsi::const_iterator iter = h_demux.begin(); iter != h_demux.end(); ++iter)
@@ -822,21 +822,21 @@ void parse::detach_demux()
 
 void parse::stop()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	out.stop();
 }
 
 void parse::stop(int id)
 {
-	dprintf("(%d)", id);
+	dPrintf("(%d)", id);
 
 	out.stop(id);
 }
 
 void parse::cleanup()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	detach_demux();
 	clear_decoded_networks();
@@ -856,7 +856,7 @@ void parse::reset_filters()
 
 void parse::reset()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	detach_demux();
 
@@ -1217,7 +1217,7 @@ int parse::add_output(void* priv, stream_callback callback, map_pidtype &pids)
 		return ret;
 
 	out.get_pids(out_pids);
-	dprintf("success adding callback target id:%4d", target_id);
+	dPrintf("success adding callback target id:%4d", target_id);
 fail:
 	return target_id;
 }
@@ -1233,7 +1233,7 @@ int parse::add_output(int socket, unsigned int method, map_pidtype &pids)
 		return ret;
 
 	out.get_pids(out_pids);
-	dprintf("success adding socket target id:%4d", target_id);
+	dPrintf("success adding socket target id:%4d", target_id);
 fail:
 	return target_id;
 }
@@ -1249,7 +1249,7 @@ int parse::add_output(char* target, map_pidtype &pids)
 		return ret;
 
 	out.get_pids(out_pids);
-	dprintf("success adding url target id:%4d", target_id);
+	dPrintf("success adding url target id:%4d", target_id);
 fail:
 	return target_id;
 }
@@ -1290,7 +1290,7 @@ int parse::add_stdout(map_pidtype &pids)
 		return ret;
 
 	out.get_pids(out_pids);
-	dprintf("success adding stdout target id:%4d", target_id);
+	dPrintf("success adding stdout target id:%4d", target_id);
 fail:
 	return target_id;
 }
@@ -1364,7 +1364,7 @@ void parse::set_service_ids(char *ids)
 
 bool parse::check()
 {
-	dprintf("(%s) "
+	dPrintf("(%s) "
 		"fed packets: %d, "
 		"ts id: %d, "
 		"mode:%s%s%s, "
@@ -1397,7 +1397,7 @@ bool parse::check()
 
 void parse::set_ts_id(uint16_t new_ts_id)
 {
-	dprintf("(%04x|%d)\n", new_ts_id, new_ts_id);
+	dPrintf("(%04x|%d)\n", new_ts_id, new_ts_id);
 	ts_id = new_ts_id;
 	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
 	decoders[ts_id].set_physical_channel(channel_info[ts_id].channel);
@@ -1593,7 +1593,7 @@ dvbpsi_class::dvbpsi_class()
   : handle(dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG))
 {
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
 }
@@ -1607,14 +1607,14 @@ dvbpsi_class::~dvbpsi_class()
 
 	if (handle) dvbpsi_delete(handle);
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 }
 
 dvbpsi_class::dvbpsi_class(const dvbpsi_class&)
 {
 #if DBG
-	dprintf("(copy)");
+	dPrintf("(copy)");
 #endif
 	handle = dvbpsi_new(&dvbpsi_message, DVBPSI_MSG_DEBUG);
 	if (!handle) fprintf(stderr, "\n!!! !!! !!! !!! MK- DVBPSI NOT INITIALIZED!!! !!! !!! !!!\n\n");
@@ -1623,7 +1623,7 @@ dvbpsi_class::dvbpsi_class(const dvbpsi_class&)
 dvbpsi_class& dvbpsi_class::operator= (const dvbpsi_class& cSource)
 {
 #if DBG
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 #endif
 	if (this == &cSource)
 		return *this;
@@ -1637,7 +1637,7 @@ dvbpsi_class& dvbpsi_class::operator= (const dvbpsi_class& cSource)
 void dvbpsi_class::purge()
 {
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 	detach_demux();
 	if (handle) dvbpsi_delete(handle);
@@ -1648,13 +1648,13 @@ void dvbpsi_class::purge()
 void dvbpsi_class::detach_tables()
 {
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 	if ((handle) && (tables.size()))
 		for (detach_table_map::iterator iter = tables.begin(); iter != tables.end(); ++iter)
 			if (iter->second.detach_cb) {
 #if DBG
-				dprintf("detaching table: %02x|%04x...", iter->second.table_id, iter->second.table_id_ext);
+				dPrintf("detaching table: %02x|%04x...", iter->second.table_id, iter->second.table_id_ext);
 #endif
 				iter->second.detach_cb(handle, iter->second.table_id, iter->second.table_id_ext);
 			}
@@ -1663,13 +1663,13 @@ void dvbpsi_class::detach_tables()
 void dvbpsi_class::detach_demux()
 {
 #if DBG
-	dprintf("()");
+	dPrintf("()");
 #endif
 	if ((handle) && (dvbpsi_decoder_present(handle))) {
 		detach_tables();
 		dvbpsi_DetachDemux(handle);
 #if DBG
-		dprintf("(done)");
+		dPrintf("(done)");
 #endif
 	}
 }
@@ -1682,7 +1682,7 @@ bool dvbpsi_class::packet_push(uint8_t* p_data)
 void dvbpsi_class::set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext)
 {
 	uint32_t idx = (((id << 16) & 0x00ff0000) | (ext & 0x0000ffff));
-	dprintf("attaching table %02x|%04x...", id, ext);
+	dPrintf("attaching table %02x|%04x...", id, ext);
 	tables[idx].detach_cb = cb;
 	tables[idx].table_id = id;
 	tables[idx].table_id_ext = ext;

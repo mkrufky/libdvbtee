@@ -28,17 +28,17 @@
 
 #define DBG_DEMUX DBG_PARSE
 
-#define dprintf(fmt, arg...) __dprintf(DBG_DEMUX, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_DEMUX, fmt, ##arg)
 
 demux::demux()
 {
-	dprintf("()");
+	dPrintf("()");
 	out.clear();
 }
 
 demux::~demux()
 {
-	dprintf("()");
+	dPrintf("()");
 	sleep(2);
 	for (map_output::const_iterator iter = out.begin(); iter != out.end(); ++iter)
 		((output_stream)(iter->second)).stop_after_drain();

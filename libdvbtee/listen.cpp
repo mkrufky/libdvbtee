@@ -30,7 +30,7 @@
 #include "log.h"
 #define CLASS_MODULE "listen"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_SERVE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_SERVE, fmt, ##arg)
 
 
 socket_listen::socket_listen()
@@ -40,19 +40,19 @@ socket_listen::socket_listen()
   , port(0)
   , m_socket_listen_iface(NULL)
 {
-	dprintf("()");
+	dPrintf("()");
 }
 
 socket_listen::~socket_listen()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	close_socket();
 }
 
 socket_listen::socket_listen(const socket_listen&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	sock_fd = -1;
@@ -62,7 +62,7 @@ socket_listen::socket_listen(const socket_listen&)
 
 socket_listen& socket_listen::operator= (const socket_listen& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -78,7 +78,7 @@ socket_listen& socket_listen::operator= (const socket_listen& cSource)
 
 void socket_listen::close_socket()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	if (sock_fd >= 0) {
 		close(sock_fd);
@@ -89,7 +89,7 @@ void socket_listen::close_socket()
 
 void socket_listen::stop()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	stop_without_wait();
 
@@ -103,7 +103,7 @@ int socket_listen::start(uint16_t port_requested)
 {
 	struct sockaddr_in tcp_sock;
 
-	dprintf("()");
+	dPrintf("()");
 
 	memset(&tcp_sock, 0, sizeof(tcp_sock));
 
@@ -151,7 +151,7 @@ int socket_listen::start_udp(uint16_t port_requested)
 {
 	struct sockaddr_in udp_sock;
 
-	dprintf("()");
+	dPrintf("()");
 
 	memset(&udp_sock, 0, sizeof(udp_sock));
 
@@ -202,7 +202,7 @@ void* socket_listen::listen_thread()
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
 
-	dprintf("(%d)", sock_fd);
+	dPrintf("(%d)", sock_fd);
 
 	while (!f_kill_thread) {
 		int accepted_sock_fd = accept(sock_fd, (struct sockaddr*)&tcpsa, &salen);
@@ -210,7 +210,7 @@ void* socket_listen::listen_thread()
 			if (m_socket_listen_iface) {
 				m_socket_listen_iface->accept_socket(accepted_sock_fd);
 			} else {
-				dprintf("(accept_socket callback not defined!)");
+				dPrintf("(accept_socket callback not defined!)");
 				close(accepted_sock_fd);
 			}
 		}
@@ -228,14 +228,14 @@ void* socket_listen::udp_listen_thread(void *p_this)
 
 void* socket_listen::udp_listen_thread()
 {
-	dprintf("(%d)", sock_fd);
+	dPrintf("(%d)", sock_fd);
 
 	while (!f_kill_thread) {
 		if (sock_fd != -1) {
 			if (m_socket_listen_iface)
 				m_socket_listen_iface->accept_socket(sock_fd);
 			else
-				dprintf("(accept_socket callback not defined!)");
+				dPrintf("(accept_socket callback not defined!)");
 		}
 		usleep(20*1000);
 	}

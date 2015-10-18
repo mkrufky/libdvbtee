@@ -37,14 +37,14 @@
 
 #define FEED_BUFFER 0
 
-#define dprintf(fmt, arg...) __dprintf(DBG_FEED, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_FEED, fmt, ##arg)
 
 unsigned int dbg = 0;
 
 void libdvbtee_set_debug_level(unsigned int debug)
 {
 	dbg = debug;
-	__dprintf(debug, "(0x%x)", debug);
+	__dPrintf(debug, "(0x%x)", debug);
 }
 
 #define BUFSIZE ((4096/188)*188)
@@ -60,7 +60,7 @@ feed::feed()
 #endif
   , m_pull_iface(NULL)
 {
-	dprintf("()");
+	dPrintf("()");
 
 	memset(filename, 0, sizeof(filename));
 #if FEED_BUFFER
@@ -70,14 +70,14 @@ feed::feed()
 
 feed::~feed()
 {
-	dprintf("(%s)", strlen(filename) ? filename : "");
+	dPrintf("(%s)", strlen(filename) ? filename : "");
 
 	close_file();
 }
 
 feed::feed(const feed&)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 	h_thread = (pthread_t)NULL;
 	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
@@ -90,7 +90,7 @@ feed::feed(const feed&)
 
 feed& feed::operator= (const feed& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -109,7 +109,7 @@ feed& feed::operator= (const feed& cSource)
 
 void feed::set_filename(char* new_file)
 {
-	dprintf("(%s)", new_file);
+	dPrintf("(%s)", new_file);
 
 	size_t len = strlen(new_file);
 	strncpy(filename, new_file, sizeof(filename)-1);
@@ -118,7 +118,7 @@ void feed::set_filename(char* new_file)
 
 int feed::_open_file(int flags)
 {
-	dprintf("()");
+	dPrintf("()");
 
 	fd = -1;
 
@@ -132,7 +132,7 @@ int feed::_open_file(int flags)
 
 void feed::close_file()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	if (fd >= 0) {
 		close(fd);
@@ -142,7 +142,7 @@ void feed::close_file()
 
 bool feed::check()
 {
-	dprintf("(%d, %s) %s", fd, filename, (f_kill_thread) ? "stopping" : "running");
+	dPrintf("(%d, %s) %s", fd, filename, (f_kill_thread) ? "stopping" : "running");
 	return true; //FIXME
 }
 
@@ -254,7 +254,7 @@ int feed::start()
 
 void feed::stop()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	stop_without_wait();
 #if 0
@@ -262,13 +262,13 @@ void feed::stop()
 #endif
 	listener.stop();
 
-	dprintf("waiting...");
+	dPrintf("waiting...");
 
 	while (-1 != fd) {
 		usleep(20*1000);
 	}
 
-	dprintf("done");
+	dPrintf("done");
 }
 
 #if FEED_BUFFER
@@ -280,13 +280,13 @@ void *feed::feed_thread()
 	if (feed_thread_prio != 100) {
 		pid_t tid = syscall(SYS_gettid);
 		if (tid >= 0) {
-			dprintf("setting priority from %d to %d",
+			dPrintf("setting priority from %d to %d",
 				getpriority(PRIO_PROCESS, tid), feed_thread_prio);
 			if (0 > setpriority(PRIO_PROCESS, tid, feed_thread_prio))
 				perror("setpriority() failed");
 		}
 	}
-	dprintf("()");
+	dPrintf("()");
 	while (!f_kill_thread) {
 		size = ringbuffer.get_size();
 		if (size >= 188) {
@@ -313,7 +313,7 @@ void *feed::file_feed_thread()
 #endif
 	int available;
 
-	dprintf("(fd=%d)", fd);
+	dPrintf("(fd=%d)", fd);
 
 	while (!f_kill_thread) {
 
@@ -385,7 +385,7 @@ void *feed::stdin_feed_thread()
 #endif
 	int available;
 
-	dprintf("()");
+	dPrintf("()");
 
 	while (!f_kill_thread) {
 
@@ -417,7 +417,7 @@ void *feed::stdin_feed_thread()
 
 void *feed::pull_thread()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	while (!f_kill_thread)
 		if ((m_pull_iface) &&
@@ -439,7 +439,7 @@ void *feed::tcp_client_feed_thread()
 #endif
 	int available;
 
-	dprintf("(sock_fd=%d)", fd);
+	dPrintf("(sock_fd=%d)", fd);
 
 //	getpeername(fd, (struct sockaddr*)&tcpsa, &salen);
 
@@ -481,7 +481,7 @@ void *feed::udp_listen_feed_thread()
 #endif
 	int available;
 
-	dprintf("(sock_fd=%d)", fd);
+	dPrintf("(sock_fd=%d)", fd);
 
 	while (!f_kill_thread) {
 
@@ -516,7 +516,7 @@ void *feed::udp_listen_feed_thread()
 
 int feed::start_stdin()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	if (NULL == freopen(NULL, "rb", stdin)) {
 		fprintf(stderr, "failed to open stdin!\n");
@@ -540,7 +540,7 @@ int feed::start_stdin()
 
 int feed::start_socket(char* source)
 {
-	dprintf("()");
+	dPrintf("()");
 #if 0
 	struct sockaddr_in ip_addr;
 #endif
@@ -550,7 +550,7 @@ int feed::start_socket(char* source)
 	bool b_udp = false;
 	int ret;
 
-	dprintf("(<--%s)", source);
+	dPrintf("(<--%s)", source);
 	size_t len = strlen(source);
 	strncpy(filename, source, sizeof(filename)-1);
 	filename[len < sizeof(filename) ? len : sizeof(filename)-1] = '\0';
@@ -606,7 +606,7 @@ int feed::start_socket(char* source)
 		return -1;
 	}
 #endif
-	dprintf("~(-->%s)", source);
+	dPrintf("~(-->%s)", source);
 	return ret;
 }
 
@@ -615,9 +615,9 @@ void feed::add_tcp_feed(int socket)
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
 
-	dprintf("(%d)", socket);
+	dPrintf("(%d)", socket);
 	if (fd >= 0) {
-		dprintf("(%d) this build only supports one tcp input feed connection at a time", socket);
+		dPrintf("(%d) this build only supports one tcp input feed connection at a time", socket);
 		close(socket);
 		return;
 	}
@@ -650,7 +650,7 @@ fail_close_file:
 
 int feed::start_tcp_listener(uint16_t port_requested)
 {
-	dprintf("(%d)", port_requested);
+	dPrintf("(%d)", port_requested);
 	sprintf(filename, "TCPLISTEN: %d", port_requested);
 
 	f_kill_thread = false;
@@ -666,7 +666,7 @@ int feed::start_udp_listener(uint16_t port_requested)
 {
 	struct sockaddr_in udp_sock;
 
-	dprintf("(%d)", port_requested);
+	dPrintf("(%d)", port_requested);
 	sprintf(filename, "UDPLISTEN: %d", port_requested);
 
 	memset(&udp_sock, 0, sizeof(udp_sock));
@@ -746,14 +746,14 @@ bool feed::wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_eve
 feed_server::feed_server()
   : m_iface(NULL)
 {
-	dprintf("()");
+	dPrintf("()");
 
 	feeders.clear();
 }
 
 feed_server::~feed_server()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	listener.stop();
 
@@ -763,7 +763,7 @@ feed_server::~feed_server()
 void feed_server::add_tcp_feed(int socket)
 {
 	if (socket >= 0) {
-		dprintf("(%d)", socket);
+		dPrintf("(%d)", socket);
 
 		feeders[socket].add_tcp_feed(socket);
 
@@ -774,7 +774,7 @@ void feed_server::add_tcp_feed(int socket)
 
 int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_iface *iface)
 {
-	dprintf("(%d)", port_requested);
+	dPrintf("(%d)", port_requested);
 
 	/* set listener callback to notify us (feed_server) of new connections */
 	listener.set_interface(this);

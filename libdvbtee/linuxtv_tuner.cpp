@@ -35,7 +35,7 @@
 #include "log.h"
 #define CLASS_MODULE "linuxtv_tuner"
 
-#define dprintf(fmt, arg...) __dprintf(DBG_TUNE, fmt, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_TUNE, fmt, ##arg)
 
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
@@ -94,13 +94,13 @@ linuxtv_tuner::linuxtv_tuner()
   , demux_id(-1)
   , dvr_id(-1)
 {
-	dprintf("()");
+	dPrintf("()");
 	filtered_pids.clear();
 }
 
 linuxtv_tuner::~linuxtv_tuner()
 {
-	dprintf("()");
+	dPrintf("()");
 	stop_feed();
 	close_fe();
 	filtered_pids.clear();
@@ -115,7 +115,7 @@ linuxtv_tuner::linuxtv_tuner(const linuxtv_tuner& linuxtv)
   , demux_id(-1)
   , dvr_id(-1)
 {
-	dprintf("(copy)");
+	dPrintf("(copy)");
 
 	feeder.parser.cleanup();
 	filtered_pids.clear();
@@ -123,7 +123,7 @@ linuxtv_tuner::linuxtv_tuner(const linuxtv_tuner& linuxtv)
 
 linuxtv_tuner& linuxtv_tuner::operator= (const linuxtv_tuner& cSource)
 {
-	dprintf("(operator=)");
+	dPrintf("(operator=)");
 
 	if (this == &cSource)
 		return *this;
@@ -142,7 +142,7 @@ linuxtv_tuner& linuxtv_tuner::operator= (const linuxtv_tuner& cSource)
 
 bool linuxtv_tuner::set_device_ids(int adap, int fe, int demux, int dvr, bool kernel_pid_filter)
 {
-	dprintf("(%d, %d, %d, %d)", adap, fe, demux, dvr);
+	dPrintf("(%d, %d, %d, %d)", adap, fe, demux, dvr);
 
 	adap_id  = adap;
 	fe_id    = fe;
@@ -174,9 +174,9 @@ bool linuxtv_tuner::check()
 {
 	bool ret = ((adap_id >= 0) && (fe_id >= 0) && (demux_id >= 0) && (dvr_id >= 0));
 	if (!ret)
-		dprintf("tuner not configured!");
+		dPrintf("tuner not configured!");
 	else {
-		dprintf("(adap: %d, fe: %d, demux: %d, dvr: %d) state:%s%s%s%s%s", adap_id, fe_id, demux_id, dvr_id,
+		dPrintf("(adap: %d, fe: %d, demux: %d, dvr: %d) state:%s%s%s%s%s", adap_id, fe_id, demux_id, dvr_id,
 			is_idle() ? " idle" : "",
 			is_open() ? " open" : "",
 			is_lock() ? " lock" : "",
@@ -185,7 +185,7 @@ bool linuxtv_tuner::check()
 		if (cur_chan) {
 			dvbtee_fe_status_t status = fe_status();
 			uint16_t snr = get_snr();
-			dprintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & DVBTEE_FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
+			dPrintf("tuned to channel: %d, %s, snr: %d.%d", cur_chan, (status & DVBTEE_FE_HAS_LOCK) ? "LOCKED" : "NO LOCK", snr / 10, snr % 10);
 			last_touched();
 		}
 	}
@@ -314,7 +314,7 @@ int linuxtv_tuner::start_feed()
 {
 	char filename[80]; // max path length??
 
-	dprintf("()");
+	dPrintf("()");
 	if (demux_fd >= 0) {
 		fprintf(stderr, "linuxtv_tuner::start_feed: demux already open!\n");
 		return -1;
@@ -461,7 +461,7 @@ void linuxtv_tuner::clear_filters(void *p_this)
 
 void linuxtv_tuner::clear_filters()
 {
-	dprintf("()");
+	dPrintf("()");
 
 	for (filtered_pid_map::const_iterator iter = filtered_pids.begin(); iter != filtered_pids.end(); ++iter) {
 		if (ioctl(iter->second, DMX_STOP, NULL) < 0) {
@@ -482,7 +482,7 @@ void linuxtv_tuner::addfilter(uint16_t pid)
 
 void linuxtv_tuner::add_filter(uint16_t pid)
 {
-	dprintf("pid = %04x", pid);
+	dPrintf("pid = %04x", pid);
 
 	if (filtered_pids.count(pid))
 		return;
