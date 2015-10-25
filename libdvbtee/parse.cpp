@@ -852,6 +852,7 @@ void parse::dumpJson()
 		it->second.showChildren();
 #endif
 	}
+	fprintf(stderr, "\n");
 }
 
 void parse::reset_filters()
