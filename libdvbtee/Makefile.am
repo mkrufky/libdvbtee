@@ -64,4 +64,7 @@ library_include_HEADERS = \
     stats.h \
     tune.h
 
+# enable the next two lines and disable the one following in order to use the old decoder
+# libdvbtee_la_SOURCES += desc.cpp
+# AM_CXXFLAGS += -DOLD_DECODER=1
 libdvbtee_la_LIBADD = -L./value -L./decode -lvalueobj -ldvbtee_decode
