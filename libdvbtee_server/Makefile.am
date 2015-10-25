@@ -2,7 +2,10 @@ AM_CXXFLAGS = -I../libdvbtee
 
 lib_LTLIBRARIES = libdvbtee_server.la
 
-libdvbtee_server_la_SOURCES = serve.cpp text.cpp text.h
+libdvbtee_server_la_SOURCES = \
+    serve.cpp \
+    text.cpp \
+    text.h
 
 EXTRA_DIST = serve.h
 

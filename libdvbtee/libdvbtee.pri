@@ -16,6 +16,7 @@ SOURCES += \
     feed.cpp \
     functions.cpp \
     listen.cpp \
+    log.cpp \
     output.cpp \
     parse.cpp \
     rbuf.cpp \
