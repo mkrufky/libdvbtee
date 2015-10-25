@@ -37,6 +37,6 @@ dbgFn::~dbgFn()
 void dbgFn::log(const char *pre)
 {
         if (m_str.length()) {
-            __printf(stderr, "%d %s %s", (int)time(NULL), pre, m_str.c_str());
+            __printf(stderr, "%d %s %s\n", (int)time(NULL), pre, m_str.c_str());
         }
 }

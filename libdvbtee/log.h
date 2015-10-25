@@ -76,11 +76,11 @@ private:
     char __lineNumb[6] = { 0 }; \
     snprintf(__lineNumb, sizeof(__lineNumb), "%d", __LINE__); \
     __dbgfnstr.append(PRETTY_FILE()); \
+    __dbgfnstr.append(":"); \
+    __dbgfnstr.append(__lineNumb); \
     __dbgfnstr.append(": "); \
     __dbgfnstr.append(__func__); \
-    __dbgfnstr.append(": "); \
-    __dbgfnstr.append(__lineNumb); \
     __dbgfnstr.append("()"); \
-    dbgFn DbgFn(__dbgfnstr.c_str());
+    dbgFn DbgFn(__dbgfnstr.c_str())
 
 #endif /* __LOG_H__ */
