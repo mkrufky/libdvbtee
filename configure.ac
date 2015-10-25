@@ -10,6 +10,16 @@ AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_SRCDIR([libdvbtee/parse.cpp])
 AC_CONFIG_HEADERS([config.h])
 
+# Check configure args
+AC_ARG_ENABLE([olddecoder],
+[  --enable-olddecoder    Enable old decoder],
+[case "${enableval}" in
+  yes) olddecoder=true ;;
+  no)  olddecoder=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-olddecoder]) ;;
+esac],[olddecoder=false])
+AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_AWK
