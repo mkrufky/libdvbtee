@@ -201,6 +201,7 @@ public:
 	void process_error_packets(bool yesno) { process_err_pkts = yesno; }
 
 	void set_tsfilter_iface(tsfilter_iface &iface) { m_tsfilter_iface = &iface; }
+	void dumpJson();
 
 	output out;
 

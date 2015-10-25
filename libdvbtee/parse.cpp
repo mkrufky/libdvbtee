@@ -844,6 +844,14 @@ void parse::cleanup()
 	channel_info.clear();
 }
 
+void parse::dumpJson()
+{
+	for (map_decoder::iterator it=decoders.begin(); it!=decoders.end(); ++it) {
+		fprintf(stderr, "\nTSID#%04x: ", it->first);
+		it->second.showChildren();
+	}
+}
+
 void parse::reset_filters()
 {
 	add_filter(PID_ATSC);

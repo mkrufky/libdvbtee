@@ -94,7 +94,7 @@ void Decoder::showChildren() const
 		child->showChildren();
 #endif
 	}
-	fprintf(stderr, "%s: %s\n", __func__, decoders.toJson().c_str());
+	fprintf(stderr, "%s\n", decoders.toJson().c_str());
 }
 
 int Decoder::linkChild(int idx, Decoder *d)
