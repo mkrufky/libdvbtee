@@ -81,6 +81,7 @@ template<class T>
 class TableTypeCarrier: public TableTypeCarrierBase {
 public:
 	explicit TableTypeCarrier(const T * const p) : m_p(p) {}
+	TableTypeCarrier(const TableTypeCarrier<T>& o) : m_p(o.m_p) {}
 
 	const T * Get() const { return m_p; }
 private:
