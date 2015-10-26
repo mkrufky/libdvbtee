@@ -68,6 +68,9 @@ library_include_HEADERS = \
 if OLDDECODER
 libdvbtee_la_SOURCES += desc.cpp
 AM_CXXFLAGS += -DOLD_DECODER=1
+libdvbtee_la_LIBADD =
 else !OLDDECODER
 libdvbtee_la_LIBADD = -L./value -L./decode -lvalueobj -ldvbtee_decode
 endif !OLDDECODER
+# uncomment to build on MacOSX
+# libdvbtee_la_LIBADD += -L/opt/local/lib -liconv
