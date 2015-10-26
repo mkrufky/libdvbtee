@@ -846,7 +846,7 @@ void parse::cleanup()
 
 void parse::dumpJson()
 {
-	for (map_decoder::iterator it=decoders.begin(); it!=decoders.end(); ++it) {
+	for (map_decoder::const_iterator it = decoders.begin(); it != decoders.end(); ++it) {
 		fprintf(stderr, "\nTSID#%04x: ", it->first);
 #if !OLD_DECODER
 		it->second.showChildren();
