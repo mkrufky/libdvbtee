@@ -30,33 +30,34 @@ mkrufky at linuxtv dot org
 
 **Command line arguments:**
 ```
--a      adapter id
--A      (1 for ATSC, 2 for ClearQAM)
--b      display bitrates & statistics
--c      channel to tune /
-        comma (,) separated list of channels to scan /
-        scan minimum channel
--C      channel to tune /
-        comma (,) separated list of channels to scan /
-        scan maximum channel
--f      frontend id
--F      filename to use as input
--t      timeout
--T      number of tuners (dvb adapters) allowed to use, 0 for all
--s      scan, optional arg when using multiple tuners:
-        1 for speed, 2 for redundancy,
-        3 for speed AND redundancy,
-        4 for optimized speed / partial redundancy
--S      server mode, optional arg 1 for command server,
-        2 for http stream server, 3 for both
--i      pull local/remote tcp/udp port for data
--I      request a service and its associated PES streams by its service id
--E      enable EPG scan, optional arg to limit the number of EITs to parse
--o      output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
--O      output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
--H      use a HdHomeRun device, optional arg to specify the device string
--d      debug level
--h      display additional help
+-a          adapter id
+-A          (1 for ATSC, 2 for ClearQAM)
+-b          display bitrates & statistics
+-c          channel to tune /
+            comma (,) separated list of channels to scan /
+            scan minimum channel
+-C          channel to tune /
+            comma (,) separated list of channels to scan /
+            scan maximum channel
+-f          frontend id
+-F          filename to use as input
+-t          timeout
+-T          number of tuners (dvb adapters) allowed to use, 0 for all
+-s          scan, optional arg when using multiple tuners:
+            1 for speed, 2 for redundancy,
+            3 for speed AND redundancy,
+            4 for optimized speed / partial redundancy
+-S          server mode, optional arg 1 for command server,
+            2 for http stream server, 3 for both
+-p<PORT>    Server port
+-i          pull local/remote tcp/udp port for data
+-I          request a service and its associated PES streams by its service id
+-E          enable EPG scan, optional arg to limit the number of EITs to parse
+-o          output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
+-O          output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
+-H          use a HdHomeRun device, optional arg to specify the device string
+-d          debug level
+-h          display additional help
 ```
 ### Example Usage
 
