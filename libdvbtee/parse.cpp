@@ -1025,10 +1025,10 @@ unsigned int parse::xine_dump(parse_iface *iface)
 	for (map_channel_info::iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		count += xine_dump(iter->first, &iter->second);
 #else
-	for (map_channel_info::iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
+	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		channels[iter->second.channel] = iter->first;
 
-	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
+	for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
 		count += xine_dump(iter->second, &channel_info[iter->second], iface);
 
 	channels.clear();
