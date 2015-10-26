@@ -72,5 +72,7 @@ libdvbtee_la_LIBADD =
 else !OLDDECODER
 libdvbtee_la_LIBADD = -L./value -L./decode -lvalueobj -ldvbtee_decode
 endif !OLDDECODER
-# uncomment to build on MacOSX
-# libdvbtee_la_LIBADD += -L/opt/local/lib -liconv
+
+if BUILD_OS_IS_DARWIN
+libdvbtee_la_LIBADD += -L/opt/local/lib -liconv
+endif BUILD_OS_IS_DARWIN
