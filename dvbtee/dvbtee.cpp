@@ -709,11 +709,7 @@ exit:
 		stop_server(&context);
 	}
 	if (b_json) {
-		if (tuner) {
-			tuner->feeder.parser.dumpJson();
-		} else {
-			context._file_feeder.parser.dumpJson();
-		}
+		parse::dumpJson();
 	}
 	cleanup(&context);
 	return 0;
