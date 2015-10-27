@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -I/usr/include/libhdhomerun -I/opt/local/include -pthread
+AM_CXXFLAGS = -I./decode -I./decode/table -I/usr/include/libhdhomerun -I/opt/local/include -pthread
 
 lib_LTLIBRARIES = libdvbtee.la
 
@@ -8,7 +8,6 @@ libdvbtee_la_SOURCES = \
     curlhttpget.cpp \
     decode.cpp \
     demux.cpp \
-    desc.cpp \
     feed.cpp \
     functions.cpp \
     hdhr_tuner.cpp \
@@ -65,4 +64,15 @@ library_include_HEADERS = \
     stats.h \
     tune.h
 
-libdvbtee_la_LIBADD = -ldvbpsi
+# enable the next two lines and disable the one following in order to use the old decoder
+if OLDDECODER
+libdvbtee_la_SOURCES += desc.cpp
+AM_CXXFLAGS += -DOLD_DECODER=1
+libdvbtee_la_LIBADD =
+else !OLDDECODER
+libdvbtee_la_LIBADD = -L./value -L./decode -lvalueobj -ldvbtee_decode
+endif !OLDDECODER
+
+if BUILD_OS_IS_DARWIN
+libdvbtee_la_LIBADD += -L/opt/local/lib -liconv
+endif BUILD_OS_IS_DARWIN

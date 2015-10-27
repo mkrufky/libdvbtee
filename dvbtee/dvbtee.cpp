@@ -300,6 +300,7 @@ void usage(bool help, char *myname)
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
 		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
 		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
+		"-j\tenable json output of decoded tables & descriptors\n  "
 		"-d\tdebug level\n  "
 		"-h\tdisplay additional help\n\n");
 	if (help)
@@ -338,6 +339,7 @@ int main(int argc, char **argv)
 	bool b_serve    = false;
 	bool b_kernel_pid_filters = false;
 	bool b_help     = false;
+	bool b_json     = false;
 	bool b_bitrate_stats = false;
 	bool b_hdhr     = false;
 
@@ -385,7 +387,7 @@ int main(int argc, char **argv)
 	char hdhrname[256];
 	memset(&hdhrname, 0, sizeof(hdhrname));
 
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:s::S::E::o::O:d::H::h?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:js::S::E::o::O:d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -482,6 +484,9 @@ int main(int argc, char **argv)
 			if (optarg)
 				strncpy(hdhrname, optarg, sizeof(hdhrname));
 			b_hdhr = true;
+			break;
+		case 'j':
+			b_json = true;
 			break;
 		case 'h':
 			b_help = true;
@@ -702,6 +707,9 @@ exit:
 	if (context.server) {
 		while (context.server->is_running()) sleep(1);
 		stop_server(&context);
+	}
+	if (b_json) {
+		parse::dumpJson();
 	}
 	cleanup(&context);
 	return 0;

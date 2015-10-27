@@ -55,6 +55,7 @@ mkrufky at linuxtv dot org
 -o      output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
 -O      output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
 -H      use a HdHomeRun device, optional arg to specify the device string
+-j      enable json output of decoded tables & descriptors
 -d      debug level
 -h      display additional help
 ```

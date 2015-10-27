@@ -10,6 +10,18 @@ AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_SRCDIR([libdvbtee/parse.cpp])
 AC_CONFIG_HEADERS([config.h])
 
+# Check configure args
+AC_ARG_ENABLE([olddecoder],
+[  --enable-olddecoder    Enable old decoder],
+[case "${enableval}" in
+  yes) olddecoder=true ;;
+  no)  olddecoder=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-olddecoder]) ;;
+esac],[olddecoder=false])
+AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
+
+AM_CONDITIONAL([BUILD_OS_IS_DARWIN], [test x"$build_os" = darwin])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_AWK
@@ -59,6 +71,8 @@ AS_IF([test "x$PKG_CONFIG" != "x"], [
 AC_CONFIG_FILES([Makefile
                  dvbtee/Makefile
                  libdvbtee/Makefile
+                 libdvbtee/decode/Makefile
+                 libdvbtee/value/Makefile
                  libdvbtee_server/Makefile
                  tunerprovider/Makefile
                  examples/parser_example/Makefile

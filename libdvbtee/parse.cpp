@@ -844,6 +844,19 @@ void parse::cleanup()
 	channel_info.clear();
 }
 
+void parse::dumpJson()
+{
+	for (map_decoder::const_iterator it = decoders.begin(); it != decoders.end(); ++it) {
+		fprintf(stderr, "\nTSID#%04x: ", it->first);
+#if !OLD_DECODER
+		it->second.showChildren();
+#endif
+	}
+	fprintf(stderr, "\n");
+
+	decode_network::dumpJson();
+}
+
 void parse::reset_filters()
 {
 	add_filter(PID_ATSC);
@@ -1025,10 +1038,10 @@ unsigned int parse::xine_dump(parse_iface *iface)
 	for (map_channel_info::iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		count += xine_dump(iter->first, &iter->second);
 #else
-	for (map_channel_info::iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
+	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		channels[iter->second.channel] = iter->first;
 
-	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
+	for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
 		count += xine_dump(iter->second, &channel_info[iter->second], iface);
 
 	channels.clear();
@@ -1042,10 +1055,10 @@ void parse::epg_dump(decode_report *reporter)
 	map_chan_to_ts_id channels;
 	//fprintf(stderr, "%s(%d, %d)\n", __func__, channel_info.size(), channels.size());
 
-	for (map_channel_info::iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
+	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		channels[iter->second.channel] = iter->first;
 
-	for (map_chan_to_ts_id::iterator iter = channels.begin(); iter != channels.end(); ++iter)
+	for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
 		if (decoders.count(iter->second)) decoders[iter->second].dump_epg(reporter);
 
 	channels.clear();

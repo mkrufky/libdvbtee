@@ -202,6 +202,8 @@ public:
 
 	void set_tsfilter_iface(tsfilter_iface &iface) { m_tsfilter_iface = &iface; }
 
+	static void dumpJson();
+
 	output out;
 
 	bool check();

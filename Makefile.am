@@ -1,6 +1,11 @@
 ACLOCAL_AMFLAGS= -I m4
 
-SUBDIRS=libdvbtee libdvbtee_server tunerprovider examples dvbtee
+if OLDDECODER
+SUBDIRS=
+else !OLDDECODER
+SUBDIRS=libdvbtee/value libdvbtee/decode
+endif !OLDDECODER
+SUBDIRS+=libdvbtee libdvbtee_server tunerprovider examples dvbtee
 
 EXTRA_DIST = libdvbtee_server.pc.in libdvbtee.pc.in packaging/libdvbtee.spec.in
 

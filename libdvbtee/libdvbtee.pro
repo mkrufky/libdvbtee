@@ -12,41 +12,9 @@ TEMPLATE = lib
 
 DEFINES += DVBTEE_LIBRARY
 
-SOURCES += channels.cpp \
-    decode.cpp \
-    demux.cpp \
-    desc.cpp \
-    feed.cpp \
-    functions.cpp \
-    listen.cpp \
-    output.cpp \
-    parse.cpp \
-    rbuf.cpp \
-    stats.cpp \
-    tune.cpp \
-    hdhr_tuner.cpp \
-    atsctext.cpp \
-    hlsfeed.cpp \
-    curlhttpget.cpp \
-    log.cpp
+include ( libdvbtee.pri )
 
-HEADERS += atsctext.h \
-    channels.h \
-    decode.h \
-    demux.h \
-    desc.h \
-    feed.h \
-    functions.h \
-    listen.h \
-    log.h \
-    output.h \
-    parse.h \
-    rbuf.h \
-    stats.h \
-    tune.h \
-    hdhr_tuner.h \
-    hlsfeed.h \
-    curlhttpget.h
+LIBS += -L$$PWD/value/ -lvalueobj
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
@@ -56,11 +24,6 @@ symbian {
     addFiles.sources = dvbtee.dll
     addFiles.path = !:/sys/bin
     DEPLOYMENT += addFiles
-}
-
-unix:!macx:!symbian {
-    HEADERS += linuxtv_tuner.h
-    SOURCES += linuxtv_tuner.cpp
 }
 
 unix:!symbian {
