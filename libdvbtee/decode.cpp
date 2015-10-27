@@ -2048,6 +2048,17 @@ const decoded_nit_t* decode::get_decoded_nit() const
 	//return networks.count(network_id) ? networks[network_id].get_decoded_nit() : NULL;
 }
 
+void decode_network::dumpJsonServices()
+{
+	for (map_decoded_network_services::const_iterator it = decoded_network_services.begin(); it != decoded_network_services.end(); ++it) {
+		fprintf(stderr, "\nNET_SVC_ID#%04x: ", it->first);
+#if !OLD_DECODER
+		it->second->showChildren();
+#endif
+	}
+	fprintf(stderr, "\n");
+}
+
 void decode_network::dumpJson()
 {
 	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it) {
@@ -2055,6 +2066,7 @@ void decode_network::dumpJson()
 #if !OLD_DECODER
 		it->second->showChildren();
 #endif
+		it->second->dumpJsonServices();
 	}
 	fprintf(stderr, "\n");
 }

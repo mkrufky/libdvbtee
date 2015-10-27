@@ -398,6 +398,7 @@ public:
 #endif
 
 	static void dumpJson();
+	void dumpJsonServices();
 
 	uint16_t orig_network_id;
 private:
