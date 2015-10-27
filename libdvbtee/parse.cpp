@@ -853,6 +853,8 @@ void parse::dumpJson()
 #endif
 	}
 	fprintf(stderr, "\n");
+
+	decode_network::dumpJson();
 }
 
 void parse::reset_filters()

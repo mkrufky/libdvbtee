@@ -397,6 +397,8 @@ public:
 	dvbtee::decode::DescriptorStore descriptors;
 #endif
 
+	static void dumpJson();
+
 	uint16_t orig_network_id;
 private:
 #if !OLD_DECODER
