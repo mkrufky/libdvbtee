@@ -708,8 +708,12 @@ exit:
 		while (context.server->is_running()) sleep(1);
 		stop_server(&context);
 	}
-	if ((b_json) && (tuner)) {
-		tuner->feeder.parser.dumpJson();
+	if (b_json) {
+		if (tuner) {
+			tuner->feeder.parser.dumpJson();
+		} else {
+			context._file_feeder.parser.dumpJson();
+		}
 	}
 	cleanup(&context);
 	return 0;
