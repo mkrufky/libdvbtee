@@ -80,7 +80,7 @@ class TableTypeCarrierBase {};
 template<class T>
 class TableTypeCarrier: public TableTypeCarrierBase {
 public:
-	explicit TableTypeCarrier(const T * const p) : m_p(p) {}
+	TableTypeCarrier(const T * const p) : m_p(p) {}
 #ifdef __clang__
 	TableTypeCarrier(const TableTypeCarrier<T>& o) : m_p(o.m_p) {}
 #endif
