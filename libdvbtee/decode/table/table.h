@@ -94,7 +94,7 @@ private:
 struct PsiTable {
     explicit PsiTable() : m_priv(NULL) { }
 #if PsiTable_CONSTRUCTORTEMPLATE
-    template<typename T> explicit PsiTable(const TableTypeCarrier<T> inT) { m_priv = &inT; }
+    template<typename T> PsiTable(const TableTypeCarrier<T> inT) { m_priv = &inT; }
 #else
     template<typename T> void Set(const TableTypeCarrier<T> inT) { m_priv = &inT; }
 #endif
