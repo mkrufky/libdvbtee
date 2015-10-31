@@ -217,7 +217,7 @@ public:
 	static TableRegistry& instance();
 
 	bool registerFactory(uint8_t, TableBaseFactory*);
-	TableBaseFactory *getFactory(uint8_t) const;
+	const TableBaseFactory* getFactory(uint8_t) const;
 
 private:
 	TableRegistry();

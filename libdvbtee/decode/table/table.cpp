@@ -92,7 +92,7 @@ bool TableRegistry::registerFactory(uint8_t tableid, TableBaseFactory *factory)
 	return true;
 }
 
-TableBaseFactory *TableRegistry::getFactory(uint8_t tableid) const
+const TableBaseFactory* TableRegistry::getFactory(uint8_t tableid) const
 {
 	pthread_mutex_lock(&m_mutex);
 	std::map <uint8_t, TableBaseFactory*>::const_iterator it = m_factories.find(tableid);
@@ -138,7 +138,7 @@ bool TableStore::add(uint8_t id, PsiTable &inTable, TableWatcher *watcher)
 {
 	Table *t = NULL;
 
-	TableBaseFactory* f = TableRegistry::instance().getFactory(id);
+	const TableBaseFactory* f = TableRegistry::instance().getFactory(id);
 	if (f) t = f->create(m_parent, inTable, watcher);
 
 	if (t) m_store.insert( std::pair<uint8_t, Table*>(t->getTableid(), t) );
