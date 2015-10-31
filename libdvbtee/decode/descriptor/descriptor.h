@@ -88,7 +88,7 @@ private:
 
 class DescriptorBaseFactory {
 public:
-	virtual Descriptor* create(Decoder *, dvbpsi_descriptor_t*) = 0;
+	virtual Descriptor* create(Decoder *, dvbpsi_descriptor_t*) const = 0;
 protected:
 	DescriptorBaseFactory() {}
 	~DescriptorBaseFactory() {}
@@ -149,7 +149,7 @@ public:
 		static DescriptorFactory<TAG, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
+	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor) const
 	{
 		return new LinkedDescriptor<T>(parent, p_descriptor);
 	}
