@@ -99,8 +99,8 @@ public:
 	static DescriptorRegistry& instance();
 
 	bool registerFactory(uint8_t, DescriptorBaseFactory*);
-	DescriptorBaseFactory *getFactory(uint8_t) const;
-	DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t*) const;
+	const DescriptorBaseFactory *getFactory(uint8_t) const;
+	const DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t*) const;
 
 	Descriptor *create(Decoder*, dvbpsi_descriptor_t*);
 private:
