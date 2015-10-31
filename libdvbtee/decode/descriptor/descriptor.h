@@ -144,7 +144,7 @@ private:
 template <uint8_t TAG, class T>
 class DescriptorFactory : public DescriptorBaseFactory {
 public:
-	static DescriptorFactory<TAG, T>& instance()
+	static const DescriptorFactory<TAG, T>& instance()
 	{
 		static DescriptorFactory<TAG, T> INSTANCE;
 		return INSTANCE;
@@ -161,7 +161,7 @@ private:
 	~DescriptorFactory() {}
 };
 
-#define REGISTER_DESCRIPTOR_FACTORY(tag, decoder) static DescriptorFactory<tag, decoder> &__DescFactory = DescriptorFactory<tag, decoder>::instance()
+#define REGISTER_DESCRIPTOR_FACTORY(tag, decoder) static const DescriptorFactory<tag, decoder> &__DescFactory = DescriptorFactory<tag, decoder>::instance()
 
 }
 
