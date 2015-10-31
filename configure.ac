@@ -40,6 +40,27 @@ AC_CHECK_LIB([curl], [curl_easy_init])
 AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach])
 AC_CHECK_LIB([hdhomerun], [hdhomerun_device_destroy])
 
+# Checks for individual descriptor support in libdvbpsi.
+AC_CHECK_FUNC([dvbpsi_DecodeISO639Dr],[DR0A=true],[DR0A=false])
+AM_CONDITIONAL([DR0A], [test x$DR0A = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeServiceDr],[DR48=true],[DR48=false])
+AM_CONDITIONAL([DR48], [test x$DR48 = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeShortEventDr],[DR4D=true],[DR4D=false])
+AM_CONDITIONAL([DR4D], [test x$DR4D = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeFrequencyListDr],[DR62=true],[DR62=false])
+AM_CONDITIONAL([DR62], [test x$DR62 = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeAc3AudioDr],[DR81=true],[DR81=false])
+AM_CONDITIONAL([DR81], [test x$DR81 = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeLCNDr],[DR83=true],[DR83=false])
+AM_CONDITIONAL([DR83], [test x$DR83 = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeCaptionServiceDr],[DR86=true],[DR86=false])
+AM_CONDITIONAL([DR86], [test x$DR86 = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeExtendedChannelNameDr],[DRA0=true],[DRA0=false])
+AC_CHECK_FUNC([dvbpsi_ExtendedChannelNameDr],[DRA0=true])
+AM_CONDITIONAL([DRA0], [test x$DRA0 = xtrue])
+AC_CHECK_FUNC([dvbpsi_DecodeServiceLocationDr],[DRA1=true],[DRA1=false])
+AM_CONDITIONAL([DRA1], [test x$DRA1 = xtrue])
+
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h libhdhomerun/hdhomerun.h linux/dvb/frontend.h])
 
