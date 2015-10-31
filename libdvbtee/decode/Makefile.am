@@ -4,33 +4,46 @@ lib_LTLIBRARIES = libdvbtee_decode.la
 
 libdvbtee_decode_la_SOURCES = decoder.cpp \
                               table/table.cpp \
-                              table/tabl_00.cpp \
-                              table/tabl_02.cpp \
-                              table/tabl_40.cpp \
-                              table/tabl_42.cpp \
-                              table/tabl_4e.cpp \
-                              table/tabl_70.cpp \
-                              table/tabl_00.h \
-                              table/tabl_02.h \
-                              table/tabl_40.h \
-                              table/tabl_42.h \
-                              table/tabl_4e.h \
-                              table/tabl_70.h \
                               descriptor/descriptor.cpp
 
-# requires libdvbpsi v1.x.x
-libdvbtee_decode_la_SOURCES += \
-                              table/tabl_c7.cpp \
-                              table/tabl_c8.cpp \
-                              table/tabl_cb.cpp \
-                              table/tabl_cc.cpp \
-                              table/tabl_cd.cpp \
-                              table/tabl_c7.h \
-                              table/tabl_c8.h \
-                              table/tabl_cb.h \
-                              table/tabl_cc.h \
-                              table/tabl_cd.h
+# table decoders
+if TA00
+libdvbtee_decode_la_SOURCES += table/tabl_00.cpp table/tabl_00.h
+endif TA00
+if TA02
+libdvbtee_decode_la_SOURCES += table/tabl_02.cpp table/tabl_02.h
+endif TA02
+if TA40
+libdvbtee_decode_la_SOURCES += table/tabl_40.cpp table/tabl_40.h
+endif TA40
+if TA42
+libdvbtee_decode_la_SOURCES += table/tabl_42.cpp table/tabl_42.h
+endif TA42
+if TA4E
+libdvbtee_decode_la_SOURCES += table/tabl_4e.cpp table/tabl_4e.h
+endif TA4E
+if TA70
+libdvbtee_decode_la_SOURCES += table/tabl_70.cpp table/tabl_70.h
+endif TA70
 
+# requires libdvbpsi v1.x.x
+if TAC7
+libdvbtee_decode_la_SOURCES += table/tabl_c7.cpp table/tabl_c7.h
+endif TAC7
+if TAC8
+libdvbtee_decode_la_SOURCES += table/tabl_c8.cpp table/tabl_c8.h
+endif TAC8
+if TACB
+libdvbtee_decode_la_SOURCES += table/tabl_cb.cpp table/tabl_cb.h
+endif TACB
+if TACC
+libdvbtee_decode_la_SOURCES += table/tabl_cc.cpp table/tabl_cc.h
+endif TACC
+if TACD
+libdvbtee_decode_la_SOURCES += table/tabl_cd.cpp table/tabl_cd.h
+endif TACD
+
+# descriptor decoders
 if DR0A
 libdvbtee_decode_la_SOURCES += descriptor/desc_0a.cpp descriptor/desc_0a.h
 endif DR0A
