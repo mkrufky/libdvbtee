@@ -282,7 +282,7 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 void usage(bool help, char *myname)
 {
 	fprintf(stderr, "built against libdvbpsi version %s\n\n", parse_libdvbpsi_version);
-	parse::count_decoder_factories();
+	int f_count = parse::count_decoder_factories();
 	fprintf(stderr, "\n  "
 		"-a\tadapter id\n  "
 		"-A\t(1 for ATSC, 2 for ClearQAM)\n  "
@@ -301,9 +301,9 @@ void usage(bool help, char *myname)
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
 		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
 		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
-		"-j\tenable json output of decoded tables & descriptors\n  "
+		"-j\tenable json output of decoded tables & descriptors%s\n  "
 		"-d\tdebug level\n  "
-		"-h\tdisplay additional help\n\n");
+		"-h\tdisplay additional help\n\n", f_count ? "" : " (feature disabled)");
 	if (help)
 		fprintf(stderr,
 		"To tune to service id 1 of physical channel 33 and stream it to a udp port:\n  "
