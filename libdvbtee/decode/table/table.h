@@ -230,7 +230,7 @@ private:
 template <uint8_t TABLEID, typename S, class T>
 class TableFactory : public TableBaseFactory {
 public:
-	static TableFactory<TABLEID, S, T>& instance()
+	static const TableFactory<TABLEID, S, T>& instance()
 	{
 		static TableFactory<TABLEID, S, T> INSTANCE;
 		return INSTANCE;
@@ -266,7 +266,7 @@ private:
 	\
 	}}\
 	\
-	static TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance()
+	static const TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance()
 }
 
 }
