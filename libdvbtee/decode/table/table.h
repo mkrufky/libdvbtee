@@ -75,33 +75,19 @@ public:
 	DescriptorStore descriptors;
 };
 
-class TableTypeCarrierBase {};
-
-template<class T>
-class TableTypeCarrier: public TableTypeCarrierBase {
-public:
-	TableTypeCarrier(const T * const p) : m_p(p) {}
-#ifdef __clang__
-	TableTypeCarrier(const TableTypeCarrier<T>& o) : m_p(o.m_p) {}
-#endif
-
-	const T * Get() const { return m_p; }
-private:
-	const T * const m_p;
-};
-
 #define PsiTable_CONSTRUCTORTEMPLATE 0
 struct PsiTable {
 #if PsiTable_CONSTRUCTORTEMPLATE
-    template<typename T> PsiTable(const TableTypeCarrier<T> inT) { m_priv = &inT; }
+    PsiTable(const PsiTable& o) : m_priv(o.m_priv) { }
+    template<typename T> PsiTable(const T* p) : m_priv(p) { }
 #else
     PsiTable() : m_priv(NULL) { }
-    template<typename T> void Set(const TableTypeCarrier<T> inT) { m_priv = &inT; }
+    template<typename T> void Set(const T* p) { m_priv = p; }
 #endif
-    template<typename T> const T * Get() const { return (!m_priv) ? NULL : ((TableTypeCarrier<T>*)m_priv)->Get(); }
+    template<typename T> const T* Get() const { return (!m_priv) ? NULL : ((T*)m_priv); }
 
 private:
-    const TableTypeCarrierBase *m_priv;
+    const void *m_priv;
 };
 
 class TableStore {
@@ -115,7 +101,7 @@ public:
 	template<typename T>
 	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
-		return add(tableid, PsiTable(TableTypeCarrier<T>(p_table)), watcher);
+		return add(tableid, PsiTable(p_table), watcher);
 	}
 #else
 	bool add(uint8_t, PsiTable&, TableWatcher* watcher = NULL);
@@ -124,8 +110,7 @@ public:
 	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
 		PsiTable psiTable;
-		TableTypeCarrier<T> inT(p_table);
-		psiTable.Set<T>(inT);
+		psiTable.Set<T>(p_table);
 		return add(tableid, psiTable, watcher);
 	}
 #endif
