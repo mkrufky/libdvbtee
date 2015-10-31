@@ -266,7 +266,7 @@ private:
 	\
 	}}\
 	\
-	static const TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance()
+	static volatile const TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance()
 }
 
 }
