@@ -127,12 +127,18 @@ public:
 		if (parent) parent->unlinkChild(m_linkedIdx);
 	}
 
-	virtual int getMapIndex() const { return m_linkedIdx; }
+	virtual int getMapIndex() const
+	{
+		return m_linkedIdx;
+	}
 
 private:
 	int m_linkedIdx;
 
-	inline void linkParent(Decoder *parent) { if (parent) m_linkedIdx = parent->linkChild(this); }
+	inline void linkParent(Decoder *parent)
+	{
+		if (parent) m_linkedIdx = parent->linkChild(this);
+	}
 };
 
 template <uint8_t TAG, class T>
@@ -143,7 +149,10 @@ public:
 		static DescriptorFactory<TAG, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor) { return new LinkedDescriptor<T>(parent, p_descriptor); }
+	virtual T *create(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
+	{
+		return new LinkedDescriptor<T>(parent, p_descriptor);
+	}
 private:
 	DescriptorFactory() {
 		bool descriptorFactoryRegistration = DescriptorRegistry::instance().registerFactory(TAG, this);
