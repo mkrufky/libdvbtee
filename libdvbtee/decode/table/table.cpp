@@ -135,10 +135,13 @@ TableStore::~TableStore()
 }
 
 #if PsiTable_CONSTRUCTORTEMPLATE
-bool TableStore::add(uint8_t id, PsiTable inTable, TableWatcher *watcher)
-#else
-bool TableStore::add(uint8_t id, PsiTable &inTable, TableWatcher *watcher)
+bool TableStore::__add(uint8_t tableid, PsiTable table, TableWatcher *watcher)
+{
+	return add(tableid, table, watcher);
+}
 #endif
+
+bool TableStore::add(uint8_t id, PsiTable &inTable, TableWatcher *watcher)
 {
 	Table *t = NULL;
 

@@ -102,17 +102,15 @@ public:
 	TableStore(Decoder *);
 	~TableStore();
 
-#if PsiTable_CONSTRUCTORTEMPLATE
-	bool add(uint8_t, PsiTable, TableWatcher* watcher = NULL);
+	bool add(uint8_t, PsiTable&, TableWatcher* watcher = NULL);
 
+#if PsiTable_CONSTRUCTORTEMPLATE
 	template<typename T>
 	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
-		return add(tableid, PsiTable(p_table), watcher);
+		return __add(tableid, p_table, watcher);
 	}
 #else
-	bool add(uint8_t, PsiTable&, TableWatcher* watcher = NULL);
-
 	template<typename T>
 	bool add(uint8_t tableid, T* p_table, TableWatcher* watcher = NULL)
 	{
@@ -162,6 +160,10 @@ public:
 private:
 	Decoder *m_parent;
 	std::multimap<uint8_t, Table*> m_store;
+
+#if PsiTable_CONSTRUCTORTEMPLATE
+	bool __add(uint8_t, PsiTable, TableWatcher*);
+#endif
 };
 
 template <uint8_t TABLEID, class T, typename S>
