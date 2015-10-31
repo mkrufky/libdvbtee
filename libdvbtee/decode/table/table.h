@@ -205,8 +205,8 @@ private:
 
 class TableBaseFactory {
 public:
-	virtual Table *create(Decoder *parent, TableWatcher *watcher) = 0;
-	virtual Table *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher) = 0;
+	virtual Table *create(Decoder *parent, TableWatcher *watcher) const = 0;
+	virtual Table *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher) const = 0;
 protected:
 	TableBaseFactory() {}
 	~TableBaseFactory() {}
@@ -235,11 +235,11 @@ public:
 		static TableFactory<TABLEID, S, T> INSTANCE;
 		return INSTANCE;
 	}
-	virtual T *create(Decoder *parent, TableWatcher *watcher)
+	virtual T *create(Decoder *parent, TableWatcher *watcher) const
 	{
 		return new LinkedTable<TABLEID,T,S>(parent, watcher);
 	}
-	virtual T *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher)
+	virtual T *create(Decoder *parent, PsiTable& inTable, TableWatcher *watcher) const
 	{
 		return new LinkedTable<TABLEID,T,S>(parent, inTable, watcher);
 	}
