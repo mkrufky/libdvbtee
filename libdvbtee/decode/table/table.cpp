@@ -95,17 +95,10 @@ bool TableRegistry::registerFactory(uint8_t tableid, TableBaseFactory *factory)
 TableBaseFactory *TableRegistry::getFactory(uint8_t tableid)
 {
 	pthread_mutex_lock(&m_mutex);
-
-	if (!m_factories.count(tableid)) {
-		pthread_mutex_unlock(&m_mutex);
-		return NULL;
-	}
-
-	TableBaseFactory* ret = m_factories[tableid];
-
+	std::map <uint8_t, TableBaseFactory*>::const_iterator it = m_factories.find(tableid);
 	pthread_mutex_unlock(&m_mutex);
 
-	return ret;
+	return (it == m_factories.end()) ? NULL : it->second;
 }
 
 
