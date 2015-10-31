@@ -84,7 +84,7 @@ bool TableRegistry::registerFactory(uint8_t tableid, TableBaseFactory *factory)
 		return false;
 	}
 
-	m_factories.insert( std::pair<uint8_t, TableBaseFactory*>(tableid,factory) );
+	m_factories.insert( std::pair<uint8_t, const TableBaseFactory*>(tableid, factory) );
 #if DBG_DECODER_INSERTION
 	fprintf(stderr, "inserted 0x%02x, %p, %ld table decoders present\n", tableid, factory, m_factories.size());
 #endif
@@ -95,7 +95,7 @@ bool TableRegistry::registerFactory(uint8_t tableid, TableBaseFactory *factory)
 const TableBaseFactory* TableRegistry::getFactory(uint8_t tableid) const
 {
 	pthread_mutex_lock(&m_mutex);
-	std::map <uint8_t, TableBaseFactory*>::const_iterator it = m_factories.find(tableid);
+	std::map <uint8_t, const TableBaseFactory*>::const_iterator it = m_factories.find(tableid);
 	pthread_mutex_unlock(&m_mutex);
 
 	return (it == m_factories.end()) ? NULL : it->second;

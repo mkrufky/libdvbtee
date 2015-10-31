@@ -224,7 +224,7 @@ private:
 	~TableRegistry();
 
 	mutable pthread_mutex_t m_mutex;
-	std::map <uint8_t, TableBaseFactory*> m_factories;
+	std::map <uint8_t, const TableBaseFactory*> m_factories;
 };
 
 template <uint8_t TABLEID, typename S, class T>
