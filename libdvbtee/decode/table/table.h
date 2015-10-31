@@ -79,13 +79,20 @@ public:
 struct PsiTable {
 #if PsiTable_CONSTRUCTORTEMPLATE
     PsiTable(const PsiTable& o) : m_priv(o.m_priv) { }
+
     template<typename T> PsiTable(const T* p) : m_priv(p) { }
 #else
     PsiTable() : m_priv(NULL) { }
-    template<typename T> void Set(const T* p) { m_priv = p; }
-#endif
-    template<typename T> const T* Get() const { return (!m_priv) ? NULL : ((T*)m_priv); }
 
+    template<typename T> void Set(const T* p)
+    {
+        m_priv = p;
+    }
+#endif
+    template<typename T> const T* Get() const
+    {
+        return (!m_priv) ? NULL : ((T*)m_priv);
+    }
 private:
     const void *m_priv;
 };
