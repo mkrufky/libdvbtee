@@ -46,6 +46,7 @@ HEADERS += \
     tune.h \
     hdhr_tuner.h \
     hlsfeed.h \
+    dvbtee_config.h \
     curlhttpget.h
 
 unix:!macx:!symbian {
