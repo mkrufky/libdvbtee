@@ -472,10 +472,12 @@ public:
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
 	bool updatePAT(dvbtee::decode::Table *table);
 	bool updatePMT(dvbtee::decode::Table *table);
+#if !USING_DVBPSI_VERSION_0
 	bool updateVCT(dvbtee::decode::Table *table);
 	bool updateMGT(dvbtee::decode::Table *table);
 	bool updateEIT(dvbtee::decode::Table *table);
 	bool updateETT(dvbtee::decode::Table *table);
+#endif
 #endif
 
 	bool take_pat(const dvbpsi_pat_t * const);

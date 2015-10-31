@@ -436,6 +436,7 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 		stream_time = table->get<time_t>("time");
 		dbg_time("%s", ctime(&stream_time));
 		break;
+#if !USING_DVBPSI_VERSION_0
 	case 0xc7: /* MGT */
 		updateMGT(table);
 		break;
@@ -449,6 +450,7 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 	case 0xcc: /* ETT */
 		updateETT(table);
 		break;
+#endif
 	default:
 		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
 		break;
