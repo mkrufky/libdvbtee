@@ -210,6 +210,7 @@ public:
 	bool is_enabled() { return enabled; }
 
 	stats statistics;
+	static int count_decoder_factories();
 private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;

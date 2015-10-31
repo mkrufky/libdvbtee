@@ -781,6 +781,17 @@ parse::~parse()
 	out_pids.clear();
 }
 
+int parse::count_decoder_factories()
+{
+	return
+#if !OLD_DECODER
+	dvbtee::decode::TableRegistry::instance().count() +
+	dvbtee::decode::DescriptorRegistry::instance().count();
+#else
+	0;
+#endif
+}
+
 void parse::detach_demux()
 {
 	dPrintf("()");

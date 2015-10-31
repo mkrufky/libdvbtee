@@ -282,7 +282,8 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 void usage(bool help, char *myname)
 {
 	fprintf(stderr, "built against libdvbpsi version %s\n\n", parse_libdvbpsi_version);
-	fprintf(stderr, "  "
+	parse::count_decoder_factories();
+	fprintf(stderr, "\n  "
 		"-a\tadapter id\n  "
 		"-A\t(1 for ATSC, 2 for ClearQAM)\n  "
 		"-b\tdisplay bitrates & statistics\n  "
