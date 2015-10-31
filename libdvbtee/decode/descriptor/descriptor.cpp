@@ -70,7 +70,7 @@ bool DescriptorRegistry::registerFactory(uint8_t tag, DescriptorBaseFactory *fac
 	return true;
 }
 
-DescriptorBaseFactory *DescriptorRegistry::getFactory(uint8_t tag)
+DescriptorBaseFactory *DescriptorRegistry::getFactory(uint8_t tag) const
 {
 	pthread_mutex_lock(&m_mutex);
 	std::map <uint8_t, DescriptorBaseFactory*>::const_iterator it = m_factories.find(tag);
@@ -79,7 +79,7 @@ DescriptorBaseFactory *DescriptorRegistry::getFactory(uint8_t tag)
 	return (it == m_factories.end()) ? NULL : it->second;;
 }
 
-DescriptorBaseFactory *DescriptorRegistry::getFactory(dvbpsi_descriptor_t *d)
+DescriptorBaseFactory *DescriptorRegistry::getFactory(dvbpsi_descriptor_t *d) const
 {
 	return (!d) ? NULL : getFactory(d->i_tag);
 }

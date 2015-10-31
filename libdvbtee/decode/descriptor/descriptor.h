@@ -99,15 +99,15 @@ public:
 	static DescriptorRegistry& instance();
 
 	bool registerFactory(uint8_t, DescriptorBaseFactory*);
-	DescriptorBaseFactory *getFactory(uint8_t);
-	DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t*);
+	DescriptorBaseFactory *getFactory(uint8_t) const;
+	DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t*) const;
 
 	Descriptor *create(Decoder*, dvbpsi_descriptor_t*);
 private:
 	DescriptorRegistry();
 	~DescriptorRegistry();
 
-	pthread_mutex_t m_mutex;
+	mutable pthread_mutex_t m_mutex;
 	std::map <uint8_t, DescriptorBaseFactory*> m_factories;
 };
 
