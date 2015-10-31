@@ -103,6 +103,8 @@ public:
 	const DescriptorBaseFactory *getFactory(dvbpsi_descriptor_t*) const;
 
 	Descriptor *create(Decoder*, dvbpsi_descriptor_t*);
+
+	int count() const;
 private:
 	DescriptorRegistry();
 	~DescriptorRegistry();

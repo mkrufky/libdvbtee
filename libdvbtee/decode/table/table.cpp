@@ -101,6 +101,15 @@ const TableBaseFactory* TableRegistry::getFactory(uint8_t tableid) const
 	return (it == m_factories.end()) ? NULL : it->second;
 }
 
+int TableRegistry::count() const
+{
+	fprintf(stderr, "%ld table decoders present:", m_factories.size());
+	for (std::map <uint8_t, const TableBaseFactory*>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
+		fprintf(stderr, " 0x%02x", it->first);
+	}
+	fprintf(stderr, "\n");
+	return m_factories.size();
+}
 
 TableRegistry::TableRegistry()
 {

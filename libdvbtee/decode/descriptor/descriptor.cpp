@@ -93,6 +93,16 @@ Descriptor *DescriptorRegistry::create(Decoder *parent, dvbpsi_descriptor_t *p_d
 	return Factory->create(parent, p_dvbpsi_descriptor);
 }
 
+int DescriptorRegistry::count() const
+{
+	fprintf(stderr, "%ld descriptor decoders present:", m_factories.size());
+	for (std::map <uint8_t, const DescriptorBaseFactory*>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
+		fprintf(stderr, " 0x%02x", it->first);
+	}
+	fprintf(stderr, "\n");
+	return m_factories.size();
+}
+
 DescriptorRegistry::DescriptorRegistry()
 {
 	pthread_mutex_init(&m_mutex, 0);

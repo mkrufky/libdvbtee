@@ -219,6 +219,7 @@ public:
 	bool registerFactory(uint8_t, TableBaseFactory*);
 	const TableBaseFactory* getFactory(uint8_t) const;
 
+	int count() const;
 private:
 	TableRegistry();
 	~TableRegistry();
