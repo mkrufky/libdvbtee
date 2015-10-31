@@ -161,7 +161,7 @@ private:
 	~DescriptorFactory() {}
 };
 
-#define REGISTER_DESCRIPTOR_FACTORY(tag, decoder) static const DescriptorFactory<tag, decoder> &__DescFactory = DescriptorFactory<tag, decoder>::instance()
+#define REGISTER_DESCRIPTOR_FACTORY(tag, decoder) static volatile const DescriptorFactory<tag, decoder> &__DescFactory = DescriptorFactory<tag, decoder>::instance()
 
 }
 
