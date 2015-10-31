@@ -189,12 +189,18 @@ public:
 		if (parent) parent->unlinkChild(m_linkedIdx);
 	}
 
-	virtual int getMapIndex() const { return m_linkedIdx; }
+	virtual int getMapIndex() const
+	{
+		return m_linkedIdx;
+	}
 
 private:
 	int m_linkedIdx;
 
-	inline void linkParent(Decoder *parent) { if (parent) m_linkedIdx = parent->linkChild(this); }
+	inline void linkParent(Decoder *parent)
+	{
+		if (parent) m_linkedIdx = parent->linkChild(this);
+	}
 };
 
 class TableBaseFactory {
