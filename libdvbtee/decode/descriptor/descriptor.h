@@ -108,7 +108,7 @@ private:
 	~DescriptorRegistry();
 
 	mutable pthread_mutex_t m_mutex;
-	std::map <uint8_t, DescriptorBaseFactory*> m_factories;
+	std::map <uint8_t, const DescriptorBaseFactory*> m_factories;
 };
 
 template <class T>
