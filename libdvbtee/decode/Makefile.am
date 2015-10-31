@@ -32,19 +32,22 @@ libdvbtee_decode_la_SOURCES += \
                               table/tabl_cc.cpp \
                               table/tabl_cd.cpp \
                               descriptor/desc_62.cpp \
-                              descriptor/desc_81.cpp \
                               descriptor/desc_83.cpp \
-                              descriptor/desc_86.cpp \
-                              descriptor/desc_a0.cpp \
-                              descriptor/desc_a1.cpp \
                               table/tabl_c7.h \
                               table/tabl_c8.h \
                               table/tabl_cb.h \
                               table/tabl_cc.h \
                               table/tabl_cd.h \
                               descriptor/desc_62.h \
+                              descriptor/desc_83.h
+
+# requires libdvbpsi v1.2.x
+libdvbtee_decode_la_SOURCES += \
+                              descriptor/desc_81.cpp \
+                              descriptor/desc_86.cpp \
+                              descriptor/desc_a0.cpp \
+                              descriptor/desc_a1.cpp \
                               descriptor/desc_81.h \
-                              descriptor/desc_83.h \
                               descriptor/desc_86.h \
                               descriptor/desc_a0.h \
                               descriptor/desc_a1.h
