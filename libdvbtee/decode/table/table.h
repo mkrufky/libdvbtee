@@ -217,13 +217,13 @@ public:
 	static TableRegistry& instance();
 
 	bool registerFactory(uint8_t, TableBaseFactory*);
-	TableBaseFactory *getFactory(uint8_t);
+	TableBaseFactory *getFactory(uint8_t) const;
 
 private:
 	TableRegistry();
 	~TableRegistry();
 
-	pthread_mutex_t m_mutex;
+	mutable pthread_mutex_t m_mutex;
 	std::map <uint8_t, TableBaseFactory*> m_factories;
 };
 
