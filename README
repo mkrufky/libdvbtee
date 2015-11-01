@@ -63,47 +63,47 @@ mkrufky at linuxtv dot org
 
 To tune to service id 1 of physical channel 33 and stream it to a udp port:
 ```
-  ./dvbtee -c33 -I1 -oudp://192.168.1.100:1234
+  dvbtee -c33 -I1 -oudp://192.168.1.100:1234
 ```
 
 To tune the second frontend of adapter 1 and stream the full TS of physical channel 44 to a tcp listener:
 ```
-  ./dvbtee -c44 -otcp://192.168.1.200:5555
+  dvbtee -c44 -otcp://192.168.1.200:5555
 ```
 
 To listen to a TCP port and stream to a UDP port:
 ```
-  ./dvbtee -itcp://5555 -oudp://192.168.1.100:1234
+  dvbtee -itcp://5555 -oudp://192.168.1.100:1234
 ```
 
 To parse a captured file and filter out the PSIP data, saving the PAT/PMT and PES streams to a file:
 ```
-  ./dvbtee -Finput.ts -O3 -ofile://output.ts
+  dvbtee -Finput.ts -O3 -ofile://output.ts
 ```
 
 To parse a UDP stream for ten seconds:
 ```
-  ./dvbtee -iudp://127.0.0.1:1234 -t10
+  dvbtee -iudp://127.0.0.1:1234 -t10
 ```
 
 To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:
 ```
-  ./dvbtee -A2 -T5 -s4
+  dvbtee -A2 -T5 -s4
 ```
 
 To scan for ATSC services using 2 HdHomeRun tuners optimized for speed and redundancy:
 ```
-  ./dvbtee -A1 -H -T2 -s3
+  dvbtee -A1 -H -T2 -s3
 ```
 
 To start a server using adapter 0:
 ```
-  ./dvbtee -a0 -S
+  dvbtee -a0 -S
 ```
 
 To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):
 ```
-  ./dvbtee -H ABCDABCD-1 -S
+  dvbtee -H ABCDABCD-1 -S
 ```
 
 #### Server commands
