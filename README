@@ -28,6 +28,41 @@ and press enter.
 Michael Ira Krufky  
 mkrufky at linuxtv dot org
 
+#### How to build / run
+libdvbtee was originally developed using the qmake build system for easy
+multi-platform build support. libdvbtee still supports the qmake system,
+but now uses autotools as the preferred build system for various reasons.
+```
+autoreconf --install
+./configure
+make
+dvbtee/dvbtee < mpegfile.ts
+```
+
+If, for some odd reason, you want to build libdvbtee using the old version of
+the table / descriptor decoder, simple specify --enable-olddecoder to configure
+```
+autoreconf --install
+./configure --enable-olddecoder
+make
+dvbtee/dvbtee < mpegfile.ts
+```
+
+If you prefer to use qmake rather than autotools, use the following commands:
+```
+qmake -r
+make
+LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
+```
+
+If, for some odd reason, you want to build libdvbtee using the old version of
+the table / descriptor decoder, simple specify CONFIG+=olddecoder to qmake
+```
+qmake -r CONFIG+=olddecoder
+make
+LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
+```
+
 #### Command line arguments
 ```
 -a      adapter id
