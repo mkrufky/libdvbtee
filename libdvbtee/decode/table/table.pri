@@ -1,6 +1,15 @@
 INCLUDEPATH += $$PWD
 
+TABLE_REQ_DVBPSI_V0_2_SOURCES = \
+    $$PWD/tabl_00.cpp \
+    $$PWD/tabl_02.cpp \
+    $$PWD/tabl_40.cpp \
+    $$PWD/tabl_42.cpp \
+    $$PWD/tabl_4e.cpp \
+    $$PWD/tabl_70.cpp
+
 TABLE_REQ_DVBPSI_V1_SOURCES = \
+    $$TABLE_REQ_DVBPSI_V0_2_SOURCES \
     $$PWD/tabl_c7.cpp \
     $$PWD/tabl_c8.cpp \
     $$PWD/tabl_cb.cpp \
@@ -8,14 +17,11 @@ TABLE_REQ_DVBPSI_V1_SOURCES = \
     $$PWD/tabl_cd.cpp
 
 TABLE_SOURCES = \
-    $$TABLE_REQ_DVBPSI_V1_SOURCES \
-    $$PWD/tabl_00.cpp \
-    $$PWD/tabl_02.cpp \
-    $$PWD/tabl_40.cpp \
-    $$PWD/tabl_42.cpp \
-    $$PWD/tabl_4e.cpp \
-    $$PWD/tabl_70.cpp \
     $$PWD/table.cpp
+
+# FIXME: autodetect
+TABLE_SOURCES += \
+    $$TABLE_REQ_DVBPSI_V1_SOURCES \
 
 HEADERS += \
     $$PWD/tabl_00.h \
