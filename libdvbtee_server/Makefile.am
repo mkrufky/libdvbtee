@@ -9,7 +9,7 @@ libdvbtee_server_la_SOURCES = \
 
 EXTRA_DIST = serve.h
 
-DVBTEE_SERVER_LIBRARY_VERSION=1:0:0
+DVBTEE_SERVER_LIBRARY_VERSION=0:0:0
 
 libdvbtee_server_la_LDFLAGS = -version-info $(DVBTEE_SERVER_LIBRARY_VERSION)
 

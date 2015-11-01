@@ -40,7 +40,7 @@ EXTRA_DIST = \
     stats.h \
     tune.h
 
-DVBTEE_LIBRARY_VERSION=1:0:0
+DVBTEE_LIBRARY_VERSION=0:0:0
 
 libdvbtee_la_LDFLAGS = -version-info $(DVBTEE_LIBRARY_VERSION)
 

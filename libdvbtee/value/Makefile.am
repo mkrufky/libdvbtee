@@ -4,7 +4,7 @@ libvalueobj_la_SOURCES = value.cpp object.cpp array.cpp
 
 EXTRA_DIST=value.h object.h array.h
 
-VALUEOBJ_LIBRARY_VERSION=1:0:0
+VALUEOBJ_LIBRARY_VERSION=0:0:0
 
 libvalueobj_la_LDFLAGS = -version-info $(VALUEOBJ_LIBRARY_VERSION)
 

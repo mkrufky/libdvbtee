@@ -81,7 +81,7 @@ EXTRA_DIST = decoder.h \
              table/table.h \
              descriptor/descriptor.h
 
-DVBTEE_DECODE_LIBRARY_VERSION=1:0:0
+DVBTEE_DECODE_LIBRARY_VERSION=0:0:0
 
 libdvbtee_decode_la_LDFLAGS = -version-info $(DVBTEE_DECODE_LIBRARY_VERSION)
 
