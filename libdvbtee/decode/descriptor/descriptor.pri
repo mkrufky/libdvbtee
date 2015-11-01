@@ -1,22 +1,28 @@
 INCLUDEPATH += $$PWD
 
+DESCRIPTOR_REQ_DVBPSI_V0_2_SOURCES = \
+    $$PWD/desc_0a.cpp \
+    $$PWD/desc_48.cpp \
+    $$PWD/desc_4d.cpp
+
+DESCRIPTOR_REQ_DVBPSI_V1_SOURCES = \
+    $$DESCRIPTOR_REQ_DVBPSI_V0_2_SOURCES \
+    $$PWD/desc_62.cpp \
+    $$PWD/desc_83.cpp
+
 DESCRIPTOR_REQ_DVBPSI_V1_2_SOURCES = \
+    $$DESCRIPTOR_REQ_DVBPSI_V1_SOURCES \
     $$PWD/desc_81.cpp \
     $$PWD/desc_86.cpp \
     $$PWD/desc_a0.cpp \
     $$PWD/desc_a1.cpp
 
-DESCRIPTOR_REQ_DVBPSI_V1_SOURCES = \
-    $$DESCRIPTOR_REQ_DVBPSI_V1_2_SOURCES \
-    $$PWD/desc_62.cpp \
-    $$PWD/desc_83.cpp
-
 DESCRIPTOR_SOURCES = \
-    $$DESCRIPTOR_REQ_DVBPSI_V1_SOURCES \
-    $$PWD/desc_0a.cpp \
-    $$PWD/desc_48.cpp \
-    $$PWD/desc_4d.cpp \
     $$PWD/descriptor.cpp
+
+# FIXME: autodetect
+DESCRIPTOR_SOURCES += \
+    $$DESCRIPTOR_REQ_DVBPSI_V1_2_SOURCES
 
 HEADERS += \
     $$PWD/desc_0a.h \
