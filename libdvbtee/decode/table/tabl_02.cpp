@@ -170,4 +170,4 @@ pmt::~pmt()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_pmt_t, pmt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_pmt_t, pmt)

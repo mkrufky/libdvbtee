@@ -37,6 +37,7 @@ namespace decode {
 /* VCT (Table) */
 
 class vct: public Table/*<dvbpsi_atsc_vct_t>*/ {
+TABLE_DECODER_TPL
 public:
 	vct(Decoder *, TableWatcher*);
 	vct(Decoder *, TableWatcher*, const dvbpsi_atsc_vct_t * const);

@@ -168,4 +168,4 @@ mgtTb::~mgtTb()
 
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_mgt_t, mgt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_mgt_t, mgt)

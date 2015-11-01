@@ -37,6 +37,7 @@ namespace decode {
 /* PAT (Table) */
 
 class pat: public Table/*<dvbpsi_pat_t>*/ {
+TABLE_DECODER_TPL
 public:
 	pat(Decoder *, TableWatcher*);
 	pat(Decoder *, TableWatcher*, const dvbpsi_pat_t * const);

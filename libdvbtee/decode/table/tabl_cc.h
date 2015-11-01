@@ -37,6 +37,7 @@ namespace decode {
 /* ETT (Table) */
 
 class atsc_ett: public Table/*<dvbpsi_atsc_ett_t>*/ {
+TABLE_DECODER_TPL
 public:
 	atsc_ett(Decoder *, TableWatcher*);
 	atsc_ett(Decoder *, TableWatcher*, const dvbpsi_atsc_ett_t * const);

@@ -132,4 +132,4 @@ pat::~pat()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_pat_t, pat);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_pat_t, pat)

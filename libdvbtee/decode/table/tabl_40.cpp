@@ -155,4 +155,4 @@ nit::~nit()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_nit_t, nit);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_nit_t, nit)

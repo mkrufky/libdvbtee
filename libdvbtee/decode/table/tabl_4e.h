@@ -37,6 +37,7 @@ namespace decode {
 /* EIT (Table) */
 
 class eit: public Table/*<dvbpsi_eit_t>*/ {
+TABLE_DECODER_TPL
 public:
 	eit(Decoder *, TableWatcher*);
 	eit(Decoder *, TableWatcher*, const dvbpsi_eit_t * const);

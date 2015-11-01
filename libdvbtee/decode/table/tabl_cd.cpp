@@ -87,4 +87,4 @@ stt::~stt()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_stt_t, stt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_stt_t, stt)

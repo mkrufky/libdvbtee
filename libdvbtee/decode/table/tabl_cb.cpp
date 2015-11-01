@@ -209,4 +209,4 @@ atsc_eit::~atsc_eit()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_eit_t, atsc_eit);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_eit_t, atsc_eit)

@@ -252,6 +252,9 @@ private:
 	~TableFactory() {}
 };
 
+#define TABLE_DECODER_TPL \
+	static void dummy();
+
 #define REGISTER_TABLE_FACTORY(tableid, psitable, decoder) \
 	namespace dvbtee {\
 	namespace decode {\
@@ -267,7 +270,9 @@ private:
 	\
 	}}\
 	\
-	static volatile const TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance()
+	static volatile const TableFactory<tableid, psitable, decoder> &__TablFactory = TableFactory<tableid, psitable, decoder>::instance();\
+	\
+	void decoder::dummy() { __TablFactory.instance(); }
 }
 
 }

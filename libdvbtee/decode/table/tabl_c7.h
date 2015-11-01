@@ -37,6 +37,7 @@ namespace decode {
 /* MGT (Table) */
 
 class mgt: public Table/*<dvbpsi_atsc_mgt_t>*/ {
+TABLE_DECODER_TPL
 public:
 	mgt(Decoder *, TableWatcher*);
 	mgt(Decoder *, TableWatcher*, const dvbpsi_atsc_mgt_t * const);

@@ -33,6 +33,7 @@ namespace decode {
 /* System Time Table (ATSC) */
 
 class stt: public Table/*<dvbpsi_atsc_stt_t>*/ {
+TABLE_DECODER_TPL
 public:
 	stt(Decoder *, TableWatcher*);
 	stt(Decoder *, TableWatcher*, const dvbpsi_atsc_stt_t * const);

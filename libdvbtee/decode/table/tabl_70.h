@@ -35,6 +35,7 @@ namespace decode {
 /* TDT (Time and Date Table)/TOT (Time Offset Table) */
 
 class tot: public Table/*<dvbpsi_tot_t>*/ {
+TABLE_DECODER_TPL
 public:
 	tot(Decoder *, TableWatcher*);
 	tot(Decoder *, TableWatcher*, const dvbpsi_tot_t * const);

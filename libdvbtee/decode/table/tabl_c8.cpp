@@ -221,4 +221,4 @@ vctCh::~vctCh()
 
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_vct_t, vct);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_atsc_vct_t, vct)

@@ -189,4 +189,4 @@ eit::~eit()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_eit_t, eit);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_eit_t, eit)

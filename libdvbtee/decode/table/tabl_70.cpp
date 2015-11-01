@@ -87,4 +87,4 @@ tot::~tot()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_tot_t, tot);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_tot_t, tot)

@@ -37,6 +37,7 @@ namespace decode {
 /* SDT (Table) */
 
 class sdt: public Table/*<dvbpsi_sdt_t>*/ {
+TABLE_DECODER_TPL
 public:
 	sdt(Decoder *, TableWatcher*);
 	sdt(Decoder *, TableWatcher*, const dvbpsi_sdt_t * const);

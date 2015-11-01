@@ -198,4 +198,4 @@ sdt::~sdt()
 	//
 }
 
-REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_sdt_t, sdt);
+REGISTER_TABLE_FACTORY(TABLEID, const dvbpsi_sdt_t, sdt)

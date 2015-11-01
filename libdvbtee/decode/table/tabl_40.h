@@ -37,6 +37,7 @@ namespace decode {
 /* NIT (Table) */
 
 class nit: public Table/*<dvbpsi_nit_t>*/ {
+TABLE_DECODER_TPL
 public:
 	nit(Decoder *, TableWatcher*);
 	nit(Decoder *, TableWatcher*, const dvbpsi_nit_t * const);
