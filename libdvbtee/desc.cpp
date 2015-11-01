@@ -29,6 +29,11 @@
 #include "log.h"
 #define CLASS_MODULE "desc"
 
+/* THIS CODE IS OBSOLETE AND ONLY PROVIDED FOR BACKWARDS-COMPAT
+ * (when the old decoder is enabled, for debugging purposes)
+ * Instead, build the code under decode/descriptor/
+ */
+
 #define DVBPSI_SUPPORTS_DR_81_86_A0_A1 (DVBPSI_VERSION_INT > ((1<<16)+(1<<8)+1))
 
 #include "dvbpsi/dr_0a.h" /* ISO639 language descriptor */

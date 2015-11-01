@@ -27,6 +27,11 @@
 
 #include <map>
 
+/* THIS CODE IS OBSOLETE AND ONLY PROVIDED FOR BACKWARDS-COMPAT
+ * (when the old decoder is enabled, for debugging purposes)
+ * Instead, build the code under decode/descriptor/
+ */
+
 typedef std::map<uint16_t, uint16_t> map_lcn; /* service ID, lcn */
 
 typedef struct
