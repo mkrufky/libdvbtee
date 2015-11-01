@@ -33,6 +33,7 @@ namespace decode {
 /* short event descriptor */
 
 class desc_4d: public Descriptor {
+DESCRIPTOR_DECODER_TPL
 public:
 	desc_4d(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_4d();

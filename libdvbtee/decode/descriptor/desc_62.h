@@ -33,6 +33,7 @@ namespace decode {
 /* Frequency List descriptor */
 
 class desc_62: public Descriptor {
+DESCRIPTOR_DECODER_TPL
 public:
 	desc_62(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_62();

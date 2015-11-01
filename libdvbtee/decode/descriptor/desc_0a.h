@@ -33,6 +33,7 @@ namespace decode {
 /* ISO639 language descriptor */
 
 class desc_0a: public Descriptor {
+DESCRIPTOR_DECODER_TPL
 public:
 	desc_0a(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_0a();

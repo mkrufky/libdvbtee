@@ -33,6 +33,7 @@ namespace decode {
 /* service location descriptor */
 
 class desc_a1: public Descriptor {
+DESCRIPTOR_DECODER_TPL
 public:
 	desc_a1(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_a1();

@@ -33,6 +33,7 @@ namespace decode {
 /* logical channel number descriptor */
 
 class desc_83: public Descriptor {
+DESCRIPTOR_DECODER_TPL
 public:
 	desc_83(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_83();

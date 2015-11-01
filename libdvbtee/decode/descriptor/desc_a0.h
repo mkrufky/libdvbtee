@@ -33,6 +33,7 @@ namespace decode {
 /* Extended Channel Name descriptor */
 
 class desc_a0: public Descriptor {
+DESCRIPTOR_DECODER_TPL
 public:
 	desc_a0(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_a0();

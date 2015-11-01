@@ -33,6 +33,7 @@ namespace decode {
 /* AC-3 Audio descriptor */
 
 class desc_81: public Descriptor {
+DESCRIPTOR_DECODER_TPL
 public:
 	desc_81(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_81();
