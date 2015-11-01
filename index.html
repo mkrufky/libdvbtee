@@ -93,47 +93,47 @@ and press enter.</p>
 
 <p>To tune to service id 1 of physical channel 33 and stream it to a udp port:</p>
 
-<pre><code>  ./dvbtee -c33 -I1 -oudp://192.168.1.100:1234
+<pre><code>  dvbtee -c33 -I1 -oudp://192.168.1.100:1234
 </code></pre>
 
 <p>To tune the second frontend of adapter 1 and stream the full TS of physical channel 44 to a tcp listener:</p>
 
-<pre><code>  ./dvbtee -c44 -otcp://192.168.1.200:5555
+<pre><code>  dvbtee -c44 -otcp://192.168.1.200:5555
 </code></pre>
 
 <p>To listen to a TCP port and stream to a UDP port:</p>
 
-<pre><code>  ./dvbtee -itcp://5555 -oudp://192.168.1.100:1234
+<pre><code>  dvbtee -itcp://5555 -oudp://192.168.1.100:1234
 </code></pre>
 
 <p>To parse a captured file and filter out the PSIP data, saving the PAT/PMT and PES streams to a file:</p>
 
-<pre><code>  ./dvbtee -Finput.ts -O3 -ofile://output.ts
+<pre><code>  dvbtee -Finput.ts -O3 -ofile://output.ts
 </code></pre>
 
 <p>To parse a UDP stream for ten seconds:</p>
 
-<pre><code>  ./dvbtee -iudp://127.0.0.1:1234 -t10
+<pre><code>  dvbtee -iudp://127.0.0.1:1234 -t10
 </code></pre>
 
 <p>To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:</p>
 
-<pre><code>  ./dvbtee -A2 -T5 -s4
+<pre><code>  dvbtee -A2 -T5 -s4
 </code></pre>
 
 <p>To scan for ATSC services using 2 HdHomeRun tuners optimized for speed and redundancy:</p>
 
-<pre><code>  ./dvbtee -A1 -H -T2 -s3
+<pre><code>  dvbtee -A1 -H -T2 -s3
 </code></pre>
 
 <p>To start a server using adapter 0:</p>
 
-<pre><code>  ./dvbtee -a0 -S
+<pre><code>  dvbtee -a0 -S
 </code></pre>
 
 <p>To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):</p>
 
-<pre><code>  ./dvbtee -H ABCDABCD-1 -S
+<pre><code>  dvbtee -H ABCDABCD-1 -S
 </code></pre>
 
 <h4><a id="server-commands" class="anchor" href="#server-commands" aria-hidden="true"><span class="octicon octicon-link"></span></a>Server commands</h4>
