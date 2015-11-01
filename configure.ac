@@ -96,7 +96,6 @@ AM_CONDITIONAL([DRA1], [test x$DRA1 = xtrue])
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h libhdhomerun/hdhomerun.h linux/dvb/frontend.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
