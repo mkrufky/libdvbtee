@@ -40,7 +40,7 @@ dvbtee/dvbtee < mpegfile.ts
 ```
 
 If, for some odd reason, you want to build libdvbtee using the old version of
-the table / descriptor decoder, simple specify --enable-olddecoder to configure
+the table / descriptor decoder, specify --enable-olddecoder to configure
 ```
 autoreconf --install
 ./configure --enable-olddecoder
@@ -56,7 +56,7 @@ LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 ```
 
 If, for some odd reason, you want to build libdvbtee using the old version of
-the table / descriptor decoder, simple specify CONFIG+=olddecoder to qmake
+the table / descriptor decoder, specify CONFIG+=olddecoder to qmake
 ```
 qmake -r CONFIG+=olddecoder
 make
