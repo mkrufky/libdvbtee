@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 olddecoder {
     QMAKE_CXXFLAGS += -DOLD_DECODER=1
     SOURCES += desc.cpp
+    HEADERS += desc.h
 } else {
     QMAKE_CXXFLAGS += -DOLD_DECODER=0
 
