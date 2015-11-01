@@ -28,7 +28,7 @@ and press enter.
 Michael Ira Krufky  
 mkrufky at linuxtv dot org
 
-#### Command line arguments:
+#### Command line arguments
 ```
 -a      adapter id
 -A      (1 for ATSC, 2 for ClearQAM)
