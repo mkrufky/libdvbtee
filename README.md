@@ -1,6 +1,6 @@
 ## dvbtee & libdvbtee
 
-### Introduction
+#### Introduction
 
 libdvbtee is a stream parser and service information aggregator library for
 MPEG2 transport streams. The library includes a program service information
@@ -28,7 +28,7 @@ and press enter.
 Michael Ira Krufky  
 mkrufky at linuxtv dot org
 
-**Command line arguments:**
+#### Command line arguments:
 ```
 -a      adapter id
 -A      (1 for ATSC, 2 for ClearQAM)
@@ -59,7 +59,7 @@ mkrufky at linuxtv dot org
 -d      debug level
 -h      display additional help
 ```
-### Example Usage
+#### Example Usage
 
 To tune to service id 1 of physical channel 33 and stream it to a udp port:
 ```
@@ -106,7 +106,7 @@ To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):
   ./dvbtee -H ABCDABCD-1 -S
 ```
 
-### Server commands
+#### Server commands
 
 ```
 tuner           specify tuner id
