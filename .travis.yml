@@ -1,0 +1,24 @@
+script:
+  - mkdir -p m4
+  - autoreconf --install
+  - ./configure
+  - make
+before_install:
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        sudo apt-get update -qq;
+        sudo apt-get install -y libdvbpsi-dev;
+    else
+        brew update;
+        brew install libdvbpsi libhdhomerun;
+    fi
+language: cpp
+compiler:
+  - clang
+  - g++
+  - gcc
+#  - g++-4.6
+#  - g++-4.8
+#  - g++-4.9
+os:
+  - linux
+  - osx
