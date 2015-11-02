@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -I../libdvbtee -I../libdvbtee_server
+AM_CXXFLAGS = -I../libdvbtee -I../libdvbtee_server -D__STDC_FORMAT_MACROS
 
 bin_PROGRAMS = dvbtee
 dvbtee_SOURCES = dvbtee.cpp
