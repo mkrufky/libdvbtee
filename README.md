@@ -1,5 +1,7 @@
 ## dvbtee & libdvbtee
 
+[![Build Status](https://travis-ci.org/mkrufky/libdvbtee.svg?branch=master)](https://travis-ci.org/mkrufky/libdvbtee)
+
 #### Introduction
 
 libdvbtee is a stream parser and service information aggregator library for
