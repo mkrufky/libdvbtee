@@ -37,7 +37,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for libraries.
 AC_CHECK_LIB([curl], [curl_easy_init])
-AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach])
+AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach], [], [AC_CHECK_LIB([dvbpsi], [dvbpsi_AttachPAT])])
 AC_CHECK_LIB([hdhomerun], [hdhomerun_device_destroy])
 
 # Checks for individual table support in libdvbpsi.
