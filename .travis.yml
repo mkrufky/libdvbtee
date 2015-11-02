@@ -1,15 +1,19 @@
+sudo: false
 language: cpp
 matrix:
   include:
     - os: linux
       compiler: gcc
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev']
 
     - os: linux
       compiler: gcc
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.8']
+          packages: ['libdvbpsi-dev', 'g++-4.8']
       env: COMPILER=g++-4.8
 
     - os: linux
@@ -17,7 +21,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9']
+          packages: ['libdvbpsi-dev', 'g++-4.9']
       env: COMPILER=g++-4.9
 
     - os: linux
@@ -25,19 +29,21 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-5']
+          packages: ['libdvbpsi-dev', 'g++-5']
       env: COMPILER=g++-5
 
     - os: linux
       compiler: clang
-      env: COMPILER=clang++
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev']
 
     - os: linux
       compiler: clang
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5']
-          packages: ['clang-3.5']
+          packages: ['libdvbpsi-dev', 'clang-3.5']
       env: COMPILER=clang++-3.5
 
     - os: linux
@@ -45,7 +51,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6']
-          packages: ['clang-3.6']
+          packages: ['libdvbpsi-dev', 'clang-3.6']
       env: COMPILER=clang++-3.6
 
 # Activate when 3.7 is released and the repository is available
@@ -54,7 +60,7 @@ matrix:
 #      addons:
 #        apt:
 #          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7']
-#          packages: ['clang-3.7']
+#          packages: ['libdvbpsi-dev', 'clang-3.7']
 #      env: COMPILER=clang++-3.7
 
     - os: osx
@@ -62,10 +68,12 @@ matrix:
 
     - os: osx
       compiler: clang
-      env: COMPILER=clang++
 
     - os: linux
       compiler: gcc
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev']
       env: USE_OLDDECODER=true
 
     - os: linux
@@ -73,7 +81,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.8']
+          packages: ['libdvbpsi-dev', 'g++-4.8']
       env: COMPILER=g++-4.8 USE_OLDDECODER=true
 
     - os: linux
@@ -81,7 +89,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9']
+          packages: ['libdvbpsi-dev', 'g++-4.9']
       env: COMPILER=g++-4.9 USE_OLDDECODER=true
 
     - os: linux
@@ -89,19 +97,22 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-5']
+          packages: ['libdvbpsi-dev', 'g++-5']
       env: COMPILER=g++-5 USE_OLDDECODER=true
 
     - os: linux
       compiler: clang
-      env: COMPILER=clang++ USE_OLDDECODER=true
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev']
+      env: USE_OLDDECODER=true
 
     - os: linux
       compiler: clang
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.5']
-          packages: ['clang-3.5']
+          packages: ['libdvbpsi-dev', 'clang-3.5']
       env: COMPILER=clang++-3.5 USE_OLDDECODER=true
 
     - os: linux
@@ -109,7 +120,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.6']
-          packages: ['clang-3.6']
+          packages: ['libdvbpsi-dev', 'clang-3.6']
       env: COMPILER=clang++-3.6 USE_OLDDECODER=true
 
 # Activate when 3.7 is released and the repository is available
@@ -118,7 +129,7 @@ matrix:
 #      addons:
 #        apt:
 #          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7']
-#          packages: ['clang-3.7']
+#          packages: ['libdvbpsi-dev', 'clang-3.7']
 #      env: COMPILER=clang++-3.7 USE_OLDDECODER=true
 
     - os: osx
@@ -127,7 +138,7 @@ matrix:
 
     - os: osx
       compiler: clang
-      env: COMPILER=clang++ USE_OLDDECODER=true
+      env: USE_OLDDECODER=true
 script:
   - mkdir -p m4
   - autoreconf --install
@@ -143,10 +154,7 @@ script:
     fi
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        sudo apt-get update -qq;
-        sudo apt-get install -y libdvbpsi-dev;
-    else
+  - if [ "$TRAVIS_OS_NAME" != "linux" ]; then
         brew update;
         brew install libdvbpsi libhdhomerun;
     fi
