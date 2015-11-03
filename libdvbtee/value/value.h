@@ -60,7 +60,6 @@ public:
 	explicit
 	Value(std::string& n, T& v);
 
-	explicit
 	Value(const Value<T>& o);
 
 	~Value();
