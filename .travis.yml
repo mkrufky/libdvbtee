@@ -13,12 +13,8 @@ before_install:
     fi
 language: cpp
 compiler:
-  - clang
-  - g++
   - gcc
-#  - g++-4.6
-#  - g++-4.8
-#  - g++-4.9
+  - clang
 os:
   - linux
   - osx
