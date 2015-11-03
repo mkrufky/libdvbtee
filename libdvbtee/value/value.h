@@ -79,7 +79,7 @@ private:
 class ValueUndefined : public ValueBase {
 public:
 	ValueUndefined(std::string n = "");
-	explicit ValueUndefined(const ValueUndefined&);
+	ValueUndefined(const ValueUndefined&);
 	~ValueUndefined();
 	const std::string get() const;
 	virtual const std::string toJson() const;
