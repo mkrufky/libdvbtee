@@ -2,6 +2,20 @@ sudo: false
 language: cpp
 matrix:
   include:
+    - os: osx
+      compiler: gcc
+
+    - os: osx
+      compiler: gcc
+      env: USE_OLDDECODER=true
+
+    - os: osx
+      compiler: clang
+
+    - os: osx
+      compiler: clang
+      env: USE_OLDDECODER=true
+
     - os: linux
       compiler: gcc
       addons:
@@ -125,20 +139,6 @@ matrix:
 #          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.7']
 #          packages: ['libdvbpsi-dev', 'clang-3.7']
 #      env: COMPILER=clang++-3.7 USE_OLDDECODER=true
-
-    - os: osx
-      compiler: gcc
-
-    - os: osx
-      compiler: gcc
-      env: USE_OLDDECODER=true
-
-    - os: osx
-      compiler: clang
-
-    - os: osx
-      compiler: clang
-      env: USE_OLDDECODER=true
 
 script:
   - mkdir -p m4
