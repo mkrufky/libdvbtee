@@ -1,7 +1,15 @@
+env:
+  matrix:
+    - USE_OLDDECODER=false
+    - USE_OLDDECODER=true
 script:
   - mkdir -p m4
   - autoreconf --install
-  - ./configure
+  - if [ "$USE_OLDDECODER" == "true" ]; then
+      ./configure --enable-olddecoder;
+    else
+      ./configure;
+    fi
   - make
 before_install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
