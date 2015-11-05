@@ -2,6 +2,22 @@ sudo: false
 language: cpp
 matrix:
   include:
+    - os: linux
+      compiler: gcc
+      env:
+        - secure: "2TodR7XtmDQ3+HgX+wclWk4zU0nomFoNCuKWJ55oxBOiiVBBe6b+I2hLeEbFB8FO6S8tgUvr89dOWpTJAz8erRIaml4IVbNyDa+3kKnzbLkzbj1nWMIOvGWlFYeEjPPNMDp+cMVqg+MIS4rTHM/LhK/T9Bip5X+oaBDj9lcRU1b08Rit17ZNw8W8Gey3xOTCdV7ARl3nSOPALuhoW+GZaaPHB37Vblg9kIzeGrgDtwmR0P2gKxhNWh0Dr+sRRvQb4OYYGw6PGaVWpER28KB535vDSN0RzgvV/bR64isG+dPUmpf0+Q06KCOpvgud3mT4MIufOK0nFXISSSgzEyAKYJ1na1V0cKFG3D1FbkH6flIepI8L+gwFOnQwtS4Q7cOThdI2t8yWbScTQw02XAIOhaV6pBf5MfnxXNlhbpUDOVh1xZ1xDhcVIdLfE76ippTKhpymYXJAenE/drrRefC31SfKWVR2N2D3WqOA6TNyRocDoNVNQi7yCBx/tk6xChNvHVs0gK1MmSm0iomVLpZcqz+ReXQs/kCfv2bw/DnRJOd3NFFw8y9L8DKoThx1vRe5OX1zir+FnuPJFJRAw7FEIi2xh/iB5O38vlF4v0OZwjREo/zFsRdgD3zHYzXgp5821J7QDDI/rpFHCSLz+jxBVCxAL4cL8Y++dLfDUTHFBuQ="
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev']
+        coverity_scan:
+          project:
+            name: "mkrufky/libdvbtee"
+            description: "Build submitted via Travis CI"
+          notification_email: mkrufky@linuxtv.org
+          build_command_prepend: "mkdir -p m4; autoreconf --install; ./configure; make clean"
+          build_command:   "make -j"
+          branch_pattern: coverity
+
     - os: osx
       compiler: gcc
 
