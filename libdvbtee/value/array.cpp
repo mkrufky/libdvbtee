@@ -273,6 +273,16 @@ const ValueBase *Array::push(Object *o)
 	return push(*o);
 }
 
+const ValueBase* Array::push(char *val)
+{
+	return push<std::string>(std::string(val));
+}
+
+const ValueBase* Array::push(const char *val)
+{
+	return push<std::string>(std::string(val));
+}
+
 const ValueBase* Array::push(ValueBase *val)
 {
 	vector.push_back(val);
