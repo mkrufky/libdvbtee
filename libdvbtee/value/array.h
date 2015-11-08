@@ -56,8 +56,14 @@ public:
 	template <typename T>
 	const ValueBase* set(std::string key, T val);
 
+	const ValueBase* set(std::string key,       char* val);
+	const ValueBase* set(std::string key, const char* val);
+
 	template <typename T>
 	const ValueBase* set(int key, T val);
+
+	const ValueBase* set(int key,       char* val);
+	const ValueBase* set(int key, const char* val);
 
 	const ValueBase* getByName(std::string idx) const;
 	const ValueBase* getByName(unsigned int idx) const;
