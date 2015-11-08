@@ -283,6 +283,26 @@ const ValueBase* Array::push(const char *val)
 	return push<std::string>(std::string(val));
 }
 
+const ValueBase *Array::set(std::string key, char *val)
+{
+	return set(key, std::string(val));
+}
+
+const ValueBase *Array::set(std::string key, const char *val)
+{
+	return set(key, std::string(val));
+}
+
+const ValueBase *Array::set(int key, char *val)
+{
+	return set(intToStr(key), val);
+}
+
+const ValueBase *Array::set(int key, const char *val)
+{
+	return set(intToStr(key), val);
+}
+
 const ValueBase* Array::push(ValueBase *val)
 {
 	vector.push_back(val);
