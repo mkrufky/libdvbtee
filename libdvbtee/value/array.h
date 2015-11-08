@@ -50,6 +50,9 @@ public:
 	template <typename T>
 	const ValueBase* push(T val);
 
+	const ValueBase* push(      char* val);
+	const ValueBase* push(const char* val);
+
 	template <typename T>
 	const ValueBase* set(std::string key, T val);
 
