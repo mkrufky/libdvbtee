@@ -123,6 +123,8 @@ public:
 	{
 		if (m_value) return ((Value<T>*)m_value)->get();
 		//FIXME: return &valueobj::ReferencedValueUndefined::instance();
+		static T zero(0);
+		return zero;
 	}
 
 	template <typename T>
