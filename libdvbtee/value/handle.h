@@ -45,7 +45,7 @@ public:
 	Handle(T& o) : m_value(NULL) { set(o); }
 #endif
 	template <typename T>
-	Handle(T o) : m_value(NULL) { set(o); }
+	Handle(T o, std::string name = "") : m_value(NULL) { set(o, name); }
 
 //	Handle(char* s) : m_value(NULL) { set(std::string(s)); }
 //	Handle(const char *s) : m_value(NULL) { set(std::string(s)); }
