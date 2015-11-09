@@ -6,6 +6,7 @@ VALOBJ_SOURCES = \
     $$PWD/value.cpp
 
 HEADERS += \
+    $$PWD/../include/valobj/handle.h \
     $$PWD/../include/valobj/array.h \
     $$PWD/../include/valobj/object.h \
     $$PWD/../include/valobj/value.h \
