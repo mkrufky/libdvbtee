@@ -22,7 +22,8 @@
 #ifndef __HANDLE_H__
 #define __HANDLE_H__
 
-//#include <string>
+#include <string>
+#include <stddef.h>
 
 #include "value.h"
 //#include "object.h"
