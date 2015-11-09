@@ -6,7 +6,7 @@ endif COVERALLS
 
 lib_LTLIBRARIES = libvalueobj.la
 
-libvalueobj_la_SOURCES = value.cpp object.cpp array.cpp
+libvalueobj_la_SOURCES = value.cpp object.cpp array.cpp handle.cpp
 
 EXTRA_DIST=../include/valobj/array.h \
            ../include/valobj/object.h \

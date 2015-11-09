@@ -1,6 +1,7 @@
 INCLUDEPATH += $$PWD/../include/valobj
 
 VALOBJ_SOURCES = \
+    $$PWD/handle.cpp \
     $$PWD/array.cpp \
     $$PWD/object.cpp \
     $$PWD/value.cpp
