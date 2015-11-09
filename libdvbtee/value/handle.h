@@ -47,18 +47,14 @@ public:
 	template <typename T>
 	Handle(T o, std::string name = "") : m_value(NULL) { set(o, name); }
 
-//	Handle(char* s) : m_value(NULL) { set(std::string(s)); }
-//	Handle(const char *s) : m_value(NULL) { set(std::string(s)); }
-
-//	Handle(const Object& o);
-//	Handle(const Array& o);
-
 	template <typename T>
 	Handle(Value<T>& v) : m_value(&v) { incRefCnt(); }
 
 	Handle(const ValueBase* v);
 	Handle(ValueBase* v);
 
+//	Handle(const Object& o);
+//	Handle(const Array& o);
 //	Handle(Object&);
 //	Handle(Object*);
 //	Handle(Array&);
@@ -93,6 +89,9 @@ public:
 //	Handle& operator=(Array&);
 //	Handle& operator=(Array*);
 
+	const ValueBase* set(char* s, std::string name = "");
+
+	const ValueBase* set(const char* s, std::string name = "");
 #if 0
 	template <typename T>
 	const ValueBase* set(T& val, std::string name = "")
@@ -100,10 +99,6 @@ public:
 		return set((ValueBase*)new Value<T>(name, val));
 	}
 #endif
-	const ValueBase* set(char* s, std::string name = "");
-
-	const ValueBase* set(const char* s, std::string name = "");
-
 	template <typename T>
 	const ValueBase* set(T val, std::string name = "")
 	{
