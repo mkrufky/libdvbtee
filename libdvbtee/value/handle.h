@@ -42,7 +42,7 @@ public:
 	Handle(const Handle& hdl);
 #if 0
 	template <typename T>
-	Handle(T& o) : m_value(NULL) { set(o); }
+	Handle(T& o, std::string name = "") : m_value(NULL) { set(o, name); }
 #endif
 	template <typename T>
 	Handle(T o, std::string name = "") : m_value(NULL) { set(o, name); }
@@ -61,21 +61,21 @@ public:
 //	Handle(Array*);
 
 	Handle& operator=(Handle& hdl);
-
+#if 1
 	template <typename T>
 	Handle& operator=(T& v)
 	{
 		set(v);
 		return *this;
 	}
-
+#else
 	template <typename T>
 	Handle& operator=(T v)
 	{
 		set(v);
 		return *this;
 	}
-
+#endif
 	template <typename T>
 	Handle& operator=(Value<T>& v)
 	{
