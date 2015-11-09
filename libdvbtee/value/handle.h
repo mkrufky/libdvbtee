@@ -131,6 +131,11 @@ public:
 		//FIXME: return &valueobj::ReferencedValueUndefined::instance();
 	}
 
+	template <typename T>
+	operator T() const { return get<T>(); }
+
+	operator ValueBase*() const;
+
 	void clear();
 
 	size_t size() const;

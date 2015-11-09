@@ -88,6 +88,11 @@ const ValueBase *Handle::get() const
   return m_value;
 }
 
+Handle::operator ValueBase *() const
+{
+  return m_value;
+}
+
 void Handle::clear()
 {
   decRefCnt();
