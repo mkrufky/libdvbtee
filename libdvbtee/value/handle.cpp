@@ -51,18 +51,16 @@ Handle::Handle(ValueBase *v)
   incRefCnt();
 }
 
-const ValueBase *Handle::set(const char *s)
+const ValueBase *Handle::set(const char *s, std::string name)
 {
-  std::string key("");
   std::string val(s);
-  return set((ValueBase*)new Value<std::string>(key, val));
+  return set((ValueBase*)new Value<std::string>(name, val));
 }
 
-const ValueBase *Handle::set(char *s)
+const ValueBase *Handle::set(char *s, std::string name)
 {
-  std::string key("");
   std::string val(s);
-  return set((ValueBase*)new Value<std::string>(key, val));
+  return set((ValueBase*)new Value<std::string>(name, val));
 }
 
 const ValueBase *Handle::set(Handle &hdl)

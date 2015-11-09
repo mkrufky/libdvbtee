@@ -95,21 +95,19 @@ public:
 
 #if 0
 	template <typename T>
-	const ValueBase* set(T& val)
+	const ValueBase* set(T& val, std::string name = "")
 	{
-		std::string key("");
-		return set((ValueBase*)new Value<T>(key, val));
+		return set((ValueBase*)new Value<T>(name, val));
 	}
 #endif
-	const ValueBase* set(char* s);
+	const ValueBase* set(char* s, std::string name = "");
 
-	const ValueBase* set(const char* s);
+	const ValueBase* set(const char* s, std::string name = "");
 
 	template <typename T>
-	const ValueBase* set(T val)
+	const ValueBase* set(T val, std::string name = "")
 	{
-		std::string key("");
-		return set((ValueBase*)new Value<T>(key, val));
+		return set((ValueBase*)new Value<T>(name, val));
 	}
 
 	template <typename T>
