@@ -33,18 +33,6 @@ using namespace valueobj;
 namespace valueobj {
 
 template <typename T>
-const ValueBase* Array::set(std::string key, T val)
-{
-	return set(Handle(val, key));
-}
-
-template <typename T>
-const ValueBase* Array::set(int key, T val)
-{
-	return set(Handle(val, intToStr(key)));
-}
-
-template <typename T>
 const T& Array::get(unsigned int &idx, T& def) const
 {
 	if (idx <= vector.size()) {
@@ -233,26 +221,6 @@ const ValueBase* Array::push(Object &o)
 const ValueBase *Array::push(Object *o)
 {
 	return push(*o);
-}
-
-const ValueBase *Array::set(std::string key, char *val)
-{
-	return set(Handle(std::string(val), key));
-}
-
-const ValueBase *Array::set(std::string key, const char *val)
-{
-	return set(Handle(std::string(val), key));
-}
-
-const ValueBase *Array::set(int key, char *val)
-{
-	return set(Handle(std::string(val), intToStr(key)));
-}
-
-const ValueBase *Array::set(int key, const char *val)
-{
-	return set(Handle(std::string(val), intToStr(key)));
 }
 
 const ValueBase* Array::push(ValueBase *val)
