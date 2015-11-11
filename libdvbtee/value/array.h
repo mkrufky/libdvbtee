@@ -44,6 +44,7 @@ public:
 	Array(const Array&);
 
 	const ValueBase* push(Handle hdl);
+	const ValueBase* set(Handle hdl);
 
 	const ValueBase* push(ValueBase*);
 

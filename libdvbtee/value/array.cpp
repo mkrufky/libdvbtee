@@ -41,18 +41,14 @@ const ValueBase* Array::push(T val)
 template <typename T>
 const ValueBase* Array::set(std::string key, T val)
 {
-	if (!key.length()) return NULL;
-	const ValueBase* v = push(Handle(val, key));
-	if (v) updateIndex(key, v);
-	return v;
+	return set(Handle(val, key));
 }
 
 template <typename T>
 const ValueBase* Array::set(int key, T val)
 {
-	return set<T>(intToStr(key), val);
+	return set(Handle(val, intToStr(key)));
 }
-
 
 template <typename T>
 const T& Array::get(unsigned int &idx, T& def) const
@@ -122,6 +118,19 @@ Array::Array(const Array &obj)
 const ValueBase *Array::push(Handle hdl)
 {
 	return push(hdl.get());
+}
+
+const ValueBase *Array::set(Handle hdl)
+{
+	ValueBase* o = hdl.get();
+	if (!o) return NULL;
+
+	const std::string& key = o->getName();
+	if (!key.length()) return NULL;
+
+	const ValueBase* v = push(hdl);
+	if (v) updateIndex(key, v);
+	return v;
 }
 
 const std::string Array::toJson() const
@@ -271,22 +280,22 @@ const ValueBase* Array::push(const char *val)
 
 const ValueBase *Array::set(std::string key, char *val)
 {
-	return set(key, std::string(val));
+	return set(Handle(std::string(val), key));
 }
 
 const ValueBase *Array::set(std::string key, const char *val)
 {
-	return set(key, std::string(val));
+	return set(Handle(std::string(val), key));
 }
 
 const ValueBase *Array::set(int key, char *val)
 {
-	return set(intToStr(key), val);
+	return set(Handle(std::string(val), intToStr(key)));
 }
 
 const ValueBase *Array::set(int key, const char *val)
 {
-	return set(intToStr(key), val);
+	return set(Handle(std::string(val), intToStr(key)));
 }
 
 const ValueBase* Array::push(ValueBase *val)
