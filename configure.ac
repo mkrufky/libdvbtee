@@ -20,6 +20,9 @@ AC_ARG_ENABLE([olddecoder],
 esac],[olddecoder=false])
 AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
 
+# Check OS
+AC_CANONICAL_BUILD
+
 AM_CONDITIONAL([BUILD_OS_IS_DARWIN], [test x"$build_os" = darwin])
 
 # Checks for programs.
