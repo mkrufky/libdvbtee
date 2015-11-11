@@ -81,7 +81,7 @@ const ValueBase *Handle::set(const ValueBase *val)
   return set((ValueBase*)val);
 }
 
-const ValueBase *Handle::get() const
+ValueBase *Handle::get() const
 {
   return m_value;
 }

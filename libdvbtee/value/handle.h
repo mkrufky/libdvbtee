@@ -117,7 +117,7 @@ public:
 
 	const ValueBase* set(ValueBase* val);
 
-	const ValueBase* get() const;
+	ValueBase* get() const;
 
 	template <typename T> const T& get() const
 	{
