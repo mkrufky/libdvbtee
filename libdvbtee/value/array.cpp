@@ -225,33 +225,6 @@ const ValueBase* Array::pushObject(Object &val, std::string idx)
 	return v;
 }
 
-#ifndef USING_INLINE_PUSH
-const ValueBase *Array::push(char *val, std::string idx)
-{
-	return push(Handle(std::string(val), idx)); }
-}
-
-const ValueBase *Array::push(const char *val, std::string idx)
-{
-	return push(Handle(std::string(val), idx)); }
-}
-
-const ValueBase *Array::push(std::string &val, std::string idx)
-{
-	return push(Handle(val, idx));
-}
-
-const ValueBase *Array::push(Array &val, std::string idx)
-{
-	return push(Handle(val, idx));
-}
-
-const ValueBase *Array::push(Array *val, std::string idx)
-{
-	return push(Handle(*val, idx));
-}
-#endif
-
 const ValueBase* Array::push(Object &o)
 {
 	return pushObject(o, "");
