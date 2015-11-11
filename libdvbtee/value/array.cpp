@@ -33,12 +33,6 @@ using namespace valueobj;
 namespace valueobj {
 
 template <typename T>
-const ValueBase* Array::push(T val)
-{
-       return push(Handle(val, ""));
-}
-
-template <typename T>
 const ValueBase* Array::set(std::string key, T val)
 {
 	return set(Handle(val, key));
@@ -266,16 +260,6 @@ const ValueBase* Array::push(Object &o)
 const ValueBase *Array::push(Object *o)
 {
 	return push(*o);
-}
-
-const ValueBase* Array::push(char *val)
-{
-	return push(Handle(std::string(val)));
-}
-
-const ValueBase* Array::push(const char *val)
-{
-	return push(Handle(std::string(val)));
 }
 
 const ValueBase *Array::set(std::string key, char *val)
