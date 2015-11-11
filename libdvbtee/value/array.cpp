@@ -35,14 +35,14 @@ namespace valueobj {
 template <typename T>
 const ValueBase* Array::push(T val)
 {
-	return push<T>(val, "");
+       return push(Handle(val, ""));
 }
 
 template <typename T>
 const ValueBase* Array::set(std::string key, T val)
 {
 	if (!key.length()) return NULL;
-	const ValueBase* v = push<T>(val, key);
+	const ValueBase* v = push(Handle(val, key));
 	if (v) updateIndex(key, v);
 	return v;
 }
@@ -51,21 +51,6 @@ template <typename T>
 const ValueBase* Array::set(int key, T val)
 {
 	return set<T>(intToStr(key), val);
-}
-
-template <typename T>
-const ValueBase* Array::pushByRef(T& val, std::string idx)
-{
-	Value<T> *v = new Value<T>(idx, val);
-	vector.push_back(v);
-	++(*v); // increment refcount
-	return v;
-}
-
-template <typename T>
-const ValueBase* Array::push(T val, std::string idx)
-{
-	return pushByRef<T>(val, idx);
 }
 
 
@@ -85,8 +70,6 @@ const T& Array::get(unsigned int &idx, T& def) const
 template const ValueBase* Array::push(T val); \
 template const ValueBase* Array::set(std::string key, T val); \
 template const ValueBase* Array::set(int key, T val); \
-template const ValueBase* Array::pushByRef(T& val, std::string idx); \
-template const ValueBase* Array::push(T val, std::string idx); \
 template const T& Array::get(unsigned int &idx, T& def) const
 
 IMPL_ARRAY_TMPL(int);
@@ -134,6 +117,11 @@ Array::Array(const Array &obj)
 #if DBG
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
 #endif
+}
+
+const ValueBase *Array::push(Handle hdl)
+{
+	return push(hdl.get());
 }
 
 const std::string Array::toJson() const
@@ -227,7 +215,7 @@ const ValueBase* Array::pushObject(Object &val, std::string idx)
 
 	if (extractIndex) assignIndex(val, idx);
 
-	const ValueBase *v = pushByRef<Object>(val, idx);
+	const ValueBase *v = push(Handle(val, idx));
 
 	if (extractIndex) updateIndex(idx, v);
 
@@ -237,27 +225,27 @@ const ValueBase* Array::pushObject(Object &val, std::string idx)
 #ifndef USING_INLINE_PUSH
 const ValueBase *Array::push(char *val, std::string idx)
 {
-	return push<std::string>(std::string(val), idx);
+	return push(Handle(std::string(val), idx)); }
 }
 
 const ValueBase *Array::push(const char *val, std::string idx)
 {
-	return push<std::string>(std::string(val), idx);
+	return push(Handle(std::string(val), idx)); }
 }
 
 const ValueBase *Array::push(std::string &val, std::string idx)
 {
-	return pushByRef<std::string>(val, idx);
+	return push(Handle(val, idx));
 }
 
 const ValueBase *Array::push(Array &val, std::string idx)
 {
-	return pushByRef<Array>(val, idx);
+	return push(Handle(val, idx));
 }
 
 const ValueBase *Array::push(Array *val, std::string idx)
 {
-	return pushByRef<Array>(*val, idx);
+	return push(Handle(*val, idx));
 }
 #endif
 
@@ -273,12 +261,12 @@ const ValueBase *Array::push(Object *o)
 
 const ValueBase* Array::push(char *val)
 {
-	return push<std::string>(std::string(val));
+	return push(Handle(std::string(val)));
 }
 
 const ValueBase* Array::push(const char *val)
 {
-	return push<std::string>(std::string(val));
+	return push(Handle(std::string(val)));
 }
 
 const ValueBase *Array::set(std::string key, char *val)

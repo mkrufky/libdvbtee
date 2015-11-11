@@ -28,6 +28,7 @@
 
 #include "value.h"
 #include "object.h"
+#include "handle.h"
 
 namespace valueobj {
 
@@ -41,6 +42,8 @@ public:
 	~Array();
 
 	Array(const Array&);
+
+	const ValueBase* push(Handle hdl);
 
 	const ValueBase* push(ValueBase*);
 
@@ -85,21 +88,15 @@ private:
 	std::map<std::string, const ValueBase*> indices;
 	std::string idxField;
 
-	template <typename T>
-	const ValueBase* pushByRef(T& val, std::string idx);
-
 	const ValueBase* pushObject(Object& val, std::string idx);
-
-	template <typename T>
-	const ValueBase* push(T val, std::string idx);
 
 #define USING_INLINE_PUSH
 #ifdef USING_INLINE_PUSH
-	inline const ValueBase* push(      char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
-	inline const ValueBase* push(const char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
-	inline const ValueBase* push(std::string& val, std::string idx)	{ return pushByRef<std::string>(val, idx); }
-	inline const ValueBase* push(Array& val, std::string idx)	{ return pushByRef<Array>(val, idx); }
-	inline const ValueBase* push(Array* val, std::string idx)	{ return pushByRef<Array>(*val, idx); }
+	inline const ValueBase* push(      char* val, std::string idx)	{ return push(Handle(std::string(val), idx)); }
+	inline const ValueBase* push(const char* val, std::string idx)	{ return push(Handle(std::string(val), idx)); }
+	inline const ValueBase* push(std::string& val, std::string idx)	{ return push(Handle(val, idx)); }
+	inline const ValueBase* push(Array& val, std::string idx)	{ return push(Handle(val, idx)); }
+	inline const ValueBase* push(Array* val, std::string idx)	{ return push(Handle(*val, idx)); }
 #else
 	const ValueBase* push(      char* val, std::string idx);
 	const ValueBase* push(const char* val, std::string idx);
