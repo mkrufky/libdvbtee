@@ -117,6 +117,7 @@ Handle& Object::getHandle(int key) const
 	return getHandle(intToStr(key));
 }
 
+#if 0
 const ValueBase* Object::get(std::string key) const
 {
 	KeyValueMap::const_iterator it = map.find(key);
@@ -130,6 +131,7 @@ const ValueBase* Object::get(int key) const
 {
 	return get(intToStr(key));
 }
+#endif
 
 void Object::unSet(std::string key)
 {
