@@ -49,16 +49,8 @@ public:
 	template <typename T>
 	const ValueBase* set(std::string key, T val)
 	{
-		return setByRef<T>(key, val);
+		return set(key, Handle(val, key));
 	}
-
-	const ValueBase* set(std::string key,       char* val);
-	const ValueBase* set(std::string key, const char* val);
-	const ValueBase* set(std::string key, std::string& val);
-	const ValueBase* set(std::string key, Array& val);
-	const ValueBase* set(std::string key, Object& val);
-	const ValueBase* set(std::string key, Array* val);
-	const ValueBase* set(std::string key, Object* val);
 
 	template <typename T>
 	const ValueBase* set(int key, T val)

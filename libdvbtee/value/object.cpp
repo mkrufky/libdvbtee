@@ -118,41 +118,6 @@ const ValueBase* Object::setByRef(std::string& key, Handle& hdl)
 	return v;
 }
 
-const ValueBase *Object::set(std::string key, char *val)
-{
-	return set<std::string>(key, std::string(val));
-}
-
-const ValueBase *Object::set(std::string key, const char *val)
-{
-	return set<std::string>(key, std::string(val));
-}
-
-const ValueBase *Object::set(std::string key, std::string &val)
-{
-	return setByRef<std::string>(key, val);
-}
-
-const ValueBase *Object::set(std::string key, Array &val)
-{
-	return setByRef<Array>(key, val);
-}
-
-const ValueBase *Object::set(std::string key, Object &val)
-{
-	return setByRef<Object>(key, val);
-}
-
-const ValueBase *Object::set(std::string key, Array *val)
-{
-	return setByRef<Array>(key, *val);
-}
-
-const ValueBase *Object::set(std::string key, Object *val)
-{
-	return setByRef<Object>(key, *val);
-}
-
 const ValueBase* Object::get(std::string key) const
 {
 	KeyValueMap::const_iterator it = map.find(key);
