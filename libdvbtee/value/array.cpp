@@ -140,16 +140,12 @@ const std::string Array::toJson() const
 
 	if (!vector.size()) return "[]";
 
-	int count = 0;
-
 	s << "[ ";
 
 	for (KeyValueVector::const_iterator it = vector.begin(); it != vector.end(); ++it) {
-		if (count) s << ", ";
+		if (it != vector.begin()) s << ", ";
 
 		s << (*it)->toJson();
-
-		count++;
 	}
 	s << " ]";
 
