@@ -96,7 +96,7 @@ Object::Object(const Object &obj)
 #endif
 }
 
-const ValueBase* Object::setByRef(std::string& key, Handle& hdl)
+Handle& Object::setByRef(std::string& key, Handle& hdl)
 {
 	map[key] = hdl;
 	return hdl;

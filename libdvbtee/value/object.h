@@ -94,7 +94,7 @@ public:
 private:
 	KeyValueMap map;
 
-	const ValueBase* setByRef(std::string&, Handle&);
+	Handle& setByRef(std::string&, Handle&);
 
 	template <typename T>
 	const T& get(std::string& key, T& def) const;
