@@ -63,6 +63,9 @@ public:
 	}
 
 
+	const ValueBase* set(std::string key, ValueBase*);
+
+	// deprecated:
 	const ValueBase* set(ValueBase*);
 
 	void unSet(std::string key);
