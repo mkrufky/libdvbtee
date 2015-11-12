@@ -32,7 +32,7 @@
 
 namespace valueobj {
 
-typedef std::vector<ValueBase*> KeyValueVector;
+typedef std::vector<Handle> KeyValueVector;
 
 class Object;
 

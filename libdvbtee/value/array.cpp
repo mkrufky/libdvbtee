@@ -36,7 +36,7 @@ template <typename T>
 const T& Array::get(unsigned int &idx, T& def) const
 {
 	if (idx <= vector.size()) {
-		Value<T> *val = (Value<T>*)vector[idx];
+		Value<T> *val = vector[idx];
 		if (val->checkType(typeid(T)))
 			return val->get();
 	}
@@ -87,8 +87,7 @@ Array::~Array()
 Array::Array(const Array &obj)
 {
 	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
-		ValueBase *v = *it;
-		push(v);
+		const ValueBase *v = push(*it);
 		const std::string& n = v->getName();
 		if (n.length()) updateIndex(n, v);
 	}
@@ -126,7 +125,7 @@ const std::string Array::toJson() const
 	for (KeyValueVector::const_iterator it = vector.begin(); it != vector.end(); ++it) {
 		if (it != vector.begin()) s << ", ";
 
-		s << (*it)->toJson();
+		s << it->toJson();
 	}
 	s << " ]";
 
@@ -184,11 +183,6 @@ const ValueBase* Array::getByName(unsigned int idx) const
 
 void Array::clear()
 {
-	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it)
-	{
-		// decrement refcount. if refcount becomes zero, delete
-		if (0 == (--(**it)).getRefCnt()) delete *it;
-	}
 	vector.clear();
 	indices.clear();
 }
@@ -226,7 +220,6 @@ const ValueBase *Array::push(Object *o)
 const ValueBase* Array::push(ValueBase *val)
 {
 	vector.push_back(val);
-	++(*val);
 	return val;
 }
 
