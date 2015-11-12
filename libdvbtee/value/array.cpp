@@ -67,6 +67,7 @@ IMPL_ARRAY_TMPL(Array);
 IMPL_ARRAY_TMPL(Object);
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();
+static Handle valueUndefinedHdl = Handle((ValueBase*)&valueUndefined);
 
 Array::Array(std::string idx)
  : idxField(idx)
@@ -139,12 +140,12 @@ const std::string &Array::getIndex() const
 	return idxField;
 }
 
-const ValueBase* Array::get(unsigned int idx) const
+Handle& Array::get(unsigned int idx) const
 {
 	if (idx <= vector.size())
-		return vector[idx];
+		return (Handle&)vector[idx];
 
-	return &valueUndefined;
+	return valueUndefinedHdl;
 }
 
 void Array::updateIndex(std::string key, const ValueBase *val)

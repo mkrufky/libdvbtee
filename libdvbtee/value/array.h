@@ -74,7 +74,7 @@ public:
 	const ValueBase* getByName(std::string idx) const;
 	const ValueBase* getByName(unsigned int idx) const;
 
-	const ValueBase* get(unsigned int idx) const;
+	Handle& get(unsigned int idx) const;
 
 	template <typename T> const T& get(unsigned int idx) const;
 
