@@ -68,6 +68,7 @@ IMPL_OBJECT_TMPL(Object);
 
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();
+static Handle valueUndefinedHdl = Handle((ValueBase*)&valueUndefined);
 
 Object::Object()
 {
@@ -99,6 +100,21 @@ const ValueBase* Object::setByRef(std::string& key, Handle& hdl)
 {
 	map[key] = hdl;
 	return hdl;
+}
+
+Handle& Object::getHandle(std::string key) const
+{
+	KeyValueMap::const_iterator it = map.find(key);
+	if (it != map.end()) {
+		return (Handle&)it->second;
+	}
+
+	return valueUndefinedHdl;
+}
+
+Handle& Object::getHandle(int key) const
+{
+	return getHandle(intToStr(key));
 }
 
 const ValueBase* Object::get(std::string key) const

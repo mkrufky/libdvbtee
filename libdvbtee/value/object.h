@@ -69,6 +69,9 @@ public:
 
 	void clear();
 
+	Handle& getHandle(std::string key) const;
+	Handle& getHandle(int key) const;
+
 	const ValueBase* get(std::string key) const;
 	const ValueBase* get(int key) const;
 
