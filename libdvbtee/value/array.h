@@ -56,18 +56,18 @@ public:
 		return push(Handle(val, ""));
 	}
 
-	const ValueBase* set(Handle hdl);
+	const ValueBase* set(std::string key, Handle hdl);
 
 	template <typename T>
 	const ValueBase* set(std::string key, T val)
 	{
-		return set(Handle(val, key));
+		return set(key, Handle(val, key));
 	}
 
 	template <typename T>
 	const ValueBase* set(int key, T val)
 	{
-		return set(Handle(val, intToStr(key)));
+		return set(intToStr(key), val);
 	}
 
 

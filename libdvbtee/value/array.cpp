@@ -101,12 +101,8 @@ const ValueBase *Array::push(Handle hdl)
 	return push(hdl.get());
 }
 
-const ValueBase *Array::set(Handle hdl)
+const ValueBase *Array::set(std::string key, Handle hdl)
 {
-	ValueBase* o = hdl.get();
-	if (!o) return NULL;
-
-	const std::string& key = o->getName();
 	if (!key.length()) return NULL;
 
 	const ValueBase* v = push(hdl);
