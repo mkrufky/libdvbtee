@@ -71,8 +71,8 @@ public:
 	}
 
 
-	const ValueBase* getByName(std::string idx) const;
-	const ValueBase* getByName(unsigned int idx) const;
+	Handle& getByName(std::string idx) const;
+	Handle& getByName(unsigned int idx) const;
 
 	Handle& get(unsigned int idx) const;
 

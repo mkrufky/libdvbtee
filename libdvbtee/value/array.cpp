@@ -164,16 +164,16 @@ std::string &Array::assignIndex(Object &obj, std::string &index)
 	return index;
 }
 
-const ValueBase* Array::getByName(std::string idx) const
+Handle& Array::getByName(std::string idx) const
 {
 	std::map<std::string, const ValueBase*>::const_iterator it = indices.find(idx);
 	if (it == indices.end())
-		return &valueUndefined;
+		return valueUndefinedHdl;
 
-	return it->second;
+	return (Handle&)it->second;
 }
 
-const ValueBase* Array::getByName(unsigned int idx) const
+Handle& Array::getByName(unsigned int idx) const
 {
 	return getByName(intToStr(idx));
 }
