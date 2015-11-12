@@ -19,7 +19,11 @@
  *
  *****************************************************************************/
 
+#define DBG 0
+
+#if DBG
 #include <stdio.h>
+#endif
 #include <sstream>
 #include "object.h"
 #include "value-macros.h"
@@ -79,8 +83,6 @@ IMPL_OBJECT_TMPL(double);
 IMPL_OBJECT_TMPL(Array);
 IMPL_OBJECT_TMPL(Object);
 
-
-#define DBG 0
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();
 

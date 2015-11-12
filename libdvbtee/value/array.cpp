@@ -19,7 +19,11 @@
  *
  *****************************************************************************/
 
+#define DBG 0
+
+#if DBG
 #include <stdio.h>
+#endif
 #include <sstream>
 #include "array.h"
 #include "value-macros.h"
@@ -100,8 +104,6 @@ IMPL_ARRAY_TMPL(bool);
 IMPL_ARRAY_TMPL(double);
 IMPL_ARRAY_TMPL(Array);
 IMPL_ARRAY_TMPL(Object);
-
-#define DBG 0
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();
 
