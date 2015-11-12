@@ -44,7 +44,6 @@ public:
 	Array(const Array&);
 
 	const ValueBase* push(Handle hdl);
-	const ValueBase* set(Handle hdl);
 
 	const ValueBase* push(ValueBase*);
 
@@ -56,6 +55,8 @@ public:
 	{
 		return push(Handle(val, ""));
 	}
+
+	const ValueBase* set(Handle hdl);
 
 	template <typename T>
 	const ValueBase* set(std::string key, T val)
