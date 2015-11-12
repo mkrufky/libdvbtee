@@ -69,17 +69,8 @@ public:
 
 	void clear();
 
-	Handle& getHandle(std::string key) const;
-	Handle& getHandle(int key) const;
-
-#if 0
-	// deprecated:
-	const ValueBase* get(std::string key) const;
-	const ValueBase* get(int key) const;
-#else
-	Handle& get(std::string key) { return getHandle(key); }
-	Handle& get(int key) const { return getHandle(key); }
-#endif
+	Handle& get(std::string key) const;
+	Handle& get(int key) const;
 
 	template <typename T> const T& get(std::string key) const;
 

@@ -102,7 +102,7 @@ Handle& Object::setByRef(std::string& key, Handle& hdl)
 	return hdl;
 }
 
-Handle& Object::getHandle(std::string key) const
+Handle& Object::get(std::string key) const
 {
 	KeyValueMap::const_iterator it = map.find(key);
 	if (it != map.end()) {
@@ -112,26 +112,10 @@ Handle& Object::getHandle(std::string key) const
 	return valueUndefinedHdl;
 }
 
-Handle& Object::getHandle(int key) const
-{
-	return getHandle(intToStr(key));
-}
-
-#if 0
-const ValueBase* Object::get(std::string key) const
-{
-	KeyValueMap::const_iterator it = map.find(key);
-	if (it != map.end())
-		return it->second;
-
-	return &valueUndefined;
-}
-
-const ValueBase* Object::get(int key) const
+Handle& Object::get(int key) const
 {
 	return get(intToStr(key));
 }
-#endif
 
 void Object::unSet(std::string key)
 {
