@@ -88,9 +88,6 @@ private:
 	const ValueBase* setByRef(std::string&, Handle&);
 
 	template <typename T>
-	const ValueBase* setByRef(std::string& key, T& val);
-
-	template <typename T>
 	const T& get(std::string& key, T& def) const;
 
 	const std::string intToStr(int) const;

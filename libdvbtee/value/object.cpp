@@ -35,14 +35,6 @@ DEFINE_DEFAULT_GETTERS(Object, std::string)
 namespace valueobj {
 
 template <typename T>
-const ValueBase* Object::setByRef(std::string& key, T& val)
-{
-	Handle hdl(val, key);
-
-	return setByRef(key, hdl);
-}
-
-template <typename T>
 const T& Object::get(std::string& key, T& def) const
 {
 	KeyValueMap::const_iterator it = map.find(key);
@@ -56,7 +48,6 @@ const T& Object::get(std::string& key, T& def) const
 }
 
 #define IMPL_OBJECT_TMPL(T) \
-template const ValueBase* Object::setByRef<T>(std::string& key, T& val); \
 template const T& Object::get<T>(std::string& key, T& def) const
 
 IMPL_OBJECT_TMPL(int);
