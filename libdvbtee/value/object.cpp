@@ -97,16 +97,8 @@ Object::Object(const Object &obj)
 
 const ValueBase* Object::setByRef(std::string& key, Handle& hdl)
 {
-	if (map.count(key)) {
-		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
-	}
-
-	ValueBase* v = hdl.get();
-
-	map[key] = v;
-
-	++(*v); // increment refcount
-	return v;
+	map[key] = hdl;
+	return hdl;
 }
 
 const ValueBase* Object::get(std::string key) const
@@ -126,7 +118,6 @@ const ValueBase* Object::get(int key) const
 void Object::unSet(std::string key)
 {
 	if (map.count(key)) {
-		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
 		map.erase(key);
 	}
 }
@@ -138,11 +129,6 @@ void Object::unSet(int key)
 
 void Object::clear()
 {
-	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it)
-	{
-		// decrement refcount. if refcount becomes zero, delete
-		if (0 == (--(*it->second)).getRefCnt()) delete it->second;
-	}
 	map.clear();
 }
 
@@ -191,10 +177,7 @@ const ValueBase *Object::set(ValueBase *val)
 
 const ValueBase *Object::set(std::string key, ValueBase *val)
 {
-	unSet(key);
-	map[key] = val;
-	++(*val);
-	return val;
+	return set(key, Handle(val));
 }
 
 TO_JSON_TPL(Object, VALUE.toJson().c_str())

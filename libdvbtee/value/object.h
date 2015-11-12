@@ -32,7 +32,7 @@
 
 namespace valueobj {
 
-typedef std::map<std::string, ValueBase*> KeyValueMap;
+typedef std::map<std::string, Handle> KeyValueMap;
 
 class Array;
 
