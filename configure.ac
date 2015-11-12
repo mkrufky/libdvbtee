@@ -23,7 +23,7 @@ AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
 # Check OS
 AC_CANONICAL_BUILD
 
-AM_CONDITIONAL([BUILD_OS_IS_DARWIN], [test x"$build_os" = darwin])
+AM_CONDITIONAL([BUILD_OS_IS_DARWIN], [case $build_os in darwin* ) true ;; * ) false ;; esac])
 
 # Checks for programs.
 AC_PROG_CXX
