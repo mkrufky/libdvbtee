@@ -102,7 +102,7 @@ Object::~Object()
 Object::Object(const Object &obj)
 {
 	for (KeyValueMap::const_iterator it = obj.map.begin(); it != obj.map.end(); ++it) {
-		set(it->second);
+		set(it->first, it->second);
 	}
 
 #if DBG
@@ -213,10 +213,16 @@ const std::string Object::intToStr(int i) const
 	return s.str();
 }
 
+// deprecated:
 const ValueBase *Object::set(ValueBase *val)
 {
-	unSet(val->getName());
-	map[val->getName()] = val;
+	return set(val->getName(), val);
+}
+
+const ValueBase *Object::set(std::string key, ValueBase *val)
+{
+	unSet(key);
+	map[key] = val;
 	++(*val);
 	return val;
 }
