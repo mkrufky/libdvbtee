@@ -37,17 +37,9 @@ namespace valueobj {
 template <typename T>
 const ValueBase* Object::setByRef(std::string& key, T& val)
 {
-	if (map.count(key)) {
-		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
-	}
+	Handle hdl(val, key);
 
-	Value<T> *v = new Value<T>(key, val);
-
-	map[key] = v;
-	//map.insert( std::pair<std::string, ValueBase*>(key, v) );
-
-	++(*v); // increment refcount
-	return v;
+	return setByRef(key, hdl);
 }
 
 template <typename T>
@@ -110,6 +102,20 @@ Object::Object(const Object &obj)
 #if DBG
 	fprintf(stderr, "%s(copy) %lu\n", __func__, map.size());
 #endif
+}
+
+const ValueBase* Object::setByRef(std::string& key, Handle& hdl)
+{
+	if (map.count(key)) {
+		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
+	}
+
+	ValueBase* v = hdl.get();
+
+	map[key] = v;
+
+	++(*v); // increment refcount
+	return v;
 }
 
 const ValueBase *Object::set(std::string key, char *val)
@@ -209,6 +215,16 @@ const std::string Object::intToStr(int i) const
 	std::stringstream s;
 	s << i;
 	return s.str();
+}
+
+const ValueBase *Object::set(std::string key, Handle hdl)
+{
+	return setByRef(key, hdl);
+}
+
+const ValueBase *Object::set(int key, Handle hdl)
+{
+	return set(intToStr(key), hdl);
 }
 
 // deprecated:

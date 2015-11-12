@@ -28,6 +28,7 @@
 
 #include "value.h"
 #include "array.h"
+#include "handle.h"
 
 namespace valueobj {
 
@@ -41,6 +42,9 @@ public:
 	~Object();
 
 	Object(const Object&);
+
+	const ValueBase* set(std::string key, Handle);
+	const ValueBase* set(int key, Handle);
 
 	template <typename T>
 	const ValueBase* set(std::string key, T val)
@@ -88,6 +92,8 @@ public:
 
 private:
 	KeyValueMap map;
+
+	const ValueBase* setByRef(std::string&, Handle&);
 
 	template <typename T>
 	const ValueBase* setByRef(std::string& key, T& val);
