@@ -43,26 +43,26 @@ public:
 
 	Object(const Object&);
 
-	const ValueBase* set(std::string key, Handle);
-	const ValueBase* set(int key, Handle);
+	Handle& set(std::string key, Handle);
+	Handle& set(int key, Handle);
 
 	template <typename T>
-	const ValueBase* set(std::string key, T val)
+	Handle& set(std::string key, T val)
 	{
 		return set(key, Handle(val, key));
 	}
 
 	template <typename T>
-	const ValueBase* set(int key, T val)
+	Handle& set(int key, T val)
 	{
 		return set(intToStr(key), val);
 	}
 
 
-	const ValueBase* set(std::string key, ValueBase*);
+	Handle& set(std::string key, ValueBase*);
 
 	// deprecated:
-	const ValueBase* set(ValueBase*);
+	Handle& set(ValueBase*);
 
 	void unSet(std::string key);
 	void unSet(int key);

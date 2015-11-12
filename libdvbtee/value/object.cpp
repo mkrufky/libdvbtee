@@ -177,23 +177,23 @@ const std::string Object::intToStr(int i) const
 	return s.str();
 }
 
-const ValueBase *Object::set(std::string key, Handle hdl)
+Handle& Object::set(std::string key, Handle hdl)
 {
 	return setByRef(key, hdl);
 }
 
-const ValueBase *Object::set(int key, Handle hdl)
+Handle& Object::set(int key, Handle hdl)
 {
 	return set(intToStr(key), hdl);
 }
 
 // deprecated:
-const ValueBase *Object::set(ValueBase *val)
+Handle& Object::set(ValueBase *val)
 {
 	return set(val->getName(), val);
 }
 
-const ValueBase *Object::set(std::string key, ValueBase *val)
+Handle& Object::set(std::string key, ValueBase *val)
 {
 	return set(key, Handle(val));
 }
