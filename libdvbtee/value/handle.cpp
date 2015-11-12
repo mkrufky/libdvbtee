@@ -91,6 +91,11 @@ Handle::operator ValueBase *() const
   return m_value;
 }
 
+Handle::operator const ValueBase *() const
+{
+  return m_value;
+}
+
 void Handle::clear()
 {
   decRefCnt();

@@ -48,7 +48,13 @@ public:
 	Handle(T o, std::string name = "") : m_value(NULL) { set(o, name); }
 
 	template <typename T>
+	Handle(Value<T> v) : m_value(&v) { incRefCnt(); }
+
+	template <typename T>
 	Handle(Value<T>& v) : m_value(&v) { incRefCnt(); }
+
+	template <typename T>
+	Handle(Value<T>* v) : m_value(v) { incRefCnt(); }
 
 	Handle(const ValueBase* v);
 	Handle(ValueBase* v);
@@ -78,6 +84,13 @@ public:
 #endif
 	template <typename T>
 	Handle& operator=(Value<T>& v)
+	{
+		set(v);
+		return *this;
+	}
+
+	template <typename T>
+	Handle& operator=(Value<T>* v)
 	{
 		set(v);
 		return *this;
@@ -130,7 +143,11 @@ public:
 	template <typename T>
 	operator T() const { return get<T>(); }
 
+	template <typename T>
+	operator Value<T>*() const { return (Value<T>*)m_value; }
+
 	operator ValueBase*() const;
+	operator const ValueBase*() const;
 
 	void clear();
 
