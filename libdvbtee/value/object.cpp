@@ -142,12 +142,9 @@ const std::string Object::toJson() const
 
 	s << "{ ";
 	for (KeyValueMap::const_iterator it = map.begin(); it != map.end(); ++it) {
-		ValueBase *val = it->second;
-
 		if (it != map.begin()) s << ", ";
-		s << "'" << it->first << "': ";
 
-		s << val->toJson();
+		s << "'" << it->first << "': " << it->second.toJson();
 	}
 	s << " }";
 
