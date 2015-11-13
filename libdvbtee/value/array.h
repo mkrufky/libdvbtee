@@ -43,15 +43,15 @@ public:
 
 	Array(const Array&);
 
-	const ValueBase* push(Handle hdl);
+	Handle& push(Handle hdl);
 
-	const ValueBase* push(ValueBase*);
+	Handle& push(ValueBase*);
 
-	const ValueBase* push(Object&);
-	const ValueBase* push(Object*);
+	Handle& push(Object&);
+	Handle& push(Object*);
 
 	template <typename T>
-	const ValueBase* push(T val)
+	Handle& push(T val)
 	{
 		return push(Handle(val, ""));
 	}
@@ -91,7 +91,7 @@ private:
 	std::map<std::string, const ValueBase*> indices;
 	std::string idxField;
 
-	const ValueBase* pushObject(Object& val, std::string idx);
+	Handle& pushObject(Object& val, std::string idx);
 
 	template <typename T>
 	const T& get(unsigned int &idx, T& def) const;

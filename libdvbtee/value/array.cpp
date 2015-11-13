@@ -45,7 +45,7 @@ const T& Array::get(unsigned int &idx, T& def) const
 }
 
 #define IMPL_ARRAY_TMPL(T) \
-template const ValueBase* Array::push(T val); \
+template Handle& Array::push(T val); \
 template const ValueBase* Array::set(std::string key, T val); \
 template const ValueBase* Array::set(int key, T val); \
 template const T& Array::get(unsigned int &idx, T& def) const
@@ -97,9 +97,10 @@ Array::Array(const Array &obj)
 #endif
 }
 
-const ValueBase *Array::push(Handle hdl)
+Handle& Array::push(Handle hdl)
 {
-	return push(hdl.get());
+	vector.push_back(hdl);
+	return vector.back();
 }
 
 const ValueBase *Array::set(std::string key, Handle hdl)
@@ -191,33 +192,32 @@ const std::string Array::intToStr(int i) const
 	return s.str();
 }
 
-const ValueBase* Array::pushObject(Object &val, std::string idx)
+Handle& Array::pushObject(Object &val, std::string idx)
 {
 	bool extractIndex = (!idx.length());
 
 	if (extractIndex) assignIndex(val, idx);
 
-	const ValueBase *v = push(Handle(val, idx));
+	Handle& v = push(Handle(val, idx));
 
 	if (extractIndex) updateIndex(idx, v);
 
 	return v;
 }
 
-const ValueBase* Array::push(Object &o)
+Handle& Array::push(Object &o)
 {
 	return pushObject(o, "");
 }
 
-const ValueBase *Array::push(Object *o)
+Handle& Array::push(Object *o)
 {
 	return push(*o);
 }
 
-const ValueBase* Array::push(ValueBase *val)
+Handle& Array::push(ValueBase *val)
 {
-	vector.push_back(val);
-	return val;
+	return push(Handle(val));
 }
 
 DEFINE_DEFAULT_GETTERS(Array, unsigned int)
