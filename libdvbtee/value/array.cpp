@@ -46,8 +46,8 @@ const T& Array::get(unsigned int &idx, T& def) const
 
 #define IMPL_ARRAY_TMPL(T) \
 template Handle& Array::push(T val); \
-template const ValueBase* Array::set(std::string key, T val); \
-template const ValueBase* Array::set(int key, T val); \
+template bool Array::set(std::string key, T val); \
+template bool Array::set(int key, T val); \
 template const T& Array::get(unsigned int &idx, T& def) const
 
 IMPL_ARRAY_TMPL(int);
@@ -103,13 +103,13 @@ Handle& Array::push(Handle hdl)
 	return vector.back();
 }
 
-const ValueBase *Array::set(std::string key, Handle hdl)
+bool Array::set(std::string key, Handle hdl)
 {
-	if (!key.length()) return NULL;
+	if (!key.length()) return false;
 
 	const ValueBase* v = push(hdl);
 	if (v) updateIndex(key, v);
-	return v;
+	return v != NULL;
 }
 
 const std::string Array::toJson() const
