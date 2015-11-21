@@ -22,7 +22,9 @@
 #ifndef CURLHTTPGET_H
 #define CURLHTTPGET_H
 
+#ifdef HAVE_LIBCURL
 #include <curl/curl.h>
+#endif /* HAVE_LIBCURL */
 
 class curlhttpget_iface
 {
@@ -40,6 +42,7 @@ public:
   explicit curlhttpget(const char *url = NULL, curlhttpget_iface *iface = NULL,
 		       curlhttpget_info_t *info = NULL);
 
+#ifdef HAVE_LIBCURL
 private:
   CURL *curl_handle;
 
@@ -49,6 +52,7 @@ private:
 
   static size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
   size_t __write_data(void *buffer, size_t size, size_t nmemb);
+#endif /* HAVE_LIBCURL */
 };
 
 #endif // CURLHTTPGET_H
