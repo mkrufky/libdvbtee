@@ -88,9 +88,9 @@ Array::~Array()
 Array::Array(const Array &obj)
 {
 	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
-		const ValueBase *v = push(*it);
-		const std::string& n = v->getName();
-		if (n.length()) updateIndex(n, v);
+		Handle& hdl = push(*it);
+		const std::string& n = hdl.get()->getName();
+		if (n.length()) updateIndex(n, hdl);
 	}
 #if DBG
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
@@ -107,9 +107,9 @@ bool Array::set(std::string key, Handle hdl)
 {
 	if (!key.length()) return false;
 
-	const ValueBase* v = push(hdl);
-	if (v) updateIndex(key, v);
-	return v != NULL;
+	Handle& h = push(hdl);
+	updateIndex(key, h);
+	return true;
 }
 
 const std::string Array::toJson() const
@@ -149,9 +149,9 @@ Handle& Array::get(unsigned int idx) const
 	return valueUndefinedHdl;
 }
 
-void Array::updateIndex(std::string key, const ValueBase *val)
+void Array::updateIndex(std::string key, Handle& val)
 {
-	if (key.length()) indices[key] = val;
+	if (key.length()) indices[key] = &val;
 }
 
 std::string &Array::assignIndex(Object &obj, std::string &index)
@@ -167,11 +167,11 @@ std::string &Array::assignIndex(Object &obj, std::string &index)
 
 Handle& Array::getByName(std::string idx) const
 {
-	std::map<std::string, const ValueBase*>::const_iterator it = indices.find(idx);
+	std::map<std::string, Handle*>::const_iterator it = indices.find(idx);
 	if (it == indices.end())
 		return valueUndefinedHdl;
 
-	return (Handle&)it->second;
+	return *(it->second);
 }
 
 Handle& Array::getByName(unsigned int idx) const

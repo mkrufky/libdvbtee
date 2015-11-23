@@ -88,7 +88,7 @@ public:
 
 private:
 	KeyValueVector vector;
-	std::map<std::string, const ValueBase*> indices;
+	std::map<std::string, Handle*> indices;
 	std::string idxField;
 
 	Handle& pushObject(Object& val, std::string idx);
@@ -96,7 +96,7 @@ private:
 	template <typename T>
 	const T& get(unsigned int &idx, T& def) const;
 
-	void updateIndex(std::string, const ValueBase*);
+	void updateIndex(std::string, Handle&);
 	std::string& assignIndex(Object&, std::string&);
 
 	const std::string intToStr(int) const;
