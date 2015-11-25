@@ -40,5 +40,5 @@ OTHER_FILES += AUTHORS \
                libdvbtee.pc.in \
                libdvbtee_server.pc.in \
                packaging/libdvbtee.spec.in \
-               travis.yml \
+               .travis.yml \
                version.m4
