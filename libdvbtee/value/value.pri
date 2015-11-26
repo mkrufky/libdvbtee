@@ -1,4 +1,4 @@
-INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD/../include/valobj
 
 VALOBJ_SOURCES = \
     $$PWD/array.cpp \
@@ -6,7 +6,7 @@ VALOBJ_SOURCES = \
     $$PWD/value.cpp
 
 HEADERS += \
-    $$PWD/array.h \
-    $$PWD/object.h \
-    $$PWD/value-macros.h \
-    $$PWD/value.h
+    $$PWD/../include/valobj/array.h \
+    $$PWD/../include/valobj/object.h \
+    $$PWD/../include/valobj/value.h \
+    $$PWD/value-macros.h
