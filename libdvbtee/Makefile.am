@@ -70,7 +70,7 @@ libdvbtee_la_SOURCES += desc.cpp
 AM_CXXFLAGS += -DOLD_DECODER=1
 libdvbtee_la_LIBADD =
 else !OLDDECODER
-libdvbtee_la_LIBADD = -L./value -L./decode -lvalueobj -ldvbtee_decode
+libdvbtee_la_LIBADD = -L./decode -ldvbtee_decode
 endif !OLDDECODER
 
 if BUILD_OS_IS_DARWIN
