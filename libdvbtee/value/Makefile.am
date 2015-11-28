@@ -1,5 +1,9 @@
 AM_CXXFLAGS = -I../include/valobj
 
+if COVERALLS
+AM_CXXFLAGS += -g -O0
+endif COVERALLS
+
 lib_LTLIBRARIES = libvalueobj.la
 
 libvalueobj_la_SOURCES = value.cpp object.cpp array.cpp
