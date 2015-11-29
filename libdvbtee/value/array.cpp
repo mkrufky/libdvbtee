@@ -36,7 +36,7 @@ template <typename T>
 const T& Array::get(unsigned int &idx, T& def) const
 {
 	if (idx <= vector.size()) {
-		Value<T> *val = vector[idx];
+		Value<T> *val = vector.at(idx);
 		if (val->checkType(typeid(T)))
 			return val->get();
 	}
@@ -144,7 +144,7 @@ const std::string &Array::getIndex() const
 Handle& Array::get(unsigned int idx) const
 {
 	if (idx <= vector.size())
-		return (Handle&)vector[idx];
+		return (Handle&)vector.at(idx);
 
 	return valueUndefinedHdl;
 }
