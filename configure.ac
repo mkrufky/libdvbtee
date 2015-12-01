@@ -21,6 +21,9 @@ AC_ARG_ENABLE([olddecoder],
 esac],[olddecoder=false])
 AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
 
+AC_ARG_ENABLE([hdhr],
+    AS_HELP_STRING([--disable-hdhr], [Disable HDHomeRun support]))
+
 # Check OS
 AC_CANONICAL_BUILD
 
@@ -42,7 +45,10 @@ AC_CONFIG_MACRO_DIR([m4])
 # Checks for libraries.
 AC_CHECK_LIB([curl], [curl_easy_init])
 AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach], [], [AC_CHECK_LIB([dvbpsi], [dvbpsi_AttachPAT])])
-AC_CHECK_LIB([hdhomerun], [hdhomerun_device_destroy])
+
+AS_IF([test "x$enable_hdhr" != "xno"], [
+  AC_CHECK_LIB([hdhomerun], [hdhomerun_device_destroy])
+])
 
 # Checks for individual table support in libdvbpsi.
 AC_CHECK_FUNC([dvbpsi_pat_attach],[TA00=true],[TA00=false])
