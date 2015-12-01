@@ -18,6 +18,38 @@ matrix:
           build_command:   "make -j"
           branch_pattern: coverity
 
+## begin tests for DISABLE_HDHR with & without dependency
+
+    - os: linux
+      compiler: gcc
+      env: DISABLE_HDHR=true
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev','libhdhomerun-dev']
+
+    - os: linux
+      compiler: gcc
+      env: DISABLE_HDHR=true USE_OLDDECODER=true
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev','libhdhomerun-dev']
+
+    - os: linux
+      compiler: gcc
+      env: DISABLE_HDHR=true
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev']
+
+    - os: linux
+      compiler: gcc
+      env: DISABLE_HDHR=true USE_OLDDECODER=true
+      addons:
+        apt:
+          packages: ['libdvbpsi-dev']
+
+##   end tests for DISABLE_HDHR with & without dependency
+
     - os: osx
       compiler: gcc
 
@@ -159,10 +191,18 @@ matrix:
 script:
   - mkdir -p m4
   - autoreconf --install
-  - if [ "$USE_OLDDECODER" == "true" ]; then
-      ./configure --enable-olddecoder;
+  - if [ "$DISABLE_HDHR" == "true" ]; then
+      if [ "$USE_OLDDECODER" == "true" ]; then
+        ./configure --disable-hdhr --enable-olddecoder;
+      else
+        ./configure --disable-hdhr;
+      fi;
     else
-      ./configure;
+      if [ "$USE_OLDDECODER" == "true" ]; then
+        ./configure --enable-olddecoder;
+      else
+        ./configure;
+      fi;
     fi
   - if [ x"$COMPILER" == "x" ]; then
       make -j;
