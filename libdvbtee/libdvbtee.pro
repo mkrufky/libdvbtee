@@ -51,19 +51,23 @@ unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/../usr/lib/libdvbpsi.a
 
 macx: LIBS += -L/opt/local/lib -liconv
 
-symbian: LIBS += -lhdhomerun
-macx: LIBS += -L/opt/local/lib/ -lhdhomerun
-else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
-
-# some distros use a different location for libhdhomerun headers :-/
-INCLUDEPATH += /opt/local/include
-INCLUDEPATH += /usr/include/libhdhomerun
-INCLUDEPATH += /usr/lib/libhdhomerun
-DEPENDPATH += /usr/lib/libhdhomerun
-
 QMAKE_CXXFLAGS += -Wno-unused-parameter -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64 -D__STDC_FORMAT_MACROS
 QMAKE_CXXFLAGS += -DHAVE_LIBCURL
-QMAKE_CXXFLAGS += -DUSE_HDHOMERUN
+
+disablehdhr {
+} else {
+    # some distros use a different location for libhdhomerun headers :-/
+    INCLUDEPATH += /opt/local/include
+    INCLUDEPATH += /usr/include/libhdhomerun
+    INCLUDEPATH += /usr/lib/libhdhomerun
+    DEPENDPATH += /usr/lib/libhdhomerun
+
+    symbian: LIBS += -lhdhomerun
+    macx: LIBS += -L/opt/local/lib/ -lhdhomerun
+    else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
+
+    QMAKE_CXXFLAGS += -DUSE_HDHOMERUN
+}
 
 unix:!macx:!symbian {
     QMAKE_CXXFLAGS += -DUSE_LINUXTV

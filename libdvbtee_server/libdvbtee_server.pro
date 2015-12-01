@@ -49,15 +49,17 @@ DEPENDPATH += $$PWD/../usr/include
 
 unix:!macx:!symbian: PRE_TARGETDEPS += $$PWD/../usr/lib/libdvbpsi.a
 
-symbian: LIBS += -lhdhomerun
-else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
+disablehdhr {
+} else {
+    symbian: LIBS += -lhdhomerun
+    macx: LIBS += -L/opt/local/lib/ -lhdhomerun
+    else:unix|win32: LIBS += -L/usr/lib/ -lhdhomerun
+}
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../libdvbtee/release/ -ldvbtee
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../libdvbtee/debug/ -ldvbtee
 else:symbian: LIBS += -ldvbtee
 else:unix: LIBS += -L$$PWD/../libdvbtee/ -ldvbtee
-
-macx: LIBS += -L/opt/local/lib/ -lhdhomerun
 
 INCLUDEPATH += $$PWD/../libdvbtee
 DEPENDPATH += $$PWD/../libdvbtee
