@@ -20,6 +20,10 @@ matrix:
 
 ## begin tests for DISABLE_HDHR with & without dependency
 
+    - os: osx
+      compiler: gcc
+      env: DISABLE_HDHR=true
+
     - os: linux
       compiler: gcc
       env: DISABLE_HDHR=true
