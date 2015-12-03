@@ -2,17 +2,21 @@ QT =
 TEMPLATE = subdirs
 
 SUBDIRS += \
-           server_example \
            parser_example \
            walk_hls
 
-server_example.target = server_example
 parser_example.target = parser_example
 walk_hls.target = walk_hls
 
 QMAKE_EXTRA_TARGETS += \
-                       server_example \
                        parser_example \
                        walk_hls
+
+!macx {
+    SUBDIRS += server_example
+    server_example.target = server_example
+    QMAKE_EXTRA_TARGETS += server_example
+}
+
 
 OTHER_FILES += Makefile.am
