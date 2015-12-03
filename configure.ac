@@ -48,6 +48,7 @@ AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach], [], [AC_CHECK_LIB([dvbpsi], [dvbpsi_
 
 AS_IF([test "x$enable_hdhr" != "xno"], [
   AC_CHECK_LIB([hdhomerun], [hdhomerun_device_destroy])
+  AC_CHECK_HEADERS([libhdhomerun/hdhomerun.h])
 ])
 
 # Checks for individual table support in libdvbpsi.
@@ -103,7 +104,7 @@ AC_CHECK_FUNC([dvbpsi_DecodeServiceLocationDr],[DRA1=true],[DRA1=false])
 AM_CONDITIONAL([DRA1], [test x$DRA1 = xtrue])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h libhdhomerun/hdhomerun.h linux/dvb/frontend.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h linux/dvb/frontend.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
