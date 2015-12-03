@@ -27,12 +27,9 @@
 #include <unistd.h>
 
 #include "feed.h"
-#include "tune.h"
 #include "serve.h"
 
 #include "atsctext.h"
-
-typedef std::map<uint8_t, tune> map_tuners;
 
 struct dvbtee_context
 {
