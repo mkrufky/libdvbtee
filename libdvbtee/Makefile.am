@@ -73,6 +73,11 @@ else !OLDDECODER
 libdvbtee_la_LIBADD = -L./decode -ldvbtee_decode
 endif !OLDDECODER
 
+if DVBPSIBUILD
+AM_CPPFLAGS = -I../usr/include/
+libdvbtee_la_LIBADD += -L../usr/lib/ -ldvbpsi
+endif DVBPSIBUILD
+
 if BUILD_OS_IS_DARWIN
 libdvbtee_la_LIBADD += -L/opt/local/lib -liconv
 endif BUILD_OS_IS_DARWIN
