@@ -232,4 +232,4 @@ quit            stop the server and exit
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mkrufky/libdvbtee/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
+[![Analytics](https://ga-beacon.appspot.com/UA-71301363-2/mkrufky/libdvbtee/README.md)](https://github.com/igrigorik/ga-beacon)
