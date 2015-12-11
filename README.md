@@ -229,3 +229,7 @@ listen          listen for TS on a TCP or UDP port
 save            save scanned channels
 quit            stop the server and exit
 ```
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/mkrufky/libdvbtee/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
