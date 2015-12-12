@@ -1,5 +1,9 @@
 AM_CXXFLAGS = -I.. -I../value -I./table -I./descriptor
 
+if DVBPSIBUILD
+AM_CPPFLAGS = -I../../usr/include/
+endif DVBPSIBUILD
+
 lib_LTLIBRARIES = libdvbtee_decode.la
 
 libdvbtee_decode_la_SOURCES = decoder.cpp \
