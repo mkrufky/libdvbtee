@@ -26,6 +26,13 @@ matrix:
 
     - os: linux
       compiler: gcc
+      env: BUILD_DVBPSI=true
+      addons:
+        apt:
+          packages: ['libhdhomerun-dev']
+
+    - os: linux
+      compiler: gcc
       env: DISABLE_HDHR=true
       addons:
         apt:
@@ -195,7 +202,9 @@ matrix:
 script:
   - mkdir -p m4
   - autoreconf --install
-  - if [ "$DISABLE_HDHR" == "true" ]; then
+  - if [ "$BUILD_DVBPSI" == "true" ]; then
+      ./build-auto.sh;
+    else if [ "$DISABLE_HDHR" == "true" ]; then
       if [ "$USE_OLDDECODER" == "true" ]; then
         ./configure --disable-hdhr --enable-olddecoder;
       else
@@ -207,7 +216,7 @@ script:
       else
         ./configure;
       fi;
-    fi
+    fi; fi
   - if [ x"$COMPILER" == "x" ]; then
       make -j;
     else
