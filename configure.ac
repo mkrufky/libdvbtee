@@ -82,8 +82,6 @@ if test -d "$srcdir/libdvbpsi"; then
     AM_CONDITIONAL([DR86], [test x = x])
     AM_CONDITIONAL([DRA0], [test x = x])
     AM_CONDITIONAL([DRA1], [test x = x])
-  ], [
-    AC_CONFIG_FILES([libdvbpsi/Makefile])
   ])
 fi
 
