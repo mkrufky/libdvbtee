@@ -29,6 +29,8 @@ const std::string html_dump_epg_header_footer_callback(void *, bool, bool);
 
 const std::string json_dump_epg_header_footer_callback(void *, bool, bool);
 
+const std::string json_dump_channels_header_footer_callback(void *, bool, bool);
+
 const std::string xml_dump_epg_header_footer_callback(void *, bool, bool);
 
 const std::string html_dump_epg_event_callback(void *, decoded_event_t *e);

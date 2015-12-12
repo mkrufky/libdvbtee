@@ -43,7 +43,7 @@ const std::string html_dump_epg_header_footer_callback(void *, bool header, bool
 	return str;
 }
 
-const std::string json_dump_epg_header_footer_callback(void *, bool header, bool channel)
+const std::string json_dump_channels_header_footer_callback(void *, bool header, bool channel)
 {
 	//fprintf(stderr, "%s(%s, %s)\n", __func__, (header) ? "header" : "footer", (channel) ? "channel" : "body");
 	std::string str;
@@ -57,6 +57,24 @@ const std::string json_dump_epg_header_footer_callback(void *, bool header, bool
 			str = "]}";
 		else
 			str = "]";
+//	fprintf(stderr, "%s", str);
+	return str;
+}
+
+const std::string json_dump_epg_header_footer_callback(void *, bool header, bool channel)
+{
+	//fprintf(stderr, "%s(%s, %s)\n", __func__, (header) ? "header" : "footer", (channel) ? "channel" : "body");
+	std::string str;
+	if (header)
+		if (channel)
+			str = "{\"Entries\":\n[";
+		else
+			str = "[";
+	else
+		if (channel)
+			str = "{}]},";
+		else
+			str = "{}]";
 //	fprintf(stderr, "%s", str);
 	return str;
 }
@@ -182,7 +200,7 @@ const std::string json_dump_epg_event_callback(void *, decoded_event_t *e)
 #endif
 	str.append("\"");
 
-	str.append("}");
+	str.append("},");
 //	fprintf(stderr, "%s", str.c_str());
 	return str;
 }

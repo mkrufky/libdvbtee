@@ -1344,7 +1344,7 @@ bool serve_client::__command(char* cmdline)
 			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 		if (data_fmt == SERVE_DATA_FMT_JSON) {
-			str = json_dump_epg_header_footer_callback(this, true, false);
+			str = json_dump_channels_header_footer_callback(this, true, false);
 			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 
@@ -1360,7 +1360,7 @@ bool serve_client::__command(char* cmdline)
 		if (data_fmt == SERVE_DATA_FMT_JSON) {
 			str = " {} ";
 			streamback((const uint8_t *)str.c_str(), str.length());
-			str = json_dump_epg_header_footer_callback(this, false, false);
+			str = json_dump_channels_header_footer_callback(this, false, false);
 			streamback((const uint8_t *)str.c_str(), str.length());
 		}
 
@@ -1483,10 +1483,6 @@ bool serve_client::__command(char* cmdline)
 				str = html_dump_epg_header_footer_callback(this, false, false);
 				streamback((const uint8_t *)str.c_str(), str.length());
 				str = html_dump_epg_header_footer_callback(this, true, false);
-				streamback((const uint8_t *)str.c_str(), str.length());
-			}
-			if (data_fmt == SERVE_DATA_FMT_JSON) {
-				str = ",";
 				streamback((const uint8_t *)str.c_str(), str.length());
 			}
 
