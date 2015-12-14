@@ -13,10 +13,10 @@ if [ -e .clean ]; then
         #exit 1 // dont exit
     fi
 
-    make clean -C dvbtee
+    make clean
     if [ $? != 0 ]; then
-        echo "make clean (dvbtee) failed"
-        exit 1
+        echo "make clean failed"
+        #exit 1 // dont exit
     fi
 fi
 
@@ -50,9 +50,17 @@ else
     ./configure CPPFLAGS=-I${DVBTEE_ROOT}/usr/include/dvbpsi/ LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild
 fi
 
+if [ -e .clean ]; then
+    make clean
+    if [ $? != 0 ]; then
+        echo "make clean failed"
+        #exit 1 // dont exit
+    fi
+fi
+
 make -C . -j
 if [ $? != 0 ]; then
-    echo "make (dvbtee) failed"
+    echo "make failed"
     exit 1
 fi
 
