@@ -41,12 +41,13 @@ if [ -e .clean ]; then
     fi
 fi
 
-if [ -e libdvbpsi ]; then
+if [ -e libdvbpsi/bootstrap ]; then
     cd libdvbpsi
 else
+    rm -rf libdvbpsi
     git clone git://github.com/mkrufky/libdvbpsi.git
     cd libdvbpsi
-    patch -p2 < ../libdvbpsi-silence-TS-discontinuity-messages.patch
+    touch .dont_del
 fi
 
 if [ -e .configured ]; then
