@@ -66,6 +66,31 @@ make
 LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 ```
 
+libdvbtee depends on libdvbpsi for PSIP parsing.
+Although libdvbtee will build against older libdvbpsi releases,
+a more recent build is required in order to provide
+all of libdvbtee's latest features, such as ATSC support.
+
+libdvbtee's build system is capable of building and linking
+against the latest version of libdvbpsi by placing a copy of the
+libdvbpsi repository in the top level of libdvbtee's source tree.
+
+Rather than giving step-by-step instructions in this README,
+shell scripts are provided that will fetch the latest libdvbpsi sources,
+configure the build system, and build both libraries together.
+
+For the integrated build of libdvbtee along with the latest version of libdvbpsi using autotools (recommended):
+```
+./build-auto.sh
+dvbtee/dvbtee < mpegfile.ts
+```
+
+For the integrated build of libdvbtee along with the latest version of libdvbpsi using qmake:
+```
+./build-qmake.sh
+dvbtee/dvbtee < mpegfile.ts
+```
+
 #### Command line arguments
 ```
 -a      adapter id
