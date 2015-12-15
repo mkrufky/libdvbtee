@@ -65,7 +65,7 @@ if test -d "$srcdir/libdvbpsi"; then
   ])
 fi
 
-AS_IF([test x$dvbpsibuild != xtrue], [
+AM_COND_IF([DVBPSIBUILD], [], [
   AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach], [], [AC_CHECK_LIB([dvbpsi], [dvbpsi_AttachPAT])])
 ])
 
