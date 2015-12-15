@@ -42,7 +42,11 @@ fi
 make -C libdvbpsi install
 
 mkdir -p m4
-autoreconf --install
+if [ -e aclocal.m4 ]; then
+    echo "configuration installed..."
+else
+    autoreconf --install
+fi
 
 if [ -e .staticlib ]; then
     ./configure CPPFLAGS=-I${DVBTEE_ROOT}/usr/include/dvbpsi/ LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@" --enable-static
