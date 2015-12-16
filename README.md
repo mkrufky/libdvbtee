@@ -88,7 +88,7 @@ dvbtee/dvbtee < mpegfile.ts
 For the integrated build of libdvbtee along with the latest version of libdvbpsi using qmake:
 ```
 ./build-qmake.sh
-dvbtee/dvbtee < mpegfile.ts
+LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 ```
 
 #### Command line arguments
