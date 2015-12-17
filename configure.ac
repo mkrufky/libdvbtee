@@ -24,6 +24,15 @@ AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
 AC_ARG_ENABLE([hdhr],
     AS_HELP_STRING([--disable-hdhr], [Disable HDHomeRun support]))
 
+AC_ARG_ENABLE([dvbpsibuild],
+[  --enable-dvbpsibuild    Enable dvbpsi build],
+[case "${enableval}" in
+  yes) dvbpsibuild=true ;;
+  no)  dvbpsibuild=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-dvbpsibuild]) ;;
+esac],[dvbpsibuild=false])
+AM_CONDITIONAL([DVBPSIBUILD], [test x$dvbpsibuild = xtrue])
+
 # Check OS
 AC_CANONICAL_BUILD
 
@@ -44,64 +53,153 @@ AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for libraries.
 AC_CHECK_LIB([curl], [curl_easy_init])
-AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach], [], [AC_CHECK_LIB([dvbpsi], [dvbpsi_AttachPAT])])
 
 AS_IF([test "x$enable_hdhr" != "xno"], [
   AC_CHECK_LIB([hdhomerun], [hdhomerun_device_destroy])
   AC_CHECK_HEADERS([libhdhomerun/hdhomerun.h])
 ])
 
-# Checks for individual table support in libdvbpsi.
-AC_CHECK_FUNC([dvbpsi_pat_attach],[TA00=true],[TA00=false])
-AC_CHECK_FUNC([dvbpsi_AttachPAT],[TA00=true])
-AM_CONDITIONAL([TA00], [test x$TA00 = xtrue])
-AC_CHECK_FUNC([dvbpsi_pmt_attach],[TA02=true],[TA02=false])
-AC_CHECK_FUNC([dvbpsi_AttachPMT],[TA02=true])
-AM_CONDITIONAL([TA02], [test x$TA02 = xtrue])
-AC_CHECK_FUNC([dvbpsi_nit_attach],[TA40=true],[TA40=false])
-AC_CHECK_FUNC([dvbpsi_AttachNIT],[TA40=true])
-AM_CONDITIONAL([TA40], [test x$TA40 = xtrue])
-AC_CHECK_FUNC([dvbpsi_sdt_attach],[TA42=true],[TA42=false])
-AC_CHECK_FUNC([dvbpsi_AttachSDT],[TA42=true])
-AM_CONDITIONAL([TA42], [test x$TA42 = xtrue])
-AC_CHECK_FUNC([dvbpsi_eit_attach],[TA4E=true],[TA4E=false])
-AC_CHECK_FUNC([dvbpsi_AttachEIT],[TA4E=true])
-AM_CONDITIONAL([TA4E], [test x$TA4E = xtrue])
-AC_CHECK_FUNC([dvbpsi_tot_attach],[TA70=true],[TA70=false])
-AC_CHECK_FUNC([dvbpsi_AttachTOT],[TA70=true])
-AM_CONDITIONAL([TA70], [test x$TA70 = xtrue])
+if test -d "$srcdir/libdvbpsi"; then
+  AM_COND_IF([DVBPSIBUILD], [
+    AC_CONFIG_SUBDIRS([libdvbpsi])
+  ])
+fi
 
-AC_CHECK_FUNC([dvbpsi_atsc_AttachMGT],[TAC7=true],[TAC7=false])
-AM_CONDITIONAL([TAC7], [test x$TAC7 = xtrue])
-AC_CHECK_FUNC([dvbpsi_atsc_AttachVCT],[TAC8=true],[TAC8=false])
-AM_CONDITIONAL([TAC8], [test x$TAC8 = xtrue])
-AC_CHECK_FUNC([dvbpsi_atsc_AttachEIT],[TACB=true],[TACB=false])
-AM_CONDITIONAL([TACB], [test x$TACB = xtrue])
-AC_CHECK_FUNC([dvbpsi_atsc_AttachETT],[TACC=true],[TACC=false])
-AM_CONDITIONAL([TACC], [test x$TACC = xtrue])
-AC_CHECK_FUNC([dvbpsi_atsc_AttachSTT],[TACD=true],[TACD=false])
-AM_CONDITIONAL([TACD], [test x$TACD = xtrue])
+AM_COND_IF([DVBPSIBUILD], [], [
+  AC_CHECK_LIB([dvbpsi], [dvbpsi_pat_attach], [], [AC_CHECK_LIB([dvbpsi], [dvbpsi_AttachPAT])])
+])
+
+# Checks for individual table support in libdvbpsi.
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TA00], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_pat_attach],[TA00=true],[TA00=false])
+  AC_CHECK_FUNC([dvbpsi_AttachPAT],[TA00=true])
+  AM_CONDITIONAL([TA00], [test x$TA00 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TA02], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_pmt_attach],[TA02=true],[TA02=false])
+  AC_CHECK_FUNC([dvbpsi_AttachPMT],[TA02=true])
+  AM_CONDITIONAL([TA02], [test x$TA02 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TA40], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_nit_attach],[TA40=true],[TA40=false])
+  AC_CHECK_FUNC([dvbpsi_AttachNIT],[TA40=true])
+  AM_CONDITIONAL([TA40], [test x$TA40 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TA42], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_sdt_attach],[TA42=true],[TA42=false])
+  AC_CHECK_FUNC([dvbpsi_AttachSDT],[TA42=true])
+  AM_CONDITIONAL([TA42], [test x$TA42 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TA4E], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_eit_attach],[TA4E=true],[TA4E=false])
+  AC_CHECK_FUNC([dvbpsi_AttachEIT],[TA4E=true])
+  AM_CONDITIONAL([TA4E], [test x$TA4E = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TA70], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_tot_attach],[TA70=true],[TA70=false])
+  AC_CHECK_FUNC([dvbpsi_AttachTOT],[TA70=true])
+  AM_CONDITIONAL([TA70], [test x$TA70 = xtrue])
+])
+
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TAC7], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_atsc_AttachMGT],[TAC7=true],[TAC7=false])
+  AM_CONDITIONAL([TAC7], [test x$TAC7 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TAC8], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_atsc_AttachVCT],[TAC8=true],[TAC8=false])
+  AM_CONDITIONAL([TAC8], [test x$TAC8 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TACB], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_atsc_AttachEIT],[TACB=true],[TACB=false])
+  AM_CONDITIONAL([TACB], [test x$TACB = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TACC], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_atsc_AttachETT],[TACC=true],[TACC=false])
+  AM_CONDITIONAL([TACC], [test x$TACC = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([TACD], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_atsc_AttachSTT],[TACD=true],[TACD=false])
+  AM_CONDITIONAL([TACD], [test x$TACD = xtrue])
+])
 
 # Checks for individual descriptor support in libdvbpsi.
-AC_CHECK_FUNC([dvbpsi_DecodeISO639Dr],[DR0A=true],[DR0A=false])
-AM_CONDITIONAL([DR0A], [test x$DR0A = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeServiceDr],[DR48=true],[DR48=false])
-AM_CONDITIONAL([DR48], [test x$DR48 = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeShortEventDr],[DR4D=true],[DR4D=false])
-AM_CONDITIONAL([DR4D], [test x$DR4D = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeFrequencyListDr],[DR62=true],[DR62=false])
-AM_CONDITIONAL([DR62], [test x$DR62 = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeAc3AudioDr],[DR81=true],[DR81=false])
-AM_CONDITIONAL([DR81], [test x$DR81 = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeLCNDr],[DR83=true],[DR83=false])
-AM_CONDITIONAL([DR83], [test x$DR83 = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeCaptionServiceDr],[DR86=true],[DR86=false])
-AM_CONDITIONAL([DR86], [test x$DR86 = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeExtendedChannelNameDr],[DRA0=true],[DRA0=false])
-AC_CHECK_FUNC([dvbpsi_ExtendedChannelNameDr],[DRA0=true])
-AM_CONDITIONAL([DRA0], [test x$DRA0 = xtrue])
-AC_CHECK_FUNC([dvbpsi_DecodeServiceLocationDr],[DRA1=true],[DRA1=false])
-AM_CONDITIONAL([DRA1], [test x$DRA1 = xtrue])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR0A], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeISO639Dr],[DR0A=true],[DR0A=false])
+  AM_CONDITIONAL([DR0A], [test x$DR0A = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR48], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeServiceDr],[DR48=true],[DR48=false])
+  AM_CONDITIONAL([DR48], [test x$DR48 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR4D], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeShortEventDr],[DR4D=true],[DR4D=false])
+  AM_CONDITIONAL([DR4D], [test x$DR4D = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR62], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeFrequencyListDr],[DR62=true],[DR62=false])
+  AM_CONDITIONAL([DR62], [test x$DR62 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR81], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeAc3AudioDr],[DR81=true],[DR81=false])
+  AM_CONDITIONAL([DR81], [test x$DR81 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR83], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeLCNDr],[DR83=true],[DR83=false])
+  AM_CONDITIONAL([DR83], [test x$DR83 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR86], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeCaptionServiceDr],[DR86=true],[DR86=false])
+  AM_CONDITIONAL([DR86], [test x$DR86 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DRA0], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeExtendedChannelNameDr],[DRA0=true],[DRA0=false])
+  AC_CHECK_FUNC([dvbpsi_ExtendedChannelNameDr],[DRA0=true])
+  AM_CONDITIONAL([DRA0], [test x$DRA0 = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DRA1], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeServiceLocationDr],[DRA1=true],[DRA1=false])
+  AM_CONDITIONAL([DRA1], [test x$DRA1 = xtrue])
+])
 
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h linux/dvb/frontend.h])
