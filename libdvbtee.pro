@@ -34,6 +34,7 @@ OTHER_FILES += AUTHORS \
                INSTALL \
                NEWS \
                README \
+               README.md \
                ChangeLog \
                configure.ac \
                Makefile.am \
