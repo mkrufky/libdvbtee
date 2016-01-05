@@ -7,41 +7,34 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/github-light.css">
+    <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-    
-      ga('create', 'UA-71301363-1', 'auto');
-      ga('send', 'pageview');
-    
-    </script>
   </head>
   <body>
     <div class="wrapper">
       <header>
-        <h1>Libdvbtee</h1>
-        <p>dvbtee: a digital television streamer / parser / service information aggregator supporting various interfaces including telnet CLI &amp; http control</p>
-
-        <p class="view"><a href="https://github.com/mkrufky/libdvbtee">View the Project on GitHub <small>mkrufky/libdvbtee</small></a></p>
-
+        <h1 class="header">Libdvbtee</h1>
+        <p class="header">dvbtee: a digital television streamer / parser / service information aggregator supporting various interfaces including telnet CLI &amp; http control</p>
 
         <ul>
-          <li><a href="https://github.com/mkrufky/libdvbtee/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/mkrufky/libdvbtee/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/mkrufky/libdvbtee">View On <strong>GitHub</strong></a></li>
+          <li class="download"><a class="buttons" href="https://github.com/mkrufky/libdvbtee/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/mkrufky/libdvbtee/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/mkrufky/libdvbtee">View On GitHub</a></li>
         </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/mkrufky">mkrufky</a></p>
+
+
       </header>
       <section>
         <h2>
 <a id="dvbtee--libdvbtee" class="anchor" href="#dvbtee--libdvbtee" aria-hidden="true"><span class="octicon octicon-link"></span></a>dvbtee &amp; libdvbtee</h2>
 
-<h4><a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h4>
+<h4>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h4>
 
 <p>libdvbtee is a stream parser and service information aggregator library for
 MPEG2 transport streams. The library includes a program service information
@@ -66,7 +59,73 @@ is <code>64080</code>, but this is configurable. The <code>server_example</code>
 When accessing the server via telnet, enter in the form 'command=argument'
 and press enter.</p>
 
-<h4><a id="command-line-arguments" class="anchor" href="#command-line-arguments" aria-hidden="true"><span class="octicon octicon-link"></span></a>Command line arguments</h4>
+<p>Michael Ira Krufky<br>
+mkrufky at linuxtv dot org</p>
+
+<h4>
+<a id="how-to-build--run" class="anchor" href="#how-to-build--run" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to build / run</h4>
+
+<p>libdvbtee was originally developed using the qmake build system for easy
+multi-platform build support. libdvbtee still supports the qmake system,
+but now uses autotools as the preferred build system for various reasons.</p>
+
+<pre><code>autoreconf --install
+./configure
+make
+dvbtee/dvbtee &lt; mpegfile.ts
+</code></pre>
+
+<p>If, for some odd reason, you want to build libdvbtee using the old version of
+the table / descriptor decoder, specify --enable-olddecoder to configure</p>
+
+<pre><code>autoreconf --install
+./configure --enable-olddecoder
+make
+dvbtee/dvbtee &lt; mpegfile.ts
+</code></pre>
+
+<p>If you prefer to use qmake rather than autotools, use the following commands:</p>
+
+<pre><code>qmake -r
+make
+LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee &lt; mpegfile.ts
+</code></pre>
+
+<p>If, for some odd reason, you want to build libdvbtee using the old version of
+the table / descriptor decoder, specify CONFIG+=olddecoder to qmake</p>
+
+<pre><code>qmake -r CONFIG+=olddecoder
+make
+LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee &lt; mpegfile.ts
+</code></pre>
+
+<p>libdvbtee depends on libdvbpsi for PSIP parsing.
+Although libdvbtee will build against older libdvbpsi releases,
+a more recent build is required in order to provide
+all of libdvbtee's latest features, such as ATSC support.</p>
+
+<p>libdvbtee's build system is capable of building and linking
+against the latest version of libdvbpsi by placing a copy of the
+libdvbpsi repository in the top level of libdvbtee's source tree.</p>
+
+<p>Rather than giving step-by-step instructions in this README,
+shell scripts are provided that will fetch the latest libdvbpsi sources,
+configure the build system, and build both libraries together.</p>
+
+<p>For the integrated build of libdvbtee along with the latest version of libdvbpsi using autotools (recommended):</p>
+
+<pre><code>./build-auto.sh
+dvbtee/dvbtee &lt; mpegfile.ts
+</code></pre>
+
+<p>For the integrated build of libdvbtee along with the latest version of libdvbpsi using qmake:</p>
+
+<pre><code>./build-qmake.sh
+LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee &lt; mpegfile.ts
+</code></pre>
+
+<h4>
+<a id="command-line-arguments" class="anchor" href="#command-line-arguments" aria-hidden="true"><span class="octicon octicon-link"></span></a>Command line arguments</h4>
 
 <pre><code>-a      adapter id
 -A      (1 for ATSC, 2 for ClearQAM)
@@ -93,12 +152,13 @@ and press enter.</p>
 -o      output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
 -O      output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
 -H      use a HdHomeRun device, optional arg to specify the device string
--j      enable json output of decoded tables & descriptors
+-j      enable json output of decoded tables &amp; descriptors
 -d      debug level
 -h      display additional help
 </code></pre>
 
-<h4><a id="example-usage" class="anchor" href="#example-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example Usage</h4>
+<h4>
+<a id="example-usage" class="anchor" href="#example-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example Usage</h4>
 
 <p>To tune to service id 1 of physical channel 33 and stream it to a udp port:</p>
 
@@ -145,7 +205,65 @@ and press enter.</p>
 <pre><code>  dvbtee -H ABCDABCD-1 -S
 </code></pre>
 
-<h4><a id="server-commands" class="anchor" href="#server-commands" aria-hidden="true"><span class="octicon octicon-link"></span></a>Server commands</h4>
+<h4>
+<a id="example-output" class="anchor" href="#example-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example output:</h4>
+
+<p>To scan a channel with JSON output enabled, the following command:</p>
+
+<pre><code>  dvbtee -s -c13 -j
+</code></pre>
+
+<p>...should generate output similar to the following:</p>
+
+<pre><code>scan channel 13...
+store PAT: v0, ts_id: 2011
+           3 | 30
+           4 | 40
+           5 | 50
+store PMT: v12, service_id 3, pcr_pid 49
+  es_pid | type
+      31 | 0x02 (Video MPEG-2) | 
+      34 | 0x81 (Audio AC3 (ATSC)) | eng
+      35 | 0x81 (Audio AC3 (ATSC)) | spa
+      36 | 0x81 (Audio AC3 (ATSC)) | fre
+store VCT: v6, ts_id 2011, b_cable_vct 0
+  channel | service_id | source_id | service_name
+     13.1 |          3 |         1 | WNET-HD | eng, spa, fre
+     13.2 |          4 |         2 | KIDS | eng, spa, fre
+     13.3 |          5 |         3 | V-Me | eng
+store MGT: v6
+  table type |   pid  | ver | bytes
+    0x0000   | 0x1ffb |   6 | 187
+    0x0100   | 0x1d00 |   6 | 1103
+    0x0101   | 0x1d01 |   6 | 1105
+    0x0102   | 0x1d02 |   6 | 1132
+    0x0103   | 0x1d03 |   6 | 1305
+    0x0200   | 0x1e00 |   6 | 1197
+    0x0201   | 0x1e01 |   6 | 1220
+    0x0202   | 0x1e02 |   6 | 1157
+    0x0203   | 0x1e03 |   6 | 1213
+store PMT: v12, service_id 5, pcr_pid 81
+  es_pid | type
+      51 | 0x02 (Video MPEG-2) | 
+      54 | 0x81 (Audio AC3 (ATSC)) | eng
+store PMT: v12, service_id 4, pcr_pid 65
+  es_pid | type
+      41 | 0x02 (Video MPEG-2) | 
+      44 | 0x81 (Audio AC3 (ATSC)) | eng
+      45 | 0x81 (Audio AC3 (ATSC)) | spa
+      46 | 0x81 (Audio AC3 (ATSC)) | fre
+
+# channel 13, 213000000,  
+13.1-WNET-HD:213000000:8VSB:49:52:3
+13.2-KIDS:213000000:8VSB:65:68:4
+13.3-V-Me:213000000:8VSB:81:84:5
+found 3 services
+
+TSID#07db: [ { 'programs': [ { 'number': 3, 'pid': 48 }, { 'number': 4, 'pid': 64 }, { 'number': 5, 'pid': 80 } ], 'tableId': 0, 'tableName': 'PAT', 'tsId': 2011, 'version': 0 }, { 'pcrPid': 49, 'program': 3, 'streams': [ { 'pid': 49, 'streamType': 2, 'streamTypeString': 'Video MPEG-2' }, { 'descriptors': [ { 'bitRateCode': 14, 'bsid': 8, 'bsmod': 0, 'description': '', 'descriptorTag': 129, 'fullSvc': true, 'language': 'eng', 'numChannels': '2/0', 'sampleRate': '48', 'surroundMode': 'Not indicated' }, { 'ISO639Lang': [ { 'audioType': 0, 'language': 'eng' } ], 'descriptorTag': 10 } ], 'pid': 52, 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'descriptors': [ { 'bitRateCode': 8, 'bsid': 8, 'bsmod': 0, 'description': '', 'descriptorTag': 129, 'fullSvc': true, 'language': 'spa', 'numChannels': '2/0', 'sampleRate': '48', 'surroundMode': 'Not indicated' }, { 'ISO639Lang': [ { 'audioType': 0, 'language': 'spa' } ], 'descriptorTag': 10 } ], 'pid': 53, 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'descriptors': [ { 'bitRateCode': 8, 'bsid': 8, 'bsmod': 2, 'description': '', 'descriptorTag': 129, 'fullSvc': true, 'language': 'fre', 'numChannels': '2/0', 'sampleRate': '48', 'surroundMode': 'Not indicated' }, { 'ISO639Lang': [ { 'audioType': 0, 'language': 'fre' } ], 'descriptorTag': 10 } ], 'pid': 54, 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' } ], 'tableId': 2, 'tableName': 'PMT', 'version': 12 }, { 'channels': [ { 'accessControlled': false, 'carrierFreq': 0, 'descriptors': [ { 'descriptorTag': 161, 'serviceLocation': [ { 'esPid': 49, 'streamType': 2, 'streamTypeString': 'Video MPEG-2' }, { 'esPid': 52, 'lang': 'eng', 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'esPid': 53, 'lang': 'spa', 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'esPid': 54, 'lang': 'fre', 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' } ] } ], 'etmLocation': 0, 'hidden': false, 'hideGuide': false, 'major': 13, 'minor': 1, 'modulation': 4, 'outOfBand': true, 'pathSelect': true, 'program': 3, 'serviceName': 'WNET-HD', 'serviceType': 2, 'sourceId': 1, 'tsId': 2011 }, { 'accessControlled': false, 'carrierFreq': 0, 'descriptors': [ { 'descriptorTag': 161, 'serviceLocation': [ { 'esPid': 65, 'streamType': 2, 'streamTypeString': 'Video MPEG-2' }, { 'esPid': 68, 'lang': 'eng', 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'esPid': 69, 'lang': 'spa', 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'esPid': 70, 'lang': 'fre', 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' } ] } ], 'etmLocation': 0, 'hidden': false, 'hideGuide': false, 'major': 13, 'minor': 2, 'modulation': 4, 'outOfBand': true, 'pathSelect': true, 'program': 4, 'serviceName': 'KIDS', 'serviceType': 2, 'sourceId': 2, 'tsId': 2011 }, { 'accessControlled': false, 'carrierFreq': 0, 'descriptors': [ { 'descriptorTag': 161, 'serviceLocation': [ { 'esPid': 81, 'streamType': 2, 'streamTypeString': 'Video MPEG-2' }, { 'esPid': 84, 'lang': 'eng', 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' } ] } ], 'etmLocation': 0, 'hidden': false, 'hideGuide': false, 'major': 13, 'minor': 3, 'modulation': 4, 'outOfBand': true, 'pathSelect': true, 'program': 5, 'serviceName': 'V-Me', 'serviceType': 2, 'sourceId': 3, 'tsId': 2011 } ], 'isCableVCT': false, 'tableId': 200, 'tableName': 'VCT', 'tsId': 2011, 'version': 6 }, { 'tableId': 199, 'tableName': 'MGT', 'tables': [ { 'bytes': 187, 'pid': 8187, 'type': 0, 'version': 6 }, { 'bytes': 1103, 'pid': 7424, 'type': 256, 'version': 6 }, { 'bytes': 1105, 'pid': 7425, 'type': 257, 'version': 6 }, { 'bytes': 1132, 'pid': 7426, 'type': 258, 'version': 6 }, { 'bytes': 1305, 'pid': 7427, 'type': 259, 'version': 6 }, { 'bytes': 1197, 'pid': 7680, 'type': 512, 'version': 6 }, { 'bytes': 1220, 'pid': 7681, 'type': 513, 'version': 6 }, { 'bytes': 1157, 'pid': 7682, 'type': 514, 'version': 6 }, { 'bytes': 1213, 'pid': 7683, 'type': 515, 'version': 6 } ], 'version': 6 }, { 'pcrPid': 81, 'program': 5, 'streams': [ { 'descriptors': [ { 'CaptionService': [ { 'digital_cc': '708', 'easyReader': false, 'iso639lang': 'eng', 'line21field': true, 'serviceNumber': 1, 'wideAspectRatio': false } ], 'descriptorTag': 134 } ], 'pid': 81, 'streamType': 2, 'streamTypeString': 'Video MPEG-2' }, { 'descriptors': [ { 'bitRateCode': 10, 'bsid': 8, 'bsmod': 0, 'description': '', 'descriptorTag': 129, 'fullSvc': true, 'language': 'eng', 'numChannels': '2/0', 'sampleRate': '48', 'surroundMode': 'Not indicated' }, { 'ISO639Lang': [ { 'audioType': 0, 'language': 'eng' } ], 'descriptorTag': 10 } ], 'pid': 84, 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' } ], 'tableId': 2, 'tableName': 'PMT', 'version': 12 }, { 'pcrPid': 65, 'program': 4, 'streams': [ { 'descriptors': [ { 'CaptionService': [ { 'digital_cc': '708', 'easyReader': false, 'iso639lang': 'eng', 'line21field': true, 'serviceNumber': 1, 'wideAspectRatio': false } ], 'descriptorTag': 134 } ], 'pid': 65, 'streamType': 2, 'streamTypeString': 'Video MPEG-2' }, { 'descriptors': [ { 'bitRateCode': 14, 'bsid': 8, 'bsmod': 0, 'description': '', 'descriptorTag': 129, 'fullSvc': true, 'language': 'eng', 'numChannels': '2/0', 'sampleRate': '48', 'surroundMode': 'Not indicated' }, { 'ISO639Lang': [ { 'audioType': 0, 'language': 'eng' } ], 'descriptorTag': 10 } ], 'pid': 68, 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'descriptors': [ { 'bitRateCode': 8, 'bsid': 8, 'bsmod': 0, 'description': '', 'descriptorTag': 129, 'fullSvc': true, 'language': 'spa', 'numChannels': '2/0', 'sampleRate': '48', 'surroundMode': 'Not indicated' }, { 'ISO639Lang': [ { 'audioType': 0, 'language': 'spa' } ], 'descriptorTag': 10 } ], 'pid': 69, 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' }, { 'descriptors': [ { 'bitRateCode': 8, 'bsid': 8, 'bsmod': 2, 'description': '', 'descriptorTag': 129, 'fullSvc': true, 'language': 'fre', 'numChannels': '2/0', 'sampleRate': '48', 'surroundMode': 'Not indicated' }, { 'ISO639Lang': [ { 'audioType': 0, 'language': 'fre' } ], 'descriptorTag': 10 } ], 'pid': 70, 'streamType': 129, 'streamTypeString': 'Audio AC3 (ATSC)' } ], 'tableId': 2, 'tableName': 'PMT', 'version': 12 } ]
+</code></pre>
+
+<h4>
+<a id="server-commands" class="anchor" href="#server-commands" aria-hidden="true"><span class="octicon octicon-link"></span></a>Server commands</h4>
 
 <pre><code>tuner           specify tuner id
 feeder          specify feeder id
@@ -176,11 +294,20 @@ quit            stop the server and exit
 </code></pre>
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/mkrufky">mkrufky</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		          <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-71301363-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
