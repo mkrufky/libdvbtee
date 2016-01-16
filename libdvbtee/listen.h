@@ -22,7 +22,10 @@
 #ifndef __LISTEN_H__
 #define __LISTEN_H__
 
+#include "dvbtee_config.h"
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #include <pthread.h>
 #include <stdint.h>
 #include <string.h>
