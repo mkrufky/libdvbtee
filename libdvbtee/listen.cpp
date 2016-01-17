@@ -112,8 +112,12 @@ int socket_listen::start(uint16_t port_requested)
 		return sock_fd;
 	}
 
+#if defined(_WIN32)
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
+#else
 	int reuse = 1;
 	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+#endif
 		perror("setting reuse failed");
 		return -1;
 	}
@@ -163,8 +167,12 @@ int socket_listen::start_udp(uint16_t port_requested)
 		return sock_fd;
 	}
 
+#if defined(_WIN32)
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
+#else
 	int reuse = 1;
 	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+#endif
 		perror("setting reuse failed");
 		return -1;
 	}

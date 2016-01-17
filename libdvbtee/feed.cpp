@@ -676,8 +676,12 @@ int feed::start_udp_listener(uint16_t port_requested)
 		return fd;
 	}
 
+#if defined(_WIN32)
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
+#else
 	int reuse = 1;
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+#endif
 		perror("setting reuse failed");
 		return -1;
 	}
