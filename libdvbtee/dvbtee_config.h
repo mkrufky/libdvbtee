@@ -44,4 +44,8 @@
 #endif
 #endif
 
+#ifdef _WIN32
+#include <ws2tcpip.h>
+#endif
+
 #endif //__DVBTEE_CONFIG_H__
