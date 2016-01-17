@@ -128,11 +128,14 @@ int socket_listen::start(uint16_t port_requested)
 	}
 	port = port_requested;
 
+#if !defined(_WIN32)
+	// FIXME
 	int fl = fcntl(sock_fd, F_GETFL, 0);
 	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 		perror("set non-blocking failed");
 		return -1;
 	}
+#endif
 #define MAX_SOCKETS 4
 	listen(sock_fd, MAX_SOCKETS);
 
@@ -175,11 +178,14 @@ int socket_listen::start_udp(uint16_t port_requested)
 		return -1;
 	}
 
+#if !defined(_WIN32)
+	// FIXME
 	int fl = fcntl(sock_fd, F_GETFL, 0);
 	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 		perror("set non-blocking failed");
 		return -1;
 	}
+#endif
 
 	int ret = pthread_create(&h_thread, NULL, udp_listen_thread, this);
 
