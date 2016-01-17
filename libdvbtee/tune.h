@@ -23,7 +23,6 @@
 #define __TUNE_H__
 
 #include <pthread.h>
-#include <sys/ioctl.h>
 #include <time.h>
 
 #include "channels.h"
