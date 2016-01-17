@@ -427,7 +427,7 @@ void *feed::tcp_client_feed_thread()
 #if FEED_BUFFER
 	void *q = NULL;
 #else
-	unsigned char q[BUFSIZE];
+	char q[BUFSIZE];
 #endif
 	int available;
 
@@ -446,7 +446,7 @@ void *feed::tcp_client_feed_thread()
 		if (rxlen > 0) {
 			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
 #if !FEED_BUFFER
-			parser.feed(rxlen, q);
+			parser.feed(rxlen, (uint8_t*)q);
 #endif
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
@@ -469,7 +469,7 @@ void *feed::udp_listen_feed_thread()
 #if FEED_BUFFER
 	void *q = NULL;
 #else
-	unsigned char q[188*7];
+	char q[188*7];
 #endif
 	int available;
 
@@ -491,7 +491,7 @@ void *feed::udp_listen_feed_thread()
 #endif
 //			getpeername(fd, (struct sockaddr*)&udpsa, &salen);
 #if !FEED_BUFFER
-			parser.feed(rxlen, q);
+			parser.feed(rxlen, (uint8_t*)q);
 #endif
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
