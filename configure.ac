@@ -40,6 +40,9 @@ AM_CONDITIONAL([DVBPSIBUILD], [test x$dvbpsibuild = xtrue])
 AC_CANONICAL_BUILD
 
 AM_CONDITIONAL([BUILD_OS_IS_DARWIN], [case $build_os in darwin* ) true ;; * ) false ;; esac])
+AM_CONDITIONAL([DARWIN], [case $target_os in darwin* ) true ;; * ) false ;; esac])
+AM_CONDITIONAL([CYGWIN], [case $target_os in cygwin* ) true ;; * ) false ;; esac])
+AM_CONDITIONAL([MINGW], [case $target_os in mingw* ) true ;; * ) false ;; esac])
 
 # Checks for programs.
 AC_PROG_CXX
