@@ -27,6 +27,10 @@
 
 #include "functions.h"
 
+#ifdef _WIN32
+#define timegm _mkgmtime
+#endif
+
 /* taken from dvbstreamer-2.1.0/src/plugins/atsctoepg.c */
 #define dvbpsi_atsc_unix_epoch_offset (315964800)
 static uint8_t GPStoUTCSecondsOffset = 14;
