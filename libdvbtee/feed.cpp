@@ -679,7 +679,7 @@ int feed::start_socket(char* source)
 		memset(&ip_addr, 0, sizeof(ip_addr));
 		ip_addr.sin_family = AF_INET;
 		ip_addr.sin_port   = htons(port);
-		if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
+		if (inet_pton(AF_INET, ip, &ip_addr.sin_addr) == 0) {
 			perror("ip address translation failed");
 			return -1;
 		} else

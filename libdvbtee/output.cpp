@@ -708,8 +708,20 @@ int output_stream::add(char* target, map_pidtype &pids)
 		if (!priv) priv = new output_stream_priv;
 		priv->ip_addr.sin_family = AF_INET;
 		priv->ip_addr.sin_port   = htons(port);
-		if (inet_aton(ip, &priv->ip_addr.sin_addr) == 0) {
+#if (!defined(HAVE_INET_PTON) && !defined(HAVE_INET_ATON) && !defined(HAVE_INETPTON))
+		if (getnameinfo((struct sockaddr*)&priv->ip_addr, sizeof(struct sockaddr),
+			ip, NI_MAXHOST, NULL, NI_MAXSERV, NI_NUMERICHOST) != 0)
+#else
+#ifndef HAVE_INET_PTON
+#define inet_pton(a,b,c) InetPton(a,b,c)
+#endif
+#ifndef HAVE_INET_ATON
+#define inet_aton(a,b) inet_pton(AF_INET,a,b)
+#endif
 
+		if (inet_aton(ip, &priv->ip_addr.sin_addr) == 0)
+#endif
+		{
 			perror("ip address translation failed");
 			return -1;
 		} else
