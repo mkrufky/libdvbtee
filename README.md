@@ -32,6 +32,13 @@ Michael Ira Krufky
 mkrufky at linuxtv dot org
 
 #### How to build / run
+The recommended way to build libdvbtee is by using the `build-auto.sh` script:
+```
+./build-auto.sh
+dvbtee/dvbtee < mpegfile.ts
+```
+
+#### Other build methods
 libdvbtee was originally developed using the qmake build system for easy
 multi-platform build support. libdvbtee still supports the qmake system,
 but now uses autotools as the preferred build system for various reasons.
