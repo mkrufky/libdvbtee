@@ -139,9 +139,11 @@ void signal_callback_handler(int signum)
 	case SIGTERM: /* Termination */
 		signal_desc = "SIGTERM";
 		break;
+#if !defined(_WIN32)
 	case SIGHUP:  /* Hangup */
 		signal_desc = "SIGHUP";
 		break;
+#endif
 	default:
 		signal_desc = "UNKNOWN";
 		break;
@@ -507,7 +509,9 @@ int main(int argc, char **argv)
 	signal(SIGILL,  signal_callback_handler); /* Illegal Instruction */
 	signal(SIGSEGV, signal_callback_handler); /* Segmentation Violation */
 	signal(SIGTERM, signal_callback_handler); /* Termination */
+#if !defined(_WIN32)
 	signal(SIGHUP,  signal_callback_handler); /* Hangup */
+#endif
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
