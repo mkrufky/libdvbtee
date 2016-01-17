@@ -34,6 +34,11 @@
 
 /* MSG_NOSIGNAL does not exists on OS X / Windows */
 #if defined(__APPLE__) || defined(__MACH__) || defined(_WIN32)
+# if defined(_WIN32)
+#  ifndef SO_NOSIGPIPE
+#   define SO_NOSIGPIPE 0
+#  endif
+# endif
 # ifndef MSG_NOSIGNAL
 #   define MSG_NOSIGNAL SO_NOSIGPIPE
 # endif
