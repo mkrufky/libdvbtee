@@ -212,7 +212,11 @@ const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len
 	if (!time_str)
 		return NULL;
 
+#if defined(_WIN32)
+	tm_time = *localtime(the_time);
+#else
 	localtime_r(the_time, &tm_time);
+#endif
 	snprintf(time_str, str_len, "%04d%02d%02d%02d%02d",
 		 1900 + tm_time.tm_year,
 		 1 + tm_time.tm_mon, tm_time.tm_mday,
