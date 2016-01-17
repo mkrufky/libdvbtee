@@ -48,9 +48,7 @@ void libdvbtee_set_debug_level(unsigned int debug)
 #define BUFSIZE ((4096/188)*188)
 
 feed::feed()
-  : h_thread((pthread_t)NULL)
-  , h_feed_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  : f_kill_thread(false)
   , fd(-1)
 #if FEED_BUFFER
   , feed_thread_prio(100)
@@ -76,8 +74,6 @@ feed::~feed()
 feed::feed(const feed&)
 {
 	dPrintf("(copy)");
-	h_thread = (pthread_t)NULL;
-	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
 #if FEED_BUFFER
@@ -93,8 +89,6 @@ feed& feed::operator= (const feed& cSource)
 	if (this == &cSource)
 		return *this;
 
-	h_thread = (pthread_t)NULL;
-	h_feed_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	fd = -1;
 #if FEED_BUFFER

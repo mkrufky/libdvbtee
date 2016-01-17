@@ -213,8 +213,7 @@ static inline size_t write_stdout(uint8_t* p_data, int size) {
 }
 
 output_stream::output_stream()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  : f_kill_thread(false)
   , f_streaming(false)
   , sock(-1)
   , mimetype(MIMETYPE_OCTET_STREAM)
@@ -246,7 +245,6 @@ output_stream::~output_stream()
 output_stream::output_stream(const output_stream&)
 {
 	dPrintf("(copy)");
-	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	m_iface = NULL;
@@ -270,7 +268,6 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	if (this == &cSource)
 		return *this;
 
-	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	stream_cb = NULL;
@@ -713,8 +710,7 @@ int output_stream::get_pids(map_pidtype &result)
 /* ----------------------------------------------------------------- */
 
 output::output()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  : f_kill_thread(false)
   , f_streaming(false)
   , ringbuffer()
   , num_targets(0)
@@ -743,7 +739,6 @@ output::output(const output&)
 {
 	dPrintf("(copy)");
 
-	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	num_targets = 0;
@@ -763,7 +758,6 @@ output& output::operator= (const output& cSource)
 	if (this == &cSource)
 		return *this;
 
-	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	f_streaming = false;
 	num_targets = 0;
