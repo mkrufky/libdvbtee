@@ -26,7 +26,11 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string>
+
+#include "dvbtee_config.h"
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 
 #include "output.h"
 #include "log.h"
