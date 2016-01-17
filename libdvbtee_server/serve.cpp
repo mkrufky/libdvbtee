@@ -284,8 +284,7 @@ static char http_conn_close[] =
 /*****************************************************************************/
 
 serve_client::serve_client()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  : f_kill_thread(false)
   , server(NULL)
   , tuner(NULL)
   , feeder(NULL)
@@ -309,7 +308,6 @@ serve_client::~serve_client()
 serve_client::serve_client(const serve_client&)
 {
 	dPrintf("(copy)");
-	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
@@ -329,7 +327,6 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 	if (this == &cSource)
 		return *this;
 
-	h_thread = (pthread_t)NULL;
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
