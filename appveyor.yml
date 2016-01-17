@@ -1,7 +1,10 @@
-os: unstable
-install:
-  - set QTDIR=C:\Qt\5.4\mingw491_32
-  - set PATH=%QTDIR%\bin;C:\MinGW\bin;%PATH%
+os: Visual Studio 2015
 build_script:
-  - qmake libdvbtee.pro
-  - mingw32-make -j
+  - set QTDIR=C:\Qt\5.4\mingw491_32
+  - set MINGWDIR=C:\MinGW
+  - set PATH=%QTDIR%\bin;%PATH%
+  - set PATH=%MINGWDIR%\bin;%PATH%
+  - set PATH=C:\msys64\usr\bin;%PATH%
+  - cd C:\projects\libdvbtee\
+  - mingw-get install mingw32-pthreads-w32
+  - ps: C:\msys64\usr\bin\sh.exe --login /c/projects/libdvbtee/build-auto.sh
