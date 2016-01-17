@@ -394,7 +394,9 @@ bool output_stream::drain()
 	while ((f_streaming) && (ringbuffer.get_capacity()))
 		usleep(20*1000);
 
+#if !defined(_WIN32)
 	fsync(sock);
+#endif
 
 	return (!f_streaming);
 }
