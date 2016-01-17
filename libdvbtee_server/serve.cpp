@@ -413,7 +413,11 @@ void* serve_client::client_thread()
 #endif
 	while (!f_kill_thread) {
 
+#if defined(_WIN32)
+		rxlen = recv(sock_fd, buf, sizeof(buf)-1, 0); // FIXME
+#else
 		rxlen = recv(sock_fd, buf, sizeof(buf)-1, MSG_DONTWAIT);
+#endif
 		if (rxlen > 0) {
 			buf[rxlen] = '\0';
 			dPrintf("(%d): %s", sock_fd, buf);
