@@ -364,17 +364,29 @@ int ATSCMultipleStringsInit(void)
         (ObjectDestructor_t)ATSCMultipleStringsDestructor);
 #endif
     Utf16ToUtf8CD = iconv_open("UTF-8", "UTF-16BE");
+#if 0
     if ((long) Utf16ToUtf8CD == -1)
+#else
+    if ((intptr_t) Utf16ToUtf8CD == -1)
+#endif
     {
         return 1;
     }
     Ucs2ToUtf8CD = iconv_open("UTF-8", "UCS-2BE");
+#if 0
     if ((long) Ucs2ToUtf8CD == -1)
+#else
+    if ((intptr_t) Ucs2ToUtf8CD == -1)
+#endif
     {
         return 1;
     }
     AsciiToUtf8CD = iconv_open("ASCII", "UCS-2BE");
+#if 0
     if ((long) AsciiToUtf8CD == -1)
+#else
+    if ((intptr_t) AsciiToUtf8CD == -1)
+#endif
     {
         return 1;
     }    
