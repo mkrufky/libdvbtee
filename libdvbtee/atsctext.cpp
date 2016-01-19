@@ -588,7 +588,11 @@ static uint8_t *AppendSegment(uint8_t *segment, int *sbIndex, bool *supported)
 #endif
     {
         *outBytes = 0;
+#if 0
         *sbIndex += (long)outBytes - (long)(TextBuffer + *sbIndex);
+#else
+        *sbIndex += (intptr_t)outBytes - (intptr_t)(TextBuffer + *sbIndex);
+#endif
     }
     
     return segment;
