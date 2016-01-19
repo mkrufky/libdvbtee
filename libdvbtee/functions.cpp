@@ -26,9 +26,28 @@
 #include "atsctext.h"
 
 #include "functions.h"
+//#include "dvbtee_config.h"
 
 #ifdef _WIN32
+#ifndef HAVE_TIMEGM
+#ifdef HAVE__MKGMTIME
 #define timegm _mkgmtime
+#else
+time_t timegm(struct tm * a_tm)
+{
+    time_t ltime = mktime(a_tm);
+    struct tm tm_val;
+    gmtime_s(&tm_val, &ltime);
+    int offset = (tm_val.tm_hour - a_tm->tm_hour);
+    if (offset > 12)
+    {
+        offset = 24 - offset;
+    }
+    time_t utc = mktime(a_tm) - offset * 3600;
+    return utc;
+}
+#endif
+#endif
 #endif
 
 /* taken from dvbstreamer-2.1.0/src/plugins/atsctoepg.c */
