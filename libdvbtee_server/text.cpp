@@ -213,6 +213,11 @@ const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len
 		return NULL;
 
 #if defined(_WIN32)
+	/* as per:
+	 * http://stackoverflow.com/questions/18551409/localtime-r-support-on-mingw
+	 * localtime_r is not supported, but localtime is supported.
+	 * localtime is thread safe but not reentrant.
+	 */
 	tm_time = *localtime(the_time);
 #else
 	localtime_r(the_time, &tm_time);
