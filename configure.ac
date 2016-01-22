@@ -6,6 +6,9 @@ AC_PREREQ([2.50])
 AC_INIT([libdvbtee], m4_defn([DVBTEE_VERSION]), [mkrufky@linuxtv.org])
 AC_CONFIG_AUX_DIR([.])
 
+# Check target OS
+AC_CANONICAL_TARGET
+
 AM_INIT_AUTOMAKE([subdir-objects])
 
 AC_CONFIG_SRCDIR([libdvbtee/parse.cpp])
@@ -247,4 +250,5 @@ libdvbtee configuration
 -----------------------
 libdvbtee version     : ${VERSION}
 compile flags         : ${CFLAGS}
+target os             : ${target_os}
 "
