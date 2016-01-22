@@ -143,8 +143,10 @@ int socket_listen::start(uint16_t port_requested)
 	}
 	port = port_requested;
 
-#if !defined(_WIN32)
-	// FIXME
+#if defined(_WIN32)
+	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
+	ioctlsocket(sock_fd, FIONBIO, &mode);
+#else
 	int fl = fcntl(sock_fd, F_GETFL, 0);
 	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 		perror("set non-blocking failed");
@@ -197,8 +199,10 @@ int socket_listen::start_udp(uint16_t port_requested)
 		return -1;
 	}
 
-#if !defined(_WIN32)
-	// FIXME
+#if defined(_WIN32)
+	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
+	ioctlsocket(sock_fd, FIONBIO, &mode);
+#else
 	int fl = fcntl(sock_fd, F_GETFL, 0);
 	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
 		perror("set non-blocking failed");
