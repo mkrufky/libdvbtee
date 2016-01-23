@@ -24,6 +24,7 @@
 #include <string>
 #include "functions.h"
 #include "text.h"
+#include "dvbtee_config.h"
 
 const std::string html_dump_epg_header_footer_callback(void *, bool header, bool channel)
 {
@@ -212,7 +213,7 @@ const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len
 	if (!time_str)
 		return NULL;
 
-#if defined(_WIN32)
+#ifndef HAVE_LOCALTIME_R
 	/* as per:
 	 * http://stackoverflow.com/questions/18551409/localtime-r-support-on-mingw
 	 * localtime_r is not supported, but localtime is supported.
