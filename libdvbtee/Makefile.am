@@ -89,3 +89,7 @@ endif CYGWIN
 if MINGW
 libdvbtee_la_LIBADD += -liconv -lws2_32
 endif MINGW
+
+if MSYS
+libdvbtee_la_LIBADD += -liconv -lws2_32
+endif MSYS
