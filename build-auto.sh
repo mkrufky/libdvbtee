@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd "$(dirname "$0")"
 export DVBTEE_ROOT="`pwd`"
 
 mkdir -p usr/bin
