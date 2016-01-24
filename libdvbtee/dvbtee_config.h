@@ -46,6 +46,10 @@
 
 #ifdef _WIN32
 #include <ws2tcpip.h>
+
+#ifndef HAVE_STRTOK_R
+#define strtok_r(a,b,c) strtok(a,b)
+#endif
 #endif
 
 #endif //__DVBTEE_CONFIG_H__
