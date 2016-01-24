@@ -35,6 +35,20 @@
 #define dPrintf(fmt, arg...) __dPrintf(DBG_SERVE, fmt, ##arg)
 
 
+void socket_set_nbio(int sockfd, bool onoff)
+{
+#if defined(HAVE_FCNTL)
+	int fl = fcntl(sockfd, F_GETFL, 0);
+	int ret = fcntl(sockfd, F_SETFL, onoff ? (fl | O_NONBLOCK) : (fl & ~O_NONBLOCK));
+	if (ret < 0) perror("set non-blocking failed");
+#else
+#if defined(_WIN32)
+	unsigned long mode = onoff ? 1 : 0;  /* 1 to enable non-blocking socket */
+	ioctlsocket(sockfd, FIONBIO, &mode);
+#endif
+#endif
+}
+
 socket_listen::socket_listen()
   :
 #if !defined(_WIN32)
@@ -145,16 +159,7 @@ int socket_listen::start(uint16_t port_requested)
 	}
 	port = port_requested;
 
-#if (defined(_WIN32) && !defined(HAVE_FCNTL))
-	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
-	ioctlsocket(sock_fd, FIONBIO, &mode);
-#else
-	int fl = fcntl(sock_fd, F_GETFL, 0);
-	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
-#endif
+	socket_set_nbio(sock_fd);
 #define MAX_SOCKETS 4
 	listen(sock_fd, MAX_SOCKETS);
 
@@ -201,16 +206,7 @@ int socket_listen::start_udp(uint16_t port_requested)
 		return -1;
 	}
 
-#if (defined(_WIN32) && !defined(HAVE_FCNTL))
-	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
-	ioctlsocket(sock_fd, FIONBIO, &mode);
-#else
-	int fl = fcntl(sock_fd, F_GETFL, 0);
-	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
-#endif
+	socket_set_nbio(sock_fd);
 
 	int ret = pthread_create(&h_thread, NULL, udp_listen_thread, this);
 

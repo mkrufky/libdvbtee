@@ -620,14 +620,7 @@ int output_stream::add(int socket, unsigned int method, map_pidtype &pids)
 	strncpy(name, "SOCKET", sizeof(name));
 
 #if NON_BLOCKING_TCP_SEND
-#if (defined(_WIN32) && !defined(HAVE_FCNTL))
-	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
-	ioctlsocket(sock, FIONBIO, &mode);
-#else
-	int fl = fcntl(sock, F_GETFL, 0);
-	if (fcntl(socket, F_SETFL, fl | O_NONBLOCK) < 0)
-		perror("set non-blocking failed");
-#endif
+	socket_set_nbio(sock);
 #endif
 	ringbuffer.reset();
 	return set_pids(pids);
@@ -705,14 +698,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 	sock = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
 	if (sock >= 0) {
 
-#if (defined(_WIN32) && !defined(HAVE_FCNTL))
-		unsigned long mode = 1;  /* 1 to enable non-blocking socket */
-		ioctlsocket(sock, FIONBIO, &mode);
-#else
-		int fl = fcntl(sock, F_GETFL, 0);
-		if (fcntl(sock, F_SETFL, fl | O_NONBLOCK) < 0)
-			perror("set non-blocking failed");
-#endif
+		socket_set_nbio(sock);
 
 		char resolved_ip[16] = { 0 };
 		if (0 == hostname_to_ip(ip, resolved_ip, sizeof(resolved_ip)))

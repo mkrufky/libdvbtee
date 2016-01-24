@@ -710,11 +710,7 @@ int feed::start_udp_listener(uint16_t port_requested)
 	}
 	//	port = port_requested;
 #if 0
-	int fl = fcntl(fd, F_GETFL, 0);
-	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
+	socket_set_nbio(fd);
 #endif
 	int ret = pthread_create(&h_thread, NULL, udp_listen_feed_thread, this);
 

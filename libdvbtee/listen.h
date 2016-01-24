@@ -31,6 +31,8 @@
 #include <string.h>
 #include <unistd.h>
 
+void socket_set_nbio(int sockfd, bool onoff = true);
+
 class socket_listen_iface
 {
 public:
