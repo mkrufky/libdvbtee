@@ -28,6 +28,9 @@
 #include <string>
 
 #include "dvbtee_config.h"
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -221,6 +224,22 @@ static inline size_t write_stdout(uint8_t* p_data, int size) {
 	return 188 * fwrite(p_data, 188, size / 188, stdout);
 }
 
+class output_stream_priv
+{
+	output_stream_priv()
+	{
+		reset();
+	}
+
+	void reset()
+	{
+		memset(&ip_addr, 0, sizeof(ip_addr));
+	}
+
+friend class output_stream;
+	struct sockaddr_in ip_addr;
+};
+
 output_stream::output_stream()
   :
 #if !defined(_WIN32)
@@ -239,10 +258,10 @@ output_stream::output_stream()
   , stream_cb(NULL)
   , stream_cb_priv(NULL)
   , have_pat(false)
+  , priv(NULL)
 {
 	dPrintf("()");
 	memset(&name, 0, sizeof(name));
-	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
 }
 
@@ -273,7 +292,7 @@ output_stream::output_stream(const output_stream&)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
-	memset(&ip_addr, 0, sizeof(ip_addr));
+	if (priv) priv = NULL;
 	pids.clear();
 	have_pat = false;
 }
@@ -298,7 +317,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
-	memset(&ip_addr, 0, sizeof(ip_addr));
+	if (priv) priv = NULL;
 	pids.clear();
 	have_pat = false;
 
@@ -507,12 +526,14 @@ int output_stream::stream(uint8_t* p_data, int size)
 {
 	int ret = -1;
 
-	if ((!p_data) || (!size))
+	if (!priv)
+		dPrintf("no priv - should never happen!!!");
+	else if ((!p_data) || (!size))
 		dPrintf("no data to stream!!!");
 	/* stream data to target */
 	else switch (stream_method) {
 	case OUTPUT_STREAM_UDP:
-		ret = socket_send(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		ret = socket_send(sock, p_data, size, 0, (struct sockaddr*) &priv->ip_addr, sizeof(priv->ip_addr));
 		break;
 	case OUTPUT_STREAM_TCP:
 		ret = socket_send(sock, p_data, size, 0);
@@ -697,10 +718,10 @@ int output_stream::add(char* target, map_pidtype &pids)
 		if (0 == hostname_to_ip(ip, resolved_ip, sizeof(resolved_ip)))
 			ip = &resolved_ip[0];
 
-		memset(&ip_addr, 0, sizeof(ip_addr));
-		ip_addr.sin_family = AF_INET;
-		ip_addr.sin_port   = htons(port);
-		if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
+		if (!priv) priv = new output_stream_priv;
+		priv->ip_addr.sin_family = AF_INET;
+		priv->ip_addr.sin_port   = htons(port);
+		if (inet_aton(ip, &priv->ip_addr.sin_addr) == 0) {
 
 			perror("ip address translation failed");
 			return -1;
@@ -708,7 +729,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 			ringbuffer.reset();
 
 		if (b_tcp) {
-			if ((connect(sock, (struct sockaddr *) &ip_addr, sizeof(ip_addr)) < 0) && (errno != EINPROGRESS)) {
+			if ((connect(sock, (struct sockaddr *) &priv->ip_addr, sizeof(priv->ip_addr)) < 0) && (errno != EINPROGRESS)) {
 				perror("failed to connect to server");
 				return -1;
 			}

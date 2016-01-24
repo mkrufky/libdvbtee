@@ -22,10 +22,6 @@
 #ifndef __OUTPUT_H__
 #define __OUTPUT_H__
 
-#include "dvbtee_config.h"
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
 #include <pthread.h>
 #include <stdint.h>
 #include <string.h>
@@ -74,6 +70,8 @@ class output_stream_iface
 public:
 	virtual int stream(const uint8_t *, size_t) = 0;
 };
+
+class output_stream_priv;
 
 class output_stream
 {
@@ -125,7 +123,7 @@ private:
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
 
-	struct sockaddr_in  ip_addr;
+	class output_stream_priv *priv;
 
 	int stream(uint8_t*, int);
 #define OUTPUT_STREAM_UDP    0
