@@ -620,7 +620,7 @@ int output_stream::add(int socket, unsigned int method, map_pidtype &pids)
 	strncpy(name, "SOCKET", sizeof(name));
 
 #if NON_BLOCKING_TCP_SEND
-#if defined(_WIN32)
+#if (defined(_WIN32) && !defined(HAVE_FCNTL))
 	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
 	ioctlsocket(sock, FIONBIO, &mode);
 #else
@@ -705,7 +705,7 @@ int output_stream::add(char* target, map_pidtype &pids)
 	sock = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
 	if (sock >= 0) {
 
-#if defined(_WIN32)
+#if (defined(_WIN32) && !defined(HAVE_FCNTL))
 		unsigned long mode = 1;  /* 1 to enable non-blocking socket */
 		ioctlsocket(sock, FIONBIO, &mode);
 #else

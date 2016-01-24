@@ -28,6 +28,8 @@
 
 #include "listen.h"
 #include "log.h"
+#include "dvbtee_config.h"
+
 #define CLASS_MODULE "listen"
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_SERVE, fmt, ##arg)
@@ -143,7 +145,7 @@ int socket_listen::start(uint16_t port_requested)
 	}
 	port = port_requested;
 
-#if defined(_WIN32)
+#if (defined(_WIN32) && !defined(HAVE_FCNTL))
 	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
 	ioctlsocket(sock_fd, FIONBIO, &mode);
 #else
@@ -199,7 +201,7 @@ int socket_listen::start_udp(uint16_t port_requested)
 		return -1;
 	}
 
-#if defined(_WIN32)
+#if (defined(_WIN32) && !defined(HAVE_FCNTL))
 	unsigned long mode = 1;  /* 1 to enable non-blocking socket */
 	ioctlsocket(sock_fd, FIONBIO, &mode);
 #else
