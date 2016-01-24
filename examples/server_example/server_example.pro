@@ -42,7 +42,6 @@ INCLUDEPATH += $$PWD/../../usr/include
 DEPENDPATH += $$PWD/../../usr/include
 
 QMAKE_CXXFLAGS += -Wno-unused-parameter -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64
-QMAKE_CXXFLAGS += -DHAVE_ARPA_INET_H
 
 unix:!macx:!symbian: QMAKE_CXXFLAGS += -DUSE_LINUXTV
 

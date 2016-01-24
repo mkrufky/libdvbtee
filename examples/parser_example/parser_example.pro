@@ -42,6 +42,5 @@ INCLUDEPATH += $$PWD/../../libdvbtee_server
 DEPENDPATH += $$PWD/../../libdvbtee_server
 
 QMAKE_CXXFLAGS += -Wno-unused-parameter -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__USE_LARGEFILE64
-QMAKE_CXXFLAGS += -DHAVE_ARPA_INET_H
 
 OTHER_FILES += Makefile.am
