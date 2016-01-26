@@ -270,6 +270,7 @@ output_stream::~output_stream()
 	dPrintf("(%d)", sock);
 
 	stop();
+	if (priv) delete priv;
 
 	dPrintf("(stream) %lu packets in, %lu packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 }
