@@ -527,16 +527,16 @@ int output_stream::stream(uint8_t* p_data, int size)
 {
 	int ret = -1;
 
-	if (!priv)
-		dPrintf("no priv - should never happen!!!");
-	else if ((!p_data) || (!size))
+	if ((!p_data) || (!size))
 		dPrintf("no data to stream!!!");
 	/* stream data to target */
 	else switch (stream_method) {
 	case OUTPUT_STREAM_UDP:
+		if (!priv) dPrintf("no priv - should never happen!!!"); else
 		ret = socket_send(sock, p_data, size, 0, (struct sockaddr*) &priv->ip_addr, sizeof(priv->ip_addr));
 		break;
 	case OUTPUT_STREAM_TCP:
+		if (!priv) dPrintf("no priv - should never happen!!!"); else
 		ret = socket_send(sock, p_data, size, 0);
 		if (ret < 0) {
 			stop_without_wait();
