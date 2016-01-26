@@ -27,6 +27,8 @@
 #include "parse.h"
 #include "rbuf.h"
 
+#define USE_IOS_READ defined(_WIN32)
+
 class feed_pull_iface
 {
 public:
@@ -95,6 +97,9 @@ private:
 	void            *feed_thread();
 #endif
 	void       *file_feed_thread();
+#if USE_IOS_READ
+	void   *ios_file_feed_thread();
+#endif
 	void      *stdin_feed_thread();
 	void *tcp_client_feed_thread();
 	void *udp_listen_feed_thread();

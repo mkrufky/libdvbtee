@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <fstream>
+
 #include "feed.h"
 #include "log.h"
 #define CLASS_MODULE "feed"
@@ -131,12 +133,16 @@ int feed::_open_file(int flags)
 
 	fd = -1;
 
+#if !USE_IOS_READ
 	if ((fd = open(filename, O_RDONLY|flags )) < 0)
 		fprintf(stderr, "failed to open %s\n", filename);
 	else
 		fprintf(stderr, "%s: using %s\n", __func__, filename);
 
 	return fd;
+#else
+	return 0;
+#endif
 }
 
 void feed::close_file()
@@ -166,7 +172,11 @@ void* feed::feed_thread(void *p_this)
 //static
 void* feed::file_feed_thread(void *p_this)
 {
+#if USE_IOS_READ
+	return static_cast<feed*>(p_this)->ios_file_feed_thread();
+#else
 	return static_cast<feed*>(p_this)->file_feed_thread();
+#endif
 }
 
 //static
@@ -383,6 +393,73 @@ void *feed::file_feed_thread()
 	close_file();
 	pthread_exit(NULL);
 }
+
+#if USE_IOS_READ
+void *feed::ios_file_feed_thread()
+{
+	ssize_t r;
+#if FEED_BUFFER
+	void *q = NULL;
+#else
+	unsigned char q[BUFSIZE];
+#endif
+	int available;
+
+	dPrintf("(ios)");
+	std::ifstream infile;
+	infile.open(filename, std::ios::binary | std::ios::in);
+	if (infile.fail()) {
+		switch (errno) {
+		case EACCES:
+			fprintf(stderr, "%s: r = %d, errno = EACCES\n", __func__, (int)r);
+			break;
+		case ENOENT:
+			fprintf(stderr, "%s: r = %d, errno = ENOENT\n", __func__, (int)r);
+			break;
+		default:
+			fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, errno);
+			break;
+		}
+	} else
+
+	while (!f_kill_thread) {
+
+#if FEED_BUFFER
+		available = ringbuffer.get_write_ptr(&q);
+#else
+		available = sizeof(q);
+#endif
+		available = (available < BUFSIZE) ? available : BUFSIZE;
+
+		infile.read((char *)q, available);
+		r = available;
+		if (infile.fail()) {
+			r = 0;
+			int err = errno;
+			switch (err) {
+			case EACCES:
+				fprintf(stderr, "%s: r = %d, errno = EACCES\n", __func__, (int)r);
+				break;
+			case ENOENT:
+				fprintf(stderr, "%s: r = %d, errno = ENOENT\n", __func__, (int)r);
+				break;
+			default:
+				if (err) fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, err);
+				break;
+			}
+			f_kill_thread = true;
+			continue;
+		}
+#if FEED_BUFFER
+		ringbuffer.put_write_ptr(r);
+#else
+		parser.feed(r, q);
+#endif
+	}
+	close_file();
+	pthread_exit(NULL);
+}
+#endif
 
 void *feed::stdin_feed_thread()
 {
