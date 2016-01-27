@@ -46,6 +46,8 @@ public:
 	 *	uint8_t audioType = o.get<uint8_t>("audioType");
 	 * }
 	 */
+
+	static void a();
 };
 
 }

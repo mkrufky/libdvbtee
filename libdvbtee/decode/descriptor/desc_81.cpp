@@ -205,4 +205,6 @@ static const char *num_channels(uint8_t num_channels_code)
 	return ret;
 }
 
+void desc_81::a() {}
+
 REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_81)

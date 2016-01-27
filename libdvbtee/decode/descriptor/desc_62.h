@@ -37,6 +37,8 @@ DESCRIPTOR_DECODER_TPL
 public:
 	desc_62(Decoder *, dvbpsi_descriptor_t*);
 	virtual ~desc_62();
+
+	static void a();
 };
 
 }

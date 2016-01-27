@@ -41,6 +41,8 @@ public:
 	/* std::string& providerName = o.get<std::string>("providerName");
 	 * std::string&  serviceName = o.get<std::string>("serviceName");
 	 */
+
+	static void a();
 };
 
 }

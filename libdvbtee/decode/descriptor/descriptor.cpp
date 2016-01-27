@@ -28,6 +28,28 @@
 using namespace dvbtee::decode;
 using namespace valueobj;
 
+#include "desc_0a.h"
+#include "desc_48.h"
+#include "desc_4d.h"
+#include "desc_62.h"
+#include "desc_81.h"
+#include "desc_83.h"
+#include "desc_86.h"
+#include "desc_a0.h"
+#include "desc_a1.h"
+
+static void a()
+{
+	desc_0a::a();
+	desc_48::a();
+	desc_4d::a();
+	desc_62::a();
+	desc_81::a();
+	desc_83::a();
+	desc_86::a();
+	desc_a0::a();
+	desc_a1::a();
+}
 
 Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
  : Decoder(parent, name)
@@ -39,7 +61,7 @@ Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *
 
 Descriptor::~Descriptor()
 {
-	//
+	a();
 }
 
 void Descriptor::init()

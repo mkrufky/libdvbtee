@@ -66,4 +66,6 @@ desc_4d::~desc_4d()
 	//
 }
 
+void desc_4d::a() {}
+
 REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_4d)

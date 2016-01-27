@@ -40,6 +40,8 @@ public:
 
 	/* uint16_t& lcn = d->get<uint16_t>(service_id);
 	 */
+
+	static void a();
 };
 
 }

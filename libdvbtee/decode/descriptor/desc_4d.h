@@ -42,6 +42,8 @@ public:
 	 * std::string& name = o.get<std::string>("name");
 	 * std::string& text = o.get<std::string>("text");
 	 */
+
+	static void a();
 };
 
 }

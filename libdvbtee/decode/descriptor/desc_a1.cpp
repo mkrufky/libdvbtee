@@ -81,4 +81,6 @@ desc_a1::~desc_a1()
 	//
 }
 
+void desc_a1::a() {}
+
 REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_a1)
