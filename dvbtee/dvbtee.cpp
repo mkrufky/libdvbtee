@@ -332,6 +332,17 @@ void usage(bool help, char *myname)
 
 int main(int argc, char **argv)
 {
+#if defined(_WIN32)
+/* Initialize Winsock as described here:
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/ms738573(v=vs.85).aspx
+ */
+	WSADATA wsaData;
+	int iResult;
+
+	iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+	if (iResult != NO_ERROR)
+		printf("Error at WSAStartup()\n");
+#endif
 	dvbtee_context context;
 	int opt, channel = 0;
 	bool b_read_dvr = false;
@@ -546,6 +557,9 @@ int main(int argc, char **argv)
 			tuner->feeder.parser.limit_eit(eit_limit);
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
+#if defined(_WIN32)
+			WSACleanup();
+#endif
 			exit(-1);
 		}
 	}
@@ -717,5 +731,8 @@ exit:
 		parse::dumpJson();
 	}
 	cleanup(&context);
+#if defined(_WIN32)
+	WSACleanup();
+#endif
 	return 0;
 }
