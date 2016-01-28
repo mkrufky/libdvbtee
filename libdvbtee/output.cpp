@@ -716,7 +716,11 @@ int output_stream::add(char* target, map_pidtype &pids)
 			ringbuffer.reset();
 
 		if (b_tcp) {
-			if ((connect(sock, (struct sockaddr *) &priv->ip_addr, sizeof(priv->ip_addr)) < 0) && (errno != EINPROGRESS)) {
+			if (((connect(sock, (struct sockaddr *) &priv->ip_addr, sizeof(priv->ip_addr)) < 0) && (errno != EINPROGRESS))
+#if defined (_WIN32)
+				&& (WSAGetLastError() != WSAEWOULDBLOCK)
+#endif
+			) {
 				perror("failed to connect to server");
 				return -1;
 			}
