@@ -28,6 +28,7 @@
 using namespace dvbtee::decode;
 using namespace valueobj;
 
+#ifdef FORCE_DECODER_LINKAGE
 #include "desc_0a.h"
 #include "desc_48.h"
 #include "desc_4d.h"
@@ -50,6 +51,7 @@ static void a()
 	desc_a0::a();
 	desc_a1::a();
 }
+#endif
 
 Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
  : Decoder(parent, name)
@@ -61,7 +63,9 @@ Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *
 
 Descriptor::~Descriptor()
 {
+#ifdef FORCE_DECODER_LINKAGE
 	a();
+#endif
 }
 
 void Descriptor::init()
