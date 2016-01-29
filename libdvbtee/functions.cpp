@@ -28,6 +28,12 @@
 #include "functions.h"
 //#include "dvbtee_config.h"
 
+#ifndef HAVE_GMTIME_S
+//#ifdef HAVE_GMTIME_R
+#define gmtime_s(a,b) gmtime_r(a,b)
+//#endif
+#endif
+
 #ifdef _WIN32
 #ifndef HAVE_TIMEGM
 #ifdef HAVE__MKGMTIME

@@ -23,6 +23,15 @@
 #define __FUNCTIONS_H__
 
 #include <stdint.h>
+
+#ifdef _WIN32
+#ifndef HAVE_TIMEGM
+#ifndef HAVE__MKGMTIME
+#define __STDC_WANT_LIB_EXT1__ 1
+#endif
+#endif
+#endif
+
 #include <time.h>
 
 #if 0
