@@ -50,9 +50,9 @@ else
 fi
 
 if [ -e .staticlib ]; then
-    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS=-I${DVBTEE_ROOT}/usr/include/dvbpsi/ LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@" --enable-static
+    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS="-I${DVBTEE_ROOT}/usr/include/dvbpsi/ -I/usr/local/include/" LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@" --enable-static
 else
-    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS=-I${DVBTEE_ROOT}/usr/include/dvbpsi/ LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@"
+    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS="-I${DVBTEE_ROOT}/usr/include/dvbpsi/ -I/usr/local/include/" LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@"
 fi
 
 if [ -e .clean ]; then
