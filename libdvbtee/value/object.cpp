@@ -195,7 +195,7 @@ const std::string Object::toJson() const
 		ValueBase *val = it->second;
 
 		if (it != map.begin()) s << ", ";
-		s << "'" << it->first << "': ";
+		s << "\"" << it->first << "\": ";
 
 		s << val->toJson();
 	}
