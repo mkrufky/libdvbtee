@@ -29,9 +29,9 @@ install:
   - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
   - set PATH=C:\msys64\usr\bin;%PATH%
   - bash --login -c "pacman -Q"
-  - bash --login -c "pacman -S --noconfirm python"
-  - bash --login -c "curl https://bootstrap.pypa.io/get-pip.py | python"
-  - bash --login -c "pip install cram"
+  - bash --login -c "pacman -S --noconfirm python mingw-gnutls mingw-libiconv"
+#  - bash --login -c "curl https://bootstrap.pypa.io/get-pip.py | python"
+#  - bash --login -c "pip install cram"
 
 # Cygwin build script
 #
