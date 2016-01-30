@@ -39,17 +39,17 @@ using namespace valueobj;
 #include "desc_a0.h"
 #include "desc_a1.h"
 
-static void a()
+static void load()
 {
-	desc_0a::a();
-	desc_48::a();
-	desc_4d::a();
-	desc_62::a();
-	desc_81::a();
-	desc_83::a();
-	desc_86::a();
-	desc_a0::a();
-	desc_a1::a();
+	desc_0a::__load();
+	desc_48::__load();
+	desc_4d::__load();
+	desc_62::__load();
+	desc_81::__load();
+	desc_83::__load();
+	desc_86::__load();
+	desc_a0::__load();
+	desc_a1::__load();
 }
 #endif
 
@@ -64,7 +64,7 @@ Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *
 Descriptor::~Descriptor()
 {
 #ifdef FORCE_DECODER_LINKAGE
-	a();
+	load();
 #endif
 }
 

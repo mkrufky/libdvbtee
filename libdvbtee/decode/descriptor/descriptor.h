@@ -164,13 +164,13 @@ private:
 };
 
 #define DESCRIPTOR_DECODER_TPL \
-	public:  static void a(); \
+	public: static void __load();
 
 #define REGISTER_DESCRIPTOR_FACTORY(tag, decoder) \
 	\
 	static volatile const DescriptorFactory<tag, decoder> &__DescFactory = DescriptorFactory<tag, decoder>::instance();\
 	\
-	void decoder::a() { __DescFactory.instance(); } \
+	void decoder::__load() { __DescFactory.instance(); }
 
 }
 
