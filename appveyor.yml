@@ -29,7 +29,7 @@ install:
   - '%CYG_BASH% -lc "cygcheck -dc cygwin"'
   - set PATH=C:\msys64\usr\bin;%PATH%
   - bash --login -c "pacman -Q"
-  - bash --login -c "pacman -S --noconfirm python mingw-gnutls mingw-libiconv"
+  - bash --login -c "pacman -S --noconfirm python mingw-w64-x86_64-gnutls mingw-w64-x86_64-libiconv mingw-w64-i686-gnutls mingw-w64-i686-libiconv"
 #  - bash --login -c "curl https://bootstrap.pypa.io/get-pip.py | python"
 #  - bash --login -c "pip install cram"
 
