@@ -1,3 +1,4 @@
+os: Visual Studio 2015
 environment:
   global:
     CYG_ROOT: C:\cygwin
