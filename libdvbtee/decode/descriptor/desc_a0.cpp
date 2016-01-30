@@ -64,6 +64,4 @@ desc_a0::~desc_a0()
 	//
 }
 
-void desc_a0::a() {}
-
 REGISTER_DESCRIPTOR_FACTORY(DESC_TAG, desc_a0)

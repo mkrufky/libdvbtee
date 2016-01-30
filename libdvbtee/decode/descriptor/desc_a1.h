@@ -45,8 +45,6 @@ public:
 	 * o.get<uint8_t>("streamType");
 	 * o.get<std::string>("streamTypeString");
 	 */
-
-	static void a();
 };
 
 }
