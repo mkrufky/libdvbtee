@@ -1,4 +1,4 @@
-SUBDIRS = parser_example walk_hls
+SUBDIRS = file_example parser_example walk_hls
 
 if !BUILD_OS_IS_DARWIN
 if !MINGW
