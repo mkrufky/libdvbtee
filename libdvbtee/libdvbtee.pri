@@ -13,6 +13,9 @@ olddecoder {
     SOURCES += $$DECODER_SOURCES
 }
 
+include ( feed/feed.pri )
+SOURCES += $$FEEDER_SOURCES
+
 SOURCES += \
     atsctext.cpp \
     channels.cpp \

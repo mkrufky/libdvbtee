@@ -9,6 +9,9 @@ libdvbtee_la_SOURCES = \
     decode.cpp \
     demux.cpp \
     feed.cpp \
+    feed/feeder.cpp \
+    feed/fdfeeder.cpp \
+    feed/file.cpp \
     functions.cpp \
     hdhr_tuner.cpp \
     hlsfeed.cpp \

@@ -242,6 +242,7 @@ AC_CONFIG_FILES([Makefile
                  libdvbtee/value/Makefile
                  libdvbtee_server/Makefile
                  tunerprovider/Makefile
+                 examples/file_example/Makefile
                  examples/parser_example/Makefile
                  examples/server_example/Makefile
                  examples/walk_hls/Makefile
