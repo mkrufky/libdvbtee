@@ -33,7 +33,7 @@ int StdinFeeder::start()
 		return -1;
 	}
 	fprintf(stderr, "%s: using STDIN\n", __func__);
-	strncpy(m_uri, "STDIN", sizeof(m_uri));
+	//strncpy(m_uri, "STDIN", sizeof(m_uri));
 
 	f_kill_thread = false;
 
