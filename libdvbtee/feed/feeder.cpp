@@ -45,6 +45,7 @@ int PushFeeder::push(int size, const uint8_t* data)
 	return parser.feed(size, (uint8_t*)data);
 }
 
+
 ThreadFeeder::ThreadFeeder()
   :
 #if !defined(_WIN32)
@@ -91,4 +92,47 @@ bool ThreadFeeder::wait_for_event_or_timeout(unsigned int timeout, unsigned int 
 	default:
 		return f_kill_thread;
 	}
+}
+
+
+PullFeeder::PullFeeder(feed_pull_iface &iface)
+  : m_iface(iface)
+{
+  //
+}
+
+PullFeeder::~PullFeeder()
+{
+	//
+}
+
+int PullFeeder::start()
+{
+	f_kill_thread = false;
+
+	//strncpy(m_uri, "PULLCALLBACK", sizeof(m_uri));
+
+	int ret = pthread_create(&h_thread, NULL, pull_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+
+	return ret;
+}
+
+//static
+void* PullFeeder::pull_thread(void *p_this)
+{
+	return static_cast<PullFeeder*>(p_this)->pull_thread();
+}
+
+void *PullFeeder::pull_thread()
+{
+	dPrintf("()");
+
+	while (!f_kill_thread)
+		if (0 >= m_iface.pull())
+			usleep(50*1000);
+
+	pthread_exit(NULL);
 }

@@ -63,6 +63,27 @@ protected:
 	bool f_kill_thread;
 };
 
+class feed_pull_iface // FIXME: RENAME!!
+{
+public:
+	virtual int pull() = 0;
+};
+
+class PullFeeder : public ThreadFeeder
+{
+public:
+	PullFeeder(feed_pull_iface &iface);
+	virtual ~PullFeeder();
+
+	virtual int start();
+
+private:
+	feed_pull_iface &m_iface;
+
+	void        *pull_thread();
+	static void *pull_thread(void*);
+};
+
 }
 
 }
