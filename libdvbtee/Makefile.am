@@ -13,6 +13,7 @@ libdvbtee_la_SOURCES = \
     feed/fdfeeder.cpp \
     feed/file.cpp \
     feed/ifsfeeder.cpp \
+    feed/stdin.cpp \
     functions.cpp \
     hdhr_tuner.cpp \
     hlsfeed.cpp \
