@@ -61,8 +61,6 @@ public:
 protected:
 	pthread_t h_thread;
 	bool f_kill_thread;
-
-	char m_uri[256];
 };
 
 }

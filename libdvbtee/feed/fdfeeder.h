@@ -7,7 +7,17 @@ namespace dvbtee {
 
 namespace feed {
 
-class FdFeeder : public ThreadFeeder
+class UriFeeder
+{
+public:
+	UriFeeder();
+	virtual ~UriFeeder();
+
+protected:
+	char m_uri[256];
+};
+
+class FdFeeder : public ThreadFeeder, public UriFeeder
 {
 public:
 	FdFeeder();
