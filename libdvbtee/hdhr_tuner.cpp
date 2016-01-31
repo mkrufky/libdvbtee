@@ -89,7 +89,7 @@ private:
 };
 
 hdhr_tuner::hdhr_tuner()
-  : pullFeeder(this)
+  : pullFeeder(*this)
   , tune(pullFeeder)
   , dev(NULL)
 {
