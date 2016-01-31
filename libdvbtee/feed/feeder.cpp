@@ -53,12 +53,12 @@ ThreadFeeder::ThreadFeeder()
 #endif
     f_kill_thread(false)
 {
-	memset(m_uri, 0, sizeof(m_uri));
+	//
 }
 
 ThreadFeeder::~ThreadFeeder()
 {
-	dPrintf("(%s)", strlen(m_uri) ? m_uri : "");
+	//
 }
 
 void ThreadFeeder::stop_without_wait()
