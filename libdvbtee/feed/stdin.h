@@ -7,7 +7,7 @@ namespace dvbtee {
 
 namespace feed {
 
-class StdinFeeder : public ThreadFeeder, public UriFeeder
+class StdinFeeder : public ThreadFeeder//, public UriFeeder
 {
 public:
 	StdinFeeder();
