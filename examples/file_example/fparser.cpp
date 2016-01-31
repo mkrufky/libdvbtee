@@ -183,12 +183,6 @@ int main(int argc, char **argv)
 		}
 		goto exit;
 	}
-
-	/* if we're not feeding a file or url then read from stdin */
-	if (NULL == freopen(NULL, "rb", stdin)) {
-		fprintf(stderr, "failed to open stdin!\n");
-		goto exit;
-	}
 exit:
 //	cleanup(&context);
 #if 1 /* FIXME */
