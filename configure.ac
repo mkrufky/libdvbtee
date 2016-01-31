@@ -245,6 +245,7 @@ AC_CONFIG_FILES([Makefile
                  examples/file_example/Makefile
                  examples/parser_example/Makefile
                  examples/server_example/Makefile
+                 examples/stdin_example/Makefile
                  examples/walk_hls/Makefile
                  examples/Makefile
                  packaging/libdvbtee.spec])
