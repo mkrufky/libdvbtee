@@ -1,5 +1,5 @@
-#ifndef FILE_H
-#define FILE_H
+#ifndef IFSFEEDER_H
+#define IFSFEEDER_H
 
 #include "fdfeeder.h"
 
@@ -7,11 +7,11 @@ namespace dvbtee {
 
 namespace feed {
 
-class FileFeeder : public FdFeeder
+class IfsFeeder : public ThreadFeeder, public UriFeeder
 {
 public:
-	FileFeeder();
-	virtual ~FileFeeder();
+	IfsFeeder();
+	virtual ~IfsFeeder();
 
 	virtual int start();
 
@@ -29,4 +29,4 @@ private:
 
 }
 
-#endif // FILE_H
+#endif // IFSFEEDER_H

@@ -27,13 +27,22 @@
 #include <unistd.h>
 
 #include "feed.h"
+#define IFS 1
+#if IFS
+#include "feed/ifsfeeder.h"
+#else
 #include "feed/file.h"
+#endif
 
 #include "atsctext.h"
 
 struct dvbtee_context
 {
+#if IFS
+	dvbtee::feed::IfsFeeder feeder;
+#else
 	dvbtee::feed::FileFeeder feeder;
+#endif
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
@@ -46,12 +55,16 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 {
 	if (quick) {
 		context->feeder.stop_without_wait();
+#if !IFS
 		context->feeder.closeFd();
+#endif
 	} else {
 		context->feeder.stop();
 	}
 
+#if !IFS
 	context->feeder.closeFd();
+#endif
 #if 1 /* FIXME */
 	ATSCMultipleStringsDeInit();
 #endif
@@ -156,7 +169,9 @@ int main(int argc, char **argv)
 				context.feeder.wait_for_streaming_or_timeout(timeout);
 				context.feeder.stop();
 			}
+#if !IFS
 			context.feeder.closeFd();
+#endif
 #if 0
 		} else
 		/* next, try to open it as a url */

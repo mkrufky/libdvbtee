@@ -68,11 +68,7 @@ int FileFeeder::start()
 //static
 void* FileFeeder::file_feed_thread(void *p_this)
 {
-#if USE_IOS_READ
-	return static_cast<FileFeeder*>(p_this)->ios_file_feed_thread();
-#else
 	return static_cast<FileFeeder*>(p_this)->file_feed_thread();
-#endif
 }
 
 void *FileFeeder::file_feed_thread()
@@ -146,70 +142,3 @@ void *FileFeeder::file_feed_thread()
 	closeFd();
 	pthread_exit(NULL);
 }
-
-#if USE_IOS_READ
-void *FileFeeder::ios_file_feed_thread()
-{
-	ssize_t r;
-#if FEED_BUFFER
-	void *q = NULL;
-#else
-	unsigned char q[BUFSIZE];
-#endif
-	int available;
-
-	dPrintf("(ios)");
-	std::ifstream infile;
-	infile.open(filename, std::ios::binary | std::ios::in);
-	if (infile.fail()) {
-		switch (errno) {
-		case EACCES:
-			fprintf(stderr, "%s: r = %d, errno = EACCES\n", __func__, (int)r);
-			break;
-		case ENOENT:
-			fprintf(stderr, "%s: r = %d, errno = ENOENT\n", __func__, (int)r);
-			break;
-		default:
-			fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, errno);
-			break;
-		}
-	} else
-
-	while (!f_kill_thread) {
-
-#if FEED_BUFFER
-		available = ringbuffer.get_write_ptr(&q);
-#else
-		available = sizeof(q);
-#endif
-		available = (available < BUFSIZE) ? available : BUFSIZE;
-
-		infile.read((char *)q, available);
-		r = available;
-		if (infile.fail()) {
-			r = 0;
-			int err = errno;
-			switch (err) {
-			case EACCES:
-				fprintf(stderr, "%s: r = %d, errno = EACCES\n", __func__, (int)r);
-				break;
-			case ENOENT:
-				fprintf(stderr, "%s: r = %d, errno = ENOENT\n", __func__, (int)r);
-				break;
-			default:
-				if (err) fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, err);
-				break;
-			}
-			f_kill_thread = true;
-			continue;
-		}
-#if FEED_BUFFER
-		ringbuffer.put_write_ptr(r);
-#else
-		parser.feed(r, q);
-#endif
-	}
-	close_file();
-	pthread_exit(NULL);
-}
-#endif
