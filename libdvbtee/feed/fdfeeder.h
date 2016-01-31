@@ -17,7 +17,8 @@ public:
 
 	void closeFd();
 
-	int openFile(int new_fd) { m_fd = new_fd; return m_fd; } /* assumes already open */
+	/* assumes already open */
+	int openFile(int new_fd);
 
 protected:
 	int m_fd;
