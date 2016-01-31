@@ -29,11 +29,16 @@
 
 #define USE_IOS_READ defined(_WIN32)
 
+#if 1
+#include "feed/feeder.h"
+typedef dvbtee::feed::feed_pull_iface feed_pull_iface;
+#else
 class feed_pull_iface
 {
 public:
 	virtual int pull() = 0;
 };
+#endif
 
 class feed : public socket_listen_iface
 {

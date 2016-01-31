@@ -5,7 +5,11 @@ SUBDIRS=
 else !OLDDECODER
 SUBDIRS=libdvbtee/value libdvbtee/decode
 endif !OLDDECODER
-SUBDIRS+=libdvbtee libdvbtee_server tunerprovider examples dvbtee
+SUBDIRS+=libdvbtee tunerprovider examples dvbtee
+
+if SERVER_ENABLE
+SUBDIRS+=libdvbtee_server
+endif
 
 EXTRA_DIST = libdvbtee_server.pc.in libdvbtee.pc.in packaging/libdvbtee.spec.in
 

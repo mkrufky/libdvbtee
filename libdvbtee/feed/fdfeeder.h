@@ -34,6 +34,8 @@ public:
 	UriFeeder();
 	virtual ~UriFeeder();
 
+	std::string getUri() { return std::string(m_uri); }
+
 protected:
 	char m_uri[256];
 };

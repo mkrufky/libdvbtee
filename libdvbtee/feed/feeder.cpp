@@ -95,7 +95,7 @@ bool ThreadFeeder::wait_for_event_or_timeout(unsigned int timeout, unsigned int 
 }
 
 
-PullFeeder::PullFeeder(feed_pull_iface &iface)
+PullFeeder::PullFeeder(feed_pull_iface* iface)
   : m_iface(iface)
 {
   //
@@ -131,8 +131,9 @@ void *PullFeeder::pull_thread()
 	dPrintf("()");
 
 	while (!f_kill_thread)
-		if (0 >= m_iface.pull())
+		if (0 >= m_iface->pull())
 			usleep(50*1000);
 
+	dPrintf("() exiting...");
 	pthread_exit(NULL);
 }

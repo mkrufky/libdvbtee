@@ -27,6 +27,7 @@
 
 #include "channels.h"
 #include "feed.h"
+#include "feed/feeder.h"
 
 #if 0
 #include <map>
@@ -79,7 +80,7 @@ public:
 class tune
 {
 public:
-	tune();
+	tune(dvbtee::feed::ThreadFeeder&);
 	~tune();
 
 	tune(const tune&);
@@ -97,7 +98,7 @@ public:
 	unsigned int get_channel() { return cur_chan; }
 	time_t last_touched();
 
-	virtual const char *get_name() { return feeder.get_filename(); }
+	virtual const char *get_name() = 0;// { return NULL;/*feeder.get_filename();*/ }
 
 	virtual bool check() { vrtdbg; return false; }
 
@@ -112,7 +113,7 @@ public:
 	unsigned int get_scan_results(bool wait = true, parse_iface *iface = NULL);
 	void stop_scan() { f_kill_thread = true; }
 
-	feed feeder;
+	dvbtee::feed::ThreadFeeder& feeder;
 #define TUNE_STATE_IDLE 0
 #define TUNE_STATE_OPEN 1
 #define TUNE_STATE_LOCK 2

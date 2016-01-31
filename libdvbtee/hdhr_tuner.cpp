@@ -89,7 +89,9 @@ private:
 };
 
 hdhr_tuner::hdhr_tuner()
-  : dev(NULL)
+  : pullFeeder(this)
+  , tune(pullFeeder)
+  , dev(NULL)
 {
 	dPrintf("()");
 	filtered_pids.clear();
@@ -109,6 +111,7 @@ hdhr_tuner::~hdhr_tuner()
 
 hdhr_tuner::hdhr_tuner(const hdhr_tuner& hdhr)
   : tune(hdhr)
+  , pullFeeder(hdhr.pullFeeder)
   , dev(NULL)
 {
 	dPrintf("(copy)");
@@ -215,7 +218,11 @@ const char *hdhr_tuner::get_name()
 		struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 		if (hdhr_dev) return hdhomerun_device_get_name(hdhr_dev);
 	}
+#if 0
 	return feeder.get_filename();
+#else
+	return "?";//feeder.get_filename();
+#endif
 }
 
 bool hdhr_tuner::check()
@@ -350,6 +357,8 @@ void hdhr_tuner::stop_feed()
 
 int hdhr_tuner::pull()
 {
+	dPrintf("()");
+
 	if (!dev) return -1;
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	size_t actual;
@@ -370,7 +379,7 @@ int hdhr_tuner::start_feed()
 	}
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	hdhomerun_device_stream_start(hdhr_dev);
-	if (0 == feeder.pull(this)) {
+	if (0 == pullFeeder.start()) {
 		state |= TUNE_STATE_FEED;
 		return 0;
 	}

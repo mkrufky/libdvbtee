@@ -59,6 +59,8 @@ public:
 
 	int pull();
 private:
+	dvbtee::feed::PullFeeder pullFeeder;
+
 	void add_filter(uint16_t);
 	void clear_filters();
 	static void clear_filters(void *);

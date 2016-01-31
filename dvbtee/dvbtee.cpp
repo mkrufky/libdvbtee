@@ -74,7 +74,7 @@ void cleanup_tuners(struct dvbtee_context* context, bool quick = false)
 
 		if (quick) {
 			iter->second->feeder.stop_without_wait();
-			iter->second->feeder.close_file();
+			//iter->second->feeder.close_file();
 		} else
 			iter->second->stop_feed();
 
