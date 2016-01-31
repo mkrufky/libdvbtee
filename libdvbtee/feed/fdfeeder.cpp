@@ -42,3 +42,10 @@ void FdFeeder::closeFd()
 		m_fd = -1;
 	}
 }
+
+int FdFeeder::openFile(int new_fd)
+{
+	closeFd();
+	m_fd = new_fd;
+	return m_fd;
+}
