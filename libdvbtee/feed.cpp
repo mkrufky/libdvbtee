@@ -44,12 +44,6 @@
 
 unsigned int dbg = 0;
 
-void libdvbtee_set_debug_level(unsigned int debug)
-{
-	dbg = debug;
-	__dPrintf(debug, "(0x%x)", debug);
-}
-
 #define BUFSIZE ((4096/188)*188)
 
 feed::feed()

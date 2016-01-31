@@ -23,6 +23,14 @@
 
 #include <sys/timeb.h>
 
+void libdvbtee_set_debug_level(unsigned int debug)
+{
+	dbg = debug;
+	if (debug)
+		__printf(stderr, "%d LOG::%s: (0x%x)\n",
+			(int)time(NULL), __func__, debug);
+}
+
 
 dbgFn::dbgFn(const char *str)
  : m_str(str ? str : "")

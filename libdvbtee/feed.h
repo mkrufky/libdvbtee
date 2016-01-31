@@ -35,8 +35,6 @@ public:
 	virtual int pull() = 0;
 };
 
-void libdvbtee_set_debug_level(unsigned int debug);
-
 class feed : public socket_listen_iface
 {
 public:
