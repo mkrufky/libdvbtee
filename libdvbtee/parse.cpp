@@ -1480,10 +1480,12 @@ int parse::feed(int count, uint8_t* p_data)
 		demuxer.push(pkt_stats.pid, p);
 #endif
 		if (pkt_stats.tei) {
+#ifndef QUIET_TEI
 			if (!tei_count)
 				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
 			else if (tei_count % 100 == 0)
 				fprintf(stderr, ".");
+#endif
 			tei_count++;
 			if (!process_err_pkts) continue;
 		}
