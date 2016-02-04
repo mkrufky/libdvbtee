@@ -29,8 +29,6 @@
 #include "feed.h"
 #include "serve.h"
 
-#include "atsctext.h"
-
 struct dvbtee_context
 {
 	feed feeder;
@@ -56,9 +54,6 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	}
 
 	context->feeder.close_file();
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
 }
 
 
@@ -174,9 +169,6 @@ int main(int argc, char **argv)
 #if !defined(_WIN32)
 	signal(SIGHUP,  signal_callback_handler); /* Hangup */
 #endif
-#if 1 /* FIXME */
-	ATSCMultipleStringsInit();
-#endif
 	context.feeder.parser.limit_eit(-1);
 
 	start_server(&context, 62080, 62081);
@@ -240,8 +232,5 @@ int main(int argc, char **argv)
 exit:
 	if (context.server) stop_server(&context);
 //	cleanup(&context);
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
 	return 0;
 }

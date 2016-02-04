@@ -28,11 +28,9 @@
 #ifdef USE_LINUXTV
 #include "linuxtv_tuner.h"
 #endif
-#include "atsctext.h"
 
 TunerProvider::TunerProvider()
 {
-	ATSCMultipleStringsInit();
 }
 
 TunerProvider::~TunerProvider()
@@ -48,7 +46,6 @@ TunerProvider::~TunerProvider()
 		iter->second->feeder.parser.cleanup();
 	}
 	tuners.clear();
-	ATSCMultipleStringsDeInit();
 }
 
 int TunerProvider::add_hdhr_tuner(const char *device_str)

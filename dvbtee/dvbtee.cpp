@@ -39,8 +39,6 @@
 #endif
 #include "serve.h"
 
-#include "atsctext.h"
-
 typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
@@ -106,10 +104,6 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	context->_file_feeder.parser.cleanup();
 
 	cleanup_tuners(context, quick);
-
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
 }
 
 
@@ -522,9 +516,6 @@ int main(int argc, char **argv)
 	signal(SIGTERM, signal_callback_handler); /* Termination */
 #if !defined(_WIN32)
 	signal(SIGHUP,  signal_callback_handler); /* Hangup */
-#endif
-#if 1 /* FIXME */
-	ATSCMultipleStringsInit();
 #endif
 	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
 
