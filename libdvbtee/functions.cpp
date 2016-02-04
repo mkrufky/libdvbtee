@@ -155,6 +155,7 @@ public:
 		return INSTANCE;
 	}
 
+private:
 	ATSCMultipleStringsSingleton()
 	{
 		ATSCMultipleStringsInit();
