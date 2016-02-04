@@ -28,25 +28,14 @@ namespace dvbtee {
 
 namespace feed {
 
-class UriFeeder
-{
-public:
-	UriFeeder();
-	virtual ~UriFeeder();
-
-	std::string getUri() { return std::string(m_uri); }
-
-protected:
-	char m_uri[256];
-};
-
-class FdFeeder : public ThreadFeeder, public UriFeeder
+class FdFeeder : public ThreadFeeder
 {
 public:
 	FdFeeder();
 	virtual ~FdFeeder();
 
 	virtual void stop();
+	virtual void close() { closeFd(); }
 
 	void closeFd();
 
