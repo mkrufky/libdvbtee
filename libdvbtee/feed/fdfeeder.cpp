@@ -69,7 +69,7 @@ void FdFeeder::closeFd()
 	dPrintf("()");
 
 	if (m_fd >= 0) {
-		close(m_fd);
+		::close(m_fd);
 		m_fd = -1;
 	}
 }
