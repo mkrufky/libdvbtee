@@ -36,15 +36,6 @@ AC_ARG_ENABLE([dvbpsibuild],
 esac],[dvbpsibuild=false])
 AM_CONDITIONAL([DVBPSIBUILD], [test x$dvbpsibuild = xtrue])
 
-AC_ARG_ENABLE([serverenable],
-[  --enable-server    Enable old server],
-[case "${enableval}" in
-  yes) serverenable=true ;;
-  no)  serverenable=false ;;
-  *) AC_MSG_ERROR([bad value ${enableval} for --enable-server]) ;;
-esac],[serverenable=false])
-AM_CONDITIONAL([SERVER_ENABLE], [test x$serverenable = xtrue])
-
 # Check OS
 AC_CANONICAL_BUILD
 

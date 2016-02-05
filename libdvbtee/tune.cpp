@@ -148,9 +148,7 @@ void tune::stop_feed()
 {
 	feeder.stop();
 	state &= ~TUNE_STATE_FEED;
-#if 0
 	feeder.close_file();
-#endif
 }
 
 time_t tune::last_touched() // sec_ago

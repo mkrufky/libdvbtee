@@ -218,11 +218,7 @@ const char *hdhr_tuner::get_name()
 		struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 		if (hdhr_dev) return hdhomerun_device_get_name(hdhr_dev);
 	}
-#if 0
 	return feeder.get_filename();
-#else
-	return "?";//feeder.get_filename();
-#endif
 }
 
 bool hdhr_tuner::check()

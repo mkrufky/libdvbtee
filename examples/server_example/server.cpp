@@ -61,7 +61,7 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 
 	if (quick) {
 		context->tuner.feeder.stop_without_wait();
-		//((dvbtee::feed::FdFeeder*)(&context->tuner.feeder))->closeFd();
+		context->tuner.feeder.close_file();
 	} else {
 		context->tuner.stop_feed();
 	}
