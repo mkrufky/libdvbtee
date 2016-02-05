@@ -61,7 +61,7 @@ int FileFeeder::doOpenFile(int flags)
 #if !USE_IOS_READ
 	int fd = -1;
 
-	if ((fd = open(m_uri, O_RDONLY|flags )) < 0)
+	if ((fd = ::open(m_uri, O_RDONLY|flags )) < 0)
 		fprintf(stderr, "failed to open %s\n", m_uri);
 	else {
 		FdFeeder::openFile(fd);
