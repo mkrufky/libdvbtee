@@ -127,13 +127,13 @@ private:
 	feed_pull_iface *m_pull_iface;
 };
 
-typedef std::map<int, feed*> feed_map;
+typedef std::map<int, dvbtee::feed::Feeder*> feed_map;
 
 class feed_server_iface
 {
 public:
 	virtual ~feed_server_iface() {}
-	virtual void add_feeder(feed*) = 0;
+	virtual void add_feeder(dvbtee::feed::Feeder*) = 0;
 };
 
 

@@ -110,7 +110,7 @@ static inline const char *data_fmt_str(unsigned int data_fmt)
 	return fmt;
 }
 
-void serve::add_feeder(feed *new_feeder)
+void serve::add_feeder(dvbtee::feed::Feeder *new_feeder)
 {
 	unsigned int new_id = feeders.size();
 	while (feeders.count(new_id)) new_id++;
