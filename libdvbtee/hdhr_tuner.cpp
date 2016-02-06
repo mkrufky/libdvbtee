@@ -401,3 +401,12 @@ bool hdhr_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int 
 	return false;
 }
 #endif
+
+HdhrPullFeeder::HdhrPullFeeder(feed_pull_iface &iface)
+ : PullFeeder(iface)
+{
+}
+
+void HdhrPullFeeder::close()
+{
+}
