@@ -36,8 +36,6 @@
 #endif
 #include "serve.h"
 
-#include "atsctext.h"
-
 typedef std::map<uint8_t, tune> map_tuners;
 
 struct dvbtee_context
@@ -70,9 +68,6 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 
 #ifdef USE_LINUXTV
 	context->tuner.close_fe();
-#endif
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
 #endif
 }
 
@@ -285,9 +280,6 @@ int main(int argc, char **argv)
 #if !defined(_WIN32)
 	signal(SIGHUP,  signal_callback_handler); /* Hangup */
 #endif
-#if 1 /* FIXME */
-	ATSCMultipleStringsInit();
-#endif
 #ifdef USE_LINUXTV
 	context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, false);
 #endif
@@ -300,8 +292,5 @@ int main(int argc, char **argv)
 		stop_server(&context);
 	}
 //	cleanup(&context);
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
 	return 0;
 }

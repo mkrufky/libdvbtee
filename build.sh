@@ -1,1 +1,1 @@
-build-qmake.sh
+build-auto.sh

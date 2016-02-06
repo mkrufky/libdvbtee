@@ -146,8 +146,30 @@ time_t atsc_datetime_utc(uint32_t in_time)
 
 //-----------------------------------------------------------------------------
 
+class ATSCMultipleStringsSingleton
+{
+public:
+	static ATSCMultipleStringsSingleton& instance()
+	{
+		static ATSCMultipleStringsSingleton INSTANCE;
+		return INSTANCE;
+	}
+
+private:
+	ATSCMultipleStringsSingleton()
+	{
+		ATSCMultipleStringsInit();
+	}
+
+	~ATSCMultipleStringsSingleton()
+	{
+		ATSCMultipleStringsDeInit();
+	}
+};
+
 int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text, size_t sizeof_text)
 {
+	ATSCMultipleStringsSingleton::instance();
 	ATSCMultipleStrings_t atsc_strings;
 	ATSCMultipleStringsConvert(&atsc_strings, (uint8_t*)data, len);
 	if (atsc_strings.number_of_strings && atsc_strings.strings && atsc_strings.strings[0].text) {
