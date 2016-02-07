@@ -243,6 +243,7 @@ AC_CONFIG_FILES([Makefile
                  libdvbtee_server/Makefile
                  tunerprovider/Makefile
                  examples/file_example/Makefile
+                 examples/udplisten/Makefile
                  examples/parser_example/Makefile
                  examples/server_example/Makefile
                  examples/stdin_example/Makefile
