@@ -42,8 +42,6 @@
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_FEED, fmt, ##arg)
 
-unsigned int dbg = 0;
-
 #define BUFSIZE ((4096/188)*188)
 
 feed::feed()
