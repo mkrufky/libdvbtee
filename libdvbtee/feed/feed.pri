@@ -9,6 +9,7 @@ HEADERS += \
     $$PWD/file.h \
     $$PWD/ifsfeeder.h \
     $$PWD/fdfeeder.h \
+    $$PWD/udp.h \
     $$PWD/stdin.h
 
 OTHER_FILES += $$PWD/Makefile.am
@@ -18,4 +19,5 @@ SOURCES += \
     $$PWD/file.cpp \
     $$PWD/ifsfeeder.cpp \
     $$PWD/fdfeeder.cpp \
+    $$PWD/udp.cpp \
     $$PWD/stdin.cpp

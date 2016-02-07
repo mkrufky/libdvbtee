@@ -11,6 +11,7 @@ libdvbtee_la_SOURCES = \
     feed.cpp \
     feed/feeder.cpp \
     feed/fdfeeder.cpp \
+    feed/udp.cpp \
     feed/file.cpp \
     feed/ifsfeeder.cpp \
     feed/stdin.cpp \
