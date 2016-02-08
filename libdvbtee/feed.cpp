@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include <fstream>
+#include <feed/udp.h>
 
 #include "feed.h"
 #include "log.h"
@@ -879,9 +880,10 @@ int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_iface *
 int feed_server::start_udp_listener(uint16_t port_requested, feed_server_iface *iface)
 {
 	if (feeders.count(0)) delete feeders[0];
-	feeders[0] = new feed;
+	dvbtee::feed::UdpFeeder *udpFeeder = new dvbtee::feed::UdpFeeder;
+	feeders[0] = udpFeeder;
 
-	int ret = feeders[0]->start_udp_listener(port_requested);
+	int ret = udpFeeder->setPort(port_requested);
 	if (ret < 0)
 		goto fail;
 
