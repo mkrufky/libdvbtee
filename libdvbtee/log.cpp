@@ -23,6 +23,8 @@
 
 #include <sys/timeb.h>
 
+unsigned int dbg = 0;
+
 void libdvbtee_set_debug_level(unsigned int debug)
 {
 	dbg = debug;

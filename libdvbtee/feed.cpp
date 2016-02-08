@@ -42,8 +42,6 @@
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_FEED, fmt, ##arg)
 
-unsigned int dbg = 0;
-
 #define BUFSIZE ((4096/188)*188)
 
 feed::feed()
@@ -828,7 +826,7 @@ feed_server::feed_server()
 {
 	dPrintf("()");
 
-	feeders.clear();
+	clear_feeders();
 }
 
 feed_server::~feed_server()
@@ -837,7 +835,7 @@ feed_server::~feed_server()
 
 	listener.stop();
 
-	feeders.clear();
+	clear_feeders();
 }
 
 void feed_server::add_tcp_feed(int socket)
@@ -845,10 +843,23 @@ void feed_server::add_tcp_feed(int socket)
 	if (socket >= 0) {
 		dPrintf("(%d)", socket);
 
-		feeders[socket].add_tcp_feed(socket);
+		if (feeders.count(socket)) delete feeders[socket];
+		feeders[socket] = new feed;
 
-		if (m_iface) m_iface->add_feeder(&feeders[socket]);
+
+		feeders[socket]->add_tcp_feed(socket);
+
+		if (m_iface) m_iface->add_feeder(feeders[socket]);
 	}
+	return;
+}
+
+void feed_server::clear_feeders()
+{
+	for (feed_map::iterator it = feeders.begin(); it != feeders.end(); ++it)
+		delete it->second;
+
+	feeders.clear();
 	return;
 }
 
@@ -867,12 +878,15 @@ int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_iface *
 
 int feed_server::start_udp_listener(uint16_t port_requested, feed_server_iface *iface)
 {
-	int ret = feeders[0].start_udp_listener(port_requested);
+	if (feeders.count(0)) delete feeders[0];
+	feeders[0] = new feed;
+
+	int ret = feeders[0]->start_udp_listener(port_requested);
 	if (ret < 0)
 		goto fail;
 
 	/* call connection notify callback to notify parent server of new feed */
-	if (iface) iface->add_feeder(&feeders[0]);
+	if (iface) iface->add_feeder(feeders[0]);
 fail:
 	return ret;
 }
