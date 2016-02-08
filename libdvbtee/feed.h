@@ -122,7 +122,7 @@ private:
 	feed_pull_iface *m_pull_iface;
 };
 
-typedef std::map<int, feed> feed_map;
+typedef std::map<int, feed*> feed_map;
 
 class feed_server_iface
 {
@@ -149,6 +149,7 @@ private:
 	feed_server_iface *m_iface;
 
 	void add_tcp_feed(int);
+	void clear_feeders();
 };
 
 typedef std::map<int, feed_server> feed_server_map;
