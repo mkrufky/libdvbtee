@@ -41,9 +41,6 @@ public:
 	feed();
 	~feed();
 
-	feed(const feed&);
-	feed& operator= (const feed&);
-
 	int open_file(char* new_file, int flags = 0) { set_filename(new_file); return _open_file(flags); }
 	int open_file(int new_fd) { fd = new_fd; return fd; } /* assumes already open */
 
@@ -81,6 +78,9 @@ public:
 
 	void accept_socket(int sock) { add_tcp_feed(sock); }
 private:
+	feed(const feed&);
+	feed& operator= (const feed&);
+
 	pthread_t h_thread;
 	pthread_t h_feed_thread;
 	bool f_kill_thread;
