@@ -36,12 +36,12 @@ using namespace dvbtee::feed;
 
 UdpFeeder::UdpFeeder()
 {
-  //
+	//
 }
 
 UdpFeeder::~UdpFeeder()
 {
-  //
+	//
 }
 
 int UdpFeeder::startUdpListener(uint16_t port_requested)
@@ -112,6 +112,8 @@ void* UdpFeeder::udp_feed_thread(void *p_this)
 
 void *UdpFeeder::udp_feed_thread()
 {
+//	struct sockaddr_in udpsa;
+//	socklen_t salen = sizeof(udpsa);
 	int rxlen = 0;
 #if FEED_BUFFER
 	void *q = NULL;
