@@ -45,6 +45,16 @@ TcpListener::~TcpListener()
   //
 }
 
+TcpFeeder::TcpFeeder()
+{
+  //
+}
+
+TcpFeeder::~TcpFeeder()
+{
+  //
+}
+
 int TcpListener::startTcpListener(uint16_t port_requested)
 {
 	dPrintf("(%d)", port_requested);
@@ -77,7 +87,7 @@ int TcpListener::start()
 	return ret;
 }
 
-void TcpListener::add_tcp_feed(int socket)
+void TcpFeeder::add_tcp_feed(int socket)
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
@@ -129,12 +139,12 @@ fail_close_file:
 //}
 
 //static
-void* TcpListener::tcp_feed_thread(void *p_this)
+void* TcpFeeder::tcp_feed_thread(void *p_this)
 {
 	return static_cast<TcpListener*>(p_this)->tcp_feed_thread();
 }
 
-void *TcpListener::tcp_feed_thread()
+void *TcpFeeder::tcp_feed_thread()
 {
 //	struct sockaddr_in tcpsa;
 //	socklen_t salen = sizeof(tcpsa);
