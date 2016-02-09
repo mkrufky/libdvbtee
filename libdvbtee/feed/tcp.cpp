@@ -21,10 +21,10 @@
 
 #include <errno.h>
 
-#include "udp.h"
+#include "tcp.h"
 
 #include "log.h"
-#define CLASS_MODULE "UdpFeeder"
+#define CLASS_MODULE "TcpFeeder"
 
 #define FEED_BUFFER 0
 
@@ -34,111 +34,122 @@ using namespace dvbtee::feed;
 
 #define BUFSIZE ((4096/188)*188)
 
-UdpFeeder::UdpFeeder()
+TcpListener::TcpListener()
 {
 	//
 }
 
-UdpFeeder::~UdpFeeder()
+TcpListener::~TcpListener()
 {
 	//
 }
 
-int UdpFeeder::startUdpListener(uint16_t port_requested)
+TcpFeeder::TcpFeeder()
 {
-	struct sockaddr_in udp_sock;
+	//
+}
 
+TcpFeeder::~TcpFeeder()
+{
+	//
+}
+
+int TcpListener::startTcpListener(uint16_t port_requested)
+{
 	dPrintf("(%d)", port_requested);
-	sprintf(m_uri, "UDPLISTEN: %d", port_requested);
-
-	memset(&udp_sock, 0, sizeof(udp_sock));
-
-	m_fd = -1;
-
-	m_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (m_fd < 0) {
-		perror("open socket failed");
-		return m_fd;
-	}
-
-#if defined(_WIN32)
-	if (setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
-#else
-	int reuse = 1;
-	if (setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-#endif
-		perror("setting reuse failed");
-		return -1;
-	}
-
-	udp_sock.sin_family = AF_INET;
-	udp_sock.sin_port = htons(port_requested);
-	udp_sock.sin_addr.s_addr = INADDR_ANY;
-
-	if (bind(m_fd, (struct sockaddr*)&udp_sock, sizeof(udp_sock)) < 0) {
-		perror("bind to local interface failed");
-		return -1;
-	}
-	//	port = port_requested;
-#if 0
-	socket_set_nbio(m_fd);
-#endif
-	return 0;
-}
-
-int UdpFeeder::start()
-{
-	int ret = startUdpListener(m_port);
-	if (0 != ret) {
-		perror("startUdpListener() failed");
-		return ret;
-	}
+	sprintf(m_uri, "TCPLISTEN: %d", port_requested);
 
 	f_kill_thread = false;
 
-	ret = pthread_create(&h_thread, NULL, udp_feed_thread, this);
+	m_fd = -1;
 
-	if (0 != ret)
-		perror("pthread_create() failed");
+	listener.set_interface(this);
+
+	return listener.start(port_requested);
+}
+
+int TcpListener::start()
+{
+	int ret = startTcpListener(m_port);
+	if (0 != ret) {
+		perror("startTcpListener() failed");
+		return ret;
+	}
 
 	return ret;
 }
 
-//static
-void* UdpFeeder::udp_feed_thread(void *p_this)
+void TcpFeeder::add_tcp_feed(int socket)
 {
-	return static_cast<UdpFeeder*>(p_this)->udp_feed_thread();
+	struct sockaddr_in tcpsa;
+	socklen_t salen = sizeof(tcpsa);
+
+	dPrintf("(%d)", socket);
+	if (m_fd >= 0) {
+		dPrintf("(%d) this build only supports one tcp input feed connection at a time", socket);
+		::close(socket);
+		return;
+	}
+
+	if (!strlen(m_uri))
+		sprintf(m_uri, "TCPSOCKET: %d", socket);
+
+	m_fd = socket;
+
+	f_kill_thread = false;
+
+	if (0 != getpeername(m_fd, (struct sockaddr*)&tcpsa, &salen)) {
+		perror("getpeername() failed");
+		goto fail_close_file;
+	}
+
+	if (0 != pthread_create(&h_thread, NULL, tcp_feed_thread, this)) {
+		perror("pthread_create() failed");
+		goto fail_close_file;
+#if FEED_BUFFER
+	} else {
+		start_feed();
+#endif
+	}
+	return;
+fail_close_file:
+	closeFd();
+	return;
 }
 
-void *UdpFeeder::udp_feed_thread()
+
+//static
+void* TcpFeeder::tcp_feed_thread(void *p_this)
 {
-//	struct sockaddr_in udpsa;
-//	socklen_t salen = sizeof(udpsa);
+	return static_cast<TcpListener*>(p_this)->tcp_feed_thread();
+}
+
+void *TcpFeeder::tcp_feed_thread()
+{
+//	struct sockaddr_in tcpsa;
+//	socklen_t salen = sizeof(tcpsa);
 	int rxlen = 0;
 #if FEED_BUFFER
 	void *q = NULL;
 #else
-	char q[188*7];
+	char q[BUFSIZE];
 #endif
 	int available;
 
 	dPrintf("(sock_fd=%d)", m_fd);
 
-	while (!f_kill_thread) {
+//	getpeername(m_fd, (struct sockaddr*)&tcpsa, &salen);
 
+	while (!f_kill_thread) {
 #if FEED_BUFFER
 		available = ringbuffer.get_write_ptr(&q);
 #else
 		available = sizeof(q);
 #endif
-		available = (available < (188*7)) ? available : (188*7);
-		//ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
-		rxlen = recvfrom(m_fd, q, available, MSG_WAITALL, NULL, NULL);//(struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		available = (available < (BUFSIZE)) ? available : (BUFSIZE);
+		rxlen = recv(m_fd, q, available, MSG_WAITALL);
 		if (rxlen > 0) {
-#if 0
 			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
-#endif
-//			getpeername(m_fd, (struct sockaddr*)&udpsa, &salen);
 #if !FEED_BUFFER
 			parser.feed(rxlen, (uint8_t*)q);
 #endif
