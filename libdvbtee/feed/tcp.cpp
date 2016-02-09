@@ -36,22 +36,22 @@ using namespace dvbtee::feed;
 
 TcpListener::TcpListener()
 {
-  //
+	//
 }
 
 TcpListener::~TcpListener()
 {
-  //
+	//
 }
 
 TcpFeeder::TcpFeeder()
 {
-  //
+	//
 }
 
 TcpFeeder::~TcpFeeder()
 {
-  //
+	//
 }
 
 int TcpListener::startTcpListener(uint16_t port_requested)
@@ -75,13 +75,6 @@ int TcpListener::start()
 		perror("startTcpListener() failed");
 		return ret;
 	}
-
-//	f_kill_thread = false;
-
-//	ret = pthread_create(&h_thread, NULL, tcp_feed_thread, this);
-
-//	if (0 != ret)
-//		perror("pthread_create() failed");
 
 	return ret;
 }
@@ -124,18 +117,6 @@ fail_close_file:
 	return;
 }
 
-
-//void TcpFeeder::accept_socket(int sock)
-//{
-//	f_kill_thread = false;
-
-//	ret = pthread_create(&h_thread, NULL, tcp_feed_thread, this);
-
-//	if (0 != ret)
-//		perror("pthread_create() failed");
-
-//	return ret;
-//}
 
 //static
 void* TcpFeeder::tcp_feed_thread(void *p_this)
