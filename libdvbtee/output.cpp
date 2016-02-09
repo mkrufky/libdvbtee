@@ -293,7 +293,7 @@ output_stream::output_stream(const output_stream&)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
-	if (priv) priv = NULL;
+	priv = NULL;
 	pids.clear();
 	have_pat = false;
 }
@@ -318,7 +318,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
-	if (priv) priv = NULL;
+	priv = NULL;
 	pids.clear();
 	have_pat = false;
 
