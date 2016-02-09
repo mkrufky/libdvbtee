@@ -28,7 +28,21 @@ namespace dvbtee {
 
 namespace feed {
 
-class TcpListener : public FdFeeder, socket_listen_iface
+class TcpFeeder : public FdFeeder, public socket_listen_iface
+{
+public:
+	TcpFeeder();
+	virtual ~TcpFeeder();
+
+	virtual void accept_socket(int sock) { add_tcp_feed(sock); }
+
+	void add_tcp_feed(int socket);
+private:
+	void        *tcp_feed_thread();
+	static void *tcp_feed_thread(void*);
+};
+
+class TcpListener : public TcpFeeder
 {
 public:
 	TcpListener();
@@ -37,14 +51,7 @@ public:
 	virtual int start();
 
 	int setPort(uint16_t port_requested) { return m_port = port_requested; }
-
-	virtual void accept_socket(int sock) { add_tcp_feed(sock); }
-
-	void add_tcp_feed(int socket);
 private:
-	void        *tcp_feed_thread();
-	static void *tcp_feed_thread(void*);
-
 	uint16_t m_port;
 	socket_listen listener;
 
