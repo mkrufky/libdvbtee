@@ -4,6 +4,7 @@ TEMPLATE = subdirs
 SUBDIRS += \
            file_example \
            udplisten \
+           tcplisten \
            parser_example \
            stdin_example \
            walk_hls
@@ -14,6 +15,7 @@ walk_hls.target = walk_hls
 QMAKE_EXTRA_TARGETS += \
                        file_example \
                        udplisten \
+                       tcplisten \
                        parser_example \
                        stdin_example \
                        walk_hls
