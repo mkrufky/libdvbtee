@@ -35,17 +35,17 @@ using namespace dvbtee::feed;
 
 #define BUFSIZE ((4096/188)*188)
 
-TcpFeeder::TcpFeeder()
+TcpListener::TcpListener()
 {
   //
 }
 
-TcpFeeder::~TcpFeeder()
+TcpListener::~TcpListener()
 {
   //
 }
 
-int TcpFeeder::startTcpListener(uint16_t port_requested)
+int TcpListener::startTcpListener(uint16_t port_requested)
 {
 	dPrintf("(%d)", port_requested);
 	sprintf(m_uri, "TCPLISTEN: %d", port_requested);
@@ -59,7 +59,7 @@ int TcpFeeder::startTcpListener(uint16_t port_requested)
 	return listener.start(port_requested);
 }
 
-int TcpFeeder::start()
+int TcpListener::start()
 {
 	int ret = startTcpListener(m_port);
 	if (0 != ret) {
@@ -77,7 +77,7 @@ int TcpFeeder::start()
 	return ret;
 }
 
-void TcpFeeder::add_tcp_feed(int socket)
+void TcpListener::add_tcp_feed(int socket)
 {
 	struct sockaddr_in tcpsa;
 	socklen_t salen = sizeof(tcpsa);
@@ -129,12 +129,12 @@ fail_close_file:
 //}
 
 //static
-void* TcpFeeder::tcp_feed_thread(void *p_this)
+void* TcpListener::tcp_feed_thread(void *p_this)
 {
-	return static_cast<TcpFeeder*>(p_this)->tcp_feed_thread();
+	return static_cast<TcpListener*>(p_this)->tcp_feed_thread();
 }
 
-void *TcpFeeder::tcp_feed_thread()
+void *TcpListener::tcp_feed_thread()
 {
 //	struct sockaddr_in tcpsa;
 //	socklen_t salen = sizeof(tcpsa);

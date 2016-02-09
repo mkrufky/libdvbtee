@@ -28,11 +28,11 @@ namespace dvbtee {
 
 namespace feed {
 
-class TcpFeeder : public FdFeeder, socket_listen_iface
+class TcpListener : public FdFeeder, socket_listen_iface
 {
 public:
-	TcpFeeder();
-	virtual ~TcpFeeder();
+	TcpListener();
+	virtual ~TcpListener();
 
 	virtual int start();
 

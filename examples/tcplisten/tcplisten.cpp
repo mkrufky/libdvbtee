@@ -31,7 +31,7 @@
 
 struct dvbtee_context
 {
-	dvbtee::feed::TcpFeeder feeder;
+	dvbtee::feed::TcpListener feeder;
 };
 typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
