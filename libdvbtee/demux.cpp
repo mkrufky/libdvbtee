@@ -40,8 +40,8 @@ demux::~demux()
 {
 	dPrintf("()");
 	sleep(2);
-	for (map_output::const_iterator iter = out.begin(); iter != out.end(); ++iter)
-		((output_stream)(iter->second)).stop_after_drain();
+	for (map_output::iterator iter = out.begin(); iter != out.end(); ++iter)
+		(iter->second).stop_after_drain();
 	out.clear();
 }
 
