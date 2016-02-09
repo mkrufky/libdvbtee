@@ -87,7 +87,7 @@ void TcpFeeder::add_tcp_feed(int socket)
 	dPrintf("(%d)", socket);
 	if (m_fd >= 0) {
 		dPrintf("(%d) this build only supports one tcp input feed connection at a time", socket);
-		close(socket);
+		::close(socket);
 		return;
 	}
 
