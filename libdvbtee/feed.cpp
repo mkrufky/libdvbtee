@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include <fstream>
+#include <feed/tcp.h>
 #include <feed/udp.h>
 
 #include "feed.h"
@@ -845,10 +846,11 @@ void feed_server::add_tcp_feed(int socket)
 		dPrintf("(%d)", socket);
 
 		if (feeders.count(socket)) delete feeders[socket];
-		feeders[socket] = new feed;
+		dvbtee::feed::TcpFeeder *tcpFeeder = new dvbtee::feed::TcpFeeder;
+		feeders[socket] = tcpFeeder;
 
 
-		feeders[socket]->add_tcp_feed(socket);
+		tcpFeeder->add_tcp_feed(socket);
 
 		if (m_iface) m_iface->add_feeder(feeders[socket]);
 	}
