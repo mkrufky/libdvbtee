@@ -34,6 +34,8 @@ public:
 	TcpFeeder();
 	virtual ~TcpFeeder();
 
+	virtual int start() { return 0; }
+
 	virtual void accept_socket(int sock) { add_tcp_feed(sock); }
 
 	void add_tcp_feed(int socket);
