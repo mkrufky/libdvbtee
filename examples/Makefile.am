@@ -1,4 +1,4 @@
-SUBDIRS = file_example udplisten parser_example stdin_example walk_hls
+SUBDIRS = file_example tcplisten udplisten parser_example stdin_example walk_hls
 
 if !BUILD_OS_IS_DARWIN
 if !MINGW
