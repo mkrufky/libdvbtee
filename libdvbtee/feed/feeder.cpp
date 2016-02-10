@@ -29,6 +29,33 @@
 
 using namespace dvbtee::feed;
 
+Feeder::Feeder()
+{
+	memset(m_uri, 0, sizeof(m_uri));
+}
+
+Feeder::~Feeder()
+{
+	dPrintf("(%s)", strlen(m_uri) ? m_uri : "");
+}
+
+Feeder::Feeder(const Feeder &)
+{
+	memset(m_uri, 0, sizeof(m_uri));
+}
+
+Feeder &Feeder::operator=(const Feeder &cSource)
+{
+	dPrintf("(operator=)");
+
+	if (this == &cSource)
+		return *this;
+
+	memset(m_uri, 0, sizeof(m_uri));
+
+	return *this;
+}
+
 
 PushFeeder::PushFeeder()
 {
@@ -134,5 +161,6 @@ void *PullFeeder::pull_thread()
 		if (0 >= m_iface.pull())
 			usleep(50*1000);
 
+	dPrintf("() exiting...");
 	pthread_exit(NULL);
 }

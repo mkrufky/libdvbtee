@@ -28,7 +28,7 @@ namespace dvbtee {
 
 namespace feed {
 
-class IfsFeeder : public ThreadFeeder, public UriFeeder
+class IfsFeeder : public ThreadFeeder
 {
 public:
 	IfsFeeder();
