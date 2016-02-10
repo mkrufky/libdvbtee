@@ -35,9 +35,6 @@ public:
 	Feeder();
 	virtual ~Feeder();
 
-	Feeder(const Feeder&);
-	Feeder& operator= (const Feeder&);
-
 	parse parser;
 
 	std::string getUri() { return std::string(m_uri); }
@@ -49,6 +46,9 @@ public:
 	__attribute__((deprecated)) void close_file() { return this->close(); }
 
 protected:
+	Feeder(const Feeder&);
+	Feeder& operator= (const Feeder&);
+
 	char m_uri[256];
 };
 
