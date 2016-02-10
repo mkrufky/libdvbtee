@@ -39,6 +39,8 @@ public:
 
 	std::string getUri() { return std::string(m_uri); }
 
+	virtual void close() { /* FIXME */ } // = 0;
+
 	/* for compat */
 	__attribute__((deprecated)) const char* get_filename() const { return m_uri; }
 	__attribute__((deprecated)) void close_file() { return this->close(); }
