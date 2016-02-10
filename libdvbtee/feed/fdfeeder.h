@@ -35,6 +35,7 @@ public:
 	virtual ~FdFeeder();
 
 	virtual void stop();
+	virtual void close() { closeFd(); }
 
 	void closeFd();
 
