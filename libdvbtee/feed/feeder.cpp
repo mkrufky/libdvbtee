@@ -95,7 +95,7 @@ bool ThreadFeeder::wait_for_event_or_timeout(unsigned int timeout, unsigned int 
 }
 
 
-PullFeeder::PullFeeder(feed_pull_iface &iface)
+PullFeeder::PullFeeder(feed_pull_iface& iface)
   : m_iface(iface)
 {
   //
