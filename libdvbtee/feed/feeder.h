@@ -29,13 +29,33 @@ namespace dvbtee {
 
 namespace feed {
 
-class PushFeeder
+class Feeder
+{
+public:
+	Feeder();
+	virtual ~Feeder();
+
+	parse parser;
+
+	std::string getUri() { return std::string(m_uri); }
+
+	/* for compat */
+	__attribute__((deprecated)) const char* get_filename() const { return m_uri; }
+	__attribute__((deprecated)) void close_file() { return this->close(); }
+
+protected:
+	Feeder(const Feeder&);
+	Feeder& operator= (const Feeder&);
+
+	char m_uri[256];
+};
+
+class PushFeeder : public Feeder
 {
 public:
 	PushFeeder();
 	virtual ~PushFeeder();
 
-	parse parser;
 	int push(int size, const uint8_t* data);
 };
 

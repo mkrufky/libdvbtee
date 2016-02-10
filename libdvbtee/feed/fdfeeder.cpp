@@ -28,16 +28,6 @@
 
 using namespace dvbtee::feed;
 
-UriFeeder::UriFeeder()
-{
-	memset(m_uri, 0, sizeof(m_uri));
-}
-
-UriFeeder::~UriFeeder()
-{
-	dPrintf("(%s)", strlen(m_uri) ? m_uri : "");
-}
-
 FdFeeder::FdFeeder()
   : m_fd(-1)
 {
