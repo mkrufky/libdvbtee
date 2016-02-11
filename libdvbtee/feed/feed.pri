@@ -1,10 +1,15 @@
 INCLUDEPATH += $$PWD
 
 FEEDER_SOURCES = \
-    $$PWD/feed.cpp
+    $$PWD/feeder.cpp \
+    $$PWD/file.cpp \
+    $$PWD/ifsfeeder.cpp \
+    $$PWD/fdfeeder.cpp \
+    $$PWD/tcp.cpp \
+    $$PWD/udp.cpp \
+    $$PWD/stdin.cpp
 
 HEADERS += \
-    $$PWD/feed.h \
     $$PWD/feeder.h \
     $$PWD/file.h \
     $$PWD/ifsfeeder.h \
@@ -14,12 +19,3 @@ HEADERS += \
     $$PWD/stdin.h
 
 OTHER_FILES += $$PWD/Makefile.am
-
-SOURCES += \
-    $$PWD/feeder.cpp \
-    $$PWD/file.cpp \
-    $$PWD/ifsfeeder.cpp \
-    $$PWD/fdfeeder.cpp \
-    $$PWD/tcp.cpp \
-    $$PWD/udp.cpp \
-    $$PWD/stdin.cpp
