@@ -158,6 +158,6 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 exit:
-//	cleanup(&context);
+	cleanup(&context);
 	return 0;
 }

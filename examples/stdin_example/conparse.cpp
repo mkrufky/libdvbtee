@@ -140,6 +140,6 @@ int main(int argc, char **argv)
 		context.feeder.stop();
 	}
 exit:
-//	cleanup(&context);
+	cleanup(&context);
 	return 0;
 }
