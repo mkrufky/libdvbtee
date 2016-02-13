@@ -33,9 +33,8 @@ struct dvbtee_context
 {
 	dvbtee::feed::UdpFeeder feeder;
 };
-typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
-map_pid_to_context context_map;
+struct dvbtee_context* ctxt;
 
 
 void stop_server(struct dvbtee_context* context);
@@ -55,7 +54,7 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 
 void signal_callback_handler(int signum)
 {
-	struct dvbtee_context* context = context_map[getpid()];
+	struct dvbtee_context* context = ctxt;
 	bool signal_dbg = true;
 
 	const char *signal_desc;
@@ -103,6 +102,8 @@ int main(int argc, char **argv)
 {
 	int opt;
 	dvbtee_context context;
+	ctxt = &context;
+
 	unsigned int timeout = 0;
 	unsigned int port = 0;
 
@@ -125,8 +126,6 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
-
-	context_map[getpid()] = &context;
 
 	signal(SIGINT,  signal_callback_handler); /* Program interrupt. (ctrl-c) */
 	signal(SIGABRT, signal_callback_handler); /* Process detects error and reports by calling abort */
