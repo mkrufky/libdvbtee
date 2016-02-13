@@ -11,3 +11,5 @@ conparse_LDADD = -L../../libdvbtee -ldvbtee
 if DVBPSIBUILD
 AM_CPPFLAGS = -I../../usr/include/
 endif DVBPSIBUILD
+
+TESTS = ./tests.sh
