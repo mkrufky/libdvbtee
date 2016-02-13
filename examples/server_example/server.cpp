@@ -289,6 +289,6 @@ int main(int argc, char **argv)
 		while (context.server->is_running()) sleep(1);
 		stop_server(&context);
 	}
-//	cleanup(&context);
+	cleanup(&context);
 	return 0;
 }

@@ -230,6 +230,6 @@ int main(int argc, char **argv)
 	}
 exit:
 	if (context.server) stop_server(&context);
-//	cleanup(&context);
+	cleanup(&context);
 	return 0;
 }
