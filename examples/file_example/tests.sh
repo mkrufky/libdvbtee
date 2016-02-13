@@ -1,0 +1,1 @@
+./dvbtee-fparser -F ../../*.ts
