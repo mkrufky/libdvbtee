@@ -133,7 +133,7 @@ void *UdpFeeder::udp_feed_thread()
 #endif
 		available = (available < (188*7)) ? available : (188*7);
 		//ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
-		rxlen = recvfrom(m_fd, q, available, MSG_WAITALL, NULL, NULL);//(struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		rxlen = recvfrom(m_fd, q, available, MSG_DONTWAIT, NULL, NULL);//(struct sockaddr*) &ip_addr, sizeof(ip_addr));
 		if (rxlen > 0) {
 #if 0
 			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
@@ -145,7 +145,7 @@ void *UdpFeeder::udp_feed_thread()
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
 		} else if (rxlen == -1) { //( (rxlen == -1) && (errno == EAGAIN) ) {
-			usleep(50*1000);
+			usleep(200*1000);
 		}
 #if FEED_BUFFER
 		ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
