@@ -1,5 +1,9 @@
 AM_CXXFLAGS = -I./decode -I./decode/table -I/usr/include/libhdhomerun -I/usr/lib/libhdhomerun -I/opt/local/include -pthread -D__STDC_FORMAT_MACROS
 
+if COVERALLS
+AM_CXXFLAGS += -g -O0
+endif COVERALLS
+
 lib_LTLIBRARIES = libdvbtee.la
 
 libdvbtee_la_SOURCES = \

@@ -1,5 +1,9 @@
 AM_CXXFLAGS = -I.. -I../value -I./table -I./descriptor
 
+if COVERALLS
+AM_CXXFLAGS += -g -O0
+endif COVERALLS
+
 if DVBPSIBUILD
 AM_CXXFLAGS += -DFORCE_DECODER_LINKAGE -I../../usr/include/
 endif DVBPSIBUILD

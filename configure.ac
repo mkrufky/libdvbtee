@@ -15,6 +15,16 @@ AC_CONFIG_SRCDIR([libdvbtee/parse.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # Check configure args
+AC_ARG_ENABLE([coveralls],
+[  --enable-coveralls    Enable coverage checker],
+[case "${enableval}" in
+  yes) coveralls=true ;;
+  no)  coveralls=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-coveralls]) ;;
+esac],[coveralls=false])
+AM_CONDITIONAL([COVERALLS], [test x$coveralls = xtrue])
+
+# Check configure args
 AC_ARG_ENABLE([olddecoder],
 [  --enable-olddecoder    Enable old decoder],
 [case "${enableval}" in
