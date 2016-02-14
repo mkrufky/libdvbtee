@@ -239,7 +239,7 @@ after_success:
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ $CXX != clang* ]]; then
       lcov --directory . --capture --output-file coverage.info;
-      lcov --remove coverage.info 'examples/*' '/usr/*' '/dvbtee/*' 'libdvbtee_server/* /libdvbpsi/* /libdvbtee/feed.* /libdvbtee/tune.* /libdvbtee/linuxtv_tuner.* /libdvbtee/hdhr_tuner.*' --output-file coverage.info;
+      lcov --remove coverage.info 'examples/*' '/usr/*' '/dvbtee/*' 'libdvbtee_server/* libdvbpsi/* libdvbtee/feed.* libdvbtee/tune.* libdvbtee/linuxtv_tuner.* libdvbtee/hdhr_tuner.*' --output-file coverage.info;
       lcov --list coverage.info;
       coveralls-lcov --repo-token ZmCWNStr6D9Dga7i8raNa1Jyhf7slUykK coverage.info;
     fi
