@@ -251,7 +251,7 @@ script:
     fi
   - mkdir -p m4
   - autoreconf --install
-  - if [ "$TRAVIS_OS_NAME" != "linux" ]; then
+  - if [["$TRAVIS_OS_NAME" != "linux"]] || [["$COMPILER" == "clang*"]]; then
       if [ "$BUILD_DVBPSI" == "true" ]; then
         if [ "$USE_OLDDECODER" == "true" ]; then
           ./build-auto.sh --enable-olddecoder;
