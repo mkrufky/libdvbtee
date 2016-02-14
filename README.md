@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mkrufky/libdvbtee.svg?branch=master)](https://travis-ci.org/mkrufky/libdvbtee)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/mkrufky-libdvbtee/badge.svg)](https://scan.coverity.com/projects/mkrufky-libdvbtee)
+[![Coverage Status](https://coveralls.io/repos/github/mkrufky/libdvbtee/badge.svg)](https://coveralls.io/github/mkrufky/libdvbtee)
 
 #### Introduction
 
