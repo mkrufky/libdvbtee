@@ -251,7 +251,7 @@ script:
     fi
   - mkdir -p m4
   - autoreconf --install
-  - if [["$TRAVIS_OS_NAME" != "linux"]] || [[ $COMPILER == clang* ]]; then
+  - if [["$TRAVIS_OS_NAME" != "linux"]] || [[ $CXX == clang* ]]; then
       if [ "$BUILD_DVBPSI" == "true" ]; then
         if [ "$USE_OLDDECODER" == "true" ]; then
           ./build-auto.sh --enable-olddecoder;
@@ -297,7 +297,7 @@ script:
     else
       make CXX=$COMPILER -j;
     fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ $COMPILER != clang* ]]; then
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]] && [[ $CXX != clang* ]]; then
       wget https://trac.ffmpeg.org/raw-attachment/ticket/3025/sbs.2.5M.ts;
       wget http://www.dododge.net/roku/hd-test-streams/mpt-200309161700-clip.ts;
       wget http://www.dododge.net/roku/hd-test-streams/football.ts;
