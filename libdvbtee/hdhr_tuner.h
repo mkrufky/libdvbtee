@@ -27,6 +27,13 @@
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
 typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 
+class HdhrPullFeeder : public dvbtee::feed::PullFeeder
+{
+public:
+	HdhrPullFeeder(feed_pull_iface&);
+	virtual void close();
+};
+
 class hdhr_tuner_device;
 
 class hdhr_tuner: public tune, public tsfilter_iface, public feed_pull_iface
@@ -59,6 +66,9 @@ public:
 
 	int pull();
 private:
+#if !DVBTEE_FEED_LEGACY
+	HdhrPullFeeder pullFeeder;
+#endif
 	void add_filter(uint16_t);
 	void clear_filters();
 	static void clear_filters(void *);

@@ -27,6 +27,7 @@
 
 #include "channels.h"
 #include "feed.h"
+#include "feed/feeder.h"
 
 #if 0
 #include <map>
@@ -79,7 +80,11 @@ public:
 class tune
 {
 public:
+#if DVBTEE_FEED_LEGACY
 	tune();
+#else
+	tune(dvbtee::feed::ThreadFeeder&);
+#endif
 	~tune();
 
 	tune(const tune&);
@@ -112,7 +117,11 @@ public:
 	unsigned int get_scan_results(bool wait = true, parse_iface *iface = NULL);
 	void stop_scan() { f_kill_thread = true; }
 
+#if DVBTEE_FEED_LEGACY
 	feed feeder;
+#else
+	dvbtee::feed::ThreadFeeder& feeder;
+#endif
 #define TUNE_STATE_IDLE 0
 #define TUNE_STATE_OPEN 1
 #define TUNE_STATE_LOCK 2

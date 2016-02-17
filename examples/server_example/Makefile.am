@@ -7,3 +7,5 @@ dvbtee_server_LDADD = -L../../libdvbtee -L../../libdvbtee_server -ldvbtee -ldvbt
 if DVBPSIBUILD
 AM_CPPFLAGS = -I../../usr/include/
 endif DVBPSIBUILD
+
+AM_CXXFLAGS += -DDVBTEE_FEED_LEGACY

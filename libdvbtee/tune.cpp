@@ -36,7 +36,11 @@ typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 
 static map_chan_to_ts_id channels;
 
+#if DVBTEE_FEED_LEGACY
 tune::tune()
+#else
+tune::tune(dvbtee::feed::ThreadFeeder &aFeeder)
+#endif
   :
 #if !defined(_WIN32)
     h_thread((pthread_t)NULL)
@@ -52,6 +56,9 @@ tune::tune()
   , fe_type(DVBTEE_FE_OFDM)
   , last_query((time_t)0)
   , m_iface(NULL)
+#if !DVBTEE_FEED_LEGACY
+  , feeder(aFeeder)
+#endif
 {
 	dPrintf("()");
 //	channels.clear();
@@ -65,7 +72,10 @@ tune::~tune()
 //	channels.clear();
 }
 
-tune::tune(const tune&)
+tune::tune(const tune& t)
+#if !DVBTEE_FEED_LEGACY
+  : feeder(t.feeder) // FIXME
+#endif
 {
 	dPrintf("(copy)");
 

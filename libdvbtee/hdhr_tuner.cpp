@@ -89,7 +89,13 @@ private:
 };
 
 hdhr_tuner::hdhr_tuner()
+#if DVBTEE_FEED_LEGACY
   : dev(NULL)
+#else
+  : pullFeeder(*this)
+  , tune(pullFeeder)
+  , dev(NULL)
+#endif
 {
 	dPrintf("()");
 	filtered_pids.clear();
@@ -109,6 +115,9 @@ hdhr_tuner::~hdhr_tuner()
 
 hdhr_tuner::hdhr_tuner(const hdhr_tuner& hdhr)
   : tune(hdhr)
+#if !DVBTEE_FEED_LEGACY
+  , pullFeeder(hdhr.pullFeeder)
+#endif
   , dev(NULL)
 {
 	dPrintf("(copy)");
@@ -350,6 +359,8 @@ void hdhr_tuner::stop_feed()
 
 int hdhr_tuner::pull()
 {
+	dPrintf("()");
+
 	if (!dev) return -1;
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	size_t actual;
@@ -370,7 +381,11 @@ int hdhr_tuner::start_feed()
 	}
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	hdhomerun_device_stream_start(hdhr_dev);
+#if DVBTEE_FEED_LEGACY
 	if (0 == feeder.pull(this)) {
+#else
+	if (0 == pullFeeder.start()) {
+#endif
 		state |= TUNE_STATE_FEED;
 		return 0;
 	}
@@ -396,3 +411,12 @@ bool hdhr_tuner::__tune_channel(dvbtee_fe_modulation_t modulation, unsigned int 
 	return false;
 }
 #endif
+
+HdhrPullFeeder::HdhrPullFeeder(feed_pull_iface &iface)
+ : PullFeeder(iface)
+{
+}
+
+void HdhrPullFeeder::close()
+{
+}
