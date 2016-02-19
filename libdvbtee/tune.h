@@ -29,6 +29,10 @@
 #include "feed.h"
 #include "feed/feeder.h"
 
+#if !DVBTEE_FEED_LEGACY
+#define tune tuneTuner
+#endif
+
 #if 0
 #include <map>
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;

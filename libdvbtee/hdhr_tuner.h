@@ -24,6 +24,10 @@
 
 #include "tune.h"
 
+#if !DVBTEE_FEED_LEGACY
+#define hdhr_tuner hdhrTuner
+#endif
+
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
 typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 

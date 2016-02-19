@@ -25,6 +25,10 @@
 #include "tune.h"
 #include "feed/file.h"
 
+#if !DVBTEE_FEED_LEGACY
+#define linuxtv_tuner linuxtvTuner
+#endif
+
 #if 0
 #include <map>
 typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;

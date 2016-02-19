@@ -250,6 +250,7 @@ AC_CONFIG_FILES([Makefile
                  libdvbtee/Makefile
                  libdvbtee/decode/Makefile
                  libdvbtee/value/Makefile
+                 libdvbtee/legacy/Makefile
                  libdvbtee_server/Makefile
                  tunerprovider/Makefile
                  examples/file_example/Makefile
