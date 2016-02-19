@@ -7,9 +7,9 @@ endif COVERALLS
 lib_LTLIBRARIES = libdvbtee_legacy.la
 
 libdvbtee_legacy_la_SOURCES = \
-    ../hdhr_tuner.cpp \
-    ../linuxtv_tuner.cpp \
-    ../tune.cpp
+    hdhr_tuner.cpp \
+    linuxtv_tuner.cpp \
+    tune.cpp
 
 DVBTEE_LIBRARY_VERSION=0:0:0
 
