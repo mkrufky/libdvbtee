@@ -6,7 +6,7 @@ endif COVERALLS
 
 bin_PROGRAMS = dvbtee
 dvbtee_SOURCES = dvbtee.cpp
-dvbtee_LDADD = -L../libdvbtee -L../libdvbtee_server -ldvbtee -ldvbtee_server
+dvbtee_LDADD = -L../libdvbtee/legacy -L../libdvbtee -L../libdvbtee_server -ldvbtee -ldvbtee_server -ldvbtee_legacy
 #MacOSX needs libiconv
 #dvbtee_LDADD += -L/opt/local/lib -liconv
 
