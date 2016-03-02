@@ -104,6 +104,11 @@ int UdpFeeder::start()
 	return ret;
 }
 
+int UdpFeeder::setPort(uint16_t port_requested)
+{
+	return m_port = port_requested;
+}
+
 //static
 void* UdpFeeder::udp_feed_thread(void *p_this)
 {

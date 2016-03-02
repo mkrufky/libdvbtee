@@ -36,7 +36,7 @@ public:
 
 	virtual int start();
 
-	int setPort(uint16_t port_requested) { return m_port = port_requested; }
+	int setPort(uint16_t port_requested);
 
 private:
 	void        *udp_feed_thread();
