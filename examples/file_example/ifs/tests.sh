@@ -1,0 +1,1 @@
+./dvbtee-ifsparser -F ../../../*.ts

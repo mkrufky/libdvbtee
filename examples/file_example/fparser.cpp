@@ -28,7 +28,7 @@
 
 #include "feed.h"
 #ifndef IFS
-#define IFS 1
+#define IFS 0
 #endif
 #if IFS
 #include "feed/ifsfeeder.h"
