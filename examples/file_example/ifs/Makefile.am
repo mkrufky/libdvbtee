@@ -1,11 +1,11 @@
-AM_CXXFLAGS = -I../../../libdvbtee -I../ -DIFS
+AM_CXXFLAGS = -I../../../libdvbtee -DIFS
 
 if COVERALLS
 AM_CXXFLAGS += -g -O0
 endif COVERALLS
 
 bin_PROGRAMS = dvbtee-ifsparser
-dvbtee_ifsparser_SOURCES = ../fparser.cpp
+dvbtee_ifsparser_SOURCES = ifsparser.cpp
 dvbtee_ifsparser_LDADD = -L../../../libdvbtee -ldvbtee
 
 if DVBPSIBUILD
