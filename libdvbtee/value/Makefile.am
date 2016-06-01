@@ -1,5 +1,3 @@
-AM_CXXFLAGS = -I../include/valobj
-
 lib_LTLIBRARIES = libvalueobj.la
 
 libvalueobj_la_SOURCES = value.cpp object.cpp array.cpp handle.cpp
