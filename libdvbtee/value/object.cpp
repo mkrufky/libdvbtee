@@ -35,22 +35,6 @@ DEFINE_DEFAULT_GETTERS(Object, std::string)
 namespace valueobj {
 
 template <typename T>
-const ValueBase* Object::setByRef(std::string& key, T& val)
-{
-	if (map.count(key)) {
-		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
-	}
-
-	Value<T> *v = new Value<T>(key, val);
-
-	map[key] = v;
-	//map.insert( std::pair<std::string, ValueBase*>(key, v) );
-
-	++(*v); // increment refcount
-	return v;
-}
-
-template <typename T>
 const T& Object::get(std::string& key, T& def) const
 {
 	KeyValueMap::const_iterator it = map.find(key);
@@ -64,7 +48,6 @@ const T& Object::get(std::string& key, T& def) const
 }
 
 #define IMPL_OBJECT_TMPL(T) \
-template const ValueBase* Object::setByRef<T>(std::string& key, T& val); \
 template const T& Object::get<T>(std::string& key, T& def) const
 
 IMPL_OBJECT_TMPL(int);
@@ -85,6 +68,7 @@ IMPL_OBJECT_TMPL(Object);
 
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();
+static Handle valueUndefinedHdl = Handle((ValueBase*)&valueUndefined);
 
 Object::Object()
 {
@@ -112,51 +96,23 @@ Object::Object(const Object &obj)
 #endif
 }
 
-const ValueBase *Object::set(std::string key, char *val)
+Handle& Object::setByRef(std::string& key, Handle& hdl)
 {
-	return set<std::string>(key, std::string(val));
+	map[key] = hdl;
+	return hdl;
 }
 
-const ValueBase *Object::set(std::string key, const char *val)
-{
-	return set<std::string>(key, std::string(val));
-}
-
-const ValueBase *Object::set(std::string key, std::string &val)
-{
-	return setByRef<std::string>(key, val);
-}
-
-const ValueBase *Object::set(std::string key, Array &val)
-{
-	return setByRef<Array>(key, val);
-}
-
-const ValueBase *Object::set(std::string key, Object &val)
-{
-	return setByRef<Object>(key, val);
-}
-
-const ValueBase *Object::set(std::string key, Array *val)
-{
-	return setByRef<Array>(key, *val);
-}
-
-const ValueBase *Object::set(std::string key, Object *val)
-{
-	return setByRef<Object>(key, *val);
-}
-
-const ValueBase* Object::get(std::string key) const
+Handle& Object::get(std::string key) const
 {
 	KeyValueMap::const_iterator it = map.find(key);
-	if (it != map.end())
-		return it->second;
+	if (it != map.end()) {
+		return (Handle&)it->second;
+	}
 
-	return &valueUndefined;
+	return valueUndefinedHdl;
 }
 
-const ValueBase* Object::get(int key) const
+Handle& Object::get(int key) const
 {
 	return get(intToStr(key));
 }
@@ -164,7 +120,6 @@ const ValueBase* Object::get(int key) const
 void Object::unSet(std::string key)
 {
 	if (map.count(key)) {
-		if (0 == (--(*map[key])).getRefCnt()) delete map[key];
 		map.erase(key);
 	}
 }
@@ -176,11 +131,6 @@ void Object::unSet(int key)
 
 void Object::clear()
 {
-	for (KeyValueMap::iterator it = map.begin(); it != map.end(); ++it)
-	{
-		// decrement refcount. if refcount becomes zero, delete
-		if (0 == (--(*it->second)).getRefCnt()) delete it->second;
-	}
 	map.clear();
 }
 
@@ -192,12 +142,9 @@ const std::string Object::toJson() const
 
 	s << "{ ";
 	for (KeyValueMap::const_iterator it = map.begin(); it != map.end(); ++it) {
-		ValueBase *val = it->second;
-
 		if (it != map.begin()) s << ", ";
-		s << "\"" << it->first << "\": ";
 
-		s << val->toJson();
+		s << "\"" << it->first << "\": " << it->second.toJson();
 	}
 	s << " }";
 
@@ -211,18 +158,25 @@ const std::string Object::intToStr(int i) const
 	return s.str();
 }
 
+Handle& Object::set(std::string key, Handle hdl)
+{
+	return setByRef(key, hdl);
+}
+
+Handle& Object::set(int key, Handle hdl)
+{
+	return set(intToStr(key), hdl);
+}
+
 // deprecated:
-const ValueBase *Object::set(ValueBase *val)
+Handle& Object::set(ValueBase *val)
 {
 	return set(val->getName(), val);
 }
 
-const ValueBase *Object::set(std::string key, ValueBase *val)
+Handle& Object::set(std::string key, ValueBase *val)
 {
-	unSet(key);
-	map[key] = val;
-	++(*val);
-	return val;
+	return set(key, Handle(val));
 }
 
 TO_JSON_TPL(Object, VALUE.toJson().c_str())

@@ -3,6 +3,7 @@ QT=
 TARGET = valueobj
 TEMPLATE = lib
 CONFIG += staticlib
+DESTDIR = ..
 
 include ( value.pri )
 

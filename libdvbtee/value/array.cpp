@@ -33,47 +33,10 @@ using namespace valueobj;
 namespace valueobj {
 
 template <typename T>
-const ValueBase* Array::push(T val)
-{
-	return push<T>(val, "");
-}
-
-template <typename T>
-const ValueBase* Array::set(std::string key, T val)
-{
-	if (!key.length()) return NULL;
-	const ValueBase* v = push<T>(val, key);
-	if (v) updateIndex(key, v);
-	return v;
-}
-
-template <typename T>
-const ValueBase* Array::set(int key, T val)
-{
-	return set<T>(intToStr(key), val);
-}
-
-template <typename T>
-const ValueBase* Array::pushByRef(T& val, std::string idx)
-{
-	Value<T> *v = new Value<T>(idx, val);
-	vector.push_back(v);
-	++(*v); // increment refcount
-	return v;
-}
-
-template <typename T>
-const ValueBase* Array::push(T val, std::string idx)
-{
-	return pushByRef<T>(val, idx);
-}
-
-
-template <typename T>
 const T& Array::get(unsigned int &idx, T& def) const
 {
 	if (idx <= vector.size()) {
-		Value<T> *val = (Value<T>*)vector[idx];
+		Value<T> *val = vector.at(idx);
 		if (val->checkType(typeid(T)))
 			return val->get();
 	}
@@ -82,11 +45,9 @@ const T& Array::get(unsigned int &idx, T& def) const
 }
 
 #define IMPL_ARRAY_TMPL(T) \
-template const ValueBase* Array::push(T val); \
-template const ValueBase* Array::set(std::string key, T val); \
-template const ValueBase* Array::set(int key, T val); \
-template const ValueBase* Array::pushByRef(T& val, std::string idx); \
-template const ValueBase* Array::push(T val, std::string idx); \
+template Handle& Array::push(T val); \
+template bool Array::set(std::string key, T val); \
+template bool Array::set(int key, T val); \
 template const T& Array::get(unsigned int &idx, T& def) const
 
 IMPL_ARRAY_TMPL(int);
@@ -106,6 +67,7 @@ IMPL_ARRAY_TMPL(Array);
 IMPL_ARRAY_TMPL(Object);
 
 static ReferencedValueUndefined& valueUndefined = ReferencedValueUndefined::instance();
+static Handle valueUndefinedHdl = Handle((ValueBase*)&valueUndefined);
 
 Array::Array(std::string idx)
  : idxField(idx)
@@ -126,14 +88,28 @@ Array::~Array()
 Array::Array(const Array &obj)
 {
 	for (KeyValueVector::const_iterator it = obj.vector.begin(); it != obj.vector.end(); ++it) {
-		ValueBase *v = *it;
-		push(v);
-		const std::string& n = v->getName();
-		if (n.length()) updateIndex(n, v);
+		Handle& hdl = push(*it);
+		const std::string& n = hdl.get()->getName();
+		if (n.length()) updateIndex(n, hdl);
 	}
 #if DBG
 	fprintf(stderr, "%s(copy) %lu\n", __func__, vector.size());
 #endif
+}
+
+Handle& Array::push(Handle hdl)
+{
+	vector.push_back(hdl);
+	return vector.back();
+}
+
+bool Array::set(std::string key, Handle hdl)
+{
+	if (!key.length()) return false;
+
+	Handle& h = push(hdl);
+	updateIndex(key, h);
+	return true;
 }
 
 const std::string Array::toJson() const
@@ -147,7 +123,7 @@ const std::string Array::toJson() const
 	for (KeyValueVector::const_iterator it = vector.begin(); it != vector.end(); ++it) {
 		if (it != vector.begin()) s << ", ";
 
-		s << (*it)->toJson();
+		s << it->toJson();
 	}
 	s << " ]";
 
@@ -165,17 +141,17 @@ const std::string &Array::getIndex() const
 	return idxField;
 }
 
-const ValueBase* Array::get(unsigned int idx) const
+Handle& Array::get(unsigned int idx) const
 {
 	if (idx <= vector.size())
-		return vector[idx];
+		return (Handle&)vector.at(idx);
 
-	return &valueUndefined;
+	return valueUndefinedHdl;
 }
 
-void Array::updateIndex(std::string key, const ValueBase *val)
+void Array::updateIndex(std::string key, Handle& val)
 {
-	if (key.length()) indices[key] = val;
+	if (key.length()) indices[key] = &val;
 }
 
 std::string &Array::assignIndex(Object &obj, std::string &index)
@@ -189,27 +165,22 @@ std::string &Array::assignIndex(Object &obj, std::string &index)
 	return index;
 }
 
-const ValueBase* Array::getByName(std::string idx) const
+Handle& Array::getByName(std::string idx) const
 {
-	std::map<std::string, const ValueBase*>::const_iterator it = indices.find(idx);
+	std::map<std::string, Handle*>::const_iterator it = indices.find(idx);
 	if (it == indices.end())
-		return &valueUndefined;
+		return valueUndefinedHdl;
 
-	return it->second;
+	return *(it->second);
 }
 
-const ValueBase* Array::getByName(unsigned int idx) const
+Handle& Array::getByName(unsigned int idx) const
 {
 	return getByName(intToStr(idx));
 }
 
 void Array::clear()
 {
-	for (KeyValueVector::iterator it = vector.begin(); it != vector.end(); ++it)
-	{
-		// decrement refcount. if refcount becomes zero, delete
-		if (0 == (--(**it)).getRefCnt()) delete *it;
-	}
 	vector.clear();
 	indices.clear();
 }
@@ -221,91 +192,32 @@ const std::string Array::intToStr(int i) const
 	return s.str();
 }
 
-const ValueBase* Array::pushObject(Object &val, std::string idx)
+Handle& Array::pushObject(Object &val, std::string idx)
 {
 	bool extractIndex = (!idx.length());
 
 	if (extractIndex) assignIndex(val, idx);
 
-	const ValueBase *v = pushByRef<Object>(val, idx);
+	Handle& v = push(Handle(val, idx));
 
 	if (extractIndex) updateIndex(idx, v);
 
 	return v;
 }
 
-#ifndef USING_INLINE_PUSH
-const ValueBase *Array::push(char *val, std::string idx)
-{
-	return push<std::string>(std::string(val), idx);
-}
-
-const ValueBase *Array::push(const char *val, std::string idx)
-{
-	return push<std::string>(std::string(val), idx);
-}
-
-const ValueBase *Array::push(std::string &val, std::string idx)
-{
-	return pushByRef<std::string>(val, idx);
-}
-
-const ValueBase *Array::push(Array &val, std::string idx)
-{
-	return pushByRef<Array>(val, idx);
-}
-
-const ValueBase *Array::push(Array *val, std::string idx)
-{
-	return pushByRef<Array>(*val, idx);
-}
-#endif
-
-const ValueBase* Array::push(Object &o)
+Handle& Array::push(Object &o)
 {
 	return pushObject(o, "");
 }
 
-const ValueBase *Array::push(Object *o)
+Handle& Array::push(Object *o)
 {
 	return push(*o);
 }
 
-const ValueBase* Array::push(char *val)
+Handle& Array::push(ValueBase *val)
 {
-	return push<std::string>(std::string(val));
-}
-
-const ValueBase* Array::push(const char *val)
-{
-	return push<std::string>(std::string(val));
-}
-
-const ValueBase *Array::set(std::string key, char *val)
-{
-	return set(key, std::string(val));
-}
-
-const ValueBase *Array::set(std::string key, const char *val)
-{
-	return set(key, std::string(val));
-}
-
-const ValueBase *Array::set(int key, char *val)
-{
-	return set(intToStr(key), val);
-}
-
-const ValueBase *Array::set(int key, const char *val)
-{
-	return set(intToStr(key), val);
-}
-
-const ValueBase* Array::push(ValueBase *val)
-{
-	vector.push_back(val);
-	++(*val);
-	return val;
+	return push(Handle(val));
 }
 
 DEFINE_DEFAULT_GETTERS(Array, unsigned int)
