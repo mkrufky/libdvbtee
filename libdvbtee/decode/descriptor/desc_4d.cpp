@@ -53,8 +53,8 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	get_descriptor_text(dr->i_text, dr->i_text_length, text);
 
 	set("lang", std::string((const char*)lang));
-	set("name", std::string((const char*)name));
-	set("text", std::string((const char*)text));
+	set("name", std::string(escape_quotes((char*)name)));
+	set("text", std::string(escape_quotes((char*)text)));
 
 	dPrintf("%s", toJson().c_str());
 
