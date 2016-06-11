@@ -98,8 +98,7 @@ Object::Object(const Object &obj)
 
 Handle& Object::setByRef(std::string& key, Handle& hdl)
 {
-	map[key] = hdl;
-	return hdl;
+	return map[key] = hdl;
 }
 
 Handle& Object::get(std::string key) const
