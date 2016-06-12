@@ -45,7 +45,13 @@ public:
 	Handle(T& o, std::string name = "") : m_value(NULL) { set(o, name); }
 #endif
 	template <typename T>
-	Handle(T o, std::string name = "") : m_value(NULL) { set(o, name); }
+	Handle(T o, std::string name = "") : m_value(NULL)
+	{
+		/* we assign m_value to the return value of set
+		 * to satisfy the coverity checker,
+		 * avoiding Resource Leak false positive */
+		m_value = (ValueBase*)set(o, name);
+	}
 
 	template <typename T>
 	Handle(Value<T> v) : m_value(&v) { incRefCnt(); }
