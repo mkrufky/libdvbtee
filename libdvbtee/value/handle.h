@@ -26,13 +26,8 @@
 #include <stddef.h>
 
 #include "value.h"
-//#include "object.h"
-//#include "array.h"
 
 namespace valueobj {
-
-//class Array;
-//class Object;
 
 class Handle {
 public:
@@ -65,13 +60,6 @@ public:
 	Handle(const ValueBase* v);
 	Handle(ValueBase* v);
 
-//	Handle(const Object& o);
-//	Handle(const Array& o);
-//	Handle(Object&);
-//	Handle(Object*);
-//	Handle(Array&);
-//	Handle(Array*);
-
 	Handle& operator=(Handle& hdl);
 #if 1
 	template <typename T>
@@ -103,10 +91,6 @@ public:
 	}
 
 	Handle& operator=(ValueBase* v);
-//	Handle& operator=(Object&);
-//	Handle& operator=(Object*);
-//	Handle& operator=(Array&);
-//	Handle& operator=(Array*);
 
 	const ValueBase* set(char* s, std::string name = "");
 
