@@ -55,6 +55,8 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	get_descriptor_text(dr->i_text, dr->i_text_length, text);
 
 	set("lang", std::string((const char*)lang));
+
+	/* FIXME: we should escape these strings on output rather than on store */
 	char* escaped = escape_quotes((char*)name);
 	set("name", std::string(escaped));
 	free(escaped);
