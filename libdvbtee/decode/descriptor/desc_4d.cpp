@@ -19,6 +19,8 @@
  *
  *****************************************************************************/
 
+#include <stdlib.h>
+
 #include "desc_4d.h"
 
 #include "dvbpsi/dr_4d.h" /* short event descriptor */
