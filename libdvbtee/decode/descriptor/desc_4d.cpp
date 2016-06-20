@@ -57,12 +57,21 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	set("lang", std::string((const char*)lang));
 
 	/* FIXME: we should escape these strings on output rather than on store */
-	char* escaped = escape_quotes((char*)name);
-	set("name", std::string(escaped));
-	free(escaped);
-	escaped = escape_quotes((char*)text);
-	set("text", std::string(escaped));
-	free(escaped);
+	char* escaped;
+	if (strchr((char*)name, '"')) {
+		escaped = escape_quotes((char*)name);
+		set("name", std::string(escaped));
+		free(escaped);
+	} else {
+		set("name", std::string((char*)name));
+	}
+	if (strchr((char*)text, '"')) {
+		escaped = escape_quotes((char*)text);
+		set("text", std::string(escaped));
+		free(escaped);
+	} else {
+		set("text", std::string((char*)text));
+	}
 
 	dPrintf("%s", toJson().c_str());
 
