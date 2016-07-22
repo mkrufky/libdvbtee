@@ -22,6 +22,9 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
+#if defined(__APPLE__)
+#define GCC6HACK 0
+#else
 #ifdef __GNUC__
 #  include <features.h>
 #  if __GNUC_PREREQ(6,0)
@@ -31,6 +34,7 @@
 #  endif
 #else
 #define GCC6HACK 0
+#endif
 #endif
 
 #include <stdio.h>
