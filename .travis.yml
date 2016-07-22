@@ -242,5 +242,7 @@ script:
 before_install:
   - if [ "$TRAVIS_OS_NAME" != "linux" ]; then
         brew update;
+        brew uninstall libtool;
+        brew install libtool;
         brew install libdvbpsi libhdhomerun;
     fi
