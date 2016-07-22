@@ -47,7 +47,7 @@ void libdvbtee_set_debug_level(unsigned int debug);
 
 #define __dPrintf(lvl, fmt, arg...) do {				\
 	if (dbg & lvl)							\
-		__printf(stderr, "%d "CLASS_MODULE"::%s: " fmt "\n", 	\
+		__printf(stderr, "%d " CLASS_MODULE "::%s: " fmt "\n", 	\
 				 (int)time(NULL), __func__, ##arg);	\
 } while (0)
 
