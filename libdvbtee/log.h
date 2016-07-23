@@ -23,7 +23,7 @@
 #define __LOG_H__
 
 #if defined(__APPLE__) || defined(__MACH__) || defined(_WIN32)
-#define GCC6HACK 0
+#define GCC6HACK 1
 #else
 #ifdef __GNUC__
 #  include <features.h>
