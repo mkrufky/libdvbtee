@@ -22,7 +22,7 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__MACH__) || defined(_WIN32)
 #define GCC6HACK 0
 #else
 #ifdef __GNUC__
