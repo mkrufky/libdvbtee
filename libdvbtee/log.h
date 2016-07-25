@@ -22,21 +22,6 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
-#if defined(__APPLE__) || defined(__MACH__) || defined(_WIN32)
-#define GCC6HACK 1
-#else
-#ifdef __GNUC__
-#  include <features.h>
-#  if __GNUC_PREREQ(6,0)
-#define GCC6HACK 1
-#  else
-#define GCC6HACK 0
-#  endif
-#else
-#define GCC6HACK 0
-#endif
-#endif
-
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -60,20 +45,11 @@ void libdvbtee_set_debug_level(unsigned int debug);
 
 #define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
 
-#if GCC6HACK
 #define __dPrintf(lvl, fmt, arg...) do {				\
 	if (dbg & lvl)							\
-		__printf(stderr, "%d %s::%s: " fmt,			\
-			 (int)time(NULL), CLASS_MODULE, __func__, ##arg);	\
-		__printf(stderr, "\n");	\
-} while (0)
-#else
-#define __dPrintf(lvl, fmt, arg...) do {				\
-	if (dbg & lvl)							\
-		__printf(stderr, "%d %s::%s: " fmt "\n",		\
+		__printf(stderr, "%d %s::%s: " #fmt "\n",		\
 			 (int)time(NULL), CLASS_MODULE, __func__, ##arg);	\
 } while (0)
-#endif
 
 class dbgFn {
 public:
