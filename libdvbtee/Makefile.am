@@ -81,3 +81,15 @@ endif DVBPSIBUILD
 if BUILD_OS_IS_DARWIN
 libdvbtee_la_LIBADD += -L/opt/local/lib -liconv
 endif BUILD_OS_IS_DARWIN
+
+if CYGWIN
+libdvbtee_la_LIBADD += -liconv -lws2_32
+endif CYGWIN
+
+if MINGW
+libdvbtee_la_LIBADD += -liconv -lws2_32
+endif MINGW
+
+if MSYS
+libdvbtee_la_LIBADD += -liconv -lws2_32
+endif MSYS

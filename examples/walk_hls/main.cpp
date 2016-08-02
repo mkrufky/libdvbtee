@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2013-2014 Michael Ira Krufky
+ * Copyright (C) 2013-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -33,7 +33,7 @@
 /* update version number by updating the LIBDVBTEE_VERSION_FOO fields below */
 #define LIBDVBTEE_VERSION_A 0
 #define LIBDVBTEE_VERSION_B 4
-#define LIBDVBTEE_VERSION_C 1
+#define LIBDVBTEE_VERSION_C 6
 
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
@@ -42,7 +42,7 @@
 #define LIBDVBTEE_VERSION_INT  ((LIBDVBTEE_VERSION_A<<16)+(LIBDVBTEE_VERSION_B<<8)+LIBDVBTEE_VERSION_C)
 
 /* Human readible LIBDVBTEE version */
-#define LIBDVBTEE_VERSION EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_A)"."EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_B)"."EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_C)
+#define LIBDVBTEE_VERSION EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_A) "." EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_B) "." EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_C)
 
 extern const char *parse_libdvbpsi_version;
 

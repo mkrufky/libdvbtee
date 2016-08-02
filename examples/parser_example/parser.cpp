@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -29,16 +29,13 @@
 #include "feed.h"
 #include "serve.h"
 
-#include "atsctext.h"
-
 struct dvbtee_context
 {
 	feed feeder;
 	serve *server;
 };
-typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
-map_pid_to_context context_map;
+struct dvbtee_context* ctxt;
 
 
 void stop_server(struct dvbtee_context* context);
@@ -56,15 +53,12 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	}
 
 	context->feeder.close_file();
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
 }
 
 
 void signal_callback_handler(int signum)
 {
-	struct dvbtee_context* context = context_map[getpid()];
+	struct dvbtee_context* context = ctxt;
 	bool signal_dbg = true;
 
 	const char *signal_desc;
@@ -88,9 +82,11 @@ void signal_callback_handler(int signum)
 	case SIGTERM: /* Termination */
 		signal_desc = "SIGTERM";
 		break;
+#if !defined(_WIN32)
 	case SIGHUP:  /* Hangup */
 		signal_desc = "SIGHUP";
 		break;
+#endif
 	default:
 		signal_desc = "UNKNOWN";
 		break;
@@ -134,6 +130,8 @@ int main(int argc, char **argv)
 {
 	int opt;
 	dvbtee_context context;
+	ctxt = &context;
+
 	unsigned int timeout = 0;
 	char filename[256];
 
@@ -161,17 +159,14 @@ int main(int argc, char **argv)
 		}
 	}
 
-	context_map[getpid()] = &context;
-
 	signal(SIGINT,  signal_callback_handler); /* Program interrupt. (ctrl-c) */
 	signal(SIGABRT, signal_callback_handler); /* Process detects error and reports by calling abort */
 	signal(SIGFPE,  signal_callback_handler); /* Floating-Point arithmetic Exception */
 	signal(SIGILL,  signal_callback_handler); /* Illegal Instruction */
 	signal(SIGSEGV, signal_callback_handler); /* Segmentation Violation */
 	signal(SIGTERM, signal_callback_handler); /* Termination */
+#if !defined(_WIN32)
 	signal(SIGHUP,  signal_callback_handler); /* Hangup */
-#if 1 /* FIXME */
-	ATSCMultipleStringsInit();
 #endif
 	context.feeder.parser.limit_eit(-1);
 
@@ -235,9 +230,6 @@ int main(int argc, char **argv)
 	}
 exit:
 	if (context.server) stop_server(&context);
-//	cleanup(&context);
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
+	cleanup(&context);
 	return 0;
 }

@@ -6,6 +6,9 @@ AC_PREREQ([2.50])
 AC_INIT([libdvbtee], m4_defn([DVBTEE_VERSION]), [mkrufky@linuxtv.org])
 AC_CONFIG_AUX_DIR([.])
 
+# Check target OS
+AC_CANONICAL_TARGET
+
 AM_INIT_AUTOMAKE([subdir-objects])
 
 AC_CONFIG_SRCDIR([libdvbtee/parse.cpp])
@@ -37,6 +40,10 @@ AM_CONDITIONAL([DVBPSIBUILD], [test x$dvbpsibuild = xtrue])
 AC_CANONICAL_BUILD
 
 AM_CONDITIONAL([BUILD_OS_IS_DARWIN], [case $build_os in darwin* ) true ;; * ) false ;; esac])
+AM_CONDITIONAL([DARWIN], [case $target_os in darwin* ) true ;; * ) false ;; esac])
+AM_CONDITIONAL([CYGWIN], [case $target_os in cygwin* ) true ;; * ) false ;; esac])
+AM_CONDITIONAL([MINGW], [case $target_os in mingw* ) true ;; * ) false ;; esac])
+AM_CONDITIONAL([MSYS], [case $target_os in msys* ) true ;; * ) false ;; esac])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -215,9 +222,7 @@ AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_STRCOLL
-AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memchr memmove memset select socket stpcpy strchr strcspn strdup strerror strpbrk strrchr strspn strstr strtoul])
+AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memchr memmove memset select socket stpcpy strchr strcspn strdup strerror strpbrk strrchr strspn strstr strtoul fcntl strtok_r timegm _mkgmtime inet_aton inet_pton InetPton])
 
 PKG_PROG_PKG_CONFIG([0.20])
 AM_CONDITIONAL([HAVE_PKG_CONFIG], [test "x$PKG_CONFIG" != "x"])
@@ -247,4 +252,5 @@ libdvbtee configuration
 -----------------------
 libdvbtee version     : ${VERSION}
 compile flags         : ${CFLAGS}
+target os             : ${target_os}
 "

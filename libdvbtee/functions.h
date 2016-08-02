@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -86,5 +86,6 @@ time_t atsc_datetime_utc(uint32_t in_time);
 int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text, size_t sizeof_text);
 
 char *url_encode(char *str);
+char *escape_quotes(char *str);
 
 #endif /* __FUNCTIONS_H__ */

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -19,17 +19,20 @@
  *
  *****************************************************************************/
 
+#include "dvbtee_config.h"
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/syscall.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <fstream>
 
 #include "feed.h"
 #include "log.h"
@@ -39,20 +42,16 @@
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_FEED, fmt, ##arg)
 
-unsigned int dbg = 0;
-
-void libdvbtee_set_debug_level(unsigned int debug)
-{
-	dbg = debug;
-	__dPrintf(debug, "(0x%x)", debug);
-}
-
 #define BUFSIZE ((4096/188)*188)
 
 feed::feed()
-  : h_thread((pthread_t)NULL)
+  :
+#if !defined(_WIN32)
+    h_thread((pthread_t)NULL)
   , h_feed_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  ,
+#endif
+    f_kill_thread(false)
   , fd(-1)
 #if FEED_BUFFER
   , feed_thread_prio(100)
@@ -78,8 +77,10 @@ feed::~feed()
 feed::feed(const feed&)
 {
 	dPrintf("(copy)");
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
 	h_feed_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	fd = -1;
 #if FEED_BUFFER
@@ -95,8 +96,10 @@ feed& feed::operator= (const feed& cSource)
 	if (this == &cSource)
 		return *this;
 
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
 	h_feed_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	fd = -1;
 #if FEED_BUFFER
@@ -122,12 +125,16 @@ int feed::_open_file(int flags)
 
 	fd = -1;
 
+#if !USE_IOS_READ
 	if ((fd = open(filename, O_RDONLY|flags )) < 0)
 		fprintf(stderr, "failed to open %s\n", filename);
 	else
 		fprintf(stderr, "%s: using %s\n", __func__, filename);
 
 	return fd;
+#else
+	return 0;
+#endif
 }
 
 void feed::close_file()
@@ -157,7 +164,11 @@ void* feed::feed_thread(void *p_this)
 //static
 void* feed::file_feed_thread(void *p_this)
 {
+#if USE_IOS_READ
+	return static_cast<feed*>(p_this)->ios_file_feed_thread();
+#else
 	return static_cast<feed*>(p_this)->file_feed_thread();
+#endif
 }
 
 //static
@@ -375,6 +386,73 @@ void *feed::file_feed_thread()
 	pthread_exit(NULL);
 }
 
+#if USE_IOS_READ
+void *feed::ios_file_feed_thread()
+{
+	ssize_t r;
+#if FEED_BUFFER
+	void *q = NULL;
+#else
+	unsigned char q[BUFSIZE];
+#endif
+	int available;
+
+	dPrintf("(ios)");
+	std::ifstream infile;
+	infile.open(filename, std::ios::binary | std::ios::in);
+	if (infile.fail()) {
+		switch (errno) {
+		case EACCES:
+			fprintf(stderr, "%s: r = %d, errno = EACCES\n", __func__, (int)r);
+			break;
+		case ENOENT:
+			fprintf(stderr, "%s: r = %d, errno = ENOENT\n", __func__, (int)r);
+			break;
+		default:
+			fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, errno);
+			break;
+		}
+	} else
+
+	while (!f_kill_thread) {
+
+#if FEED_BUFFER
+		available = ringbuffer.get_write_ptr(&q);
+#else
+		available = sizeof(q);
+#endif
+		available = (available < BUFSIZE) ? available : BUFSIZE;
+
+		infile.read((char *)q, available);
+		r = available;
+		if (infile.fail()) {
+			r = 0;
+			int err = errno;
+			switch (err) {
+			case EACCES:
+				fprintf(stderr, "%s: r = %d, errno = EACCES\n", __func__, (int)r);
+				break;
+			case ENOENT:
+				fprintf(stderr, "%s: r = %d, errno = ENOENT\n", __func__, (int)r);
+				break;
+			default:
+				if (err) fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, err);
+				break;
+			}
+			f_kill_thread = true;
+			continue;
+		}
+#if FEED_BUFFER
+		ringbuffer.put_write_ptr(r);
+#else
+		parser.feed(r, q);
+#endif
+	}
+	close_file();
+	pthread_exit(NULL);
+}
+#endif
+
 void *feed::stdin_feed_thread()
 {
 	ssize_t r;
@@ -435,7 +513,7 @@ void *feed::tcp_client_feed_thread()
 #if FEED_BUFFER
 	void *q = NULL;
 #else
-	unsigned char q[BUFSIZE];
+	char q[BUFSIZE];
 #endif
 	int available;
 
@@ -454,7 +532,7 @@ void *feed::tcp_client_feed_thread()
 		if (rxlen > 0) {
 			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
 #if !FEED_BUFFER
-			parser.feed(rxlen, q);
+			parser.feed(rxlen, (uint8_t*)q);
 #endif
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
@@ -477,7 +555,7 @@ void *feed::udp_listen_feed_thread()
 #if FEED_BUFFER
 	void *q = NULL;
 #else
-	unsigned char q[188*7];
+	char q[188*7];
 #endif
 	int available;
 
@@ -499,7 +577,7 @@ void *feed::udp_listen_feed_thread()
 #endif
 //			getpeername(fd, (struct sockaddr*)&udpsa, &salen);
 #if !FEED_BUFFER
-			parser.feed(rxlen, q);
+			parser.feed(rxlen, (uint8_t*)q);
 #endif
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
@@ -593,7 +671,7 @@ int feed::start_socket(char* source)
 		memset(&ip_addr, 0, sizeof(ip_addr));
 		ip_addr.sin_family = AF_INET;
 		ip_addr.sin_port   = htons(port);
-		if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
+		if (inet_pton(AF_INET, ip, &ip_addr.sin_addr) == 0) {
 			perror("ip address translation failed");
 			return -1;
 		} else
@@ -681,8 +759,12 @@ int feed::start_udp_listener(uint16_t port_requested)
 		return fd;
 	}
 
+#if defined(_WIN32)
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
+#else
 	int reuse = 1;
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+#endif
 		perror("setting reuse failed");
 		return -1;
 	}
@@ -697,11 +779,7 @@ int feed::start_udp_listener(uint16_t port_requested)
 	}
 	//	port = port_requested;
 #if 0
-	int fl = fcntl(fd, F_GETFL, 0);
-	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
+	socket_set_nbio(fd);
 #endif
 	int ret = pthread_create(&h_thread, NULL, udp_listen_feed_thread, this);
 
@@ -748,7 +826,7 @@ feed_server::feed_server()
 {
 	dPrintf("()");
 
-	feeders.clear();
+	clear_feeders();
 }
 
 feed_server::~feed_server()
@@ -757,7 +835,7 @@ feed_server::~feed_server()
 
 	listener.stop();
 
-	feeders.clear();
+	clear_feeders();
 }
 
 void feed_server::add_tcp_feed(int socket)
@@ -765,10 +843,23 @@ void feed_server::add_tcp_feed(int socket)
 	if (socket >= 0) {
 		dPrintf("(%d)", socket);
 
-		feeders[socket].add_tcp_feed(socket);
+		if (feeders.count(socket)) delete feeders[socket];
+		feeders[socket] = new feed;
 
-		if (m_iface) m_iface->add_feeder(&feeders[socket]);
+
+		feeders[socket]->add_tcp_feed(socket);
+
+		if (m_iface) m_iface->add_feeder(feeders[socket]);
 	}
+	return;
+}
+
+void feed_server::clear_feeders()
+{
+	for (feed_map::iterator it = feeders.begin(); it != feeders.end(); ++it)
+		delete it->second;
+
+	feeders.clear();
 	return;
 }
 
@@ -787,12 +878,15 @@ int feed_server::start_tcp_listener(uint16_t port_requested, feed_server_iface *
 
 int feed_server::start_udp_listener(uint16_t port_requested, feed_server_iface *iface)
 {
-	int ret = feeders[0].start_udp_listener(port_requested);
+	if (feeders.count(0)) delete feeders[0];
+	feeders[0] = new feed;
+
+	int ret = feeders[0]->start_udp_listener(port_requested);
 	if (ret < 0)
 		goto fail;
 
 	/* call connection notify callback to notify parent server of new feed */
-	if (iface) iface->add_feeder(&feeders[0]);
+	if (iface) iface->add_feeder(feeders[0]);
 fail:
 	return ret;
 }

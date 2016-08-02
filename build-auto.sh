@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd "$(dirname "$0")"
 export DVBTEE_ROOT="`pwd`"
 
 mkdir -p usr/bin
@@ -67,5 +68,3 @@ if [ $? != 0 ]; then
     echo "make failed"
     exit 1
 fi
-
-make -C dvbtee

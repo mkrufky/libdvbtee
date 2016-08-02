@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -40,8 +40,8 @@ demux::~demux()
 {
 	dPrintf("()");
 	sleep(2);
-	for (map_output::const_iterator iter = out.begin(); iter != out.end(); ++iter)
-		((output_stream)(iter->second)).stop_after_drain();
+	for (map_output::iterator iter = out.begin(); iter != out.end(); ++iter)
+		(iter->second).stop_after_drain();
 	out.clear();
 }
 

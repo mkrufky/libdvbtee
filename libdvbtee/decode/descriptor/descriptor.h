@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -164,12 +164,13 @@ private:
 };
 
 #define DESCRIPTOR_DECODER_TPL \
-	static void dummy();
+	public: static void __load();
 
 #define REGISTER_DESCRIPTOR_FACTORY(tag, decoder) \
+	\
 	static volatile const DescriptorFactory<tag, decoder> &__DescFactory = DescriptorFactory<tag, decoder>::instance();\
 	\
-	void decoder::dummy() { __DescFactory.instance(); }
+	void decoder::__load() { __DescFactory.instance(); }
 
 }
 

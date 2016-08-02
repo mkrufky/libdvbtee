@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -24,6 +24,7 @@
 #include <string>
 #include "functions.h"
 #include "text.h"
+#include "dvbtee_config.h"
 
 const std::string html_dump_epg_header_footer_callback(void *, bool header, bool channel)
 {
@@ -212,7 +213,16 @@ const char * bcd_time_str(const time_t *the_time, char *time_str, size_t str_len
 	if (!time_str)
 		return NULL;
 
+#ifndef HAVE_LOCALTIME_R
+	/* as per:
+	 * http://stackoverflow.com/questions/18551409/localtime-r-support-on-mingw
+	 * localtime_r is not supported, but localtime is supported.
+	 * localtime is thread safe but not reentrant.
+	 */
+	tm_time = *localtime(the_time);
+#else
 	localtime_r(the_time, &tm_time);
+#endif
 	snprintf(time_str, str_len, "%04d%02d%02d%02d%02d",
 		 1900 + tm_time.tm_year,
 		 1 + tm_time.tm_mon, tm_time.tm_mday,

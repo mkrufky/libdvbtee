@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -27,22 +27,19 @@
 #include "parse.h"
 #include "rbuf.h"
 
+#define USE_IOS_READ defined(_WIN32)
+
 class feed_pull_iface
 {
 public:
 	virtual int pull() = 0;
 };
 
-void libdvbtee_set_debug_level(unsigned int debug);
-
 class feed : public socket_listen_iface
 {
 public:
 	feed();
 	~feed();
-
-	feed(const feed&);
-	feed& operator= (const feed&);
 
 	int open_file(char* new_file, int flags = 0) { set_filename(new_file); return _open_file(flags); }
 	int open_file(int new_fd) { fd = new_fd; return fd; } /* assumes already open */
@@ -81,6 +78,9 @@ public:
 
 	void accept_socket(int sock) { add_tcp_feed(sock); }
 private:
+	feed(const feed&);
+	feed& operator= (const feed&);
+
 	pthread_t h_thread;
 	pthread_t h_feed_thread;
 	bool f_kill_thread;
@@ -95,6 +95,9 @@ private:
 	void            *feed_thread();
 #endif
 	void       *file_feed_thread();
+#if USE_IOS_READ
+	void   *ios_file_feed_thread();
+#endif
 	void      *stdin_feed_thread();
 	void *tcp_client_feed_thread();
 	void *udp_listen_feed_thread();
@@ -119,7 +122,7 @@ private:
 	feed_pull_iface *m_pull_iface;
 };
 
-typedef std::map<int, feed> feed_map;
+typedef std::map<int, feed*> feed_map;
 
 class feed_server_iface
 {
@@ -146,6 +149,7 @@ private:
 	feed_server_iface *m_iface;
 
 	void add_tcp_feed(int);
+	void clear_feeders();
 };
 
 typedef std::map<int, feed_server> feed_server_map;

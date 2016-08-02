@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -20,7 +20,10 @@
  *****************************************************************************/
 
 #include <errno.h>
+#include "dvbtee_config.h"
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdarg.h>
@@ -28,7 +31,6 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
 #include <string.h>
 
 #include "log.h"
@@ -285,8 +287,12 @@ static char http_conn_close[] =
 /*****************************************************************************/
 
 serve_client::serve_client()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  :
+#if !defined(_WIN32)
+    h_thread((pthread_t)NULL)
+  ,
+#endif
+    f_kill_thread(false)
   , server(NULL)
   , tuner(NULL)
   , feeder(NULL)
@@ -310,7 +316,9 @@ serve_client::~serve_client()
 serve_client::serve_client(const serve_client&)
 {
 	dPrintf("(copy)");
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
@@ -330,7 +338,9 @@ serve_client& serve_client::operator= (const serve_client& cSource)
 	if (this == &cSource)
 		return *this;
 
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	server = NULL;
 	tuner = NULL;
@@ -414,7 +424,11 @@ void* serve_client::client_thread()
 #endif
 	while (!f_kill_thread) {
 
+#if defined(_WIN32)
+		rxlen = recv(sock_fd, buf, sizeof(buf)-1, 0); // FIXME
+#else
 		rxlen = recv(sock_fd, buf, sizeof(buf)-1, MSG_DONTWAIT);
+#endif
 		if (rxlen > 0) {
 			buf[rxlen] = '\0';
 			dPrintf("(%d): %s", sock_fd, buf);
@@ -1072,11 +1086,35 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, parse_iface *iface)
 					bw7mhz = true;
 
 				temp = strtok_r(NULL, ":", &save); // FEC_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // FEC_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // QAM_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // TRANSMISSION_MODE_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // GUARD_INTERVAL_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // HIERARCHY_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 
 				c.modulation = (bw7mhz) ?
 					"INVERSION_AUTO:BANDWIDTH_7_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO" :

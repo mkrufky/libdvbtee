@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -41,12 +41,14 @@
 
 extern unsigned int dbg;
 
+void libdvbtee_set_debug_level(unsigned int debug);
+
 #define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
 
 #define __dPrintf(lvl, fmt, arg...) do {				\
 	if (dbg & lvl)							\
-		__printf(stderr, "%d "CLASS_MODULE"::%s: " fmt "\n", 	\
-				 (int)time(NULL), __func__, ##arg);	\
+		__printf(stderr, "%d %s::%s: " #fmt "\n",		\
+			 (int)time(NULL), CLASS_MODULE, __func__, ##arg);	\
 } while (0)
 
 class dbgFn {

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -22,6 +22,16 @@
 #include "log.h"
 
 #include <sys/timeb.h>
+
+unsigned int dbg = 0;
+
+void libdvbtee_set_debug_level(unsigned int debug)
+{
+	dbg = debug;
+	if (debug)
+		__printf(stderr, "%d LOG::%s: (0x%x)\n",
+			(int)time(NULL), __func__, debug);
+}
 
 
 dbgFn::dbgFn(const char *str)

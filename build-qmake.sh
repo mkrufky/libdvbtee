@@ -37,7 +37,7 @@ if [ -e .clean ]; then
     make clean -C dvbtee
     if [ $? != 0 ]; then
         echo "make clean (dvbtee) failed"
-    	exit 1
+        #exit 1 // dont exit
     fi
 fi
 

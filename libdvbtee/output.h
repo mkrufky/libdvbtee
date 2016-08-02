@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -22,7 +22,6 @@
 #ifndef __OUTPUT_H__
 #define __OUTPUT_H__
 
-#include <arpa/inet.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <string.h>
@@ -71,6 +70,8 @@ class output_stream_iface
 public:
 	virtual int stream(const uint8_t *, size_t) = 0;
 };
+
+class output_stream_priv;
 
 class output_stream
 {
@@ -135,9 +136,9 @@ private:
 
 	void *output_stream_thread();
 	static void *output_stream_thread(void*);
-        long get_file_size(int);
+	long get_file_size(int);
 
-	struct sockaddr_in  ip_addr;
+	class output_stream_priv *priv;
 
 	int stream(uint8_t*, int);
 #define OUTPUT_STREAM_UDP    0

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -22,11 +22,16 @@
 #ifndef __LISTEN_H__
 #define __LISTEN_H__
 
+#include "dvbtee_config.h"
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #include <pthread.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+
+void socket_set_nbio(int sockfd, bool onoff = true);
 
 class socket_listen_iface
 {

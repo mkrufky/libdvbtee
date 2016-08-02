@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -28,6 +28,30 @@
 using namespace dvbtee::decode;
 using namespace valueobj;
 
+#ifdef FORCE_DECODER_LINKAGE
+#include "desc_0a.h"
+#include "desc_48.h"
+#include "desc_4d.h"
+#include "desc_62.h"
+#include "desc_81.h"
+#include "desc_83.h"
+#include "desc_86.h"
+#include "desc_a0.h"
+#include "desc_a1.h"
+
+static void load()
+{
+	desc_0a::__load();
+	desc_48::__load();
+	desc_4d::__load();
+	desc_62::__load();
+	desc_81::__load();
+	desc_83::__load();
+	desc_86::__load();
+	desc_a0::__load();
+	desc_a1::__load();
+}
+#endif
 
 Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *p_dvbpsi_descriptor)
  : Decoder(parent, name)
@@ -39,7 +63,9 @@ Descriptor::Descriptor(Decoder *parent, std::string &name, dvbpsi_descriptor_t *
 
 Descriptor::~Descriptor()
 {
-	//
+#ifdef FORCE_DECODER_LINKAGE
+	load();
+#endif
 }
 
 void Descriptor::init()

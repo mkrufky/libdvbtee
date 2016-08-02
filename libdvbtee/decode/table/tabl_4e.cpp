@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -131,10 +131,13 @@ eitEV::eitEV(decoded_eit_t& decoded_eit, Decoder *parent, const dvbpsi_eit_event
 		cur_event.name.assign(d->get<std::string>("name").c_str());
 		cur_event.text.assign(d->get<std::string>("text").c_str());
 	}
-#if EIT_DBG
 	time_t start = datetime_utc(cur_event.start_time /*+ (60 * tz_offset)*/);
 	time_t end   = datetime_utc(cur_event.start_time + cur_event.length_sec /*+ (60 * tz_offset)*/);
 
+	set("unixTimeBegin", start);
+	set("unixTimeEnd", end);
+
+#if EIT_DBG
 	struct tm tms = *localtime(&start);
 	struct tm tme = *localtime(&end);
 

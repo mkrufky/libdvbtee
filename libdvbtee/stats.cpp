@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -28,7 +28,7 @@
 
 #define DBG 0
 
-#define dPrintf(fmt, arg...) __dPrintf(DBG_STATS, "(%s) "fmt, parent, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_STATS, "(%s) " fmt, parent, ##arg)
 
 stats::stats(const char *caller)
   : tei_count(0)

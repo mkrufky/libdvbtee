@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -37,8 +37,12 @@ typedef std::map<unsigned int, uint16_t> map_chan_to_ts_id;
 static map_chan_to_ts_id channels;
 
 tune::tune()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  :
+#if !defined(_WIN32)
+    h_thread((pthread_t)NULL)
+  ,
+#endif
+    f_kill_thread(false)
   , state(TUNE_STATE_IDLE)
   , cur_chan(0)
   , time_touched((time_t)0)
@@ -67,7 +71,9 @@ tune::tune(const tune&)
 
 //	channels.clear();
 	feeder.parser.cleanup();
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	cur_chan = 0;
 	state = TUNE_STATE_IDLE;
@@ -89,7 +95,9 @@ tune& tune::operator= (const tune& cSource)
 
 //	channels.clear();
 	feeder.parser.cleanup();
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	cur_chan = 0;
 	state = TUNE_STATE_IDLE;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -39,8 +39,6 @@
 #endif
 #include "serve.h"
 
-#include "atsctext.h"
-
 typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
@@ -49,9 +47,8 @@ struct dvbtee_context
 	map_tuners tuners;
 	serve *server;
 };
-typedef std::map<pid_t, struct dvbtee_context*> map_pid_to_context;
 
-map_pid_to_context context_map;
+struct dvbtee_context* ctxt;
 
 class write_feed : public curlhttpget_iface
 {
@@ -106,16 +103,12 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	context->_file_feeder.parser.cleanup();
 
 	cleanup_tuners(context, quick);
-
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
 }
 
 
 void signal_callback_handler(int signum)
 {
-	struct dvbtee_context* context = context_map[getpid()];
+	struct dvbtee_context* context = ctxt;
 	bool signal_dbg = true;
 
 	const char *signal_desc;
@@ -139,9 +132,11 @@ void signal_callback_handler(int signum)
 	case SIGTERM: /* Termination */
 		signal_desc = "SIGTERM";
 		break;
+#if !defined(_WIN32)
 	case SIGHUP:  /* Hangup */
 		signal_desc = "SIGHUP";
 		break;
+#endif
 	default:
 		signal_desc = "UNKNOWN";
 		break;
@@ -332,7 +327,20 @@ void usage(bool help, char *myname)
 
 int main(int argc, char **argv)
 {
+#if defined(_WIN32)
+/* Initialize Winsock as described here:
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/ms738573(v=vs.85).aspx
+ */
+	WSADATA wsaData;
+	int iResult;
+
+	iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+	if (iResult != NO_ERROR)
+		printf("Error at WSAStartup()\n");
+#endif
 	dvbtee_context context;
+	ctxt = &context;
+
 	int opt, channel = 0;
 	bool b_read_dvr = false;
 	bool b_scan     = false;
@@ -531,17 +539,14 @@ int main(int argc, char **argv)
 	}
 #define b_READ_TUNER (b_read_dvr || b_hdhr)
 
-	context_map[getpid()] = &context;
-
 	signal(SIGINT,  signal_callback_handler); /* Program interrupt. (ctrl-c) */
 	signal(SIGABRT, signal_callback_handler); /* Process detects error and reports by calling abort */
 	signal(SIGFPE,  signal_callback_handler); /* Floating-Point arithmetic Exception */
 	signal(SIGILL,  signal_callback_handler); /* Illegal Instruction */
 	signal(SIGSEGV, signal_callback_handler); /* Segmentation Violation */
 	signal(SIGTERM, signal_callback_handler); /* Termination */
+#if !defined(_WIN32)
 	signal(SIGHUP,  signal_callback_handler); /* Hangup */
-#if 1 /* FIXME */
-	ATSCMultipleStringsInit();
 #endif
 	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
 
@@ -574,6 +579,9 @@ int main(int argc, char **argv)
 			tuner->feeder.parser.limit_eit(eit_limit);
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
+#if defined(_WIN32)
+			WSACleanup();
+#endif
 			exit(-1);
 		}
 	}
@@ -763,5 +771,8 @@ exit:
 		parse::dumpJson();
 	}
 	cleanup(&context);
+#if defined(_WIN32)
+	WSACleanup();
+#endif
 	return 0;
 }

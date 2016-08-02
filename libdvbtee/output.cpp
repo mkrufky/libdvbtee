@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -27,15 +27,27 @@
 #include <errno.h>
 #include <string>
 #include <sstream>
-#include <netdb.h>
 #include <dirent.h>
+
+#include "dvbtee_config.h"
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 
 #include "output.h"
 #include "log.h"
 #define CLASS_MODULE "out"
 
-// MSG_NOSIGNAL does not exists on OS X
-#if defined(__APPLE__) || defined(__MACH__)
+/* MSG_NOSIGNAL does not exists on OS X / Windows */
+#if defined(__APPLE__) || defined(__MACH__) || defined(_WIN32)
+# if defined(_WIN32)
+#  ifndef SO_NOSIGPIPE
+#   define SO_NOSIGPIPE 0
+#  endif
+# endif
 # ifndef MSG_NOSIGNAL
 #   define MSG_NOSIGNAL SO_NOSIGPIPE
 # endif
@@ -167,7 +179,7 @@ ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 			sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
 			send(sockfd, buf, len, flags) :
 #else
-		sendto(sockfd, buf, len, flags|MSG_NOSIGNAL, dest_addr, addrlen) :
+		sendto(sockfd, (const char *)buf, len, flags|MSG_NOSIGNAL, dest_addr, addrlen) :
 #endif
 		ret;
 }
@@ -214,9 +226,29 @@ static inline size_t write_stdout(uint8_t* p_data, int size) {
 	return 188 * fwrite(p_data, 188, size / 188, stdout);
 }
 
+class output_stream_priv
+{
+	output_stream_priv()
+	{
+		reset();
+	}
+
+	void reset()
+	{
+		memset(&ip_addr, 0, sizeof(ip_addr));
+	}
+
+friend class output_stream;
+	struct sockaddr_in ip_addr;
+};
+
 output_stream::output_stream()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  :
+#if !defined(_WIN32)
+    h_thread((pthread_t)NULL)
+  ,
+#endif
+    f_kill_thread(false)
   , f_streaming(false)
   , sock(-1)
   , mimetype(MIMETYPE_OCTET_STREAM)
@@ -230,10 +262,10 @@ output_stream::output_stream()
   , stream_cb(NULL)
   , stream_cb_priv(NULL)
   , have_pat(false)
+  , priv(NULL)
 {
 	dPrintf("()");
 	memset(&name, 0, sizeof(name));
-	memset(&ip_addr, 0, sizeof(ip_addr));
 	pids.clear();
 }
 
@@ -242,6 +274,7 @@ output_stream::~output_stream()
 	dPrintf("(%d)", sock);
 
 	stop();
+	if (priv) delete priv;
 
 	dPrintf("(stream) %lu packets in, %lu packets out, %d packets remain in rbuf", count_in / 188, count_out / 188, ringbuffer.get_size() / 188);
 }
@@ -250,7 +283,9 @@ output_stream::~output_stream()
 output_stream::output_stream(const output_stream&)
 {
 	dPrintf("(copy)");
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	f_streaming = false;
 	m_iface = NULL;
@@ -262,7 +297,7 @@ output_stream::output_stream(const output_stream&)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
-	memset(&ip_addr, 0, sizeof(ip_addr));
+	priv = NULL;
 	pids.clear();
 	have_pat = false;
 }
@@ -274,7 +309,9 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	if (this == &cSource)
 		return *this;
 
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	f_streaming = false;
 	stream_cb = NULL;
@@ -285,7 +322,7 @@ output_stream& output_stream::operator= (const output_stream& cSource)
 	mimetype = MIMETYPE_OCTET_STREAM;
 	stream_method = OUTPUT_STREAM_UDP;
 	memset(&name, 0, sizeof(name));
-	memset(&ip_addr, 0, sizeof(ip_addr));
+	priv = NULL;
 	pids.clear();
 	have_pat = false;
 
@@ -401,7 +438,9 @@ bool output_stream::drain()
 	while ((f_streaming) && (ringbuffer.get_capacity()))
 		usleep(20*1000);
 
+#if !defined(_WIN32)
 	fsync(sock);
+#endif
 
 	return (!f_streaming);
 }
@@ -497,9 +536,11 @@ int output_stream::stream(uint8_t* p_data, int size)
 	/* stream data to target */
 	else switch (stream_method) {
 	case OUTPUT_STREAM_UDP:
-		ret = socket_send(sock, p_data, size, 0, (struct sockaddr*) &ip_addr, sizeof(ip_addr));
+		if (!priv) dPrintf("no priv - should never happen!!!"); else
+		ret = socket_send(sock, p_data, size, 0, (struct sockaddr*) &priv->ip_addr, sizeof(priv->ip_addr));
 		break;
 	case OUTPUT_STREAM_TCP:
+		if (!priv) dPrintf("no priv - should never happen!!!"); else
 		ret = socket_send(sock, p_data, size, 0);
 		if (ret < 0) {
 			stop_without_wait();
@@ -766,9 +807,7 @@ int output_stream::add(int socket, unsigned int method, map_pidtype &pids)
 	strncpy(name, "SOCKET", sizeof(name));
 
 #if NON_BLOCKING_TCP_SEND
-	int fl = fcntl(sock, F_GETFL, 0);
-	if (fcntl(socket, F_SETFL, fl | O_NONBLOCK) < 0)
-		perror("set non-blocking failed");
+	socket_set_nbio(sock);
 #endif
 	ringbuffer.reset();
 	return set_pids(pids);
@@ -847,26 +886,40 @@ int output_stream::add(char* target, map_pidtype &pids)
 	sock = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
 	if (sock >= 0) {
 
-		int fl = fcntl(sock, F_GETFL, 0);
-		if (fcntl(sock, F_SETFL, fl | O_NONBLOCK) < 0)
-			perror("set non-blocking failed");
+		socket_set_nbio(sock);
 
 		char resolved_ip[16] = { 0 };
 		if (0 == hostname_to_ip(ip, resolved_ip, sizeof(resolved_ip)))
 			ip = &resolved_ip[0];
 
-		memset(&ip_addr, 0, sizeof(ip_addr));
-		ip_addr.sin_family = AF_INET;
-		ip_addr.sin_port   = htons(port);
-		if (inet_aton(ip, &ip_addr.sin_addr) == 0) {
+		if (!priv) priv = new output_stream_priv;
+		priv->ip_addr.sin_family = AF_INET;
+		priv->ip_addr.sin_port   = htons(port);
+#if (!defined(HAVE_INET_PTON) && !defined(HAVE_INET_ATON) && !defined(HAVE_INETPTON))
+		if (getnameinfo((struct sockaddr*)&priv->ip_addr, sizeof(struct sockaddr),
+			ip, NI_MAXHOST, NULL, NI_MAXSERV, NI_NUMERICHOST) != 0)
+#else
+#ifndef HAVE_INET_PTON
+#define inet_pton(a,b,c) InetPton(a,b,c)
+#endif
+#ifndef HAVE_INET_ATON
+#define inet_aton(a,b) inet_pton(AF_INET,a,b)
+#endif
 
+		if (inet_aton(ip, &priv->ip_addr.sin_addr) == 0)
+#endif
+		{
 			perror("ip address translation failed");
 			return -1;
 		} else
 			ringbuffer.reset();
 
 		if (b_tcp) {
-			if ((connect(sock, (struct sockaddr *) &ip_addr, sizeof(ip_addr)) < 0) && (errno != EINPROGRESS)) {
+			if (((connect(sock, (struct sockaddr *) &priv->ip_addr, sizeof(priv->ip_addr)) < 0) && (errno != EINPROGRESS))
+#if defined (_WIN32)
+				&& (WSAGetLastError() != WSAEWOULDBLOCK)
+#endif
+			) {
 				perror("failed to connect to server");
 				return -1;
 			}
@@ -900,8 +953,12 @@ int output_stream::get_pids(map_pidtype &result)
 /* ----------------------------------------------------------------- */
 
 output::output()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  :
+#if !defined(_WIN32)
+    h_thread((pthread_t)NULL)
+  ,
+#endif
+    f_kill_thread(false)
   , f_streaming(false)
   , ringbuffer()
   , num_targets(0)
@@ -932,7 +989,9 @@ output::output(const output&)
 {
 	dPrintf("(copy)");
 
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	f_streaming = false;
 	num_targets = 0;
@@ -952,7 +1011,9 @@ output& output::operator= (const output& cSource)
 	if (this == &cSource)
 		return *this;
 
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	f_streaming = false;
 	num_targets = 0;

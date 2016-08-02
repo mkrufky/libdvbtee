@@ -1,8 +1,20 @@
 AM_CXXFLAGS = -I.. -I../value -I./table -I./descriptor
 
 if DVBPSIBUILD
-AM_CPPFLAGS = -I../../usr/include/
+AM_CXXFLAGS += -DFORCE_DECODER_LINKAGE -I../../usr/include/
 endif DVBPSIBUILD
+
+if CYGWIN
+AM_CXXFLAGS += -DFORCE_DECODER_LINKAGE
+endif CYGWIN
+
+if MINGW
+AM_CXXFLAGS += -DFORCE_DECODER_LINKAGE
+endif MINGW
+
+if MSYS
+AM_CXXFLAGS += -DFORCE_DECODER_LINKAGE
+endif MSYS
 
 lib_LTLIBRARIES = libdvbtee_decode.la
 

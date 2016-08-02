@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -195,7 +195,7 @@ const std::string Object::toJson() const
 		ValueBase *val = it->second;
 
 		if (it != map.begin()) s << ", ";
-		s << "'" << it->first << "': ";
+		s << "\"" << it->first << "\": ";
 
 		s << val->toJson();
 	}

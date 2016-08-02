@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -41,6 +41,14 @@
 #ifdef HAVE_LIBHDHOMERUN
 #if HAVE_LIBHDHOMERUN
 #define USE_HDHOMERUN
+#endif
+#endif
+
+#ifdef _WIN32
+#include <ws2tcpip.h>
+
+#ifndef HAVE_STRTOK_R
+#define strtok_r(a,b,c) strtok(a,b)
 #endif
 #endif
 

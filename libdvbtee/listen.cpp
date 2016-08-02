@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -28,14 +28,34 @@
 
 #include "listen.h"
 #include "log.h"
+#include "dvbtee_config.h"
+
 #define CLASS_MODULE "listen"
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_SERVE, fmt, ##arg)
 
 
+void socket_set_nbio(int sockfd, bool onoff)
+{
+#if defined(HAVE_FCNTL)
+	int fl = fcntl(sockfd, F_GETFL, 0);
+	int ret = fcntl(sockfd, F_SETFL, onoff ? (fl | O_NONBLOCK) : (fl & ~O_NONBLOCK));
+	if (ret < 0) perror("set non-blocking failed");
+#else
+#if defined(_WIN32)
+	unsigned long mode = onoff ? 1 : 0;  /* 1 to enable non-blocking socket */
+	ioctlsocket(sockfd, FIONBIO, &mode);
+#endif
+#endif
+}
+
 socket_listen::socket_listen()
-  : h_thread((pthread_t)NULL)
-  , f_kill_thread(false)
+  :
+#if !defined(_WIN32)
+    h_thread((pthread_t)NULL)
+  ,
+#endif
+    f_kill_thread(false)
   , sock_fd(-1)
   , port(0)
   , m_socket_listen_iface(NULL)
@@ -53,7 +73,9 @@ socket_listen::~socket_listen()
 socket_listen::socket_listen(const socket_listen&)
 {
 	dPrintf("(copy)");
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	sock_fd = -1;
 	port = 0;
@@ -67,7 +89,9 @@ socket_listen& socket_listen::operator= (const socket_listen& cSource)
 	if (this == &cSource)
 		return *this;
 
+#if !defined(_WIN32)
 	h_thread = (pthread_t)NULL;
+#endif
 	f_kill_thread = false;
 	sock_fd = -1;
 	port = 0;
@@ -115,8 +139,12 @@ int socket_listen::start(uint16_t port_requested)
 		return sock_fd;
 	}
 
+#if defined(_WIN32)
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
+#else
 	int reuse = 1;
 	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+#endif
 		perror("setting reuse failed");
 		return -1;
 	}
@@ -131,11 +159,7 @@ int socket_listen::start(uint16_t port_requested)
 	}
 	port = port_requested;
 
-	int fl = fcntl(sock_fd, F_GETFL, 0);
-	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
+	socket_set_nbio(sock_fd);
 #define MAX_SOCKETS 4
 	listen(sock_fd, MAX_SOCKETS);
 
@@ -163,8 +187,12 @@ int socket_listen::start_udp(uint16_t port_requested)
 		return sock_fd;
 	}
 
+#if defined(_WIN32)
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
+#else
 	int reuse = 1;
 	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+#endif
 		perror("setting reuse failed");
 		return -1;
 	}
@@ -178,11 +206,7 @@ int socket_listen::start_udp(uint16_t port_requested)
 		return -1;
 	}
 
-	int fl = fcntl(sock_fd, F_GETFL, 0);
-	if (fcntl(sock_fd, F_SETFL, fl | O_NONBLOCK) < 0) {
-		perror("set non-blocking failed");
-		return -1;
-	}
+	socket_set_nbio(sock_fd);
 
 	int ret = pthread_create(&h_thread, NULL, udp_listen_thread, this);
 

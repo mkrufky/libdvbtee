@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2015 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
+#include <stdlib.h>
 
 #include "desc_4d.h"
 
@@ -53,8 +55,22 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	get_descriptor_text(dr->i_text, dr->i_text_length, text);
 
 	set("lang", std::string((const char*)lang));
-	set("name", std::string((const char*)name));
-	set("text", std::string((const char*)text));
+
+	/* FIXME: we should escape these strings on output rather than on store */
+	if (strchr((char*)name, '"')) {
+		char* escaped = escape_quotes((char*)name);
+		set("name", std::string(escaped));
+		free(escaped);
+	} else {
+		set("name", std::string((char*)name));
+	}
+	if (strchr((char*)text, '"')) {
+		char* escaped = escape_quotes((char*)text);
+		set("text", std::string(escaped));
+		free(escaped);
+	} else {
+		set("text", std::string((char*)text));
+	}
 
 	dPrintf("%s", toJson().c_str());
 

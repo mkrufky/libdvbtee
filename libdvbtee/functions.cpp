@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2014 Michael Ira Krufky
+ * Copyright (C) 2011-2016 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -26,6 +26,29 @@
 #include "atsctext.h"
 
 #include "functions.h"
+//#include "dvbtee_config.h"
+
+#ifdef _WIN32
+#ifndef HAVE_TIMEGM
+#ifdef HAVE__MKGMTIME
+#define timegm _mkgmtime
+#else
+time_t timegm(struct tm * a_tm)
+{
+    time_t ltime = mktime(a_tm);
+    struct tm tm_val;
+    gmtime_s(&tm_val, &ltime);
+    int offset = (tm_val.tm_hour - a_tm->tm_hour);
+    if (offset > 12)
+    {
+        offset = 24 - offset;
+    }
+    time_t utc = mktime(a_tm) - offset * 3600;
+    return utc;
+}
+#endif
+#endif
+#endif
 
 /* taken from dvbstreamer-2.1.0/src/plugins/atsctoepg.c */
 #define dvbpsi_atsc_unix_epoch_offset (315964800)
@@ -123,8 +146,30 @@ time_t atsc_datetime_utc(uint32_t in_time)
 
 //-----------------------------------------------------------------------------
 
+class ATSCMultipleStringsSingleton
+{
+public:
+	static ATSCMultipleStringsSingleton& instance()
+	{
+		static ATSCMultipleStringsSingleton INSTANCE;
+		return INSTANCE;
+	}
+
+private:
+	ATSCMultipleStringsSingleton()
+	{
+		ATSCMultipleStringsInit();
+	}
+
+	~ATSCMultipleStringsSingleton()
+	{
+		ATSCMultipleStringsDeInit();
+	}
+};
+
 int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text, size_t sizeof_text)
 {
+	ATSCMultipleStringsSingleton::instance();
 	ATSCMultipleStrings_t atsc_strings;
 	ATSCMultipleStringsConvert(&atsc_strings, (uint8_t*)data, len);
 	if (atsc_strings.number_of_strings && atsc_strings.strings && atsc_strings.strings[0].text) {
@@ -237,6 +282,20 @@ char *url_decode(char *str) {
 		} else {
 			*pbuf++ = *pstr;
 		}
+		pstr++;
+	}
+	*pbuf = '\0';
+	return buf;
+}
+
+/* Returns a quote-escaped version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *escape_quotes(char *str) {
+	char *pstr = str, *buf = (char *)malloc(strlen(str) * 2 + 1), *pbuf = buf;
+	while (*pstr) {
+		if (*pstr == '"')
+			*pbuf++ = '\\';
+		*pbuf++ = *pstr;
 		pstr++;
 	}
 	*pbuf = '\0';
