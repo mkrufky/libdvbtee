@@ -507,7 +507,7 @@ int output_stream::stream(uint8_t* p_data, int size)
 		}
 		break;
 	case OUTPUT_STREAM_FILE:
-            //dprintf("(sock: %d, size: %d, filesize: %lu, limit: %lu)", sock, size, get_file_size(sock), target_file_size_limit);
+            //dPrintf("(sock: %d, size: %d, filesize: %lu, limit: %lu)", sock, size, get_file_size(sock), target_file_size_limit);
             
             if (
                 target_file_size_limit > 0
@@ -579,12 +579,12 @@ int output_stream::change_file()
     new_name = target_file_name;
     
     if (target_file_size_limit > 0) {
-        dprintf("rotate detected");
+        dPrintf("rotate detected");
         struct stat s;
         
         //TODO: check only once
         if (stat(target_file_name, &s) != 0) {
-            dprintf("Output directory not exists. Creating ...");
+            dPrintf("Output directory not exists. Creating ...");
             if (mkdir(target_file_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
                 perror("Can't create output directory");
                 return -1;
@@ -606,7 +606,7 @@ int output_stream::change_file()
         }
     }
         
-    dprintf("opening file %s...", new_name.c_str());
+    dPrintf("opening file %s...", new_name.c_str());
     if (
         (sock = open(new_name.c_str(), O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0
     ) {
@@ -674,7 +674,7 @@ unsigned int output_stream::pickup_target_file_index()
         i = strtoul(filename.substr(0, lastdot).c_str(), NULL, 0); 
     }
     
-    dprintf("Index detected: %d", i);
+    dPrintf("Index detected: %d", i);
     
     return (i + 1);
 }
@@ -733,7 +733,7 @@ void output_stream::cleanup_target_dir()
         
         total_size -= s.st_size;
         
-        dprintf("Removed %s, total: %lu", path.c_str(), total_size);
+        dPrintf("Removed %s, total: %lu", path.c_str(), total_size);
     }
     
     free(namelist);
