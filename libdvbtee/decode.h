@@ -231,7 +231,7 @@ typedef struct decoded_atsc_ett_s
 	unsigned int			event_not_channel_id:2;
 #endif
 	uint16_t			etm_length;
-	uint8_t				etm[256/*4096*/];
+	uint8_t				etm[4096];
 
 	decoded_atsc_ett_s() : version(0xff), etm_id(0xffffffff), etm_length(0) {}
 } decoded_atsc_ett_t;
