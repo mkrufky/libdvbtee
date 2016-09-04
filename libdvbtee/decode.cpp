@@ -1447,8 +1447,13 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 	fprintf(stderr, "%04d-%02d-%02d %02d:%02d-%02d:%02d,%s\n",
 		tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
 		tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+
+	unsigned char message[ETM_MAX_LENGTH];
+	const char* etm = (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message));
+	if (message[0])
+		fprintf(stderr, "\t%s\n", message);
+
 	if (reporter) {
-		unsigned char message[ETM_MAX_LENGTH];
 		reporter->epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
 					 physical_channel, channel->program,
@@ -1456,7 +1461,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 					 start,
 					 (end - start),
 					 (const char *)name,
-					 (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
+					 (const char *)message);
 	}
 	return;
 }
