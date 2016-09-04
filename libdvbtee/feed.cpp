@@ -26,6 +26,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/poll.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -323,8 +324,12 @@ void *feed::file_feed_thread()
 	unsigned char q[BUFSIZE];
 #endif
 	int available;
+	struct pollfd pfd[1];
 
 	dPrintf("(fd=%d)", fd);
+
+	pfd[0].fd = fd;
+	pfd[0].events = POLLIN;
 
 	while (!f_kill_thread) {
 
@@ -334,8 +339,20 @@ void *feed::file_feed_thread()
 		available = sizeof(q);
 #endif
 		available = (available < BUFSIZE) ? available : BUFSIZE;
-		if ((r = read(fd, q, available)) <= 0) {
-
+		if ((r = poll(pfd, 1, -1)) <= 0) {
+			fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, errno);
+			f_kill_thread = true;
+			break;
+		}
+		if (pfd[0].revents & (POLLERR|POLLIN)) {
+			if ((r = read(fd, q, available)) > 0) {
+#if FEED_BUFFER
+				ringbuffer.put_write_ptr(r);
+#else
+				parser.feed(r, q);
+#endif
+				continue;
+			}
 			if (!r) {
 				f_kill_thread = true;
 				continue;
@@ -376,11 +393,6 @@ void *feed::file_feed_thread()
 			}
 			continue;
 		}
-#if FEED_BUFFER
-		ringbuffer.put_write_ptr(r);
-#else
-		parser.feed(r, q);
-#endif
 	}
 	close_file();
 	pthread_exit(NULL);
