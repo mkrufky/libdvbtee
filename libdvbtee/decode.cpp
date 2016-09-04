@@ -2014,6 +2014,43 @@ bool decode::got_all_eit(int limit)
 	return true;
 }
 
+bool decode::got_all_ett()
+{
+	int missing_etts=0;
+	int total_events=0;
+	for (int eit_num=0;
+	     eit_num < 128 && !decoded_atsc_eit[eit_num].empty();
+	     eit_num++)
+	{
+		map_decoded_atsc_eit::const_iterator eit_iter;
+		for (eit_iter = decoded_atsc_eit[eit_num].begin();
+		     eit_iter != decoded_atsc_eit[eit_num].end();
+		     eit_iter++)
+		{
+			uint32_t source_id = eit_iter->first;
+			map_decoded_atsc_eit_events events = eit_iter->second.events;
+			map_decoded_atsc_eit_events::const_iterator event_iter;
+			for (event_iter = events.begin();
+			     event_iter != events.end();
+			     event_iter++)
+			{
+				if (!event_iter->second.etm_location) continue;
+				// TODO: not yet supported? haven't tested
+				if (event_iter->second.etm_location == 2) continue;
+				total_events++;
+
+				uint32_t event_id = event_iter->second.event_id;
+				uint32_t etm_id = (source_id << 16) | (event_id << 2) | 0x02;
+				if (!decoded_ett.count(etm_id)) {
+				        missing_etts++;
+				}
+			}
+		}
+	}
+	fprintf(stderr, "%3d/%3d ETTs remaining...\r", missing_etts, total_events);
+	return (missing_etts == 0);
+}
+
 const decode_network* decode::get_decoded_network() const
 {
 	map_network_decoder::const_iterator it = networks.find(orig_network_id);

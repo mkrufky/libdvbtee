@@ -525,6 +525,7 @@ public:
 	void dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
 	bool got_all_eit(int limit = -1);
+	bool got_all_ett();
 
 	void dump_epg(decode_report *reporter);
 
