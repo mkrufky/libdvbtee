@@ -710,7 +710,13 @@ parse::parse()
   , ts_id(0)
   , epg_mode(false)
   , scan_mode(false)
-  , dont_collect_ett(true)
+  , dont_collect_ett(
+#if ETT
+	  false
+#else
+	  true
+#endif
+	  )
   , has_pat(false)
   , has_mgt(false)
   , has_vct(false)
