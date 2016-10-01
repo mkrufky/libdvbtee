@@ -64,7 +64,7 @@ void atsc_ett::store(const dvbpsi_atsc_ett_t * const p_ett)
 	       (sizeof(decoded_ett.etm) >= p_ett->i_etm_length) ?
 		       p_ett->i_etm_length : sizeof(decoded_ett.etm));
 
-	unsigned char message[4096];
+	unsigned char message[ETM_MAX_LENGTH];
 	memset(message, 0, sizeof(message));
 
 	decode_multiple_string(decoded_ett.etm, decoded_ett.etm_length, message, sizeof(message));
