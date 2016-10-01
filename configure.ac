@@ -209,7 +209,7 @@ AM_COND_IF([DVBPSIBUILD], [
 ])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h linux/dvb/frontend.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/poll.h sys/socket.h sys/time.h unistd.h linux/dvb/frontend.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
