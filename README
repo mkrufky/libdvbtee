@@ -29,6 +29,13 @@ Michael Ira Krufky
 mkrufky at linuxtv dot org
 
 #### How to build / run
+The recommended way to build libdvbtee is by using the `build-auto.sh` script:
+```
+./build-auto.sh
+dvbtee/dvbtee < mpegfile.ts
+```
+
+#### Other build methods
 libdvbtee was originally developed using the qmake build system for easy
 multi-platform build support. libdvbtee still supports the qmake system,
 but now uses autotools as the preferred build system for various reasons.
@@ -60,6 +67,31 @@ the table / descriptor decoder, specify CONFIG+=olddecoder to qmake
 ```
 qmake -r CONFIG+=olddecoder
 make
+LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
+```
+
+libdvbtee depends on libdvbpsi for PSIP parsing.
+Although libdvbtee will build against older libdvbpsi releases,
+a more recent build is required in order to provide
+all of libdvbtee's latest features, such as ATSC support.
+
+libdvbtee's build system is capable of building and linking
+against the latest version of libdvbpsi by placing a copy of the
+libdvbpsi repository in the top level of libdvbtee's source tree.
+
+Rather than giving step-by-step instructions in this README,
+shell scripts are provided that will fetch the latest libdvbpsi sources,
+configure the build system, and build both libraries together.
+
+For the integrated build of libdvbtee along with the latest version of libdvbpsi using autotools (recommended):
+```
+./build-auto.sh
+dvbtee/dvbtee < mpegfile.ts
+```
+
+For the integrated build of libdvbtee along with the latest version of libdvbpsi using qmake:
+```
+./build-qmake.sh
 LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 ```
 
@@ -144,6 +176,61 @@ To start a server using adapter 0:
 To start a server using tuner1 of a specific HdHomeRun device (ex: ABCDABCD):
 ```
   dvbtee -H ABCDABCD-1 -S
+```
+
+#### Example output:
+
+To scan a channel with JSON output enabled, the following command:
+```
+  dvbtee -s -c13 -j
+```
+...should generate output similar to the following:
+```
+scan channel 13...
+store PAT: v0, ts_id: 2011
+           3 | 30
+           4 | 40
+           5 | 50
+store PMT: v12, service_id 3, pcr_pid 49
+  es_pid | type
+      31 | 0x02 (Video MPEG-2) |
+      34 | 0x81 (Audio AC3 (ATSC)) | eng
+      35 | 0x81 (Audio AC3 (ATSC)) | spa
+      36 | 0x81 (Audio AC3 (ATSC)) | fre
+store VCT: v6, ts_id 2011, b_cable_vct 0
+  channel | service_id | source_id | service_name
+     13.1 |          3 |         1 | WNET-HD | eng, spa, fre
+     13.2 |          4 |         2 | KIDS | eng, spa, fre
+     13.3 |          5 |         3 | V-Me | eng
+store MGT: v6
+  table type |   pid  | ver | bytes
+    0x0000   | 0x1ffb |   6 | 187
+    0x0100   | 0x1d00 |   6 | 1103
+    0x0101   | 0x1d01 |   6 | 1105
+    0x0102   | 0x1d02 |   6 | 1132
+    0x0103   | 0x1d03 |   6 | 1305
+    0x0200   | 0x1e00 |   6 | 1197
+    0x0201   | 0x1e01 |   6 | 1220
+    0x0202   | 0x1e02 |   6 | 1157
+    0x0203   | 0x1e03 |   6 | 1213
+store PMT: v12, service_id 5, pcr_pid 81
+  es_pid | type
+      51 | 0x02 (Video MPEG-2) |
+      54 | 0x81 (Audio AC3 (ATSC)) | eng
+store PMT: v12, service_id 4, pcr_pid 65
+  es_pid | type
+      41 | 0x02 (Video MPEG-2) |
+      44 | 0x81 (Audio AC3 (ATSC)) | eng
+      45 | 0x81 (Audio AC3 (ATSC)) | spa
+      46 | 0x81 (Audio AC3 (ATSC)) | fre
+
+# channel 13, 213000000,
+13.1-WNET-HD:213000000:8VSB:49:52:3
+13.2-KIDS:213000000:8VSB:65:68:4
+13.3-V-Me:213000000:8VSB:81:84:5
+found 3 services
+
+TSID#07db: [ { "programs": [ { "number": 3, "pid": 48 }, { "number": 4, "pid": 64 }, { "number": 5, "pid": 80 } ], "tableId": 0, "tableName": "PAT", "tsId": 2011, "version": 0 }, { "pcrPid": 49, "program": 3, "streams": [ { "pid": 49, "streamType": 2, "streamTypeString": "Video MPEG-2" }, { "descriptors": [ { "bitRateCode": 14, "bsid": 8, "bsmod": 0, "description": "", "descriptorTag": 129, "fullSvc": true, "language": "eng", "numChannels": "2/0", "sampleRate": "48", "surroundMode": "Not indicated" }, { "ISO639Lang": [ { "audioType": 0, "language": "eng" } ], "descriptorTag": 10 } ], "pid": 52, "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "descriptors": [ { "bitRateCode": 8, "bsid": 8, "bsmod": 0, "description": "", "descriptorTag": 129, "fullSvc": true, "language": "spa", "numChannels": "2/0", "sampleRate": "48", "surroundMode": "Not indicated" }, { "ISO639Lang": [ { "audioType": 0, "language": "spa" } ], "descriptorTag": 10 } ], "pid": 53, "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "descriptors": [ { "bitRateCode": 8, "bsid": 8, "bsmod": 2, "description": "", "descriptorTag": 129, "fullSvc": true, "language": "fre", "numChannels": "2/0", "sampleRate": "48", "surroundMode": "Not indicated" }, { "ISO639Lang": [ { "audioType": 0, "language": "fre" } ], "descriptorTag": 10 } ], "pid": 54, "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" } ], "tableId": 2, "tableName": "PMT", "version": 12 }, { "channels": [ { "accessControlled": false, "carrierFreq": 0, "descriptors": [ { "descriptorTag": 161, "serviceLocation": [ { "esPid": 49, "streamType": 2, "streamTypeString": "Video MPEG-2" }, { "esPid": 52, "lang": "eng", "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "esPid": 53, "lang": "spa", "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "esPid": 54, "lang": "fre", "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" } ] } ], "etmLocation": 0, "hidden": false, "hideGuide": false, "major": 13, "minor": 1, "modulation": 4, "outOfBand": true, "pathSelect": true, "program": 3, "serviceName": "WNET-HD", "serviceType": 2, "sourceId": 1, "tsId": 2011 }, { "accessControlled": false, "carrierFreq": 0, "descriptors": [ { "descriptorTag": 161, "serviceLocation": [ { "esPid": 65, "streamType": 2, "streamTypeString": "Video MPEG-2" }, { "esPid": 68, "lang": "eng", "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "esPid": 69, "lang": "spa", "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "esPid": 70, "lang": "fre", "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" } ] } ], "etmLocation": 0, "hidden": false, "hideGuide": false, "major": 13, "minor": 2, "modulation": 4, "outOfBand": true, "pathSelect": true, "program": 4, "serviceName": "KIDS", "serviceType": 2, "sourceId": 2, "tsId": 2011 }, { "accessControlled": false, "carrierFreq": 0, "descriptors": [ { "descriptorTag": 161, "serviceLocation": [ { "esPid": 81, "streamType": 2, "streamTypeString": "Video MPEG-2" }, { "esPid": 84, "lang": "eng", "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" } ] } ], "etmLocation": 0, "hidden": false, "hideGuide": false, "major": 13, "minor": 3, "modulation": 4, "outOfBand": true, "pathSelect": true, "program": 5, "serviceName": "V-Me", "serviceType": 2, "sourceId": 3, "tsId": 2011 } ], "isCableVCT": false, "tableId": 200, "tableName": "VCT", "tsId": 2011, "version": 6 }, { "tableId": 199, "tableName": "MGT", "tables": [ { "bytes": 187, "pid": 8187, "type": 0, "version": 6 }, { "bytes": 1103, "pid": 7424, "type": 256, "version": 6 }, { "bytes": 1105, "pid": 7425, "type": 257, "version": 6 }, { "bytes": 1132, "pid": 7426, "type": 258, "version": 6 }, { "bytes": 1305, "pid": 7427, "type": 259, "version": 6 }, { "bytes": 1197, "pid": 7680, "type": 512, "version": 6 }, { "bytes": 1220, "pid": 7681, "type": 513, "version": 6 }, { "bytes": 1157, "pid": 7682, "type": 514, "version": 6 }, { "bytes": 1213, "pid": 7683, "type": 515, "version": 6 } ], "version": 6 }, { "pcrPid": 81, "program": 5, "streams": [ { "descriptors": [ { "CaptionService": [ { "digital_cc": "708", "easyReader": false, "iso639lang": "eng", "line21field": true, "serviceNumber": 1, "wideAspectRatio": false } ], "descriptorTag": 134 } ], "pid": 81, "streamType": 2, "streamTypeString": "Video MPEG-2" }, { "descriptors": [ { "bitRateCode": 10, "bsid": 8, "bsmod": 0, "description": "", "descriptorTag": 129, "fullSvc": true, "language": "eng", "numChannels": "2/0", "sampleRate": "48", "surroundMode": "Not indicated" }, { "ISO639Lang": [ { "audioType": 0, "language": "eng" } ], "descriptorTag": 10 } ], "pid": 84, "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" } ], "tableId": 2, "tableName": "PMT", "version": 12 }, { "pcrPid": 65, "program": 4, "streams": [ { "descriptors": [ { "CaptionService": [ { "digital_cc": "708", "easyReader": false, "iso639lang": "eng", "line21field": true, "serviceNumber": 1, "wideAspectRatio": false } ], "descriptorTag": 134 } ], "pid": 65, "streamType": 2, "streamTypeString": "Video MPEG-2" }, { "descriptors": [ { "bitRateCode": 14, "bsid": 8, "bsmod": 0, "description": "", "descriptorTag": 129, "fullSvc": true, "language": "eng", "numChannels": "2/0", "sampleRate": "48", "surroundMode": "Not indicated" }, { "ISO639Lang": [ { "audioType": 0, "language": "eng" } ], "descriptorTag": 10 } ], "pid": 68, "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "descriptors": [ { "bitRateCode": 8, "bsid": 8, "bsmod": 0, "description": "", "descriptorTag": 129, "fullSvc": true, "language": "spa", "numChannels": "2/0", "sampleRate": "48", "surroundMode": "Not indicated" }, { "ISO639Lang": [ { "audioType": 0, "language": "spa" } ], "descriptorTag": 10 } ], "pid": 69, "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" }, { "descriptors": [ { "bitRateCode": 8, "bsid": 8, "bsmod": 2, "description": "", "descriptorTag": 129, "fullSvc": true, "language": "fre", "numChannels": "2/0", "sampleRate": "48", "surroundMode": "Not indicated" }, { "ISO639Lang": [ { "audioType": 0, "language": "fre" } ], "descriptorTag": 10 } ], "pid": 70, "streamType": 129, "streamTypeString": "Audio AC3 (ATSC)" } ], "tableId": 2, "tableName": "PMT", "version": 12 } ]
 ```
 
 #### Server commands
