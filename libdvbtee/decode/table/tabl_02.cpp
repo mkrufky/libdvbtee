@@ -141,7 +141,7 @@ bool pmt::ingest(TableStore *s, const dvbpsi_pmt_t * const t, TableWatcher *w)
 	for (std::vector<Table*>::const_iterator it = pmts.begin(); it != pmts.end(); ++it) {
 		pmt *thisPMT = (pmt*)*it;
 		if (thisPMT->get<uint16_t>("program") == t->i_program_number) {
-			if (thisPMT->get<uint16_t>("version") == t->i_version) {
+			if (thisPMT->get<uint8_t>("version") == t->i_version) {
 				dPrintf("PMT v%d, service_id %d, pcr_pid %d: ALREADY DECODED", t->i_version, t->i_program_number, t->i_pcr_pid);
 				return false;
 			}
