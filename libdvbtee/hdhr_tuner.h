@@ -24,7 +24,7 @@
 
 #include "tune.h"
 
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
 #define hdhr_tuner hdhrTuner
 #endif
 
@@ -70,7 +70,7 @@ public:
 
 	int pull();
 private:
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
 	HdhrPullFeeder pullFeeder;
 #endif
 	void add_filter(uint16_t);

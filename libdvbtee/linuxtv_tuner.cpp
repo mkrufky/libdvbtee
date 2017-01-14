@@ -88,7 +88,7 @@ static dvbtee_fe_status_t dvbtee_fe_status(fe_status_t status)
 }
 
 linuxtv_tuner::linuxtv_tuner()
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
   : adap_id(-1)
 #else
   : tune(fileFeeder)
@@ -313,7 +313,7 @@ uint16_t linuxtv_tuner::get_snr()
 void linuxtv_tuner::stop_feed()
 {
 	tune::stop_feed();
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
 	fileFeeder.closeFd();
 #endif
 	close_demux();
@@ -362,14 +362,14 @@ int linuxtv_tuner::start_feed()
 	sleep(1); // FIXME
 
 	sprintf(filename, "/dev/dvb/adapter%i/dvr%i", adap_id, dvr_id);
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
 	if (feeder.open_file(filename, O_NONBLOCK) < 0) {
 #else
 	if (fileFeeder.openFile(filename, O_NONBLOCK) < 0) {
 #endif
 		// try flat dvb dev structure if this fails
 		sprintf(filename, "/dev/dvb%i.dvr%i", adap_id, dvr_id);
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
 		if (feeder.open_file(filename, O_NONBLOCK) < 0) {
 #else
 		if (fileFeeder.openFile(filename, O_NONBLOCK) < 0) {
@@ -379,7 +379,7 @@ int linuxtv_tuner::start_feed()
 		}
 	}
 
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
 	if (0 == feeder.start()) {
 #else
 	if (0 == fileFeeder.start()) {
@@ -388,7 +388,7 @@ int linuxtv_tuner::start_feed()
 		return 0;
 	}
 fail_dvr:
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
 	feeder.close_file();
 #else
 	fileFeeder.closeFd();

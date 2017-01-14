@@ -25,7 +25,7 @@
 #include "tune.h"
 #include "feed/file.h"
 
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
 #define linuxtv_tuner linuxtvTuner
 #endif
 
@@ -57,7 +57,7 @@ public:
 
 	bool __tune_channel(dvbtee_fe_modulation_t, unsigned int);
 
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
 	virtual const char *get_name() { return fileFeeder.getUri().c_str(); }
 #endif
 
@@ -65,7 +65,7 @@ public:
 
 	void addfilter(uint16_t);
 private:
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
 	dvbtee::feed::FileFeeder fileFeeder;
 #endif
 

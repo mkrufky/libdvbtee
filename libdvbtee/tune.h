@@ -29,7 +29,7 @@
 #include "feed.h"
 #include "feed/feeder.h"
 
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
 #define tune tuneTuner
 #endif
 
@@ -84,7 +84,7 @@ public:
 class tune
 {
 public:
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
 	tune();
 #else
 	tune(dvbtee::feed::ThreadFeeder&);
@@ -121,7 +121,7 @@ public:
 	unsigned int get_scan_results(bool wait = true, parse_iface *iface = NULL);
 	void stop_scan() { f_kill_thread = true; }
 
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
 	feed feeder;
 #else
 	dvbtee::feed::ThreadFeeder& feeder;

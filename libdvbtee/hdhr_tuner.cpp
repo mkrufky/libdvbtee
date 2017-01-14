@@ -89,7 +89,7 @@ private:
 };
 
 hdhr_tuner::hdhr_tuner()
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
   : dev(NULL)
 #else
   : pullFeeder(*this)
@@ -115,7 +115,7 @@ hdhr_tuner::~hdhr_tuner()
 
 hdhr_tuner::hdhr_tuner(const hdhr_tuner& hdhr)
   : tune(hdhr)
-#if !DVBTEE_FEED_LEGACY
+#if !defined(DVBTEE_FEED_LEGACY)
   , pullFeeder(hdhr.pullFeeder)
 #endif
   , dev(NULL)
@@ -381,7 +381,7 @@ int hdhr_tuner::start_feed()
 	}
 	struct hdhomerun_device_t *hdhr_dev = dev->get_hdhr_dev();
 	hdhomerun_device_stream_start(hdhr_dev);
-#if DVBTEE_FEED_LEGACY
+#if defined(DVBTEE_FEED_LEGACY)
 	if (0 == feeder.pull(this)) {
 #else
 	if (0 == pullFeeder.start()) {
