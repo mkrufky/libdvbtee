@@ -157,6 +157,11 @@ To parse a UDP stream for ten seconds:
   dvbtee -iudp://127.0.0.1:1234 -t10
 ```
 
+To scan for services using the first connected tuner:
+```
+  dvbtee -s -a0
+```
+
 To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:
 ```
   dvbtee -A2 -T5 -s4
@@ -192,7 +197,7 @@ store PAT: v0, ts_id: 2011
            5 | 50
 store PMT: v12, service_id 3, pcr_pid 49
   es_pid | type
-      31 | 0x02 (Video MPEG-2) | 
+      31 | 0x02 (Video MPEG-2) |
       34 | 0x81 (Audio AC3 (ATSC)) | eng
       35 | 0x81 (Audio AC3 (ATSC)) | spa
       36 | 0x81 (Audio AC3 (ATSC)) | fre
@@ -214,16 +219,16 @@ store MGT: v6
     0x0203   | 0x1e03 |   6 | 1213
 store PMT: v12, service_id 5, pcr_pid 81
   es_pid | type
-      51 | 0x02 (Video MPEG-2) | 
+      51 | 0x02 (Video MPEG-2) |
       54 | 0x81 (Audio AC3 (ATSC)) | eng
 store PMT: v12, service_id 4, pcr_pid 65
   es_pid | type
-      41 | 0x02 (Video MPEG-2) | 
+      41 | 0x02 (Video MPEG-2) |
       44 | 0x81 (Audio AC3 (ATSC)) | eng
       45 | 0x81 (Audio AC3 (ATSC)) | spa
       46 | 0x81 (Audio AC3 (ATSC)) | fre
 
-# channel 13, 213000000,  
+# channel 13, 213000000,
 13.1-WNET-HD:213000000:8VSB:49:52:3
 13.2-KIDS:213000000:8VSB:65:68:4
 13.3-V-Me:213000000:8VSB:81:84:5

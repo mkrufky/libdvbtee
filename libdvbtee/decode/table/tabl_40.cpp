@@ -126,7 +126,7 @@ bool nit::ingest(TableStore *s, const dvbpsi_nit_t * const t, TableWatcher *w)
 	for (std::vector<Table*>::const_iterator it = nits.begin(); it != nits.end(); ++it) {
 		nit *thisNIT = (nit*)*it;
 		if (thisNIT->get<uint16_t>("networkId") == t->i_network_id) {
-			if (thisNIT->get<uint16_t>("version") == t->i_version) {
+			if (thisNIT->get<uint8_t>("version") == t->i_version) {
 				dPrintf("NIT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
 				return false;
 			}
