@@ -12,7 +12,6 @@ libdvbtee_la_SOURCES = \
     curlhttpget.cpp \
     decode.cpp \
     demux.cpp \
-    feed.cpp \
     feed/feeder.cpp \
     feed/fdfeeder.cpp \
     feed/tcp.cpp \
@@ -38,7 +37,6 @@ EXTRA_DIST = \
     curlhttpget.h \
     decode.h \
     demux.h \
-    feed.h \
     functions.h \
     hdhr_tuner.h \
     hlsfeed.h \
@@ -62,7 +60,6 @@ library_include_HEADERS = \
     curlhttpget.h \
     decode.h \
     demux.h \
-    feed.h \
     functions.h \
     hdhr_tuner.h \
     hlsfeed.h \

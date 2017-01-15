@@ -1,5 +1,5 @@
 #SUBDIRS = parser_example walk_hls
-SUBDIRS = walk_hls
+SUBDIRS =
 SUBDIRS += file_example file_example/ifs tcplisten udplisten stdin_example
 
 if !BUILD_OS_IS_DARWIN
