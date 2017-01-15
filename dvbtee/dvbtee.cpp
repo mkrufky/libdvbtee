@@ -43,42 +43,42 @@ typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
 {
-	int channel = 0;
-	bool b_read_dvr = false;
-	bool b_scan     = false;
-	bool scan_epg   = false;
-	bool b_output_file   = false;
-	bool b_output_stdout = false;
-	bool b_serve    = false;
-	bool b_kernel_pid_filters = false;
-	bool b_help     = false;
-	bool b_json     = false;
-	bool b_bitrate_stats = false;
-	bool b_hdhr     = false;
+	int channel;
+	bool b_read_dvr;
+	bool b_scan;
+	bool scan_epg;
+	bool b_output_file;
+	bool b_output_stdout;
+	bool b_serve;
+	bool b_kernel_pid_filters;
+	bool b_help;
+	bool b_json;
+	bool b_bitrate_stats;
+	bool b_hdhr;
 
 #ifdef USE_LINUXTV
 	/* LinuxDVB context: */
-	int dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
-	int fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
-	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
-	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
+	int dvb_adap; /* ID X, /dev/dvb/adapterX/ */
+	int fe_id;    /* ID Y, /dev/dvb/adapterX/frontendY */
+	int demux_id; /* ID Y, /dev/dvb/adapterX/demuxY */
+	int dvr_id;   /* ID Y, /dev/dvb/adapterX/dvrY */
 #endif
 
-	unsigned int serv_flags  = 0;
-	unsigned int scan_flags  = 0;
-	unsigned int scan_min    = 0;
-	unsigned int scan_max    = 0;
-	unsigned int scan_method = 0;
+	unsigned int serv_flags;
+	unsigned int scan_flags;
+	unsigned int scan_min;
+	unsigned int scan_max;
+	unsigned int scan_method;
 
-	int num_tuners           = -1;
-	unsigned int timeout     = 0;
+	int num_tuners;
+	unsigned int timeout;
 
-	unsigned int wait_event  = 0;
-	int eit_limit            = -1;
+	unsigned int wait_event;
+	int eit_limit;
 
-	tune *tuner = NULL;
+	tune *tuner;
 
-	enum output_options out_opt = (enum output_options)-1;
+	enum output_options out_opt;
 
 	char filename[256];
 	char outfilename[256];
