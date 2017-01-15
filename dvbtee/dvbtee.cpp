@@ -53,14 +53,11 @@ struct dvbtee_context* ctxt;
 class write_feed : public curlhttpget_iface
 {
 public:
-	write_feed(dvbtee_context &ctxt) : m_ctxt(ctxt) {}
-
 	void write_data(void *buffer, size_t size, size_t nmemb)
 	{
 		feeder.push(size * nmemb, (const uint8_t*)buffer);
 	}
 private:
-	dvbtee_context m_ctxt;
 	dvbtee::feed::PushFeeder feeder;
 };
 
@@ -642,7 +639,7 @@ int main(int argc, char **argv)
 
 	if (strlen(tcpipfeedurl)) {
 		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
-			write_feed iface(context);
+			write_feed iface;
 			hlsfeed(tcpipfeedurl, &iface);
 		} else {
 			int ret = context._file_feeder->start_socket(tcpipfeedurl);
