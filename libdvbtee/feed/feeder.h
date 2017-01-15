@@ -49,6 +49,9 @@ public:
 	__attribute__((deprecated)) int open_file(char* new_file, int flags = 0) { return openFile(new_file, flags); }
 
 	__attribute__((deprecated)) int start_socket(char*) { return -1; } // NEEDS FIX
+	__attribute__((deprecated)) int start_stdin() { return start(); } // NEEDS FIX
+
+	__attribute__((deprecated)) int wait_for_streaming_or_timeout(int) { return -1; } // NEEDS FIX
 
 	virtual void stop() { }
 	virtual int start() { return -1; }

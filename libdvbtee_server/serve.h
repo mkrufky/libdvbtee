@@ -157,7 +157,9 @@ public:
 			    tune_iface *t_iface, parse_iface *p_iface);
 	bool cmd_config_channels_conf_load(tune* tuner, parse_iface *iface);
 
+#if 0
 	feed_server_map feed_servers;
+#endif
 
 	serve_client_map* get_client_map() { return &client_map; }
 

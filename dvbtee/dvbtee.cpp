@@ -43,7 +43,7 @@ typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
 {
-	feed _file_feeder;
+	dvbtee::feed::Feeder* _file_feeder;
 	map_tuners tuners;
 	serve *server;
 };
@@ -57,10 +57,11 @@ public:
 
 	void write_data(void *buffer, size_t size, size_t nmemb)
 	{
-		m_ctxt._file_feeder.push(size * nmemb, (const uint8_t*)buffer);
+		feeder.push(size * nmemb, (const uint8_t*)buffer);
 	}
 private:
-	dvbtee_context &m_ctxt;
+	dvbtee_context m_ctxt;
+	dvbtee::feed::PushFeeder feeder;
 };
 
 
@@ -94,13 +95,15 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	if (context->server)
 		stop_server(context);
 
+#if 0
 	if (quick)
-		context->_file_feeder.stop_without_wait();
+		context->_file_feeder->stop_without_wait();
 	else
-		context->_file_feeder.stop();
+#endif
+		context->_file_feeder->stop();
 
-	context->_file_feeder.close_file();
-	context->_file_feeder.parser.cleanup();
+	context->_file_feeder->close_file();
+	context->_file_feeder->parser.cleanup();
 
 	cleanup_tuners(context, quick);
 }
@@ -579,7 +582,7 @@ int main(int argc, char **argv)
 #endif
 	if (out_opt > 0) {
 		if ((strlen(tcpipfeedurl)) || (strlen(filename)))
-			context._file_feeder.parser.out.set_options(out_opt);
+			context._file_feeder->parser.out.set_options(out_opt);
 		else for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 			iter->second->feeder.parser.out.set_options(out_opt);
 	}
@@ -588,21 +591,21 @@ int main(int argc, char **argv)
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 		else
-			context._file_feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
+			context._file_feeder->parser.statistics.set_statistics_callback(bitrate_stats, &context);
 	}
 	if (b_output_file) {
 		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_output(outfilename);
 		else
-			context._file_feeder.parser.add_output(outfilename);
+			context._file_feeder->parser.add_output(outfilename);
 	}
 	if (b_output_stdout) {
 		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_stdout();
 		else
-			context._file_feeder.parser.add_stdout();
+			context._file_feeder->parser.add_stdout();
 	}
 	if (b_serve)
 		start_server(&context, serv_flags | (scan_flags << 2));
@@ -627,14 +630,14 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(filename)) {
-		if (0 <= context._file_feeder.open_file(filename)) {
-			int ret = context._file_feeder.start();
+		if (0 <= context._file_feeder->open_file(filename)) {
+			int ret = context._file_feeder->start();
 			if (b_serve) goto exit;
 			if (0 == ret) {
-				context._file_feeder.wait_for_streaming_or_timeout(timeout);
-				context._file_feeder.stop();
+				context._file_feeder->wait_for_streaming_or_timeout(timeout);
+				context._file_feeder->stop();
 			}
-			context._file_feeder.close_file();
+			context._file_feeder->close_file();
 		}
 		goto exit;
 	}
@@ -644,12 +647,12 @@ int main(int argc, char **argv)
 			write_feed iface(context);
 			hlsfeed(tcpipfeedurl, &iface);
 		} else {
-			int ret = context._file_feeder.start_socket(tcpipfeedurl);
+			int ret = context._file_feeder->start_socket(tcpipfeedurl);
 			if (b_serve) goto exit;
 			if (0 <= ret) {
-				context._file_feeder.wait_for_streaming_or_timeout(timeout);
-				context._file_feeder.stop();
-				context._file_feeder.close_file();
+				context._file_feeder->wait_for_streaming_or_timeout(timeout);
+				context._file_feeder->stop();
+				context._file_feeder->close_file();
 			}
 		}
 		goto exit;
@@ -697,13 +700,13 @@ int main(int argc, char **argv)
 		}
 	}
 	else
-	if (0 == context._file_feeder.parser.get_fed_pkt_count()) {
+	if (0 == context._file_feeder->parser.get_fed_pkt_count()) {
 		fprintf(stderr, "reading from STDIN\n");
-		int ret = context._file_feeder.start_stdin();
+		int ret = context._file_feeder->start_stdin();
 		if (b_serve) goto exit;
 		if (0 == ret) {
-			context._file_feeder.wait_for_streaming_or_timeout(timeout);
-			context._file_feeder.stop();
+			context._file_feeder->wait_for_streaming_or_timeout(timeout);
+			context._file_feeder->stop();
 		}
 	}
 

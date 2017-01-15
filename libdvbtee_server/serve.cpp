@@ -499,7 +499,9 @@ serve::serve()
 {
 	dPrintf("()");
 	tuners.clear();
+#if 0
 	feed_servers.clear();
+#endif
 	scan_flags.clear();
 	start_monitor();
 }
@@ -511,7 +513,9 @@ serve::~serve()
 	stop();
 
 	tuners.clear();
+#if 0
 	feed_servers.clear();
+#endif
 	scan_flags.clear();
 }
 
