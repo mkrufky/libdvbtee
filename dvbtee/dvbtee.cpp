@@ -43,9 +43,101 @@ typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
 {
+	int channel = 0;
+	bool b_read_dvr = false;
+	bool b_scan     = false;
+	bool scan_epg   = false;
+	bool b_output_file   = false;
+	bool b_output_stdout = false;
+	bool b_serve    = false;
+	bool b_kernel_pid_filters = false;
+	bool b_help     = false;
+	bool b_json     = false;
+	bool b_bitrate_stats = false;
+	bool b_hdhr     = false;
+
+#ifdef USE_LINUXTV
+	/* LinuxDVB context: */
+	int dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
+	int fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
+	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
+	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
+#endif
+
+	unsigned int serv_flags  = 0;
+	unsigned int scan_flags  = 0;
+	unsigned int scan_min    = 0;
+	unsigned int scan_max    = 0;
+	unsigned int scan_method = 0;
+
+	int num_tuners           = -1;
+	unsigned int timeout     = 0;
+
+	unsigned int wait_event  = 0;
+	int eit_limit            = -1;
+
+	tune *tuner = NULL;
+
+	enum output_options out_opt = (enum output_options)-1;
+
+	char filename[256];
+	char outfilename[256];
+	char tcpipfeedurl[2048];
+	char service_ids[64];
+	char channel_list[256];
+	char hdhrname[256];
+
+//////////////////////////////////////////////////////////////////
+
 	dvbtee::feed::Feeder* _file_feeder;
 	map_tuners tuners;
 	serve *server;
+
+	dvbtee_context() {
+		channel = 0;
+		b_read_dvr = false;
+		b_scan     = false;
+		scan_epg   = false;
+		b_output_file   = false;
+		b_output_stdout = false;
+		b_serve    = false;
+		b_kernel_pid_filters = false;
+		b_help     = false;
+		b_json     = false;
+		b_bitrate_stats = false;
+		b_hdhr     = false;
+
+#ifdef USE_LINUXTV
+		/* LinuxDVB context: */
+		dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
+		fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
+		demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
+		dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
+#endif
+
+		serv_flags  = 0;
+		scan_flags  = 0;
+		scan_min    = 0;
+		scan_max    = 0;
+		scan_method = 0;
+
+		num_tuners           = -1;
+		timeout     = 0;
+
+		wait_event  = 0;
+		eit_limit            = -1;
+
+		tuner = NULL;
+
+		out_opt = (enum output_options)-1;
+
+		memset(&filename, 0, sizeof(filename));
+		memset(&outfilename, 0, sizeof(outfilename));
+		memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
+		memset(&service_ids, 0, sizeof(service_ids));
+		memset(&channel_list, 0, sizeof(channel_list));
+		memset(&hdhrname, 0, sizeof(hdhrname));
+	}
 };
 
 struct dvbtee_context* ctxt;
@@ -337,151 +429,96 @@ int main(int argc, char **argv)
 		printf("Error at WSAStartup()\n");
 #endif
 	dvbtee_context context;
+	context.server = NULL;
 	ctxt = &context;
 
-	int opt, channel = 0;
-	bool b_read_dvr = false;
-	bool b_scan     = false;
-	bool scan_epg   = false;
-	bool b_output_file   = false;
-	bool b_output_stdout = false;
-	bool b_serve    = false;
-	bool b_kernel_pid_filters = false;
-	bool b_help     = false;
-	bool b_json     = false;
-	bool b_bitrate_stats = false;
-	bool b_hdhr     = false;
-
-	context.server = NULL;
-
-#ifdef USE_LINUXTV
-	/* LinuxDVB context: */
-	int dvb_adap = -1; /* ID X, /dev/dvb/adapterX/ */
-	int fe_id    = -1; /* ID Y, /dev/dvb/adapterX/frontendY */
-	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
-	int dvr_id   = 0; /* ID Y, /dev/dvb/adapterX/dvrY */
-#endif
-
-	unsigned int serv_flags  = 0;
-	unsigned int scan_flags  = 0;
-	unsigned int scan_min    = 0;
-	unsigned int scan_max    = 0;
-	unsigned int scan_method = 0;
-
-	int num_tuners           = -1;
-	unsigned int timeout     = 0;
-
-	unsigned int wait_event  = 0;
-	int eit_limit            = -1;
-
-	tune *tuner = NULL;
-
-	enum output_options out_opt = (enum output_options)-1;
-
-	char filename[256];
-	memset(&filename, 0, sizeof(filename));
-
-	char outfilename[256];
-	memset(&outfilename, 0, sizeof(outfilename));
-
-	char tcpipfeedurl[2048];
-	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
-
-	char service_ids[64];
-	memset(&service_ids, 0, sizeof(service_ids));
-
-	char channel_list[256];
-	memset(&channel_list, 0, sizeof(channel_list));
-
-	char hdhrname[256];
-	memset(&hdhrname, 0, sizeof(hdhrname));
-
+	int opt;
 	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:js::S::E::o::O:d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
-			dvb_adap = strtoul(optarg, NULL, 0);
-			b_read_dvr = true;
+			ctxt->dvb_adap = strtoul(optarg, NULL, 0);
+			ctxt->b_read_dvr = true;
 #endif
 			break;
 		case 'A': /* ATSC / QAM */
-			scan_flags = strtoul(optarg, NULL, 0);
-			b_read_dvr = true;
+			ctxt->scan_flags = strtoul(optarg, NULL, 0);
+			ctxt->b_read_dvr = true;
 			break;
 		case 'b': /* bitrates & statistics */
-			b_bitrate_stats = true;
+			ctxt->b_bitrate_stats = true;
 			break;
 		case 'c': /* channel list | channel / scan min */
 			if (strstr(optarg, ","))
-				strncpy(channel_list, optarg, sizeof(channel_list)-1);
+				strncpy(ctxt->channel_list, optarg, sizeof(ctxt->channel_list)-1);
 
 			/* if a list was provided, use the first item */
-			channel = strtoul(optarg, NULL, 0);
-			scan_min = strtoul(optarg, NULL, 0);
+			ctxt->channel = strtoul(optarg, NULL, 0);
+			ctxt->scan_min = strtoul(optarg, NULL, 0);
 
-			b_read_dvr = true;
+			ctxt->b_read_dvr = true;
 			break;
 		case 'C': /* channel list | channel / scan max */
 			if (strstr(optarg, ","))
-				strncpy(channel_list, optarg, sizeof(channel_list));
+				strncpy(ctxt->channel_list, optarg, sizeof(ctxt->channel_list));
 
 			/* if a list was provided, use the first item */
-			scan_max = strtoul(optarg, NULL, 0);
+			ctxt->scan_max = strtoul(optarg, NULL, 0);
 
-			b_read_dvr = true;
+			ctxt->b_read_dvr = true;
 			break;
 		case 'f': /* frontend */
 #ifdef USE_LINUXTV
-			fe_id = strtoul(optarg, NULL, 0);
-			b_read_dvr = true;
+			ctxt->fe_id = strtoul(optarg, NULL, 0);
+			ctxt->b_read_dvr = true;
 #endif
 			break;
 		case 'F': /* Filename */
-			strncpy(filename, optarg, sizeof(filename));
+			strncpy(ctxt->filename, optarg, sizeof(ctxt->filename));
 			break;
 		case 't': /* timeout */
-			timeout = strtoul(optarg, NULL, 0);
+			ctxt->timeout = strtoul(optarg, NULL, 0);
 			break;
 		case 'T': /* number of tuners (dvb adapters) allowed to use, 0 for all */
-			num_tuners = strtoul(optarg, NULL, 0);
-			b_read_dvr = true;
+			ctxt->num_tuners = strtoul(optarg, NULL, 0);
+			ctxt->b_read_dvr = true;
 			break;
 		case 's': /* scan, optional arg when using multiple tuners: 1 for speed, 2 for redundancy, 3 for speed AND redundancy, 4 for optimized speed / partial redundancy */
-			b_scan = true;
-			scan_method = (optarg) ? strtoul(optarg, NULL, 0) : 0;
-			if (scan_method)
-				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
+			ctxt->b_scan = true;
+			ctxt->scan_method = (optarg) ? strtoul(optarg, NULL, 0) : 0;
+			if (ctxt->scan_method)
+				fprintf(stderr, "MULTISCAN: %d...\n", ctxt->scan_method);
 			break;
 		case 'S': /* server mode, optional arg 1 for command server, 2 for http stream server, 3 for both */
-			b_serve = true;
-			serv_flags = (optarg) ? strtoul(optarg, NULL, 0) : 0;
+			ctxt->b_serve = true;
+			ctxt->serv_flags = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			break;
 		case 'i': /* pull local/remote tcp/udp port for data */
-			strncpy(tcpipfeedurl, optarg, sizeof(tcpipfeedurl));
+			strncpy(ctxt->tcpipfeedurl, optarg, sizeof(ctxt->tcpipfeedurl));
 			break;
 		case 'I': /* request a service by its service id */
-			strncpy(service_ids, optarg, sizeof(service_ids));
+			strncpy(ctxt->service_ids, optarg, sizeof(ctxt->service_ids));
 			break;
 		case 'E': /* enable EPG scan, optional arg to limit the number of EITs to parse */
 #if 0
-			b_scan = true; // FIXME
+			ctxt->b_scan = true; // FIXME
 #endif
-			scan_epg = true;
-			wait_event = FEED_EVENT_EPG;
-			eit_limit = (optarg) ? strtoul(optarg, NULL, 0) : -1;
-			if (eit_limit >= 0)
-				fprintf(stderr, "EIT LIMIT: %d...\n", eit_limit);
+			ctxt->scan_epg = true;
+			ctxt->wait_event = FEED_EVENT_EPG;
+			ctxt->eit_limit = (optarg) ? strtoul(optarg, NULL, 0) : -1;
+			if (ctxt->eit_limit >= 0)
+				fprintf(stderr, "EIT LIMIT: %d...\n", ctxt->eit_limit);
 			break;
 		case 'o': /* output filtered data, optional arg is a filename */
 			if (optarg) {
 				/* outfilename was initialized with 0's */
-				strncpy(outfilename, optarg, sizeof(outfilename)-1);
-				b_output_file = true;
+				strncpy(ctxt->outfilename, optarg, sizeof(ctxt->outfilename)-1);
+				ctxt->b_output_file = true;
 			} else
-				b_output_stdout = true;
+				ctxt->b_output_stdout = true;
 			break;
 		case 'O': /* output options */
-			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
+			ctxt->out_opt = (enum output_options)strtoul(optarg, NULL, 0);
 			break;
 		case 'd':
 			if (optarg)
@@ -491,21 +528,21 @@ int main(int argc, char **argv)
 			break;
 		case 'H':
 			if (optarg)
-				strncpy(hdhrname, optarg, sizeof(hdhrname));
-			b_hdhr = true;
+				strncpy(ctxt->hdhrname, optarg, sizeof(ctxt->hdhrname));
+			ctxt->b_hdhr = true;
 			break;
 		case 'j':
-			b_json = true;
+			ctxt->b_json = true;
 			break;
 		case 'h':
-			b_help = true;
+			ctxt->b_help = true;
 			/* fall - thru  */
 		default:
-			usage(b_help, argv[0]);
+			usage(ctxt->b_help, argv[0]);
 			return -1;
 		}
 	}
-#define b_READ_TUNER (b_read_dvr || b_hdhr)
+#define b_READ_TUNER (ctxt->b_read_dvr || ctxt->b_hdhr)
 
 	signal(SIGINT,  signal_callback_handler); /* Program interrupt. (ctrl-c) */
 	signal(SIGABRT, signal_callback_handler); /* Process detects error and reports by calling abort */
@@ -516,35 +553,35 @@ int main(int argc, char **argv)
 #if !defined(_WIN32)
 	signal(SIGHUP,  signal_callback_handler); /* Hangup */
 #endif
-	b_kernel_pid_filters = (strlen(service_ids) > 0) ? true : false;
+	ctxt->b_kernel_pid_filters = (strlen(ctxt->service_ids) > 0) ? true : false;
 
-	if (((b_scan) && (num_tuners == -1)) || b_READ_TUNER) {
+	if (((ctxt->b_scan) && (ctxt->num_tuners == -1)) || b_READ_TUNER) {
 #ifdef USE_HDHOMERUN
-		if (b_hdhr) {
-			tuner = new hdhr_tuner;
+		if (ctxt->b_hdhr) {
+			ctxt->tuner = new hdhr_tuner;
 
-			if ((tuner) && (strlen(hdhrname))) {
-				((hdhr_tuner*)(tuner))->set_hdhr_id(hdhrname);
+			if ((ctxt->tuner) && (strlen(ctxt->hdhrname))) {
+				((hdhr_tuner*)(ctxt->tuner))->set_hdhr_id(ctxt->hdhrname);
 			}
 		} else {
 #else
 		{
 #endif
 #ifdef USE_LINUXTV
-			tuner = new linuxtv_tuner;
+			ctxt->tuner = new linuxtv_tuner;
 
-			if ((tuner) && ((dvb_adap >= 0) || (fe_id >= 0))) {
-				if (dvb_adap < 0)
-					dvb_adap = 0;
-				if (fe_id < 0)
-					fe_id = 0;
-				((linuxtv_tuner*)(tuner))->set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, b_kernel_pid_filters);
+			if ((ctxt->tuner) && ((ctxt->dvb_adap >= 0) || (ctxt->fe_id >= 0))) {
+				if (ctxt->dvb_adap < 0)
+					ctxt->dvb_adap = 0;
+				if (ctxt->fe_id < 0)
+					ctxt->fe_id = 0;
+				((linuxtv_tuner*)(ctxt->tuner))->set_device_ids(ctxt->dvb_adap, ctxt->fe_id, ctxt->demux_id, ctxt->dvr_id, ctxt->b_kernel_pid_filters);
 			}
 #endif
 		}
-		if (tuner) {
-			context.tuners[context.tuners.size()] = tuner;
-			tuner->feeder.parser.limit_eit(eit_limit);
+		if (ctxt->tuner) {
+			context.tuners[context.tuners.size()] = ctxt->tuner;
+			ctxt->tuner->feeder.parser.limit_eit(ctxt->eit_limit);
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
 #if defined(_WIN32)
@@ -554,10 +591,10 @@ int main(int argc, char **argv)
 		}
 	}
 #if (defined(USE_HDHOMERUN) | defined(USE_LINUXTV))
-	if (num_tuners > 0) while (context.tuners.size() < ((unsigned int) num_tuners)) {
+	if (ctxt->num_tuners > 0) while (context.tuners.size() < ((unsigned int) ctxt->num_tuners)) {
 		tune *new_tuner = NULL;
 #ifdef USE_HDHOMERUN
-		if (b_hdhr) {
+		if (ctxt->b_hdhr) {
 			new_tuner = new hdhr_tuner;
 		} else
 #endif
@@ -567,7 +604,7 @@ int main(int argc, char **argv)
 #endif
 		}
 		if (new_tuner) {
-			new_tuner->feeder.parser.limit_eit(eit_limit);
+			new_tuner->feeder.parser.limit_eit(ctxt->eit_limit);
 			context.tuners[context.tuners.size()] = new_tuner;
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
@@ -575,61 +612,61 @@ int main(int argc, char **argv)
 		}
 	}
 #endif
-	if (out_opt > 0) {
-		if ((strlen(tcpipfeedurl)) || (strlen(filename)))
-			context._file_feeder->parser.out.set_options(out_opt);
+	if (ctxt->out_opt > 0) {
+		if ((strlen(ctxt->tcpipfeedurl)) || (strlen(ctxt->filename)))
+			context._file_feeder->parser.out.set_options(ctxt->out_opt);
 		else for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
-			iter->second->feeder.parser.out.set_options(out_opt);
+			iter->second->feeder.parser.out.set_options(ctxt->out_opt);
 	}
-	if (b_bitrate_stats) {
+	if (ctxt->b_bitrate_stats) {
 		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
 		else
 			context._file_feeder->parser.statistics.set_statistics_callback(bitrate_stats, &context);
 	}
-	if (b_output_file) {
+	if (ctxt->b_output_file) {
 		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
-				iter->second->feeder.parser.add_output(outfilename);
+				iter->second->feeder.parser.add_output(ctxt->outfilename);
 		else
-			context._file_feeder->parser.add_output(outfilename);
+			context._file_feeder->parser.add_output(ctxt->outfilename);
 	}
-	if (b_output_stdout) {
+	if (ctxt->b_output_stdout) {
 		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
 				iter->second->feeder.parser.add_stdout();
 		else
 			context._file_feeder->parser.add_stdout();
 	}
-	if (b_serve)
-		start_server(&context, serv_flags | (scan_flags << 2));
+	if (ctxt->b_serve)
+		start_server(&context, ctxt->serv_flags | (ctxt->scan_flags << 2));
 
-	if ((scan_min) && (!scan_max))
-		scan_max = scan_min;
+	if ((ctxt->scan_min) && (!ctxt->scan_max))
+		ctxt->scan_max = ctxt->scan_min;
 	else
-	if ((scan_max) && (!scan_min))
-		channel = scan_min = scan_max;
+	if ((ctxt->scan_max) && (!ctxt->scan_min))
+		ctxt->channel = ctxt->scan_min = ctxt->scan_max;
 
-	if ((b_scan) && (b_READ_TUNER || (num_tuners >= 0))) {
-		if (num_tuners >= 0)
-			multiscan(&context, scan_method, scan_flags, scan_min, scan_max, scan_epg); // FIXME: channel_list
+	if ((ctxt->b_scan) && (b_READ_TUNER || (ctxt->num_tuners >= 0))) {
+		if (ctxt->num_tuners >= 0)
+			multiscan(&context, ctxt->scan_method, ctxt->scan_flags, ctxt->scan_min, ctxt->scan_max, ctxt->scan_epg); // FIXME: channel_list
 		else {
-			if (strlen(channel_list)) {
-				if (tuner) tuner->scan_for_services(scan_flags, channel_list, scan_epg);
+			if (strlen(ctxt->channel_list)) {
+				if (ctxt->tuner) ctxt->tuner->scan_for_services(ctxt->scan_flags, ctxt->channel_list, ctxt->scan_epg);
 			} else {
-				if (tuner) tuner->scan_for_services(scan_flags, scan_min, scan_max, scan_epg);
+				if (ctxt->tuner) ctxt->tuner->scan_for_services(ctxt->scan_flags, ctxt->scan_min, ctxt->scan_max, ctxt->scan_epg);
 			}
 		}
 		goto exit;
 	}
 
-	if (strlen(filename)) {
-		if (0 <= context._file_feeder->open_file(filename)) {
+	if (strlen(ctxt->filename)) {
+		if (0 <= context._file_feeder->open_file(ctxt->filename)) {
 			int ret = context._file_feeder->start();
-			if (b_serve) goto exit;
+			if (ctxt->b_serve) goto exit;
 			if (0 == ret) {
-				context._file_feeder->wait_for_streaming_or_timeout(timeout);
+				context._file_feeder->wait_for_streaming_or_timeout(ctxt->timeout);
 				context._file_feeder->stop();
 			}
 			context._file_feeder->close_file();
@@ -637,15 +674,15 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
-	if (strlen(tcpipfeedurl)) {
-		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
+	if (strlen(ctxt->tcpipfeedurl)) {
+		if (0 == strncmp(ctxt->tcpipfeedurl, "http", 4)) {
 			write_feed iface;
-			hlsfeed(tcpipfeedurl, &iface);
+			hlsfeed(ctxt->tcpipfeedurl, &iface);
 		} else {
-			int ret = context._file_feeder->start_socket(tcpipfeedurl);
-			if (b_serve) goto exit;
+			int ret = context._file_feeder->start_socket(ctxt->tcpipfeedurl);
+			if (ctxt->b_serve) goto exit;
 			if (0 <= ret) {
-				context._file_feeder->wait_for_streaming_or_timeout(timeout);
+				context._file_feeder->wait_for_streaming_or_timeout(ctxt->timeout);
 				context._file_feeder->stop();
 				context._file_feeder->close_file();
 			}
@@ -653,71 +690,71 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
-	if ((tuner) && (channel)) {
-		fprintf(stderr, "TUNE to channel %d...\n", channel);
-		int fe_fd = tuner->open_fe();
+	if ((ctxt->tuner) && (ctxt->channel)) {
+		fprintf(stderr, "TUNE to channel %d...\n", ctxt->channel);
+		int fe_fd = ctxt->tuner->open_fe();
 		if (fe_fd < 0)
 			return fe_fd;
 
-		if (!scan_flags)
-			scan_flags = SCAN_VSB;
+		if (!ctxt->scan_flags)
+			ctxt->scan_flags = SCAN_VSB;
 
-		if (tuner->tune_channel(
-				(scan_flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, channel)) {
-			if (!tuner->wait_for_lock_or_timeout(2000)) {
-				tuner->close_fe();
+		if (ctxt->tuner->tune_channel(
+				(ctxt->scan_flags == SCAN_VSB) ? DVBTEE_VSB_8 : DVBTEE_QAM_256, ctxt->channel)) {
+			if (!ctxt->tuner->wait_for_lock_or_timeout(2000)) {
+				ctxt->tuner->close_fe();
 				goto exit; /* NO LOCK! */
 			}
-			tuner->feeder.parser.set_channel_info(channel,
-				(scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(channel) : atsc_qam_chan_to_freq(channel),
-				(scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
+			ctxt->tuner->feeder.parser.set_channel_info(ctxt->channel,
+				(ctxt->scan_flags == SCAN_VSB) ? atsc_vsb_chan_to_freq(ctxt->channel) : atsc_qam_chan_to_freq(ctxt->channel),
+				(ctxt->scan_flags == SCAN_VSB) ? "8VSB" : "QAM_256");
 		}
 
-		if (strlen(service_ids) > 0) {
-			tuner->feeder.parser.set_service_ids(service_ids);
-			if (out_opt < 0)
-				tuner->feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
+		if (strlen(ctxt->service_ids) > 0) {
+			ctxt->tuner->feeder.parser.set_service_ids(ctxt->service_ids);
+			if (ctxt->out_opt < 0)
+				ctxt->tuner->feeder.parser.out.set_options((enum output_options)OUTPUT_AV);
 		}
 	}
 
-	if ((tuner) && b_READ_TUNER) {
+	if ((ctxt->tuner) && b_READ_TUNER) {
 		/* assume frontend is already streaming,
 		   all we have to do is read from the DVR device */
-		int ret = tuner->start_feed();
-		if (b_serve) goto exit;
+		int ret = ctxt->tuner->start_feed();
+		if (ctxt->b_serve) goto exit;
 		else {
 			if (0 == ret) {
-				tuner->feeder.wait_for_event_or_timeout(timeout, wait_event);
-				tuner->stop_feed();
+				ctxt->tuner->feeder.wait_for_event_or_timeout(ctxt->timeout, ctxt->wait_event);
+				ctxt->tuner->stop_feed();
 			}
-			if (channel) /* if we tuned the frontend ourselves then close it */
-				tuner->close_fe();
+			if (ctxt->channel) /* if we tuned the frontend ourselves then close it */
+				ctxt->tuner->close_fe();
 		}
 	}
 	else
 	if (0 == context._file_feeder->parser.get_fed_pkt_count()) {
 		fprintf(stderr, "reading from STDIN\n");
 		int ret = context._file_feeder->start_stdin();
-		if (b_serve) goto exit;
+		if (ctxt->b_serve) goto exit;
 		if (0 == ret) {
-			context._file_feeder->wait_for_streaming_or_timeout(timeout);
+			context._file_feeder->wait_for_streaming_or_timeout(ctxt->timeout);
 			context._file_feeder->stop();
 		}
 	}
 
-	if (b_serve)
+	if (ctxt->b_serve)
 		goto exit;
 
-	if ((tuner) && (b_scan)) // scan channel mode, normal scan would have goto'd to exit
-		tuner->feeder.parser.xine_dump();
-	if ((tuner) && (scan_epg))
-		tuner->feeder.parser.epg_dump();
+	if ((ctxt->tuner) && (ctxt->b_scan)) // scan channel mode, normal scan would have goto'd to exit
+		ctxt->tuner->feeder.parser.xine_dump();
+	if ((ctxt->tuner) && (ctxt->scan_epg))
+		ctxt->tuner->feeder.parser.epg_dump();
 exit:
 	if (context.server) {
 		while (context.server->is_running()) sleep(1);
 		stop_server(&context);
 	}
-	if (b_json) {
+	if (ctxt->b_json) {
 		parse::dumpJson();
 	}
 	cleanup(&context);
