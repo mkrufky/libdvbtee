@@ -51,11 +51,11 @@ public:
 	__attribute__((deprecated)) int start_socket(char*) { return -1; } // NEEDS FIX
 	__attribute__((deprecated)) int start_stdin() { return start(); } // NEEDS FIX
 
-	__attribute__((deprecated)) int wait_for_streaming_or_timeout(int) { return -1; } // NEEDS FIX
-
 	virtual void stop() { }
 	virtual int start() { return -1; }
 	virtual int openFile(char*, int) { return -1; }
+	virtual bool wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_event) { return false; }
+	virtual bool wait_for_streaming_or_timeout(unsigned int timeout) { return wait_for_event_or_timeout(timeout, 0); }
 
 protected:
 	Feeder(const Feeder&);
@@ -86,6 +86,7 @@ public:
 
 #define FEED_EVENT_PSIP 1
 #define FEED_EVENT_EPG  2
+	virtual
 	bool wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_event);
 
 	inline bool wait_for_streaming_or_timeout(unsigned int timeout) { return wait_for_event_or_timeout(timeout, 0); }
