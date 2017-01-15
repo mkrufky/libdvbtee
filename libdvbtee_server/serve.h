@@ -31,7 +31,7 @@
 #define SERVE_DEFAULT_PORT 64080
 
 typedef std::map<unsigned int, tune*> tuner_map;
-typedef std::map<unsigned int, feed*> feeder_map;
+typedef std::map<unsigned int, dvbtee::feed::Feeder*> feeder_map;
 
 class serve;
 
@@ -60,7 +60,7 @@ private:
 
 	serve *server;
 	tune *tuner;
-	feed *feeder;
+	dvbtee::feed::Feeder *feeder;
 
 	int sock_fd;
 	FILE *channels_conf_file;
@@ -111,7 +111,7 @@ struct libdvbtee_server_config {
 	bool cli_disabled;
 };
 
-class serve : public feed_server_iface, public socket_listen_iface
+class serve : public socket_listen_iface
 {
 public:
 	serve();
@@ -122,7 +122,7 @@ public:
 	void stop();
 
 	bool add_tuner(tune *new_tuner);
-	void add_feeder(feed *new_feeder);
+	void add_feeder(dvbtee::feed::Feeder *new_feeder);
 
 	bool get_epg(decode_report *iface);
 	bool get_channels(parse_iface *iface, unsigned int tuner_id = 0);

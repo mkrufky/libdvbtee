@@ -36,6 +36,7 @@ public:
 
 	virtual int start();
 
+	virtual
 	int openFile(char* new_file, int flags = 0) { setFilename(new_file); return doOpenFile(flags); }
 
 private:

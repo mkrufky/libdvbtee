@@ -21,6 +21,3 @@ library_includedir=$(includedir)/dvbtee
 library_include_HEADERS = serve.h
 
 libdvbtee_server_la_LIBADD = -L../libdvbtee -ldvbtee
-libdvbtee_server_la_LIBADD += -L../libdvbtee/legacy -ldvbtee_legacy
-
-AM_CXXFLAGS += -DDVBTEE_FEED_LEGACY

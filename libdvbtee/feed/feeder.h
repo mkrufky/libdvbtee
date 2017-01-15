@@ -45,6 +45,15 @@ public:
 	__attribute__((deprecated)) const char* get_filename() const { return m_uri; }
 	__attribute__((deprecated)) void close_file() { return this->close(); }
 
+	__attribute__((deprecated)) bool check() { return true; /* FIXME: inherited from feed.h */ }
+	__attribute__((deprecated)) int open_file(char* new_file, int flags = 0) { return openFile(new_file, flags); }
+
+	__attribute__((deprecated)) int start_socket(char*) { return -1; } // NEEDS FIX
+
+	virtual void stop() { }
+	virtual int start() { return -1; }
+	virtual int openFile(char*, int) { return -1; }
+
 protected:
 	Feeder(const Feeder&);
 	Feeder& operator= (const Feeder&);
