@@ -366,6 +366,22 @@ void multiscan(struct dvbtee_context* context, unsigned int scan_method,
 	fprintf(stderr, "found %d services in total\n", count);
 }
 
+void configure_output(struct dvbtee_context* context)
+{
+	if (context->out_opt > 0) {
+		context->_file_feeder->parser.out.set_options(context->out_opt);
+	}
+	if (context->b_bitrate_stats) {
+		context->_file_feeder->parser.statistics.set_statistics_callback(bitrate_stats, &context);
+	}
+	if (context->b_output_file) {
+		context->_file_feeder->parser.add_output(context->outfilename);
+	}
+	if (context->b_output_stdout) {
+		context->_file_feeder->parser.add_stdout();
+	}
+}
+
 void usage(bool help, char *myname)
 {
 	fprintf(stderr, "built against libdvbpsi version %s\n\n", parse_libdvbpsi_version);
@@ -612,32 +628,22 @@ int main(int argc, char **argv)
 		}
 	}
 #endif
-	if (ctxt->out_opt > 0) {
-		if ((strlen(ctxt->tcpipfeedurl)) || (strlen(ctxt->filename)))
-			context._file_feeder->parser.out.set_options(ctxt->out_opt);
-		else for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
-			iter->second->feeder.parser.out.set_options(ctxt->out_opt);
-	}
-	if (ctxt->b_bitrate_stats) {
-		if (b_READ_TUNER) // FIXME
-			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+
+	if (b_READ_TUNER) {// FIXME
+		for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter) {
+			if (ctxt->out_opt > 0) {
+				iter->second->feeder.parser.out.set_options(ctxt->out_opt);
+			}
+			if (ctxt->b_bitrate_stats) {
 				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
-		else
-			context._file_feeder->parser.statistics.set_statistics_callback(bitrate_stats, &context);
-	}
-	if (ctxt->b_output_file) {
-		if (b_READ_TUNER) // FIXME
-			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+			}
+			if (ctxt->b_output_file) {
 				iter->second->feeder.parser.add_output(ctxt->outfilename);
-		else
-			context._file_feeder->parser.add_output(ctxt->outfilename);
-	}
-	if (ctxt->b_output_stdout) {
-		if (b_READ_TUNER) // FIXME
-			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
+			}
+			if (ctxt->b_output_stdout) {
 				iter->second->feeder.parser.add_stdout();
-		else
-			context._file_feeder->parser.add_stdout();
+			}
+		}
 	}
 	if (ctxt->b_serve)
 		start_server(&context, ctxt->serv_flags | (ctxt->scan_flags << 2));
@@ -662,6 +668,8 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(ctxt->filename)) {
+		context._file_feeder = new dvbtee::feed::FileFeeder;
+		configure_output(ctxt);
 		if (0 <= context._file_feeder->open_file(ctxt->filename)) {
 			int ret = context._file_feeder->start();
 			if (ctxt->b_serve) goto exit;
@@ -674,7 +682,10 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
+#if 0
 	if (strlen(ctxt->tcpipfeedurl)) {
+		context._file_feeder = new dvbtee::feed:://FileFeeder;
+		configure_output(ctxt);
 		if (0 == strncmp(ctxt->tcpipfeedurl, "http", 4)) {
 			write_feed iface;
 			hlsfeed(ctxt->tcpipfeedurl, &iface);
@@ -689,6 +700,7 @@ int main(int argc, char **argv)
 		}
 		goto exit;
 	}
+#endif
 
 	if ((ctxt->tuner) && (ctxt->channel)) {
 		fprintf(stderr, "TUNE to channel %d...\n", ctxt->channel);
