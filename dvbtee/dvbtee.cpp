@@ -142,17 +142,6 @@ struct dvbtee_context
 
 struct dvbtee_context* ctxt;
 
-class write_feed : public curlhttpget_iface
-{
-public:
-	void write_data(void *buffer, size_t size, size_t nmemb)
-	{
-		feeder.push(size * nmemb, (const uint8_t*)buffer);
-	}
-private:
-	dvbtee::feed::PushFeeder feeder;
-};
-
 
 void cleanup_tuners(struct dvbtee_context* context, bool quick = false)
 {
@@ -381,6 +370,30 @@ void configure_output(struct dvbtee_context* context)
 		context->_file_feeder->parser.add_stdout();
 	}
 }
+
+class write_feed : public curlhttpget_iface
+{
+public:
+	write_feed(dvbtee_context *ctxt)
+	 : m_ctxt(ctxt)
+	{
+		m_ctxt->_file_feeder = &feeder;
+		configure_output(m_ctxt);
+	}
+
+	~write_feed()
+	{
+		m_ctxt->_file_feeder = NULL;
+	}
+
+	void write_data(void *buffer, size_t size, size_t nmemb)
+	{
+		feeder.push(size * nmemb, (const uint8_t*)buffer);
+	}
+private:
+	dvbtee_context* m_ctxt;
+	dvbtee::feed::PushFeeder feeder;
+};
 
 void usage(bool help, char *myname)
 {
@@ -682,14 +695,14 @@ int main(int argc, char **argv)
 		goto exit;
 	}
 
-#if 0
 	if (strlen(ctxt->tcpipfeedurl)) {
-		context._file_feeder = new dvbtee::feed:://FileFeeder;
-		configure_output(ctxt);
 		if (0 == strncmp(ctxt->tcpipfeedurl, "http", 4)) {
-			write_feed iface;
+			write_feed iface(ctxt);
 			hlsfeed(ctxt->tcpipfeedurl, &iface);
 		} else {
+			context._file_feeder = new dvbtee::feed::FileFeeder; // FIXME BUG BUG BUG
+			configure_output(ctxt);
+
 			int ret = context._file_feeder->start_socket(ctxt->tcpipfeedurl);
 			if (ctxt->b_serve) goto exit;
 			if (0 <= ret) {
@@ -700,7 +713,6 @@ int main(int argc, char **argv)
 		}
 		goto exit;
 	}
-#endif
 
 	if ((ctxt->tuner) && (ctxt->channel)) {
 		fprintf(stderr, "TUNE to channel %d...\n", ctxt->channel);
