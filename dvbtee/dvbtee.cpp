@@ -193,10 +193,8 @@ int start_server(struct dvbtee_context* context, unsigned int flags)
 {
 	context->server = new serve;
 
-#if 0
 	if (!context->tuners.size())
-		context->server->add_feeder(&context->_file_feeder);
-#endif
+		context->server->add_feeder(context->_file_feeder);
 
 	for (map_tuners::const_iterator iter = context->tuners.begin(); iter != context->tuners.end(); ++iter) {
 		context->server->add_tuner(iter->second);
