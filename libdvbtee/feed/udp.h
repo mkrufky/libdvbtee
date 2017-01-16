@@ -36,6 +36,7 @@ public:
 
 	virtual int start();
 
+	virtual
 	int setPort(uint16_t port_requested);
 
 private:

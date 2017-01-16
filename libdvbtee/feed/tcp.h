@@ -52,6 +52,7 @@ public:
 
 	virtual int start();
 
+	virtual
 	int setPort(uint16_t port_requested) { return m_port = port_requested; }
 private:
 	uint16_t m_port;

@@ -29,6 +29,8 @@
 
 #include "feed.h"
 #include "hlsfeed.h"
+#include "feed/tcp.h"
+#include "feed/udp.h"
 
 #include "dvbtee_config.h"
 #ifdef USE_LINUXTV
@@ -700,10 +702,53 @@ int main(int argc, char **argv)
 			write_feed iface(ctxt);
 			hlsfeed(ctxt->tcpipfeedurl, &iface);
 		} else {
-			context._file_feeder = new dvbtee::feed::FileFeeder; // FIXME BUG BUG BUG
+			char *ip, *portnum, *save, *source = ctxt->tcpipfeedurl;
+			uint16_t port = 0;
+			bool b_tcp = false;
+			bool b_udp = false;
+
+			//dPrintf("(<--%s)", source);
+			//size_t len = strlen(source);
+			//strncpy(filename, source, sizeof(filename)-1);
+			//filename[len < sizeof(filename) ? len : sizeof(filename)-1] = '\0';
+
+			if (strstr(source, ":")) {
+				ip = strtok_r(source, ":", &save);
+				if (strstr(ip, "tcp"))
+					b_tcp = true;
+				else
+					if (strstr(ip, "udp"))
+						b_udp = true;
+
+				if ((b_tcp) || (b_udp)) {
+					ip = strtok_r(NULL, ":", &save);
+					if (strstr(ip, "//") == ip)
+						ip += 2;
+				}
+				// else ip = proto;
+				portnum = strtok_r(NULL, ":", &save);
+				if (portnum)
+					port = atoi(portnum);
+
+				if (!port) {
+					port = atoi(ip);
+					ip = NULL;
+				}
+			} else {
+				// assuming UDP
+				ip = NULL;
+				port = atoi(source);
+			}
+
+			//ret = (b_tcp) ? start_tcp_listener(port) : start_udp_listener(port);
+			//dPrintf("~(-->%s)", source);
+
+			context._file_feeder = ((b_tcp) ? (dvbtee::feed::Feeder*) new dvbtee::feed::TcpListener
+			                                : (dvbtee::feed::Feeder*) new dvbtee::feed::UdpFeeder);
 			configure_output(ctxt);
 
-			int ret = context._file_feeder->start_socket(ctxt->tcpipfeedurl);
+			context._file_feeder->setPort(port);
+			int ret = context._file_feeder->start();
 			if (ctxt->b_serve) goto exit;
 			if (0 <= ret) {
 				context._file_feeder->wait_for_streaming_or_timeout(ctxt->timeout);

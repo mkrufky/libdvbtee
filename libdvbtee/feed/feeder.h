@@ -54,6 +54,7 @@ public:
 	virtual void stop() { }
 	virtual int start() { return -1; }
 	virtual int openFile(char*, int) { return -1; }
+	virtual int setPort(uint16_t) { return -1; }
 	virtual bool wait_for_event_or_timeout(unsigned int timeout, unsigned int wait_event) { return false; }
 	virtual bool wait_for_streaming_or_timeout(unsigned int timeout) { return wait_for_event_or_timeout(timeout, 0); }
 
