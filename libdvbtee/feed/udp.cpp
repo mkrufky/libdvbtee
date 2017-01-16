@@ -150,7 +150,7 @@ void *UdpFeeder::udp_feed_thread()
 		} else if ( (rxlen == 0) || ( (rxlen == -1) && (errno != EAGAIN) ) ) {
 			stop_without_wait();
 		} else if (rxlen == -1) { //( (rxlen == -1) && (errno == EAGAIN) ) {
-			usleep(200*1000);
+			usleep(40*1000);
 		}
 #if FEED_BUFFER
 		ringbuffer.put_write_ptr((rxlen > 0) ? rxlen : 0);
