@@ -52,6 +52,7 @@ public:
 	__attribute__((deprecated)) int start_stdin() { return start(); } // NEEDS FIX
 
 	virtual void stop() { }
+	virtual void stop_without_wait() {}
 	virtual int start() { return -1; }
 	virtual int openFile(char*, int) { return -1; }
 	virtual int setPort(uint16_t) { return -1; }
@@ -80,6 +81,7 @@ public:
 	ThreadFeeder();
 	virtual ~ThreadFeeder();
 
+	virtual
 	void stop_without_wait();
 
 	virtual void stop() { stop_without_wait(); }

@@ -175,11 +175,9 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	if (context->server)
 		stop_server(context);
 
-#if 0
 	if (quick)
 		context->_file_feeder->stop_without_wait();
 	else
-#endif
 		context->_file_feeder->stop();
 
 	context->_file_feeder->close_file();
