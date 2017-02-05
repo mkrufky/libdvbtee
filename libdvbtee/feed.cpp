@@ -625,8 +625,11 @@ void *feed::udp_listen_feed_thread()
 int feed::start_stdin()
 {
 	dPrintf("()");
+	int retries = 0;
 
 	while (NULL == freopen(NULL, "rb", stdin)) {
+		if (!retries) fprintf(stderr, "retrying to open stdin...\n");
+		retries++;
 		usleep(200*1000);
 	}
 	fprintf(stderr, "%s: using STDIN\n", __func__);
