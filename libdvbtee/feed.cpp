@@ -626,9 +626,8 @@ int feed::start_stdin()
 {
 	dPrintf("()");
 
-	if (NULL == freopen(NULL, "rb", stdin)) {
-		fprintf(stderr, "failed to open stdin!\n");
-		return -1;
+	while (NULL == freopen(NULL, "rb", stdin)) {
+		usleep(200*1000);
 	}
 	fprintf(stderr, "%s: using STDIN\n", __func__);
 	strncpy(filename, "STDIN", sizeof(filename));
