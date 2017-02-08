@@ -1,5 +1,5 @@
 AM_CXXFLAGS = -I../../libdvbtee -I../../libdvbtee_server
-AM_CXXFLAGS += -I../../libdvbtee/decode -I../../libdvbtee/decode/table
+AM_CXXFLAGS += -I../../libdvbtee/decode -I../../libdvbtee/decode/table -I../../libdvbtee/decode/descriptor
 
 bin_PROGRAMS = dvbtee-parser
 dvbtee_parser_SOURCES = parser.cpp

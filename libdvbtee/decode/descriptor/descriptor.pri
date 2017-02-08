@@ -34,4 +34,4 @@ HEADERS += \
     $$PWD/desc_86.h \
     $$PWD/desc_a0.h \
     $$PWD/desc_a1.h \
-    $$PWD/descriptor.h
+    $$PWD/descript.h
