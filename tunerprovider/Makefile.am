@@ -1,5 +1,5 @@
 AM_CXXFLAGS = -I../libdvbtee -I/usr/include/libhdhomerun
-AM_CXXFLAGS += -I../libdvbtee/decode/table
+AM_CXXFLAGS += -I../libdvbtee/decode -I../libdvbtee/decode/table
 
 lib_LTLIBRARIES = libdvbtee_tunerprovider.la
 

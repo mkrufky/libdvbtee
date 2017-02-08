@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include "decode/decoder.h"
+#include "decoder.h"
 #include "decode/descriptor/descriptor.h"
 
 namespace dvbtee {

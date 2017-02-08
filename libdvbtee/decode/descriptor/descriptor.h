@@ -27,7 +27,7 @@
 #include <pthread.h>
 #include <vector>
 
-#include "decode/decoder.h"
+#include "decoder.h"
 #include "dvbpsi/descriptor.h"
 
 #include "log.h"
