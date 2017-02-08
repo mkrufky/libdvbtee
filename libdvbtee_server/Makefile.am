@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -I../libdvbtee
+AM_CXXFLAGS = -I../libdvbtee -I../libdvbtee/decode/table
 
 lib_LTLIBRARIES = libdvbtee_server.la
 
