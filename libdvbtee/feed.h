@@ -49,8 +49,10 @@ public:
 	int start();
 	int start_stdin();
 	int start_socket(char* source);
+	int start_socket(char* source, char* interface);
 	int start_tcp_listener(uint16_t);
 	int start_udp_listener(uint16_t);
+	int start_udp_listener(uint16_t, char* ip, char* interface);
 
 	/* initialize for feed via functional interface */
 	int setup_feed(int prio);
