@@ -39,7 +39,7 @@
 typedef std::map<uint16_t, uint16_t> map_pidtype;
 #endif
 ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
-		    const struct sockaddr *dest_addr = NULL, socklen_t addrlen = 0);
+		    const struct sockaddr *dest_addr = NULL, int addrlen = 0);
 
 int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false);
 
