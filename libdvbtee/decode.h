@@ -231,7 +231,7 @@ typedef struct decoded_atsc_ett_s
 	unsigned int			event_not_channel_id:2;
 #endif
 	uint16_t			etm_length;
-	uint8_t				etm[256/*4096*/];
+	uint8_t				etm[4096];
 
 	decoded_atsc_ett_s() : version(0xff), etm_id(0xffffffff), etm_length(0) {}
 } decoded_atsc_ett_t;
@@ -525,6 +525,7 @@ public:
 	void dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
 	bool got_all_eit(int limit = -1);
+	bool got_all_ett();
 
 	void dump_epg(decode_report *reporter);
 

@@ -1444,10 +1444,16 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+	fprintf(stderr, "%04d-%02d-%02d %02d:%02d-%02d:%02d,%s\n",
+		tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
+		tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 
+	unsigned char message[4096];
+	const char* etm = (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message));
+	if (message[0])
+		fprintf(stderr, "\t%s\n", message);
+	
 	if (reporter) {
-		unsigned char message[512];
 		reporter->epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
 					 physical_channel, channel->program,
@@ -1455,7 +1461,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 					 start,
 					 (end - start),
 					 (const char *)name,
-					 (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
+					 (const char *)message);
 	}
 	return;
 }
@@ -1474,7 +1480,10 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, event->name.c_str()/*, iter_eit->second.text.c_str()*/ );
+	fprintf(stderr, "%04d-%02d-%02d,%02d:%02d,%02d:%02d,%s\n",
+		tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
+		tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min,
+		event->name.c_str());
 
 	if (reporter)
 		reporter->epg_event((const char *)service->service_name,
@@ -1510,7 +1519,7 @@ void decode::get_epg_event(const decoded_vct_channel_t *channel, const decoded_a
 	struct tm tme = *localtime( &end  );
 	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
-	unsigned char message[512];
+	unsigned char message[4096];
 	_get_epg_event(e, (const char *)service_name,
 		      channel->chan_major, channel->chan_minor,
 		      physical_channel, channel->program,
@@ -2003,6 +2012,43 @@ bool decode::got_all_eit(int limit)
 		}
 	}
 	return true;
+}
+
+bool decode::got_all_ett()
+{
+	int missing_etts=0;
+	int total_events=0;
+	for (int eit_num=0;
+	     eit_num < 128 && !decoded_atsc_eit[eit_num].empty();
+	     eit_num++)
+	{
+		map_decoded_atsc_eit::const_iterator eit_iter;
+		for (eit_iter = decoded_atsc_eit[eit_num].begin();
+		     eit_iter != decoded_atsc_eit[eit_num].end();
+		     eit_iter++)
+		{
+			uint32_t source_id = eit_iter->first;
+			map_decoded_atsc_eit_events events = eit_iter->second.events;
+			map_decoded_atsc_eit_events::const_iterator event_iter;
+			for (event_iter = events.begin();
+			     event_iter != events.end();
+			     event_iter++)
+			{
+				if (!event_iter->second.etm_location) continue;
+				// TODO: not yet supported? haven't tested
+				if (event_iter->second.etm_location == 2) continue;
+				total_events++;
+
+				uint32_t event_id = event_iter->second.event_id;
+				uint32_t etm_id = (source_id << 16) | (event_id << 2) | 0x02;
+				if (!decoded_ett.count(etm_id)) {
+				        missing_etts++;
+				}
+			}
+		}
+	}
+	fprintf(stderr, "%3d/%3d ETTs remaining...\r", missing_etts, total_events);
+	return (missing_etts == 0);
 }
 
 const decode_network* decode::get_decoded_network() const
