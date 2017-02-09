@@ -657,78 +657,6 @@ int feed::start_stdin()
 	return ret;
 }
 
-int feed::start_socket(char* source)
-{
-	dPrintf("()");
-#if 0
-	struct sockaddr_in ip_addr;
-#endif
-	char *ip, *portnum, *save;
-	uint16_t port = 0;
-	bool b_tcp = false;
-	bool b_udp = false;
-	int ret;
-
-	dPrintf("(<--%s)", source);
-	size_t len = strlen(source);
-	strncpy(filename, source, sizeof(filename)-1);
-	filename[len < sizeof(filename) ? len : sizeof(filename)-1] = '\0';
-
-	if (strstr(source, ":")) {
-		ip = strtok_r(source, ":", &save);
-		if (strstr(ip, "tcp"))
-			b_tcp = true;
-		else
-			if (strstr(ip, "udp"))
-				b_udp = true;
-
-		if ((b_tcp) || (b_udp)) {
-			ip = strtok_r(NULL, ":", &save);
-			if (strstr(ip, "//") == ip)
-				ip += 2;
-		}
-		// else ip = proto;
-		portnum = strtok_r(NULL, ":", &save);
-		if (portnum)
-			port = atoi(portnum);
-
-		if (!port) {
-			port = atoi(ip);
-			ip = NULL;
-		}
-	} else {
-		// assuming UDP
-		ip = NULL;
-		port = atoi(source);
-	}
-#if 0
-	if (fd >= 0)
-		close(fd);
-
-	fd = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
-	if (fd >= 0) {
-#endif
-#if 0
-		memset(&ip_addr, 0, sizeof(ip_addr));
-		ip_addr.sin_family = AF_INET;
-		ip_addr.sin_port   = htons(port);
-		if (inet_pton(AF_INET, ip, &ip_addr.sin_addr) == 0) {
-			perror("ip address translation failed");
-			return -1;
-		} else
-			ringbuffer.reset();
-#endif
-		ret = (b_tcp) ? start_tcp_listener(port) : start_udp_listener(port);
-#if 0
-	} else {
-		perror("socket failed");
-		return -1;
-	}
-#endif
-	dPrintf("~(-->%s)", source);
-	return ret;
-}
-
 int feed::start_socket(char* source, char* interface)
 {
 	dPrintf("()");
@@ -790,8 +718,9 @@ int feed::start_socket(char* source, char* interface)
 		} else
 			ringbuffer.reset();
 #endif
-
-		ret = (b_tcp) ? start_tcp_listener(port) : start_udp_listener(port, ip, interface);
+		ret = (b_tcp) ? start_tcp_listener(port) :
+		      ((ip) && (interface)) ? start_udp_listener(port, ip, interface) :
+		      start_udp_unbound_listener(port);
 #if 0
 	} else {
 		perror("socket failed");
@@ -854,7 +783,7 @@ int feed::start_tcp_listener(uint16_t port_requested)
 	return listener.start(port_requested);
 }
 
-int feed::start_udp_listener(uint16_t port_requested)
+int feed::start_udp_unbound_listener(uint16_t port_requested)
 {
 	struct sockaddr_in udp_sock;
 
@@ -909,7 +838,7 @@ int feed::start_udp_listener(uint16_t port_requested)
 int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
 {
 	dPrintf("(%d)", port_requested);
-	sprintf(filename, "UDPLISTEN: %d", port_requested);
+	snprintf(filename, sizeof(filename), "UDPLISTEN: %s:%d %s", ip, port_requested, interface);
 
 	f_kill_thread = false;
 
@@ -926,7 +855,7 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
 
 	char host[NI_MAXHOST];
 	struct ifaddrs *ifaddr, *ifa;
-	int family, s;
+	int s;
 
 	if (getifaddrs(&ifaddr) == -1) {
 		perror("getifaddrs failed");
@@ -956,13 +885,8 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
 	imreq.imr_multiaddr.s_addr = inet_addr(ip);
 	imreq.imr_interface.s_addr = inet_addr(host);
 
-#if defined(_WIN32)
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, "1", 1) < 0) {
-#else
-	int reuse = 1;
-	if (setsockopt(fd, IPPROTO_IP,IP_ADD_MEMBERSHIP,&imreq,sizeof(imreq)) < 0) {
-#endif
-		perror("setting reuse failed");
+	if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imreq, sizeof(imreq)) < 0) {
+		perror("setting IPPROTO_IP / IP_ADD_MEMBERSHIP failed");
 		return -1;
 	}
 
@@ -970,7 +894,6 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
 		perror("bind to specified interface failed");
 		return -1;
 	}
-	//	port = port_requested;
 #if 0
 	socket_set_nbio(fd);
 #endif
@@ -1074,7 +997,7 @@ int feed_server::start_udp_listener(uint16_t port_requested, feed_server_iface *
 	if (feeders.count(0)) delete feeders[0];
 	feeders[0] = new feed;
 
-	int ret = feeders[0]->start_udp_listener(port_requested);
+	int ret = feeders[0]->start_udp_unbound_listener(port_requested);
 	if (ret < 0)
 		goto fail;
 

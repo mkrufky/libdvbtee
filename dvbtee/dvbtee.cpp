@@ -650,12 +650,7 @@ int main(int argc, char **argv)
 			write_feed iface(context);
 			hlsfeed(tcpipfeedurl, &iface);
 		} else {
-			int ret;
-			if (!b_network_interface) {
-				ret = context._file_feeder.start_socket(tcpipfeedurl);
-			} else {
-				ret = context._file_feeder.start_socket(tcpipfeedurl, network_interface);
-			}
+			int ret = context._file_feeder.start_socket(tcpipfeedurl, (b_network_interface) ? network_interface : NULL);
 			if (b_serve) goto exit;
 			if (0 <= ret) {
 				context._file_feeder.wait_for_streaming_or_timeout(timeout);
