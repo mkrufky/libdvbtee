@@ -659,7 +659,7 @@ int feed::start_stdin()
 	return ret;
 }
 
-int feed::start_socket(char* source, char* interface)
+int feed::start_socket(char* source, char* net_if)
 {
 	dPrintf("()");
 #if 0
@@ -721,7 +721,7 @@ int feed::start_socket(char* source, char* interface)
 			ringbuffer.reset();
 #endif
 		ret = (b_tcp) ? start_tcp_listener(port) :
-		      ((ip) && (interface)) ? start_udp_listener(port, ip, interface) :
+		      ((ip) && (net_if)) ? start_udp_listener(port, ip, net_if) :
 		      start_udp_unbound_listener(port, ip);
 #if 0
 	} else {
@@ -837,10 +837,10 @@ int feed::start_udp_unbound_listener(uint16_t port_requested, char *ip)
 	return ret;
 }
 
-int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
+int feed::start_udp_listener(uint16_t port_requested, char *ip, char *net_if)
 {
 	dPrintf("(%d)", port_requested);
-	snprintf(filename, sizeof(filename), "UDPLISTEN: %s:%d %s", ip, port_requested, interface);
+	snprintf(filename, sizeof(filename), "UDPLISTEN: %s:%d %s", ip, port_requested, net_if);
 
 	f_kill_thread = false;
 
@@ -869,7 +869,7 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
 		if (ifa->ifa_addr == NULL)
 			continue;
 		s = getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-		if((strcmp(ifa->ifa_name, interface) == 0) && (ifa->ifa_addr->sa_family == AF_INET)) {
+		if((strcmp(ifa->ifa_name, net_if) == 0) && (ifa->ifa_addr->sa_family == AF_INET)) {
 			if (s != 0) {
 				perror("unable to get network interface");
 				return -1;
