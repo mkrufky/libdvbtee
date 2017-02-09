@@ -50,7 +50,7 @@ public:
 	int start_stdin();
 	int start_socket(char* source, char* interface = NULL);
 	int start_tcp_listener(uint16_t);
-	int start_udp_unbound_listener(uint16_t);
+	int start_udp_unbound_listener(uint16_t, char *ip = NULL);
 	int start_udp_listener(uint16_t, char* ip, char* interface);
 
 	/* initialize for feed via functional interface */

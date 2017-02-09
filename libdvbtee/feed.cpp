@@ -720,7 +720,7 @@ int feed::start_socket(char* source, char* interface)
 #endif
 		ret = (b_tcp) ? start_tcp_listener(port) :
 		      ((ip) && (interface)) ? start_udp_listener(port, ip, interface) :
-		      start_udp_unbound_listener(port);
+		      start_udp_unbound_listener(port, ip);
 #if 0
 	} else {
 		perror("socket failed");
@@ -783,7 +783,7 @@ int feed::start_tcp_listener(uint16_t port_requested)
 	return listener.start(port_requested);
 }
 
-int feed::start_udp_unbound_listener(uint16_t port_requested)
+int feed::start_udp_unbound_listener(uint16_t port_requested, char *ip)
 {
 	struct sockaddr_in udp_sock;
 
@@ -814,7 +814,7 @@ int feed::start_udp_unbound_listener(uint16_t port_requested)
 
 	udp_sock.sin_family = AF_INET;
 	udp_sock.sin_port = htons(port_requested);
-	udp_sock.sin_addr.s_addr = INADDR_ANY;
+	udp_sock.sin_addr.s_addr = (ip) ? inet_addr(ip) : INADDR_ANY;
 
 	if (bind(fd, (struct sockaddr*)&udp_sock, sizeof(udp_sock)) < 0) {
 		perror("bind to local interface failed");
