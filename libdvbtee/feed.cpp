@@ -855,8 +855,12 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *net_if)
 	struct sockaddr_in sock;
 	memset(&sock, 0, sizeof(sock));
 
-	char host[NI_MAXHOST] = { 0 };
+	struct ip_mreq imreq;
+
+	imreq.imr_multiaddr.s_addr = inet_addr(ip);
+
 #ifdef HAVE_IFADDRS_H
+	char host[NI_MAXHOST] = { 0 };
 	struct ifaddrs *ifaddr, *ifa;
 	int s;
 
@@ -879,16 +883,13 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *net_if)
 	}
 
 	freeifaddrs(ifaddr);
+
+	imreq.imr_interface.s_addr = inet_addr(host);
 #endif
 
 	sock.sin_family = AF_INET;
 	sock.sin_port = htons(port_requested);
 	sock.sin_addr.s_addr = inet_addr(ip);
-
-	struct ip_mreq imreq;
-
-	imreq.imr_multiaddr.s_addr = inet_addr(ip);
-	imreq.imr_interface.s_addr = inet_addr(host);
 
 #if defined(_WIN32)
 	if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&imreq, sizeof(imreq)) < 0) {
