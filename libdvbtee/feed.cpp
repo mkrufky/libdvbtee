@@ -34,7 +34,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_IFADDRS_H
 #include <ifaddrs.h>
+#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -853,7 +855,8 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
 	struct sockaddr_in sock;
 	memset(&sock, 0, sizeof(sock));
 
-	char host[NI_MAXHOST];
+	char host[NI_MAXHOST] = { 0 };
+#ifdef HAVE_IFADDRS_H
 	struct ifaddrs *ifaddr, *ifa;
 	int s;
 
@@ -876,6 +879,8 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *interface)
 	}
 
 	freeifaddrs(ifaddr);
+#endif
+
 	sock.sin_family = AF_INET;
 	sock.sin_port = htons(port_requested);
 	sock.sin_addr.s_addr = inet_addr(ip);
