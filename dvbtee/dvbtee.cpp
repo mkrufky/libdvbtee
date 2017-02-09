@@ -291,6 +291,7 @@ void usage(bool help, char *myname)
 		"-s\tscan, optional arg when using multiple tuners: \n\t1 for speed, 2 for redundancy, \n\t3 for speed AND redundancy, \n\t4 for optimized speed / partial redundancy\n  "
 		"-S\tserver mode, optional arg 1 for command server, \n\t2 for http stream server, 3 for both\n  "
 		"-i\tpull local/remote tcp/udp port for data\n  "
+		"-n\tbind to a specific network interface\n  "
 		"-I\trequest a service and its associated PES streams by its service id\n  "
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "

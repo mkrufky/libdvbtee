@@ -120,6 +120,7 @@ LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 -S      server mode, optional arg 1 for command server,
         2 for http stream server, 3 for both
 -i      pull local/remote tcp/udp port for data
+-n      bind to a specific network interface
 -I      request a service and its associated PES streams by its service id
 -E      enable EPG scan, optional arg to limit the number of EITs to parse
 -o      output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
