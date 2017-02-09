@@ -890,7 +890,11 @@ int feed::start_udp_listener(uint16_t port_requested, char *ip, char *net_if)
 	imreq.imr_multiaddr.s_addr = inet_addr(ip);
 	imreq.imr_interface.s_addr = inet_addr(host);
 
+#if defined(_WIN32)
+	if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&imreq, sizeof(imreq)) < 0) {
+#else
 	if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imreq, sizeof(imreq)) < 0) {
+#endif
 		perror("setting IPPROTO_IP / IP_ADD_MEMBERSHIP failed");
 		return -1;
 	}
