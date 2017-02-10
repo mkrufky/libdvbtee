@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
-#include "descriptor.h"
+#include "descript.h"
 
 #define CLASS_MODULE "DESCRIPTOR"
 

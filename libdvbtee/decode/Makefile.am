@@ -99,7 +99,7 @@ endif DRA1
 
 EXTRA_DIST = decoder.h \
              table/table.h \
-             descriptor/descriptor.h
+             descriptor/descript.h
 
 DVBTEE_DECODE_LIBRARY_VERSION=0:0:0
 
@@ -108,6 +108,6 @@ libdvbtee_decode_la_LDFLAGS = -version-info $(DVBTEE_DECODE_LIBRARY_VERSION)
 library_includedir=$(includedir)/dvbtee
 library_include_HEADERS = decoder.h \
              table/table.h \
-             descriptor/descriptor.h
+             descriptor/descript.h
 
 libdvbtee_decode_la_LIBADD = -L../value -lvalueobj

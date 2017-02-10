@@ -24,7 +24,7 @@
 
 #include <map>
 
-#include "descriptor.h"
+#include "descript.h"
 
 namespace dvbtee {
 
