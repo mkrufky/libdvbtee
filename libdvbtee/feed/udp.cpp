@@ -245,7 +245,11 @@ void *UdpFeeder::udp_feed_thread()
 #endif
 		available = (available < (188*7)) ? available : (188*7);
 		//ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
+#if defined(_WIN32)
+		rxlen = recvfrom(m_fd, q, available, 0, NULL, NULL); // FIXME
+#else
 		rxlen = recvfrom(m_fd, q, available, MSG_DONTWAIT, NULL, NULL);//(struct sockaddr*) &ip_addr, sizeof(ip_addr));
+#endif
 		if (rxlen > 0) {
 #if 0
 			if (rxlen != available) fprintf(stderr, "%s: %d bytes != %d\n", __func__, rxlen, available);
