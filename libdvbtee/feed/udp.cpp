@@ -23,6 +23,15 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 #include <errno.h>
 
 #include "udp.h"
@@ -84,6 +93,77 @@ int UdpFeeder::startUdpListener(uint16_t port_requested, const char *ip)
 		return -1;
 	}
 	//	port = port_requested;
+#if 0
+	socket_set_nbio(m_fd);
+#endif
+	return 0;
+}
+
+int UdpFeeder::startUdpListener(uint16_t port_requested, const char *ip, const char *net_if)
+{
+	dPrintf("(%d)", port_requested);
+	snprintf(m_uri, sizeof(m_uri), "UDPLISTEN: %s:%d %s", ip, port_requested, net_if);
+
+	m_fd = -1;
+
+	m_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (m_fd < 0) {
+		perror("open socket failed");
+		return m_fd;
+	}
+
+	struct sockaddr_in sock;
+	memset(&sock, 0, sizeof(sock));
+
+	struct ip_mreq imreq;
+
+	imreq.imr_multiaddr.s_addr = inet_addr(ip);
+
+#ifdef HAVE_IFADDRS_H
+	char host[NI_MAXHOST] = { 0 };
+	struct ifaddrs *ifaddr, *ifa;
+	int s;
+
+	if (getifaddrs(&ifaddr) == -1) {
+		perror("getifaddrs failed");
+		return -1;
+	}
+
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+		if (ifa->ifa_addr == NULL)
+			continue;
+		s = getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+		if((strcmp(ifa->ifa_name, net_if) == 0) && (ifa->ifa_addr->sa_family == AF_INET)) {
+			if (s != 0) {
+				perror("unable to get network interface");
+				return -1;
+			}
+			break;
+		}
+	}
+
+	freeifaddrs(ifaddr);
+
+	imreq.imr_interface.s_addr = inet_addr(host);
+#endif
+
+	sock.sin_family = AF_INET;
+	sock.sin_port = htons(port_requested);
+	sock.sin_addr.s_addr = inet_addr(ip);
+
+#if defined(_WIN32)
+	if (setsockopt(m_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&imreq, sizeof(imreq)) < 0) {
+#else
+	if (setsockopt(m_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imreq, sizeof(imreq)) < 0) {
+#endif
+		perror("setting IPPROTO_IP / IP_ADD_MEMBERSHIP failed");
+		return -1;
+	}
+
+	if (bind(m_fd, (struct sockaddr*)&sock, sizeof(sock)) < 0) {
+		perror("bind to specified interface failed");
+		return -1;
+	}
 #if 0
 	socket_set_nbio(m_fd);
 #endif

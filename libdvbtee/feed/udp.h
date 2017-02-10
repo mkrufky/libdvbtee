@@ -45,6 +45,7 @@ private:
 	uint16_t m_port;
 
 	int startUdpListener(uint16_t port_requested, const char *ip = NULL);
+	int startUdpListener(uint16_t port_requested, const char* ip, const char* net_if);
 };
 
 }
