@@ -29,6 +29,7 @@
 
 #include "feed.h"
 #include "hlsfeed.h"
+#include "feed/file.h"
 #include "feed/tcp.h"
 #include "feed/udp.h"
 
