@@ -287,3 +287,17 @@ char *url_decode(char *str) {
 	*pbuf = '\0';
 	return buf;
 }
+
+/* Returns a quote-escaped version of str */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *escape_quotes(char *str) {
+	char *pstr = str, *buf = (char *)malloc(strlen(str) * 2 + 1), *pbuf = buf;
+	while (*pstr) {
+		if (*pstr == '"')
+			*pbuf++ = '\\';
+		*pbuf++ = *pstr;
+		pstr++;
+	}
+	*pbuf = '\0';
+	return buf;
+}

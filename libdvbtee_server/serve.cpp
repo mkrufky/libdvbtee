@@ -1086,11 +1086,35 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, parse_iface *iface)
 					bw7mhz = true;
 
 				temp = strtok_r(NULL, ":", &save); // FEC_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // FEC_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // QAM_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // TRANSMISSION_MODE_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // GUARD_INTERVAL_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 				temp = strtok_r(NULL, ":", &save); // HIERARCHY_AUTO
+				if (!temp) {
+					memset(line, 0, sizeof(line));
+					continue;
+				}
 
 				c.modulation = (bw7mhz) ?
 					"INVERSION_AUTO:BANDWIDTH_7_MHZ:FEC_AUTO:FEC_AUTO:QAM_AUTO:TRANSMISSION_MODE_AUTO:GUARD_INTERVAL_AUTO:HIERARCHY_AUTO" :

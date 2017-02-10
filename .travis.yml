@@ -146,6 +146,22 @@ matrix:
       env: COMPILER=g++-5 USE_OLDDECODER=true
 
     - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['libdvbpsi-dev', 'g++-6']
+      env: COMPILER=g++-6
+
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['libdvbpsi-dev', 'g++-6']
+      env: COMPILER=g++-6 USE_OLDDECODER=true
+
+    - os: linux
       compiler: clang
       addons:
         apt:
@@ -242,5 +258,7 @@ script:
 before_install:
   - if [ "$TRAVIS_OS_NAME" != "linux" ]; then
         brew update;
+        brew uninstall libtool;
+        brew install libtool;
         brew install libdvbpsi libhdhomerun;
     fi

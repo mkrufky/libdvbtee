@@ -26,11 +26,27 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_POLL_H
+#include <sys/poll.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#include <unistd.h>
 
 #include <fstream>
 
@@ -323,8 +339,16 @@ void *feed::file_feed_thread()
 	unsigned char q[BUFSIZE];
 #endif
 	int available;
+#ifdef HAVE_SYS_POLL_H
+	struct pollfd pfd[1];
+#endif
 
 	dPrintf("(fd=%d)", fd);
+
+#ifdef HAVE_SYS_POLL_H
+	pfd[0].fd = fd;
+	pfd[0].events = POLLIN;
+#endif
 
 	while (!f_kill_thread) {
 
@@ -334,7 +358,24 @@ void *feed::file_feed_thread()
 		available = sizeof(q);
 #endif
 		available = (available < BUFSIZE) ? available : BUFSIZE;
+#ifdef HAVE_SYS_POLL_H
+		if ((r = poll(pfd, 1, -1)) <= 0) {
+			fprintf(stderr, "%s: r = %d, errno = %d\n", __func__, (int)r, errno);
+			f_kill_thread = true;
+			break;
+		}
+		if (pfd[0].revents & (POLLERR|POLLIN)) {
+			if ((r = read(fd, q, available)) > 0) {
+#if FEED_BUFFER
+				ringbuffer.put_write_ptr(r);
+#else
+				parser.feed(r, q);
+#endif
+				continue;
+			}
+#else
 		if ((r = read(fd, q, available)) <= 0) {
+#endif
 
 			if (!r) {
 				f_kill_thread = true;
@@ -376,10 +417,12 @@ void *feed::file_feed_thread()
 			}
 			continue;
 		}
+#ifndef HAVE_SYS_POLL_H
 #if FEED_BUFFER
 		ringbuffer.put_write_ptr(r);
 #else
 		parser.feed(r, q);
+#endif
 #endif
 	}
 	close_file();
@@ -616,7 +659,7 @@ int feed::start_stdin()
 	return ret;
 }
 
-int feed::start_socket(char* source)
+int feed::start_socket(char* source, char* net_if)
 {
 	dPrintf("()");
 #if 0
@@ -677,7 +720,9 @@ int feed::start_socket(char* source)
 		} else
 			ringbuffer.reset();
 #endif
-		ret = (b_tcp) ? start_tcp_listener(port) : start_udp_listener(port);
+		ret = (b_tcp) ? start_tcp_listener(port) :
+		      ((ip) && (net_if)) ? start_udp_listener(port, ip, net_if) :
+		      start_udp_unbound_listener(port, ip);
 #if 0
 	} else {
 		perror("socket failed");
@@ -740,7 +785,7 @@ int feed::start_tcp_listener(uint16_t port_requested)
 	return listener.start(port_requested);
 }
 
-int feed::start_udp_listener(uint16_t port_requested)
+int feed::start_udp_unbound_listener(uint16_t port_requested, char *ip)
 {
 	struct sockaddr_in udp_sock;
 
@@ -771,13 +816,94 @@ int feed::start_udp_listener(uint16_t port_requested)
 
 	udp_sock.sin_family = AF_INET;
 	udp_sock.sin_port = htons(port_requested);
-	udp_sock.sin_addr.s_addr = INADDR_ANY;
+	udp_sock.sin_addr.s_addr = (ip) ? inet_addr(ip) : INADDR_ANY;
 
 	if (bind(fd, (struct sockaddr*)&udp_sock, sizeof(udp_sock)) < 0) {
 		perror("bind to local interface failed");
 		return -1;
 	}
 	//	port = port_requested;
+#if 0
+	socket_set_nbio(fd);
+#endif
+	int ret = pthread_create(&h_thread, NULL, udp_listen_feed_thread, this);
+
+	if (0 != ret)
+		perror("pthread_create() failed");
+#if FEED_BUFFER
+	else
+		start_feed();
+#endif
+	return ret;
+}
+
+int feed::start_udp_listener(uint16_t port_requested, char *ip, char *net_if)
+{
+	dPrintf("(%d)", port_requested);
+	snprintf(filename, sizeof(filename), "UDPLISTEN: %s:%d %s", ip, port_requested, net_if);
+
+	f_kill_thread = false;
+
+	fd = -1;
+
+	fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (fd < 0) {
+		perror("open socket failed");
+		return fd;
+	}
+
+	struct sockaddr_in sock;
+	memset(&sock, 0, sizeof(sock));
+
+	struct ip_mreq imreq;
+
+	imreq.imr_multiaddr.s_addr = inet_addr(ip);
+
+#ifdef HAVE_IFADDRS_H
+	char host[NI_MAXHOST] = { 0 };
+	struct ifaddrs *ifaddr, *ifa;
+	int s;
+
+	if (getifaddrs(&ifaddr) == -1) {
+		perror("getifaddrs failed");
+		return -1;
+	}
+
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+		if (ifa->ifa_addr == NULL)
+			continue;
+		s = getnameinfo(ifa->ifa_addr,sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+		if((strcmp(ifa->ifa_name, net_if) == 0) && (ifa->ifa_addr->sa_family == AF_INET)) {
+			if (s != 0) {
+				perror("unable to get network interface");
+				return -1;
+			}
+			break;
+		}
+	}
+
+	freeifaddrs(ifaddr);
+
+	imreq.imr_interface.s_addr = inet_addr(host);
+#endif
+
+	sock.sin_family = AF_INET;
+	sock.sin_port = htons(port_requested);
+	sock.sin_addr.s_addr = inet_addr(ip);
+
+#if defined(_WIN32)
+	if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char *)&imreq, sizeof(imreq)) < 0) {
+#else
+	if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imreq, sizeof(imreq)) < 0) {
+#endif
+		perror("setting IPPROTO_IP / IP_ADD_MEMBERSHIP failed");
+		return -1;
+	}
+
+	if (bind(fd, (struct sockaddr*)&sock, sizeof(sock)) < 0) {
+		perror("bind to specified interface failed");
+		return -1;
+	}
 #if 0
 	socket_set_nbio(fd);
 #endif
@@ -881,7 +1007,7 @@ int feed_server::start_udp_listener(uint16_t port_requested, feed_server_iface *
 	if (feeders.count(0)) delete feeders[0];
 	feeders[0] = new feed;
 
-	int ret = feeders[0]->start_udp_listener(port_requested);
+	int ret = feeders[0]->start_udp_unbound_listener(port_requested);
 	if (ret < 0)
 		goto fail;
 

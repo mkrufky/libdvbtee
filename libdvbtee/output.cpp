@@ -145,7 +145,7 @@ const std::string http_response(enum output_mimetype mimetype)
 }
 
 ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
-		    const struct sockaddr *dest_addr, socklen_t addrlen)
+		    const struct sockaddr *dest_addr, int addrlen)
 {
 	if (sockfd < 0)
 		return sockfd;
@@ -174,10 +174,10 @@ ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 	return (ret > 0) ?
 #if 0
 		((dest_addr) && (addrlen)) ?
-			sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
+			sendto(sockfd, buf, len, flags, dest_addr, (socklen_t) addrlen) :
 			send(sockfd, buf, len, flags) :
 #else
-		sendto(sockfd, (const char *)buf, len, flags|MSG_NOSIGNAL, dest_addr, addrlen) :
+		sendto(sockfd, (const char *)buf, len, flags|MSG_NOSIGNAL, dest_addr, (socklen_t) addrlen) :
 #endif
 		ret;
 }

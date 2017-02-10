@@ -291,6 +291,7 @@ void usage(bool help, char *myname)
 		"-s\tscan, optional arg when using multiple tuners: \n\t1 for speed, 2 for redundancy, \n\t3 for speed AND redundancy, \n\t4 for optimized speed / partial redundancy\n  "
 		"-S\tserver mode, optional arg 1 for command server, \n\t2 for http stream server, 3 for both\n  "
 		"-i\tpull local/remote tcp/udp port for data\n  "
+		"-n\tbind to a specific network interface\n  "
 		"-I\trequest a service and its associated PES streams by its service id\n  "
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
@@ -351,6 +352,7 @@ int main(int argc, char **argv)
 	bool b_json     = false;
 	bool b_bitrate_stats = false;
 	bool b_hdhr     = false;
+	bool b_network_interface = false;
 
 	context.server = NULL;
 
@@ -387,6 +389,9 @@ int main(int argc, char **argv)
 	char tcpipfeedurl[2048];
 	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
 
+	char network_interface[2048];
+	memset(&network_interface, 0, sizeof(network_interface));
+
 	char service_ids[64];
 	memset(&service_ids, 0, sizeof(service_ids));
 
@@ -396,7 +401,7 @@ int main(int argc, char **argv)
 	char hdhrname[256];
 	memset(&hdhrname, 0, sizeof(hdhrname));
 
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:js::S::E::o::O:d::H::h?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:n:T:i:I:js::S::E::o::O:d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -451,6 +456,10 @@ int main(int argc, char **argv)
 			scan_method = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			if (scan_method)
 				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
+			break;
+		case 'n': /* bind to specific interface */
+			strncpy(network_interface, optarg, sizeof(network_interface));
+			b_network_interface = true;
 			break;
 		case 'S': /* server mode, optional arg 1 for command server, 2 for http stream server, 3 for both */
 			b_serve = true;
@@ -642,7 +651,7 @@ int main(int argc, char **argv)
 			write_feed iface(context);
 			hlsfeed(tcpipfeedurl, &iface);
 		} else {
-			int ret = context._file_feeder.start_socket(tcpipfeedurl);
+			int ret = context._file_feeder.start_socket(tcpipfeedurl, (b_network_interface) ? network_interface : NULL);
 			if (b_serve) goto exit;
 			if (0 <= ret) {
 				context._file_feeder.wait_for_streaming_or_timeout(timeout);

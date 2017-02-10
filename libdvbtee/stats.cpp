@@ -28,7 +28,7 @@
 
 #define DBG 0
 
-#define dPrintf(fmt, arg...) __dPrintf(DBG_STATS, "(%s) "fmt, parent, ##arg)
+#define dPrintf(fmt, arg...) __dPrintf(DBG_STATS, "(%s) " fmt, parent, ##arg)
 
 stats::stats(const char *caller)
   : tei_count(0)

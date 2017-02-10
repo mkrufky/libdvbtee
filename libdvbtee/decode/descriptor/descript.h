@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) 2011-2016 Michael Ira Krufky
+ * Copyright (C) 2011-2017 Michael Ira Krufky
  *
  * Author: Michael Ira Krufky <mkrufky@linuxtv.org>
  *
@@ -27,7 +27,7 @@
 #include <pthread.h>
 #include <vector>
 
-#include "decode/decoder.h"
+#include "decoder.h"
 #include "dvbpsi/descriptor.h"
 
 #include "log.h"

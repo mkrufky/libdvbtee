@@ -102,7 +102,7 @@ bool vct::ingest(TableStore *s, const dvbpsi_atsc_vct_t * const t, TableWatcher 
 	for (std::vector<Table*>::const_iterator it = vcts.begin(); it != vcts.end(); ++it) {
 		vct *thisVCT = (vct*)*it;
 		if (thisVCT->get<uint16_t>("tsId") == __ts_id) {
-			if (thisVCT->get<uint16_t>("version") == t->i_version) {
+			if (thisVCT->get<uint8_t>("version") == t->i_version) {
 				dPrintf("VCT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
 				return false;
 			}
