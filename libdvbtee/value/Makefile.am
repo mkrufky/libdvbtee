@@ -9,4 +9,4 @@ VALOBJ_LIBRARY_VERSION=1:0:0
 libvalueobj_la_LDFLAGS = -version-info $(VALOBJ_LIBRARY_VERSION)
 
 library_includedir=$(includedir)/value
-library_include_HEADERS = value.h object.h array.h
+library_include_HEADERS = value.h object.h array.h handle.h
