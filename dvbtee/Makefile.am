@@ -1,4 +1,5 @@
 AM_CXXFLAGS = -I../libdvbtee -I../libdvbtee_server -D__STDC_FORMAT_MACROS
+AM_CXXFLAGS += -I../libdvbtee/decode -I../libdvbtee/decode/table -I../libdvbtee/decode/descriptor
 
 if COVERALLS
 AM_CXXFLAGS += -g -O0

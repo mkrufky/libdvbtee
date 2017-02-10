@@ -219,7 +219,7 @@ AM_COND_IF([DVBPSIBUILD], [
 ])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/poll.h sys/socket.h sys/time.h unistd.h linux/dvb/frontend.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/time.h sys/timeb.h unistd.h ifaddrs.h sys/poll.h sys/socket.h linux/dvb/frontend.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -232,7 +232,7 @@ AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memchr memmove memset select socket stpcpy strchr strcspn strdup strerror strpbrk strrchr strspn strstr strtoul fcntl strtok_r timegm _mkgmtime inet_aton inet_pton InetPton])
+AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memset select socket strchr strdup strstr strtoul memchr memmove stpcpy strcspn strerror strpbrk strrchr strspn fcntl strtok_r timegm _mkgmtime inet_aton inet_pton InetPton])
 
 PKG_PROG_PKG_CONFIG([0.20])
 AM_CONDITIONAL([HAVE_PKG_CONFIG], [test "x$PKG_CONFIG" != "x"])

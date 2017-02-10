@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "descriptor.h"
+#include "descript.h"
 
 namespace dvbtee {
 

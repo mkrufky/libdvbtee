@@ -26,6 +26,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "dvbtee_config.h"
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 #include "listen.h"
 #include "log.h"
 #include "dvbtee_config.h"

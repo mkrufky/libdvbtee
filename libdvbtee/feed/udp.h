@@ -35,6 +35,8 @@ public:
 	virtual ~UdpFeeder();
 
 	virtual int start();
+	int start(const char *ip);
+	int start(const char *ip, const char *net_if);
 
 	virtual
 	int setPort(uint16_t port_requested);
@@ -45,7 +47,8 @@ private:
 
 	uint16_t m_port;
 
-	int startUdpListener(uint16_t port_requested);
+	int startUdpListener(uint16_t port_requested, const char *ip = NULL);
+	int startUdpListener(uint16_t port_requested, const char* ip, const char* net_if);
 };
 
 }

@@ -57,6 +57,7 @@ struct dvbtee_context
 	bool b_json;
 	bool b_bitrate_stats;
 	bool b_hdhr;
+	bool b_network_interface;
 
 #ifdef USE_LINUXTV
 	/* LinuxDVB context: */
@@ -88,6 +89,7 @@ struct dvbtee_context
 	char service_ids[64];
 	char channel_list[256];
 	char hdhrname[256];
+	char network_interface[2048];
 
 //////////////////////////////////////////////////////////////////
 
@@ -108,6 +110,7 @@ struct dvbtee_context
 		b_json     = false;
 		b_bitrate_stats = false;
 		b_hdhr     = false;
+		b_network_interface = false;
 
 #ifdef USE_LINUXTV
 		/* LinuxDVB context: */
@@ -139,6 +142,7 @@ struct dvbtee_context
 		memset(&service_ids, 0, sizeof(service_ids));
 		memset(&channel_list, 0, sizeof(channel_list));
 		memset(&hdhrname, 0, sizeof(hdhrname));
+		memset(&network_interface, 0, sizeof(network_interface));
 	}
 };
 
@@ -412,6 +416,7 @@ void usage(bool help, char *myname)
 		"-s\tscan, optional arg when using multiple tuners: \n\t1 for speed, 2 for redundancy, \n\t3 for speed AND redundancy, \n\t4 for optimized speed / partial redundancy\n  "
 		"-S\tserver mode, optional arg 1 for command server, \n\t2 for http stream server, 3 for both\n  "
 		"-i\tpull local/remote tcp/udp port for data\n  "
+		"-n\tbind to a specific network interface\n  "
 		"-I\trequest a service and its associated PES streams by its service id\n  "
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
@@ -462,7 +467,7 @@ int main(int argc, char **argv)
 	ctxt = &context;
 
 	int opt;
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:js::S::E::o::O:d::H::h?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:n:T:i:I:js::S::E::o::O:d::H::h?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -517,6 +522,10 @@ int main(int argc, char **argv)
 			ctxt->scan_method = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			if (ctxt->scan_method)
 				fprintf(stderr, "MULTISCAN: %d...\n", ctxt->scan_method);
+			break;
+		case 'n': /* bind to specific interface */
+			strncpy(ctxt->network_interface, optarg, sizeof(ctxt->network_interface));
+			ctxt->b_network_interface = true;
 			break;
 		case 'S': /* server mode, optional arg 1 for command server, 2 for http stream server, 3 for both */
 			ctxt->b_serve = true;
@@ -746,7 +755,11 @@ int main(int argc, char **argv)
 			configure_output(ctxt);
 
 			context._file_feeder->setPort(port);
-			int ret = context._file_feeder->start();
+			int ret = (b_tcp) ? context._file_feeder->start()
+			                  : (ctxt->b_network_interface)
+			                  ? ((dvbtee::feed::UdpFeeder*)context._file_feeder)->start(ip, ctxt->network_interface)
+			                  : ((dvbtee::feed::UdpFeeder*)context._file_feeder)->start(ip);
+
 			if (ctxt->b_serve) goto exit;
 			if (0 <= ret) {
 				context._file_feeder->wait_for_streaming_or_timeout(ctxt->timeout);
