@@ -48,7 +48,7 @@ UdpFeeder::~UdpFeeder()
 	//
 }
 
-int UdpFeeder::startUdpListener(uint16_t port_requested)
+int UdpFeeder::startUdpListener(uint16_t port_requested, const char *ip)
 {
 	struct sockaddr_in udp_sock;
 
@@ -77,7 +77,7 @@ int UdpFeeder::startUdpListener(uint16_t port_requested)
 
 	udp_sock.sin_family = AF_INET;
 	udp_sock.sin_port = htons(port_requested);
-	udp_sock.sin_addr.s_addr = INADDR_ANY;
+	udp_sock.sin_addr.s_addr = (ip) ? inet_addr(ip) : INADDR_ANY;
 
 	if (bind(m_fd, (struct sockaddr*)&udp_sock, sizeof(udp_sock)) < 0) {
 		perror("bind to local interface failed");
