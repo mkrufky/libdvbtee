@@ -50,7 +50,7 @@ void mgt::store(const dvbpsi_atsc_mgt_t * const p_mgt)
 //		return false;
 //	}
 #if MGT_DBG
-	fprintf(stderr, "%s MGT: v%d\n", __func__, p_mgt->i_version);
+	__log_printf(stderr, "%s MGT: v%d\n", __func__, p_mgt->i_version);
 #endif
 	decoded_mgt.version = p_mgt->i_version;
 	decoded_mgt.tables.clear();
@@ -62,7 +62,7 @@ void mgt::store(const dvbpsi_atsc_mgt_t * const p_mgt)
 	const dvbpsi_atsc_mgt_table_t *p_table = p_mgt->p_first_table;
 #if MGT_DBG
 	if (p_table)
-		fprintf(stderr, "  table type |   pid  | ver | bytes\n");
+		__log_printf(stderr, "  table type |   pid  | ver | bytes\n");
 #endif
 	while (p_table) {
 
@@ -136,7 +136,7 @@ mgtTb::mgtTb(decoded_mgt_t &decoded_mgt, Decoder *parent, const dvbpsi_atsc_mgt_
 : TableDataComponent(parent, MGTTB)
 {
 #if MGT_DBG
-	fprintf(stderr, "    0x%04x   | 0x%04x | %3d | %d\n",
+	__log_printf(stderr, "    0x%04x   | 0x%04x | %3d | %d\n",
 			p_table->i_table_type, p_table->i_table_type_pid,
 			p_table->i_table_type_version, p_table->i_number_bytes);
 #endif

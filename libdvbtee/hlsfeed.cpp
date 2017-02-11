@@ -134,7 +134,7 @@ void hlsfeed::walk(uint8_t *buffer)
 	perror(e.what());
 	duration = 0;
       }
-      fprintf(stderr, "%s: playback duration: %f\n", __func__, duration);
+      __log_printf(stderr, "%s: playback duration: %f\n", __func__, duration);
     } else if (strstr(line, ".ts")) {
       curlhttpget(line, &push_iface, &info);
     } else if (strstr(line, ".m3u8")) {

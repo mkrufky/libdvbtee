@@ -20,6 +20,7 @@
  *****************************************************************************/
 
 #include "decoder.h"
+#include "log.h"
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -94,7 +95,7 @@ void Decoder::showChildren() const
 		child->showChildren();
 #endif
 	}
-	fprintf(stderr, "%s\n", decoders.toJson().c_str());
+	__log_printf(stderr, "%s\n", decoders.toJson().c_str());
 }
 
 int Decoder::linkChild(int idx, Decoder *d)

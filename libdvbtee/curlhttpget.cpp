@@ -55,7 +55,7 @@ void curlhttpget::getinfo(curlhttpget_info_t *info)
   info->total_time = 0.0;
   CURLcode res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME, &info->total_time);
   if (res == CURLE_OK)
-    fprintf(stderr, "%s: total time: %f\n", __func__, info->total_time);
+    __log_printf(stderr, "%s: total time: %f\n", __func__, info->total_time);
 }
 
 //static

@@ -45,7 +45,7 @@ void libdvbtee_set_debug_level(unsigned int debug);
 
 #define __log_printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
 
-#define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
+#define __printf(fd, fmt, arg...) __log_printf(fd, fmt, ##arg)
 
 #define __dPrintf(lvl, fmt, arg...) do {				\
 	if (dbg & lvl)							\

@@ -103,12 +103,12 @@ void addpid(uint8_t pid)
 void printpids()
 {
 	unsigned int i = 0;
-	fprintf(stderr, "%s: ", __func__);
+	__log_printf(stderr, "%s: ", __func__);
 	while (i < pid_idx) {
-		fprintf(stderr, "%d(%04x) ", pids[i], pids[i]);
+		__log_printf(stderr, "%d(%04x) ", pids[i], pids[i]);
 		i++;
 	}
-	fprintf(stderr, "\n");
+	__log_printf(stderr, "\n");
 }
 #endif
 /* --- */
@@ -699,7 +699,7 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 	/* the range is 0x00 thru 0x7f, so 0x80 indicates error */
 	return current_eit_x + 1;
 eit_complete:
-	fprintf(stderr, "%s: EIT COMPLETE: %d\n", __func__, current_eit_x);
+	__log_printf(stderr, "%s: EIT COMPLETE: %d\n", __func__, current_eit_x);
 	return 0x80; /* throw an error to signify last EIT */
 }
 #endif
@@ -776,7 +776,7 @@ parse::~parse()
 #endif
 #if 1//DBG
 	if (fed_pkt_count)
-		fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
+		__log_printf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
 	service_ids.clear();
 	rcvd_pmt.clear();
@@ -865,12 +865,12 @@ void parse::cleanup()
 void parse::dumpJson()
 {
 	for (map_decoder::const_iterator it = decoders.begin(); it != decoders.end(); ++it) {
-		fprintf(stderr, "\nTSID#%04x: ", it->first);
+		__log_printf(stderr, "\nTSID#%04x: ", it->first);
 #if !OLD_DECODER
 		it->second.showChildren();
 #endif
 	}
-	fprintf(stderr, "\n");
+	__log_printf(stderr, "\n");
 
 	decode_network::dumpJson();
 }
@@ -1075,7 +1075,7 @@ unsigned int parse::xine_dump(parse_iface *iface)
 void parse::epg_dump(decode_report *reporter)
 {
 	map_chan_to_ts_id channels;
-	//fprintf(stderr, "%s(%d, %d)\n", __func__, channel_info.size(), channels.size());
+	//__log_printf(stderr, "%s(%d, %d)\n", __func__, channel_info.size(), channels.size());
 
 	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		channels[iter->second.channel] = iter->first;
@@ -1085,7 +1085,7 @@ void parse::epg_dump(decode_report *reporter)
 
 	channels.clear();
 
-	//fprintf(stderr, "%s", str.c_str());
+	//__log_printf(stderr, "%s", str.c_str());
 
 	return;
 }
@@ -1484,13 +1484,13 @@ int parse::feed(int count, uint8_t* p_data)
 			if (sync_offset == 188) {
 				sync_offset = 0;
 				i--;
-				fprintf(stderr, "\nSYNC LOSS\n\n");
+				__log_printf(stderr, "\nSYNC LOSS\n\n");
 			}
 			statistics.parse(p, &pkt_stats);
-			fprintf(stderr, ".\t");
+			__log_printf(stderr, ".\t");
 		}
 
-		if (sync_offset) fprintf(stderr, "\nSYNC LOSS\n\n");
+		if (sync_offset) __log_printf(stderr, "\nSYNC LOSS\n\n");
 #if 0
 		/* demux & statistics for entire read TS */
 		statistics.push(p, &pkt_stats);
@@ -1499,9 +1499,9 @@ int parse::feed(int count, uint8_t* p_data)
 		if (pkt_stats.tei) {
 #ifndef QUIET_TEI
 			if (!tei_count)
-				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
+				__log_printf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
 			else if (tei_count % 100 == 0)
-				fprintf(stderr, ".");
+				__log_printf(stderr, ".");
 #endif
 			tei_count++;
 			if (!process_err_pkts) continue;
@@ -1631,7 +1631,7 @@ static void dvbpsi_message(dvbpsi_t *handle, const dvbpsi_msg_level_t level, con
 		default: /* do nothing */
 			return;
 	}
-	fprintf(stderr, "%s%s\n", status, msg);
+	__log_printf(stderr, "%s%s\n", status, msg);
 }
 
 dvbpsi_class::dvbpsi_class()

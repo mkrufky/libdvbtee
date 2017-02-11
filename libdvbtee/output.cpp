@@ -473,8 +473,8 @@ bool output_stream::check()
 		if (pids.size()) {
 			dPrintf("(%d: %s) subscribed to the following pids:", sock, name);
 			for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
-				fprintf(stderr, "%d, ", iter->first);
-			fprintf(stderr, "\n");
+				__log_printf(stderr, "%d, ", iter->first);
+			__log_printf(stderr, "\n");
 		}
 #endif
 	}
@@ -940,8 +940,8 @@ bool output::check()
 	if (pids.size()) {
 		dPrintf("subscribed to the following pids:");
 		for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
-			fprintf(stderr, "%d, ", iter->first);
-		fprintf(stderr, "\n");
+			__log_printf(stderr, "%d, ", iter->first);
+		__log_printf(stderr, "\n");
 	}
 #endif
 	ringbuffer.check();

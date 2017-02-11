@@ -145,7 +145,7 @@ int feed::_open_file(int flags)
 	if ((fd = open(filename, O_RDONLY|flags )) < 0)
 		fprintf(stderr, "failed to open %s\n", filename);
 	else
-		fprintf(stderr, "%s: using %s\n", __func__, filename);
+		__log_printf(stderr, "%s: using %s\n", __func__, filename);
 
 	return fd;
 #else
@@ -643,7 +643,7 @@ int feed::start_stdin()
 		fprintf(stderr, "failed to open stdin!\n");
 		return -1;
 	}
-	fprintf(stderr, "%s: using STDIN\n", __func__);
+	__log_printf(stderr, "%s: using STDIN\n", __func__);
 	strncpy(filename, "STDIN", sizeof(filename));
 
 	f_kill_thread = false;

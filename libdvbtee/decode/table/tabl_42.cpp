@@ -32,7 +32,7 @@
 #define CLASS_MODULE "[SDT]"
 
 //#define dPrintf(fmt, arg...) __dPrintf(DBG_DECODE, fmt, ##arg)
-#define dPrintf(fmt, arg...) fprintf(stderr, fmt"\n", ##arg)
+#define dPrintf(fmt, arg...) __log_printf(stderr, fmt"\n", ##arg)
 
 using namespace dvbtee::decode;
 using namespace valueobj;
@@ -58,7 +58,7 @@ void sdt::store(const dvbpsi_sdt_t * const p_sdt)
 //			p_sdt->i_network_id);
 //		return false;
 //	}
-	fprintf(stderr, "%s SDT: v%02d, ts_id %05d, network_id %05d\n"
+	__log_printf(stderr, "%s SDT: v%02d, ts_id %05d, network_id %05d\n"
 		/*"------------------------------------"*/, __func__,
 		p_sdt->i_version,
 		__ts_id,
@@ -78,7 +78,7 @@ void sdt::store(const dvbpsi_sdt_t * const p_sdt)
 	services_w_eit_pf    = 0;
 	services_w_eit_sched = 0;
 
-	//fprintf(stderr, "  service_id | service_name");
+	//__log_printf(stderr, "  service_id | service_name");
 	const dvbpsi_sdt_service_t *p_service = p_sdt->p_first_service;
 	if (p_service)
 		dPrintf(" svcId | EIT avail |  provider  | service name");

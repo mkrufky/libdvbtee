@@ -90,7 +90,7 @@ bool DescriptorRegistry::registerFactory(uint8_t tag, DescriptorBaseFactory *fac
 
 	m_factories.insert( std::pair<uint8_t, const DescriptorBaseFactory*>(tag, factory) );
 #if DBG_DECODER_INSERTION
-	fprintf(stderr, "inserted 0x%02x, %p, %ld descriptor decoders present\n", tag, factory, m_factories.size());
+	__log_printf(stderr, "inserted 0x%02x, %p, %ld descriptor decoders present\n", tag, factory, m_factories.size());
 #endif
 	pthread_mutex_unlock(&m_mutex);
 	return true;
@@ -121,11 +121,11 @@ Descriptor *DescriptorRegistry::create(Decoder *parent, dvbpsi_descriptor_t *p_d
 
 int DescriptorRegistry::count() const
 {
-	fprintf(stderr, "%ld descriptor decoders present:", m_factories.size());
+	__log_printf(stderr, "%ld descriptor decoders present:", m_factories.size());
 	for (std::map <uint8_t, const DescriptorBaseFactory*>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
-		fprintf(stderr, " 0x%02x", it->first);
+		__log_printf(stderr, " 0x%02x", it->first);
 	}
-	fprintf(stderr, "\n");
+	__log_printf(stderr, "\n");
 	return m_factories.size();
 }
 
@@ -194,7 +194,7 @@ const Descriptor *DescriptorStore::last(uint8_t tag) const
 {
 	const std::vector<Descriptor*> D = get(tag);
 	ssize_t s = D.size();
-	//if (s > 1) fprintf(stderr, "tag: %02x, %ld collected, returning last\n", tag, s);
+	//if (s > 1) __log_printf(stderr, "tag: %02x, %ld collected, returning last\n", tag, s);
 	if (s) return D[s-1];
 	return NULL;
 }

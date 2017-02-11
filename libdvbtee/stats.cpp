@@ -257,7 +257,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 #if DBG
 			stats_map::const_iterator iter = last_pcr_base.find(hdr.pid);
 			if ((iter != last_pcr_base.end()) && (pcr_base < iter->second))
-				fprintf(stderr, "%s: PID: 0x%04x, %" PRIu64 " < %" PRIu64 " !!!\n",
+				__log_printf(stderr, "%s: PID: 0x%04x, %" PRIu64 " < %" PRIu64 " !!!\n",
 					__func__, hdr.pid, pcr_base, iter->second);
 #endif
 			last_pcr_base[hdr.pid] = pcr_base;
