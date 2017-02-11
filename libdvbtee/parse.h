@@ -47,7 +47,9 @@
 extern const char *parse_libdvbpsi_version;
 
 
+#ifndef USE_STATIC_DECODE_MAP
 #define USE_STATIC_DECODE_MAP 1
+#endif
 
 #include <map>
 
