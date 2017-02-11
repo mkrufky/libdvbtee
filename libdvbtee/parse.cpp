@@ -153,7 +153,7 @@ void parse::rewrite_pat()
 #endif
 	dvbpsi_pat_t pat;
 	dvbpsi_psi_section_t* p_section;
-	const decoded_pat_t *decoded_pat = decoders[ts_id].get_decoded_pat();
+	const decoded_pat_t *decoded_pat = get_decoder(ts_id).get_decoded_pat();
 
 	if (rewritten_pat_ver_offset == 0x1e)
 		rewritten_pat_ver_offset = 0;
@@ -248,7 +248,7 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 
 	if (!decoded) return true;
 
-	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+	const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
 
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(p_pmt->i_program_number);
 	if (iter_pmt != decoded_pmt->end())
@@ -282,7 +282,7 @@ bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 
 void parse::process_mgt(bool attach)
 {
-	const decoded_mgt_t* decoded_mgt = decoders[ts_id].get_decoded_mgt();
+	const decoded_mgt_t* decoded_mgt = get_decoder(ts_id).get_decoded_mgt();
 
 	bool b_expecting_vct = false;
 
@@ -672,9 +672,9 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 	if (!eit_x_complete(current_eit_x))
 		return current_eit_x;
 
-	map_decoded_mgt_tables::const_iterator iter = decoders[ts_id].get_decoded_mgt()->tables.find(0x0100 + current_eit_x);
+	map_decoded_mgt_tables::const_iterator iter = get_decoder(ts_id).get_decoded_mgt()->tables.find(0x0100 + current_eit_x);
 
-	if (iter != decoders[ts_id].get_decoded_mgt()->tables.end()) {
+	if (iter != get_decoder(ts_id).get_decoded_mgt()->tables.end()) {
 		map_dvbpsi::const_iterator iter_demux = h_demux.find(iter->second.pid);
 		if (iter_demux != h_demux.end()) {
 			//dvbpsi_DetachDemux(h_demux[iter->second.pid]);
@@ -687,9 +687,9 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 		goto eit_complete;
 
 	//map_decoded_mgt_tables::const_iterator
-	iter = decoders[ts_id].get_decoded_mgt()->tables.find(0x0100 + current_eit_x + 1);
+	iter = get_decoder(ts_id).get_decoded_mgt()->tables.find(0x0100 + current_eit_x + 1);
 
-	if (iter == decoders[ts_id].get_decoded_mgt()->tables.end())
+	if (iter == get_decoder(ts_id).get_decoded_mgt()->tables.end())
 		goto eit_complete;
 
 	h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
@@ -990,9 +990,9 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 		for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
 		c.service_name[7] = 0;
 	} else { // FIXME: use SDT info
-		c.lcn = decoders[ts_id].get_lcn(c.program_number);
+		c.lcn = get_decoder(ts_id).get_lcn(c.program_number);
 
-		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
+		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)get_decoder(ts_id).get_decoded_sdt();
 		if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
 			snprintf((char*)c.service_name, sizeof(c.service_name), "%s", decoded_sdt->services[c.program_number].service_name);
 		else {
@@ -1010,9 +1010,9 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, pars
 
 	int count = 0;
 
-	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
-	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
-	const decoded_vct_t* decoded_vct = decoders[ts_id].get_decoded_vct();
+	const decoded_pat_t* decoded_pat = get_decoder(ts_id).get_decoded_pat();
+	const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
+	const decoded_vct_t* decoded_vct = get_decoder(ts_id).get_decoded_vct();
 
 	fprintf(stdout, "\n# channel %d, %d, %s %s\n", c.physical_channel, c.freq, "", "");
 
@@ -1328,12 +1328,12 @@ fail:
 
 void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
 {
-	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
+	const decoded_pat_t* decoded_pat = get_decoder(ts_id).get_decoded_pat();
 	map_decoded_pat_programs::const_iterator iter_pat = decoded_pat->programs.find(service_id);
 	if (iter_pat != decoded_pat->programs.end())
 		pids[iter_pat->second] = 0;//FIXME
 
-	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+	const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service_id);
 	if (iter_pmt != decoded_pmt->end()) {
 
@@ -1378,8 +1378,8 @@ void parse::set_service_ids(char *ids)
 	if (has_pat) {
 		rewrite_pat();
 
-		const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
-		const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+		const decoded_pat_t* decoded_pat = get_decoder(ts_id).get_decoded_pat();
+		const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
 
 		process_pat(decoded_pat);
 
@@ -1429,7 +1429,7 @@ void parse::set_ts_id(uint16_t new_ts_id)
 	dPrintf("(%04x|%d)\n", new_ts_id, new_ts_id);
 	ts_id = new_ts_id;
 	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
-	decoders[ts_id].set_physical_channel(channel_info[ts_id].channel);
+	get_decoder(ts_id).set_physical_channel(channel_info[ts_id].channel);
 }
 
 uint16_t parse::get_ts_id(unsigned int channel)
@@ -1541,7 +1541,7 @@ int parse::feed(int count, uint8_t* p_data)
 			iter_eit = eit_pids.find(pkt_stats.pid);
 			if (iter_eit != eit_pids.end()) {
 
-				if (decoders[ts_id].eit_x_complete(iter_eit->second)) {
+				if (get_decoder(ts_id).eit_x_complete(iter_eit->second)) {
 					if (h_demux.count(iter_eit->first)) {
 #if USING_DVBPSI_VERSION_0
 						dvbpsi_DetachDemux(h_demux[iter_eit->first]);
@@ -1554,7 +1554,7 @@ int parse::feed(int count, uint8_t* p_data)
 					//epg_complete = (eit_pids.size() == 0);
 					continue;
 				}
-				decoders[ts_id].set_current_eit_x(iter_eit->second);
+				get_decoder(ts_id).set_current_eit_x(iter_eit->second);
 				out_type = OUTPUT_PSIP;
 			}
 
@@ -1595,8 +1595,8 @@ int parse::feed(int count, uint8_t* p_data)
 		fed_pkt_count++;
 	}
 #if 1//DBG
-	while (((decoders.count(ts_id)) && (decoders[ts_id].eit_x_complete(dumped_eit)))) {
-		decoders[ts_id].dump_eit_x(NULL, dumped_eit);
+	while (((decoders.count(ts_id)) && (get_decoder(ts_id).eit_x_complete(dumped_eit)))) {
+		get_decoder(ts_id).dump_eit_x(NULL, dumped_eit);
 		dumped_eit++;
 	}
 #endif
