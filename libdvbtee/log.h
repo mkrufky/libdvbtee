@@ -42,7 +42,7 @@
 extern unsigned int dbg;
 extern unsigned int dbg_info;
 
-void libdvbtee_set_debug_level(unsigned int debug, unsigned int debug_info = 1);
+int libdvbtee_set_debug_level(unsigned int debug, unsigned int debug_info = 1);
 
 #define __log_printf(fd, fmt, arg...) do {				\
 	if (dbg_info)							\

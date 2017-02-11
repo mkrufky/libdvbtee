@@ -39,6 +39,8 @@
 #endif
 #include "serve.h"
 
+static int __libdvbtee_lvl = libdvbtee_set_debug_level(0,1); // force info logging enabled
+
 typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
