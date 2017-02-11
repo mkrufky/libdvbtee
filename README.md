@@ -128,6 +128,7 @@ LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 -H      use a HdHomeRun device, optional arg to specify the device string
 -j      enable json output of decoded tables & descriptors
 -d      debug level
+-q      quiet most logging
 -h      display additional help
 ```
 #### Example Usage

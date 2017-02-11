@@ -301,6 +301,7 @@ void usage(bool help, char *myname)
 		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
 		"-j\tenable json output of decoded tables & descriptors%s\n  "
 		"-d\tdebug level\n  "
+		"-q\tquiet most logging\n  "
 		"-h\tdisplay additional help\n\n", f_count ? "" : " (feature disabled)");
 	if (help)
 		fprintf(stderr,
@@ -403,7 +404,7 @@ int main(int argc, char **argv)
 	char hdhrname[256];
 	memset(&hdhrname, 0, sizeof(hdhrname));
 
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:n:T:i:I:js::S::E::o::O:d::H::h?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:n:T:i:I:js::S::E::o::O:d::H::qh?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -507,6 +508,9 @@ int main(int argc, char **argv)
 			break;
 		case 'j':
 			b_json = true;
+			break;
+		case 'q':
+			libdvbtee_set_debug_level(0,0);
 			break;
 		case 'h':
 			b_help = true;
