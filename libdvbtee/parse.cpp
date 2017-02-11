@@ -672,9 +672,11 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 	if (!eit_x_complete(current_eit_x))
 		return current_eit_x;
 
-	map_decoded_mgt_tables::const_iterator iter = get_decoder(ts_id).get_decoded_mgt()->tables.find(0x0100 + current_eit_x);
+	decode &decoder = get_decoder(ts_id);
 
-	if (iter != get_decoder(ts_id).get_decoded_mgt()->tables.end()) {
+	map_decoded_mgt_tables::const_iterator iter = decoder.get_decoded_mgt()->tables.find(0x0100 + current_eit_x);
+
+	if (iter != decoder.get_decoded_mgt()->tables.end()) {
 		map_dvbpsi::const_iterator iter_demux = h_demux.find(iter->second.pid);
 		if (iter_demux != h_demux.end()) {
 			//dvbpsi_DetachDemux(h_demux[iter->second.pid]);
@@ -687,9 +689,9 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 		goto eit_complete;
 
 	//map_decoded_mgt_tables::const_iterator
-	iter = get_decoder(ts_id).get_decoded_mgt()->tables.find(0x0100 + current_eit_x + 1);
+	iter = decoder.get_decoded_mgt()->tables.find(0x0100 + current_eit_x + 1);
 
-	if (iter == get_decoder(ts_id).get_decoded_mgt()->tables.end())
+	if (iter == decoder.get_decoded_mgt()->tables.end())
 		goto eit_complete;
 
 	h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
@@ -955,6 +957,8 @@ static const char * xine_chandump(parsed_channel_info_t *c)
 
 void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c)
 {
+	decode &decoder = get_decoder(ts_id);
+
 	//map_ts_elementary_streams::iterator iter_pmt_es = decoded_pmt->es_streams.find(program_number);
 	for (map_ts_elementary_streams::const_iterator iter_pmt_es = decoded_pmt->es_streams.begin();
 	     iter_pmt_es != decoded_pmt->es_streams.end(); ++iter_pmt_es)
@@ -990,9 +994,9 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 		for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
 		c.service_name[7] = 0;
 	} else { // FIXME: use SDT info
-		c.lcn = get_decoder(ts_id).get_lcn(c.program_number);
+		c.lcn = decoder.get_lcn(c.program_number);
 
-		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)get_decoder(ts_id).get_decoded_sdt();
+		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoder.get_decoded_sdt();
 		if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
 			snprintf((char*)c.service_name, sizeof(c.service_name), "%s", decoded_sdt->services[c.program_number].service_name);
 		else {
@@ -1010,9 +1014,11 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, pars
 
 	int count = 0;
 
-	const decoded_pat_t* decoded_pat = get_decoder(ts_id).get_decoded_pat();
-	const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
-	const decoded_vct_t* decoded_vct = get_decoder(ts_id).get_decoded_vct();
+	decode &decoder = get_decoder(ts_id);
+
+	const decoded_pat_t* decoded_pat = decoder.get_decoded_pat();
+	const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
+	const decoded_vct_t* decoded_vct = decoder.get_decoded_vct();
 
 	fprintf(stdout, "\n# channel %d, %d, %s %s\n", c.physical_channel, c.freq, "", "");
 
@@ -1328,12 +1334,14 @@ fail:
 
 void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
 {
-	const decoded_pat_t* decoded_pat = get_decoder(ts_id).get_decoded_pat();
+	decode &decoder = get_decoder(ts_id);
+
+	const decoded_pat_t* decoded_pat = decoder.get_decoded_pat();
 	map_decoded_pat_programs::const_iterator iter_pat = decoded_pat->programs.find(service_id);
 	if (iter_pat != decoded_pat->programs.end())
 		pids[iter_pat->second] = 0;//FIXME
 
-	const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
+	const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service_id);
 	if (iter_pmt != decoded_pmt->end()) {
 
@@ -1378,8 +1386,10 @@ void parse::set_service_ids(char *ids)
 	if (has_pat) {
 		rewrite_pat();
 
-		const decoded_pat_t* decoded_pat = get_decoder(ts_id).get_decoded_pat();
-		const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
+		decode &decoder = get_decoder(ts_id);
+
+		const decoded_pat_t* decoded_pat = decoder.get_decoded_pat();
+		const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
 
 		process_pat(decoded_pat);
 
@@ -1541,7 +1551,9 @@ int parse::feed(int count, uint8_t* p_data)
 			iter_eit = eit_pids.find(pkt_stats.pid);
 			if (iter_eit != eit_pids.end()) {
 
-				if (get_decoder(ts_id).eit_x_complete(iter_eit->second)) {
+				decode &decoder = get_decoder(ts_id);
+
+				if (decoder.eit_x_complete(iter_eit->second)) {
 					if (h_demux.count(iter_eit->first)) {
 #if USING_DVBPSI_VERSION_0
 						dvbpsi_DetachDemux(h_demux[iter_eit->first]);
@@ -1554,7 +1566,7 @@ int parse::feed(int count, uint8_t* p_data)
 					//epg_complete = (eit_pids.size() == 0);
 					continue;
 				}
-				get_decoder(ts_id).set_current_eit_x(iter_eit->second);
+				decoder.set_current_eit_x(iter_eit->second);
 				out_type = OUTPUT_PSIP;
 			}
 
