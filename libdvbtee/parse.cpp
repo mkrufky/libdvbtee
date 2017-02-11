@@ -218,7 +218,7 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		return true;
 	}
 
-	process_pat(decoders[p_pat->i_ts_id].get_decoded_pat());
+	process_pat(get_decoder(p_pat->i_ts_id).get_decoded_pat());
 
 	rewrite_pat();
 
@@ -1100,12 +1100,14 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	if (!channel_info.count(requested_ts_id))
 		return false;
 
-	const map_decoded_pmt* decoded_pmt = decoders[requested_ts_id].get_decoded_pmt();
+	decode& decoder = get_decoder(requested_ts_id);
+
+	const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service);
 	if (iter_pmt == decoded_pmt->end())
 		return false;
 
-	const decoded_vct_t* decoded_vct = decoders[requested_ts_id].get_decoded_vct();
+	const decoded_vct_t* decoded_vct = decoder.get_decoded_vct();
 
 	channel_info_t *info = &channel_info[requested_ts_id];
 
@@ -1126,11 +1128,11 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	time(&last);
 
 	if (e0) {
-		decoders[requested_ts_id].get_epg_event(service, last, e0);
+		decoder.get_epg_event(service, last, e0);
 		last = e0->start_time + e0->length_sec + 1;
 	}
 	if (e1)
-		decoders[requested_ts_id].get_epg_event(service, last, e1);
+		decoder.get_epg_event(service, last, e1);
 
 	return true;
 }
