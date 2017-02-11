@@ -217,6 +217,8 @@ private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
 #endif
+	decode& get_decoder(uint16_t ts_id);
+
 	static void take_pat(void*, dvbpsi_pat_t*);
 	static void take_pmt(void*, dvbpsi_pmt_t*);
 	static void take_eit(void*, dvbpsi_eit_t*);

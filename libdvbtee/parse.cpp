@@ -792,6 +792,11 @@ int parse::count_decoder_factories()
 #endif
 }
 
+decode &parse::get_decoder(uint16_t ts_id)
+{
+	return decoders[ts_id];
+}
+
 void parse::detach_demux()
 {
 	dPrintf("()");
