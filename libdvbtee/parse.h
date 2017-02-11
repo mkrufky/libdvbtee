@@ -139,6 +139,8 @@ public:
 	parse();
 	~parse();
 
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
+
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; }
 	uint16_t get_ts_id() const { return ts_id; }
 	uint16_t get_ts_id(unsigned int channel);
@@ -217,6 +219,7 @@ private:
 #if !USE_STATIC_DECODE_MAP
 	map_decoder   decoders;
 #endif
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 	decode& get_decoder(uint16_t ts_id);
 
 	static void take_pat(void*, dvbpsi_pat_t*);

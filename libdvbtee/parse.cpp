@@ -708,6 +708,7 @@ static bool hello = false;
 
 parse::parse()
   : statistics(CLASS_MODULE)
+  , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
   , ts_id(0)
   , epg_mode(false)
@@ -796,7 +797,9 @@ int parse::count_decoder_factories()
 
 decode &parse::get_decoder(uint16_t ts_id)
 {
-	return decoders[ts_id];
+	decode &d = decoders[ts_id];
+	d.subscribeTables(subscribedTableWatcher);
+	return d;
 }
 
 void parse::detach_demux()
