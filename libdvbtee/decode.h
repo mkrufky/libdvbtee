@@ -317,6 +317,8 @@ public:
 			       );
 	~decode_network_service();
 
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
+
 #if !OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
@@ -337,6 +339,7 @@ private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 
 	decoded_sdt_t                   decoded_sdt;
 
@@ -369,6 +372,8 @@ public:
 	~decode_network();
 
 	decode_network_service *fetch_network_service(uint16_t ts_id);
+
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
 
 #if !OLD_DECODER
 	/* TableWatcher */
@@ -405,6 +410,7 @@ private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
@@ -466,6 +472,8 @@ public:
 	decode& operator= (const decode&);
 
 	decode_network *fetch_network(uint16_t nw_id);
+
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
 
 #if !OLD_DECODER
 	/* TableWatcher */
@@ -538,6 +546,7 @@ private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 
 	uint16_t orig_network_id;
 	uint16_t      network_id;

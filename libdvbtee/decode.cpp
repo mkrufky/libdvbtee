@@ -95,6 +95,7 @@ decode_network_service::decode_network_service(
 #else
   : LinkedDecoder(parent, name)
   , store(this)
+  , subscribedTableWatcher(NULL)
   , services_w_eit_pf(0)
 #endif
   , services_w_eit_sched(0)
@@ -150,6 +151,8 @@ void decode_network_service::updateTable(uint8_t tId, dvbtee::decode::Table *tab
 		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
 		break;
 	}
+	if (subscribedTableWatcher)
+		subscribedTableWatcher->updateTable(tId, table);
 }
 
 bool decode_network_service::updateEIT(dvbtee::decode::Table *table)
@@ -197,6 +200,7 @@ decode_network::decode_network(
   : LinkedDecoder(parent, name)
   , orig_network_id(0)
   , store(this)
+  , subscribedTableWatcher(NULL)
 #endif
 {
 	dPrintf("()");
@@ -257,6 +261,8 @@ void decode_network::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
 		break;
 	}
+	if (subscribedTableWatcher)
+		subscribedTableWatcher->updateTable(tId, table);
 }
 
 bool decode_network::updateNIT(dvbtee::decode::Table *table)
@@ -280,6 +286,7 @@ decode::decode()
 #else
   : NullDecoder()
   , store(this)
+  , subscribedTableWatcher(NULL)
   , orig_network_id(0)
 #endif
   , network_id(0)
@@ -334,6 +341,7 @@ decode::decode(const decode&)
 #if !OLD_DECODER
  : NullDecoder()
  , store(this)
+ , subscribedTableWatcher(NULL)
 #endif
 {
 	dPrintf("(copy)");
@@ -455,6 +463,8 @@ void decode::updateTable(uint8_t tId, dvbtee::decode::Table *table)
 		fprintf(stderr, "%s: UNHANDLED TABLE ID 0x%02x !!\n", __func__, tId);
 		break;
 	}
+	if (subscribedTableWatcher)
+		subscribedTableWatcher->updateTable(tId, table);
 }
 
 bool decode::updatePAT(dvbtee::decode::Table *table)
