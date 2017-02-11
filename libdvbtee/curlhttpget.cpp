@@ -22,6 +22,7 @@
 #include "dvbtee_config.h"
 #ifdef HAVE_LIBCURL
 #include "curlhttpget.h"
+#include "log.h"
 
 curlhttpget::curlhttpget(const char *url, curlhttpget_iface *iface, curlhttpget_info_t *info)
   : curl_handle(curl_easy_init())
