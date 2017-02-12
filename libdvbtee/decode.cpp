@@ -1458,7 +1458,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	__log_printf(stderr, "%04d-%02d-%02d %02d:%02d-%02d:%02d,%s\n",
+	__log_printf(stderr, "%04d-%02d-%02d %02d:%02d-%02d:%02d %s\n",
 		     tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
 		     tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 	if (reporter) {
@@ -1489,7 +1489,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	__log_printf(stderr, "%04d-%02d-%02d,%02d:%02d,%02d:%02d,%s\n",
+	__log_printf(stderr, "%04d-%02d-%02d,%02d:%02d,%02d:%02d %s\n",
 		     tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
 		     tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min,
 		     event->name.c_str());
