@@ -31,7 +31,7 @@ else
 fi
 
 ./bootstrap
-./configure --prefix=${DVBTEE_ROOT}/usr/ --enable-static
+./configure --prefix=${DVBTEE_ROOT}/usr/ --enable-static --with-pic
 cd ..
 
 make -C libdvbpsi -j
