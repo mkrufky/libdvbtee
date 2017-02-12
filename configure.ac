@@ -27,6 +27,10 @@ AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
 AC_ARG_ENABLE([hdhr],
     AS_HELP_STRING([--disable-hdhr], [Disable HDHomeRun support]))
 
+AC_ARG_ENABLE([examples],
+    AS_HELP_STRING([--disable-examples], [Disable building example applications]))
+AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
+
 AC_ARG_ENABLE([dvbpsibuild],
 [  --enable-dvbpsibuild    Enable dvbpsi build],
 [case "${enableval}" in
@@ -233,6 +237,13 @@ AS_IF([test "x$PKG_CONFIG" != "x"], [
 	                 libdvbtee_server.pc])
 ])
 
+AS_IF([test "x$enable_examples" != "xno"], [
+	AC_CONFIG_FILES([examples/parser_example/Makefile
+	                 examples/server_example/Makefile
+	                 examples/walk_hls/Makefile
+	                 examples/Makefile])
+])
+
 AC_CONFIG_FILES([Makefile
                  dvbtee/Makefile
                  libdvbtee/Makefile
@@ -240,10 +251,6 @@ AC_CONFIG_FILES([Makefile
                  libdvbtee/value/Makefile
                  libdvbtee_server/Makefile
                  tunerprovider/Makefile
-                 examples/parser_example/Makefile
-                 examples/server_example/Makefile
-                 examples/walk_hls/Makefile
-                 examples/Makefile
                  packaging/libdvbtee.spec])
 AC_OUTPUT
 
