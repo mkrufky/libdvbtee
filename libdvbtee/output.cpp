@@ -251,6 +251,7 @@ output_stream::output_stream()
   , sock(-1)
   , mimetype(MIMETYPE_OCTET_STREAM)
   , ringbuffer()
+  , priv(NULL)
   , stream_method(OUTPUT_STREAM_UDP)
   , count_in(0)
   , count_out(0)
@@ -258,7 +259,6 @@ output_stream::output_stream()
   , stream_cb(NULL)
   , stream_cb_priv(NULL)
   , have_pat(false)
-  , priv(NULL)
 {
 	dPrintf("()");
 	memset(&name, 0, sizeof(name));
