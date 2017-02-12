@@ -431,7 +431,7 @@ int main(int argc, char **argv)
 			break;
 		case 'C': /* channel list | channel / scan max */
 			if (strstr(optarg, ","))
-				strncpy(channel_list, optarg, sizeof(channel_list));
+				strncpy(channel_list, optarg, sizeof(channel_list)-1);
 
 			/* if a list was provided, use the first item */
 			scan_max = strtoul(optarg, NULL, 0);
@@ -445,7 +445,7 @@ int main(int argc, char **argv)
 #endif
 			break;
 		case 'F': /* Filename */
-			strncpy(filename, optarg, sizeof(filename));
+			strncpy(filename, optarg, sizeof(filename)-1);
 			break;
 		case 't': /* timeout */
 			timeout = strtoul(optarg, NULL, 0);
@@ -461,7 +461,7 @@ int main(int argc, char **argv)
 				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
 			break;
 		case 'n': /* bind to specific interface */
-			strncpy(network_interface, optarg, sizeof(network_interface));
+			strncpy(network_interface, optarg, sizeof(network_interface)-1);
 			b_network_interface = true;
 			break;
 		case 'S': /* server mode, optional arg 1 for command server, 2 for http stream server, 3 for both */
@@ -469,10 +469,10 @@ int main(int argc, char **argv)
 			serv_flags = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			break;
 		case 'i': /* pull local/remote tcp/udp port for data */
-			strncpy(tcpipfeedurl, optarg, sizeof(tcpipfeedurl));
+			strncpy(tcpipfeedurl, optarg, sizeof(tcpipfeedurl)-1);
 			break;
 		case 'I': /* request a service by its service id */
-			strncpy(service_ids, optarg, sizeof(service_ids));
+			strncpy(service_ids, optarg, sizeof(service_ids)-1);
 			break;
 		case 'E': /* enable EPG scan, optional arg to limit the number of EITs to parse */
 #if 0
@@ -503,7 +503,7 @@ int main(int argc, char **argv)
 			break;
 		case 'H':
 			if (optarg)
-				strncpy(hdhrname, optarg, sizeof(hdhrname));
+				strncpy(hdhrname, optarg, sizeof(hdhrname)-1);
 			b_hdhr = true;
 			break;
 		case 'j':
