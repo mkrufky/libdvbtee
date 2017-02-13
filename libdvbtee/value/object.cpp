@@ -190,16 +190,16 @@ const std::string Object::toJson() const
 
 	if (!map.size()) return "{}";
 
-	s << "{ ";
+	s << "{";
 	for (KeyValueMap::const_iterator it = map.begin(); it != map.end(); ++it) {
 		ValueBase *val = it->second;
 
-		if (it != map.begin()) s << ", ";
-		s << "\"" << it->first << "\": ";
+		if (it != map.begin()) s << ",";
+		s << "\"" << it->first << "\":";
 
 		s << val->toJson();
 	}
-	s << " }";
+	s << "}";
 
 	return s.str();
 }
