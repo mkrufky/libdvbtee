@@ -28,10 +28,11 @@
 
 #include "value.h"
 #include "object.h"
+#include "handle.h"
 
 namespace valueobj {
 
-typedef std::vector<ValueBase*> KeyValueVector;
+typedef std::vector<Handle> KeyValueVector;
 
 class Object;
 
@@ -42,33 +43,38 @@ public:
 
 	Array(const Array&);
 
-	const ValueBase* push(ValueBase*);
+	Handle& push(Handle hdl);
 
-	const ValueBase* push(Object&);
-	const ValueBase* push(Object*);
+	Handle& push(ValueBase*);
 
-	template <typename T>
-	const ValueBase* push(T val);
-
-	const ValueBase* push(      char* val);
-	const ValueBase* push(const char* val);
+	Handle& push(Object&);
+	Handle& push(Object*);
 
 	template <typename T>
-	const ValueBase* set(std::string key, T val);
+	Handle& push(T val)
+	{
+		return push(Handle(val, ""));
+	}
 
-	const ValueBase* set(std::string key,       char* val);
-	const ValueBase* set(std::string key, const char* val);
+	bool set(std::string key, Handle hdl);
 
 	template <typename T>
-	const ValueBase* set(int key, T val);
+	bool set(std::string key, T val)
+	{
+		return set(key, Handle(val, key));
+	}
 
-	const ValueBase* set(int key,       char* val);
-	const ValueBase* set(int key, const char* val);
+	template <typename T>
+	bool set(int key, T val)
+	{
+		return set(intToStr(key), val);
+	}
 
-	const ValueBase* getByName(std::string idx) const;
-	const ValueBase* getByName(unsigned int idx) const;
 
-	const ValueBase* get(unsigned int idx) const;
+	Handle& getByName(std::string idx) const;
+	Handle& getByName(unsigned int idx) const;
+
+	Handle& get(unsigned int idx) const;
 
 	template <typename T> const T& get(unsigned int idx) const;
 
@@ -82,36 +88,15 @@ public:
 
 private:
 	KeyValueVector vector;
-	std::map<std::string, const ValueBase*> indices;
+	std::map<std::string, Handle*> indices;
 	std::string idxField;
 
-	template <typename T>
-	const ValueBase* pushByRef(T& val, std::string idx);
-
-	const ValueBase* pushObject(Object& val, std::string idx);
-
-	template <typename T>
-	const ValueBase* push(T val, std::string idx);
-
-#define USING_INLINE_PUSH
-#ifdef USING_INLINE_PUSH
-	inline const ValueBase* push(      char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
-	inline const ValueBase* push(const char* val, std::string idx)	{ return push<std::string>(std::string(val), idx); }
-	inline const ValueBase* push(std::string& val, std::string idx)	{ return pushByRef<std::string>(val, idx); }
-	inline const ValueBase* push(Array& val, std::string idx)	{ return pushByRef<Array>(val, idx); }
-	inline const ValueBase* push(Array* val, std::string idx)	{ return pushByRef<Array>(*val, idx); }
-#else
-	const ValueBase* push(      char* val, std::string idx);
-	const ValueBase* push(const char* val, std::string idx);
-	const ValueBase* push(std::string& val, std::string idx);
-	const ValueBase* push(Array& val, std::string idx);
-	const ValueBase* push(Array* val, std::string idx);
-#endif
+	Handle& pushObject(Object& val, std::string idx);
 
 	template <typename T>
 	const T& get(unsigned int &idx, T& def) const;
 
-	void updateIndex(std::string, const ValueBase*);
+	void updateIndex(std::string, Handle&);
 	std::string& assignIndex(Object&, std::string&);
 
 	const std::string intToStr(int) const;

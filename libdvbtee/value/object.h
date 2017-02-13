@@ -28,10 +28,11 @@
 
 #include "value.h"
 #include "array.h"
+#include "handle.h"
 
 namespace valueobj {
 
-typedef std::map<std::string, ValueBase*> KeyValueMap;
+typedef std::map<std::string, Handle> KeyValueMap;
 
 class Array;
 
@@ -42,39 +43,34 @@ public:
 
 	Object(const Object&);
 
+	Handle& set(std::string key, Handle);
+	Handle& set(int key, Handle);
+
 	template <typename T>
-	const ValueBase* set(std::string key, T val)
+	Handle& set(std::string key, T val)
 	{
-		return setByRef<T>(key, val);
+		return set(key, Handle(val, key));
 	}
 
-	const ValueBase* set(std::string key,       char* val);
-	const ValueBase* set(std::string key, const char* val);
-	const ValueBase* set(std::string key, std::string& val);
-	const ValueBase* set(std::string key, Array& val);
-	const ValueBase* set(std::string key, Object& val);
-	const ValueBase* set(std::string key, Array* val);
-	const ValueBase* set(std::string key, Object* val);
-
 	template <typename T>
-	const ValueBase* set(int key, T val)
+	Handle& set(int key, T val)
 	{
 		return set(intToStr(key), val);
 	}
 
 
-	const ValueBase* set(std::string key, ValueBase*);
+	Handle& set(std::string key, ValueBase*);
 
 	// deprecated:
-	const ValueBase* set(ValueBase*);
+	Handle& set(ValueBase*);
 
 	void unSet(std::string key);
 	void unSet(int key);
 
 	void clear();
 
-	const ValueBase* get(std::string key) const;
-	const ValueBase* get(int key) const;
+	Handle& get(std::string key) const;
+	Handle& get(int key) const;
 
 	template <typename T> const T& get(std::string key) const;
 
@@ -89,8 +85,7 @@ public:
 private:
 	KeyValueMap map;
 
-	template <typename T>
-	const ValueBase* setByRef(std::string& key, T& val);
+	Handle& setByRef(std::string&, Handle&);
 
 	template <typename T>
 	const T& get(std::string& key, T& def) const;
