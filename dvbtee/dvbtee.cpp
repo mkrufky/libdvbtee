@@ -733,7 +733,11 @@ exit:
 		stop_server(&context);
 	}
 	if (b_json) {
-		parse::dumpJson();
+
+		if (tuner)
+			tuner->feeder.parser.dumpJson();
+		else
+			context._file_feeder.parser.dumpJson();
 	}
 	cleanup(&context);
 #if defined(_WIN32)

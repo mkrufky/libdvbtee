@@ -34,7 +34,7 @@
 const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
 
 #if USE_STATIC_DECODE_MAP
-static map_decoder   decoders;
+static map_decoder   global_static_decoders;
 #endif
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_PARSE, fmt, ##arg)
@@ -599,19 +599,6 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 	}
 }
 
-#if USE_STATIC_DECODE_MAP
-#define define_table_wrapper(a, b, c, d)				\
-void parse::a(void* p_this, b* p_table)					\
-{									\
-	parse* parser = (parse*)p_this;					\
-	if ((parser) &&							\
-	    (((parser->a(p_table, false)) && (parser->get_ts_id())) &&	\
-	     ((decoders[parser->get_ts_id()].a(p_table)) ||		\
-	      (!parser->d))))						\
-		parser->a(p_table, true);				\
-	c(p_table);							\
-}
-#else
 #define define_table_wrapper(a, b, c, d)				\
 void parse::a(void* p_this, b* p_table)					\
 {									\
@@ -623,7 +610,6 @@ void parse::a(void* p_this, b* p_table)					\
 		parser->a(p_table, true);				\
 	c(p_table);							\
 }
-#endif /* USE_STATIC_DECODE_MAP */
 
 #if USING_DVBPSI_VERSION_0
 #define dvbpsi_pat_delete dvbpsi_DeletePAT
@@ -708,6 +694,7 @@ static bool hello = false;
 
 parse::parse()
   : statistics(CLASS_MODULE)
+  , decoders(global_static_decoders)
   , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
   , ts_id(0)

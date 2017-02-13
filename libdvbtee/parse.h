@@ -206,7 +206,7 @@ public:
 
 	void set_tsfilter_iface(tsfilter_iface &iface) { m_tsfilter_iface = &iface; }
 
-	static void dumpJson();
+	void dumpJson();
 
 	output out;
 
@@ -216,9 +216,7 @@ public:
 	stats statistics;
 	static int count_decoder_factories();
 private:
-#if !USE_STATIC_DECODE_MAP
-	map_decoder   decoders;
-#endif
+	map_decoder&   decoders;
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 	decode& get_decoder(uint16_t ts_id);
 
