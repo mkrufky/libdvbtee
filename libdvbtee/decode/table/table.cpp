@@ -103,12 +103,22 @@ const TableBaseFactory* TableRegistry::getFactory(uint8_t tableid) const
 
 int TableRegistry::count() const
 {
+	std::vector<uint8_t> v = list();
+	int ret = v.size();
+	v.clear();
+	return ret;
+}
+
+std::vector<uint8_t> TableRegistry::list() const
+{
+	std::vector<uint8_t> v;
 	__log_printf(stderr, "%ld table decoders present:", m_factories.size());
 	for (std::map <uint8_t, const TableBaseFactory*>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
 		__log_printf(stderr, " 0x%02x", it->first);
+		v.push_back(it->first);
 	}
 	__log_printf(stderr, "\n");
-	return m_factories.size();
+	return v;
 }
 
 TableRegistry::TableRegistry()

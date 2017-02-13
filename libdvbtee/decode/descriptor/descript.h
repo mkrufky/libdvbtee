@@ -105,6 +105,7 @@ public:
 	Descriptor *create(Decoder*, dvbpsi_descriptor_t*);
 
 	int count() const;
+	std::vector<uint8_t> list() const;
 private:
 	DescriptorRegistry();
 	~DescriptorRegistry();

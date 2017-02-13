@@ -220,6 +220,7 @@ public:
 	const TableBaseFactory* getFactory(uint8_t) const;
 
 	int count() const;
+	std::vector<uint8_t> list() const;
 private:
 	TableRegistry();
 	~TableRegistry();
