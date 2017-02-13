@@ -33,9 +33,7 @@
 
 const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
 
-#if USE_STATIC_DECODE_MAP
 static map_decoder   global_static_decoders;
-#endif
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_PARSE, fmt, ##arg)
 

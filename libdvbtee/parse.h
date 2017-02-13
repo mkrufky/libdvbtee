@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <map>
 
 #include "decode.h"
 #include "demux.h"
@@ -46,12 +47,6 @@
 
 extern const char *parse_libdvbpsi_version;
 
-
-#ifndef USE_STATIC_DECODE_MAP
-#define USE_STATIC_DECODE_MAP 1
-#endif
-
-#include <map>
 
 #if !USING_DVBPSI_VERSION_0
 typedef void (*dvbpsi_detach_table_callback)(dvbpsi_t *, uint8_t, uint16_t);
