@@ -692,6 +692,28 @@ eit_complete:
 
 static bool hello = false;
 
+privateParse::privateParse()
+: parse(m_decoders)
+{
+	//
+}
+
+privateParse::~privateParse()
+{
+	//
+}
+
+globalParse::globalParse()
+: parse(global_static_decoders)
+{
+	//
+}
+
+globalParse::~globalParse()
+{
+	//
+}
+
 parse::parse()
   : statistics(CLASS_MODULE)
   , decoders(global_static_decoders)
@@ -715,6 +737,38 @@ parse::parse()
   , enabled(true)
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
+{
+	init();
+}
+
+parse::parse(map_decoder& supplied_decoders)
+  : statistics(CLASS_MODULE)
+  , decoders(supplied_decoders)
+  , subscribedTableWatcher(NULL)
+  , fed_pkt_count(0)
+  , ts_id(0)
+  , epg_mode(false)
+  , scan_mode(false)
+  , dont_collect_ett(true)
+  , has_pat(false)
+  , has_mgt(false)
+  , has_vct(false)
+  , has_sdt(false)
+  , has_nit(false)
+  , expect_vct(true)
+  , dumped_eit(0)
+  , eit_collection_limit(-1)
+  , process_err_pkts(false)
+  , tei_count(0)
+  , m_tsfilter_iface(NULL)
+  , enabled(true)
+  , rewritten_pat_ver_offset(0)
+  , rewritten_pat_cont_ctr(0)
+{
+	init();
+}
+
+void parse::init()
 {
 	if (!hello)
 		fprintf(stdout, "# dvbtee v" LIBDVBTEE_VERSION

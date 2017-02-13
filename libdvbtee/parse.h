@@ -136,8 +136,9 @@ public:
 class parse
 {
 public:
-	parse();
-	~parse();
+	__attribute__((deprecated)) parse();
+	parse(map_decoder&);
+	virtual ~parse();
 
 	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
 
@@ -219,6 +220,8 @@ private:
 	map_decoder&   decoders;
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 	decode& get_decoder(uint16_t ts_id);
+
+	void init();
 
 	static void take_pat(void*, dvbpsi_pat_t*);
 	static void take_pmt(void*, dvbpsi_pmt_t*);
@@ -333,6 +336,22 @@ private:
 	map_pidtype out_pids;
 
 	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&);
+};
+
+class privateParse: public parse
+{
+public:
+	privateParse();
+	virtual ~privateParse();
+private:
+	map_decoder m_decoders;
+};
+
+class globalParse: public parse
+{
+public:
+	globalParse();
+	virtual ~globalParse();
 };
 
 #endif //__PARSE_H__
