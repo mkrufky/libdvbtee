@@ -101,14 +101,6 @@ const TableBaseFactory* TableRegistry::getFactory(uint8_t tableid) const
 	return (it == m_factories.end()) ? NULL : it->second;
 }
 
-int TableRegistry::count() const
-{
-	std::vector<uint8_t> v = list();
-	int ret = v.size();
-	v.clear();
-	return ret;
-}
-
 std::vector<uint8_t> TableRegistry::list() const
 {
 	std::vector<uint8_t> v;

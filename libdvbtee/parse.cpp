@@ -786,13 +786,12 @@ parse::~parse()
 
 int parse::count_decoder_factories()
 {
-	return
+	return 0
 #if !OLD_DECODER
-	dvbtee::decode::TableRegistry::instance().count() +
-	dvbtee::decode::DescriptorRegistry::instance().count();
-#else
-	0;
+	+ dvbtee::decode::TableRegistry::instance().list().size()
+	+ dvbtee::decode::DescriptorRegistry::instance().list().size()
 #endif
+	;
 }
 
 decode &parse::get_decoder(uint16_t ts_id)

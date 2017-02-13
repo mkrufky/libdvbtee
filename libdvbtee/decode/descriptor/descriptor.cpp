@@ -119,14 +119,6 @@ Descriptor *DescriptorRegistry::create(Decoder *parent, dvbpsi_descriptor_t *p_d
 	return Factory->create(parent, p_dvbpsi_descriptor);
 }
 
-int DescriptorRegistry::count() const
-{
-	std::vector<uint8_t> v = list();
-	int ret = v.size();
-	v.clear();
-	return ret;
-}
-
 std::vector<uint8_t> DescriptorRegistry::list() const
 {
 	std::vector<uint8_t> v;
