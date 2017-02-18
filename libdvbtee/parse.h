@@ -131,8 +131,8 @@ public:
 class parse
 {
 public:
-	__attribute__((deprecated)) parse();
-	parse(map_decoder&);
+	__attribute__((deprecated)) parse(output_base&);
+	parse(output_base&, map_decoder&);
 	virtual ~parse();
 
 	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
@@ -204,7 +204,7 @@ public:
 
 	void dumpJson();
 
-	output out;
+	output_base& out;
 
 	bool check();
 	bool is_enabled() { return enabled; }
@@ -339,6 +339,7 @@ public:
 	privateParse();
 	virtual ~privateParse();
 private:
+	dummy_output outp;
 	map_decoder m_decoders;
 };
 
@@ -347,6 +348,8 @@ class globalParse: public parse
 public:
 	globalParse();
 	virtual ~globalParse();
+private:
+	dummy_output outp;
 };
 
 #endif //__PARSE_H__

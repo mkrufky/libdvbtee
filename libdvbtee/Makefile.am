@@ -35,6 +35,7 @@ EXTRA_DIST = \
     listen.h \
     log.h \
     output.h \
+    outputbase.h \
     parse.h \
     rbuf.h \
     stats.h \
@@ -59,6 +60,7 @@ library_include_HEADERS = \
     listen.h \
     log.h \
     output.h \
+    outputbase.h \
     parse.h \
     rbuf.h \
     stats.h \

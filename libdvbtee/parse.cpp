@@ -691,7 +691,7 @@ eit_complete:
 static bool hello = false;
 
 privateParse::privateParse()
-: parse(m_decoders)
+  : parse(outp, m_decoders)
 {
 	//
 }
@@ -702,7 +702,7 @@ privateParse::~privateParse()
 }
 
 globalParse::globalParse()
-: parse(global_static_decoders)
+  : parse(outp, global_static_decoders)
 {
 	//
 }
@@ -712,8 +712,9 @@ globalParse::~globalParse()
 	//
 }
 
-parse::parse()
-  : statistics(CLASS_MODULE)
+parse::parse(output_base& outp)
+  : out(outp)
+  , statistics(CLASS_MODULE)
   , decoders(global_static_decoders)
   , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
@@ -739,8 +740,9 @@ parse::parse()
 	init();
 }
 
-parse::parse(map_decoder& supplied_decoders)
-  : statistics(CLASS_MODULE)
+parse::parse(output_base& outp, map_decoder& supplied_decoders)
+  : out(outp)
+  , statistics(CLASS_MODULE)
   , decoders(supplied_decoders)
   , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)

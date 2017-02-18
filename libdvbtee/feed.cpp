@@ -61,7 +61,7 @@
 #define BUFSIZE ((4096/188)*188)
 
 feed::feed()
-  :
+  : parser(out),
 #if !defined(_WIN32)
     h_thread((pthread_t)NULL)
   , h_feed_thread((pthread_t)NULL)
@@ -91,6 +91,7 @@ feed::~feed()
 }
 
 feed::feed(const feed&)
+  : parser(out)
 {
 	dPrintf("(copy)");
 #if !defined(_WIN32)

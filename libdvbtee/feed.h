@@ -63,6 +63,7 @@ public:
 	char* get_filename() { return filename; }
 	bool check();
 
+	output out;
 	parse parser;
 
 #define FEED_EVENT_PSIP 1
