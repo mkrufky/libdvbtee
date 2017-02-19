@@ -294,6 +294,7 @@ decode::decode()
   , network_id(0)
   , stream_time((time_t)0)
   , eit_x(0)
+  , ett_x(0)
   , physical_channel(0)
 {
 	dPrintf("()");
@@ -313,7 +314,10 @@ decode::decode()
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
-	decoded_ett.clear();
+
+	for (int i = 0; i < 128; i++) {
+		decoded_ett[i].clear();
+	}
 }
 
 decode::~decode()
@@ -336,7 +340,10 @@ decode::~decode()
 
 	rcvd_pmt.clear();
 	decoded_pmt.clear();
-	decoded_ett.clear();
+
+	for (int i = 0; i < 128; i++) {
+		decoded_ett[i].clear();
+	}
 }
 
 decode::decode(const decode&)
@@ -363,12 +370,16 @@ decode::decode(const decode&)
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
-	decoded_ett.clear();
+
+	for (int i = 0; i < 128; i++) {
+		decoded_ett[i].clear();
+	}
 
 	orig_network_id = 0;
 	network_id = 0;
 	stream_time = (time_t)0;
 	eit_x = 0;
+	ett_x = 0;
 	physical_channel = 0;
 }
 
@@ -396,12 +407,16 @@ decode& decode::operator= (const decode& cSource)
 
 	decoded_pmt.clear();
 	rcvd_pmt.clear();
-	decoded_ett.clear();
+
+	for (int i = 0; i < 128; i++) {
+		decoded_ett[i].clear();
+	}
 
 	orig_network_id = 0;
 	network_id = 0;
 	stream_time = (time_t)0;
 	eit_x = 0;
+	ett_x = 0;
 	physical_channel = 0;
 
 	return *this;
@@ -613,7 +628,7 @@ bool decode::updateETT(dvbtee::decode::Table *table)
 
 	dvbtee::decode::atsc_ett *ettTable = (dvbtee::decode::atsc_ett*)table;
 
-	decoded_atsc_ett_t &cur_ett = decoded_ett[ettTable->get<uint32_t>("etmId")];
+	decoded_atsc_ett_t &cur_ett = decoded_ett[ett_x][ettTable->get<uint32_t>("etmId")];
 
 	cur_ett = ettTable->getDecodedETT();
 
@@ -1436,7 +1451,7 @@ void decode_report::epg_event(const char * channel_name,
 }
 
 
-void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decode_report *reporter)
+void decode::dump_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decode_report *reporter)
 {
 	unsigned char service_name[8] = { 0 };
 	for ( int i = 0; i < 7; ++i ) service_name[i] = channel->short_name[i*2+1];
@@ -1458,11 +1473,18 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	__log_printf(stderr, "%04d-%02d-%02d %02d:%02d-%02d:%02d %s\n",
+
+	unsigned char message[ETM_MAX_LENGTH];
+
+	const char* etm = (const char *)get_decoded_ett(current_eit_x, (channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message));
+	if (message[0])
+		__log_printf(stderr, "\t%s\n", message);
+
+	__log_printf(stderr, "%04d-%02d-%02d %02d:%02d-%02d:%02d %s%s%s\n",
 		     tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
-		     tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+		     tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name, (etm) ? "\n" : "", (etm) ? etm : "");
+
 	if (reporter) {
-		unsigned char message[ETM_MAX_LENGTH];
 		reporter->epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
 					 physical_channel, channel->program,
@@ -1470,7 +1492,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 					 start,
 					 (end - start),
 					 (const char *)name,
-					 (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
+					 (const char *)message);
 	}
 	return;
 }
@@ -1506,7 +1528,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 	return;
 }
 
-void decode::get_epg_event(const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decoded_event_t *e)
+void decode::get_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decoded_event_t *e)
 {
 #if 1//DBG
 	__log_printf(stderr, "%s\n", __func__);
@@ -1536,7 +1558,7 @@ void decode::get_epg_event(const decoded_vct_channel_t *channel, const decoded_a
 		      start,
 		      event->length_sec,
 		      (const char *)name,
-		      (const char *)get_decoded_ett((channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
+		      (const char *)get_decoded_ett(current_eit_x, (channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message)));
 	return;
 }
 
@@ -1613,7 +1635,7 @@ bool decode::get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_eve
 				struct tm tme = *localtime( &end  );
 				__log_printf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
-				get_epg_event(&iter_vct->second, &iter_eit->second, e);
+				get_epg_event(eit_num, &iter_vct->second, &iter_eit->second, e);
 				return true;
 			}
 		}
@@ -1743,7 +1765,7 @@ void decode::dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t so
 			struct tm tme = *localtime( &end  );
 			__log_printf(stdout, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
-			dump_epg_event(&iter_vct->second, &iter_eit->second, reporter);
+			dump_epg_event(eit_x, &iter_vct->second, &iter_eit->second, reporter);
 		}
 	}
 	return;
@@ -1857,13 +1879,13 @@ void decode::dump_epg(decode_report *reporter)
 	return;
 }
 
-unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message)
+unsigned char * decode::get_decoded_ett(uint8_t current_eit_x, uint16_t etm_id, unsigned char *message, size_t sizeof_message)
 {
 	memset(message, 0, sizeof_message);
 
-	if (decoded_ett.count(etm_id)) {
+	if (decoded_ett[current_eit_x].count(etm_id)) {
 
-		decoded_atsc_ett_t &cur_ett = decoded_ett[etm_id];
+		decoded_atsc_ett_t &cur_ett = decoded_ett[current_eit_x][etm_id];
 
 		decode_multiple_string(cur_ett.etm,
 				       cur_ett.etm_length,
@@ -1875,16 +1897,18 @@ unsigned char * decode::get_decoded_ett(uint16_t etm_id, unsigned char *message,
 #if !USING_DVBPSI_VERSION_0
 bool decode::take_ett(const dvbpsi_atsc_ett_t * const p_ett)
 {
-#if OLD_DECODER
-	decoded_atsc_ett_t &cur_ett = decoded_ett[p_ett->i_etm_id];
-#if 1
+	decoded_atsc_ett_t &cur_ett = decoded_ett[ett_x][p_ett->i_etm_id];
+
 	if ((cur_ett.version == p_ett->i_version) &&
 	    (cur_ett.etm_id  == p_ett->i_etm_id)) {
-		__log_printf(stderr, "%s: v%d, ID %d: ALREADY DECODED\n", __func__,
-			p_ett->i_version, p_ett->i_etm_id);
+#if DBG
+		__log_printf(stderr, "%s-%d: v%d, ID %d: ALREADY DECODED\n", __func__,
+			ett_x, p_ett->i_version, p_ett->i_etm_id);
+#endif
 		return false;
 	}
-#endif
+
+#if OLD_DECODER
 	cur_ett.version    = p_ett->i_version;
 	cur_ett.etm_id     = p_ett->i_etm_id;
 	cur_ett.etm_length = p_ett->i_etm_length;
@@ -1998,6 +2022,34 @@ bool decode::eit_x_complete(uint8_t current_eit_x)
 #endif
 }
 
+bool decode::ett_x_complete(uint8_t current_ett_x)
+{
+	if (!eit_x_complete_atsc(current_ett_x))
+		return false;
+
+	int etm_missing = 0;
+
+	for (map_decoded_atsc_eit::const_iterator iter =
+		decoded_atsc_eit[current_ett_x].begin();
+	     iter != decoded_atsc_eit[current_ett_x].end(); ++iter) {
+		for (map_decoded_atsc_eit_events::const_iterator event_iter =
+			iter->second.events.begin();
+		     event_iter != iter->second.events.end(); ++event_iter) {
+
+		     if (event_iter->second.etm_location == 1) {
+
+				uint32_t event_id = event_iter->second.event_id;
+				uint32_t etm_id = (iter->second.source_id << 16) | (event_id << 2) | 0x02;
+				if (!decoded_ett[current_ett_x].count(etm_id)) {
+				        etm_missing++;
+				}
+			}
+		}
+	}
+
+	return !etm_missing;
+}
+
 bool decode::got_all_eit(int limit)
 {
 	if (decoded_mgt.tables.size() == 0) {
@@ -2015,6 +2067,30 @@ bool decode::got_all_eit(int limit)
 #if DBG
 				fprintf(stderr, "%s: eit #%d MISSING\n", __func__,
 					iter->first - 0x0100);
+#endif
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool decode::got_all_ett(int limit)
+{
+	// returning true for now if DVBT
+	if (decoded_mgt.tables.size() == 0) {
+		return true;
+	}
+	for (map_decoded_mgt_tables::const_iterator iter = decoded_mgt.tables.begin(); iter != decoded_mgt.tables.end(); ++iter) {
+		switch (iter->first) {
+#if 0
+		case            0x0004: /* FIXME: Channel ETT */
+#endif
+		case 0x0200 ... 0x027f: /* ETT-0 to ETT-127 */
+			if (((limit == -1) || (limit >= iter->first - 0x0200)) && (!ett_x_complete(iter->first - 0x0200))) {
+#if DBG
+				fprintf(stderr, "%s: ett #%d MISSING\n", __func__,
+					iter->first - 0x0200);
 #endif
 				return false;
 			}

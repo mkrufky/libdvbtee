@@ -285,6 +285,7 @@ void parse::process_mgt(bool attach)
 	bool b_expecting_vct = false;
 
 	eit_pids.clear();
+	ett_pids.clear();
 	if (!decoded_mgt)
 		fprintf(stderr, "%s: decoded_mgt is NULL!!!\n", __func__);
 	else for (map_decoded_mgt_tables::const_iterator iter =
@@ -309,9 +310,11 @@ void parse::process_mgt(bool attach)
 		case 0x0200 ... 0x027f: /* ETT-0 to ETT-127 */
 			if (dont_collect_ett)
 				break;
-
+#if 0
 			if (scan_mode)
 				break;
+#endif
+			ett_pids[iter->second.pid] = iter->first - 0x0200;
 			/* FALL THRU */
 		case 0x0004:            /* Channel ETT */
 			b_attach_demux  = true;
@@ -577,11 +580,9 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 	case TID_ATSC_EIT:
 		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachEIT, dvbpsi_atsc_DetachEIT, take_eit, i_table_id, i_extension);
 		break;
-#ifdef ETT
 	case TID_ATSC_ETT:
 		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachETT, dvbpsi_atsc_DetachETT, take_ett, i_table_id, i_extension);
 		break;
-#endif
 	case TID_ATSC_STT:
 		attach_table_auto_detach_wrapper_noext(container, dvbpsi_atsc_AttachSTT, dvbpsi_atsc_DetachSTT, take_stt, i_table_id, i_extension);
 		break;
@@ -1208,7 +1209,9 @@ bool parse::is_psip_ready()
 
 bool parse::is_epg_ready()
 {
-	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
+	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) &&
+		((decoders[get_ts_id()].got_all_eit(eit_collection_limit)) &&
+		((dont_collect_ett) || (decoders[get_ts_id()].got_all_ett(eit_collection_limit)))))));
 }
 
 int parse::add_output(void* priv, stream_callback callback)
@@ -1615,6 +1618,28 @@ int parse::feed(int count, uint8_t* p_data)
 				out_type = OUTPUT_PSIP;
 			}
 
+			map_pidtype::const_iterator iter_ett;
+			iter_ett = ett_pids.find(pkt_stats.pid);
+			if (iter_ett != ett_pids.end()) {
+
+				decode &decoder = get_decoder(ts_id);
+
+				if (decoder.ett_x_complete(iter_ett->second)) {
+					if (h_demux.count(iter_ett->first)) {
+#if USING_DVBPSI_VERSION_0
+						dvbpsi_DetachDemux(h_demux[iter_ett->first]);
+#else
+						h_demux[iter_ett->first].detach_demux();
+#endif
+						h_demux.erase(iter_ett->first);
+					}
+					ett_pids.erase(iter_ett->first);
+					continue;
+				}
+				decoder.set_current_ett_x(iter_ett->second);
+				out_type = OUTPUT_PSIP;
+			}
+
 			iter = h_demux.find(pkt_stats.pid);
 			if (iter != h_demux.end()) {
 #if USING_DVBPSI_VERSION_0
@@ -1652,7 +1677,8 @@ int parse::feed(int count, uint8_t* p_data)
 		fed_pkt_count++;
 	}
 #if 1//DBG
-	while (((decoders.count(ts_id)) && (get_decoder(ts_id).eit_x_complete(dumped_eit)))) {
+	while ((((decoders.count(ts_id)) && (get_decoder(ts_id).eit_x_complete(dumped_eit)))) &&
+	       ((dont_collect_ett) || (get_decoder(ts_id).ett_x_complete(dumped_eit)))) {
 		get_decoder(ts_id).dump_eit_x(NULL, dumped_eit);
 		dumped_eit++;
 	}
