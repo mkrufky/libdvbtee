@@ -220,6 +220,8 @@ typedef void (* decoded_atsc_eit_callback)(void* p_cb_data, uint8_t eit_x);
 #endif
 
 /* -- ETT -- */
+#define ETM_MAX_LENGTH 4096
+
 typedef struct decoded_atsc_ett_s
 {
 	uint8_t				version;
@@ -231,7 +233,7 @@ typedef struct decoded_atsc_ett_s
 	unsigned int			event_not_channel_id:2;
 #endif
 	uint16_t			etm_length;
-	uint8_t				etm[256/*4096*/];
+	uint8_t				etm[ETM_MAX_LENGTH];
 
 	decoded_atsc_ett_s() : version(0xff), etm_id(0xffffffff), etm_length(0) {}
 } decoded_atsc_ett_t;

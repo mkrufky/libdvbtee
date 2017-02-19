@@ -1462,7 +1462,7 @@ void decode::dump_epg_event(const decoded_vct_channel_t *channel, const decoded_
 		     tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
 		     tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 	if (reporter) {
-		unsigned char message[512];
+		unsigned char message[ETM_MAX_LENGTH];
 		reporter->epg_event((const char *)service_name,
 					 channel->chan_major, channel->chan_minor,
 					 physical_channel, channel->program,
@@ -1528,7 +1528,7 @@ void decode::get_epg_event(const decoded_vct_channel_t *channel, const decoded_a
 	struct tm tme = *localtime( &end  );
 	__log_printf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
-	unsigned char message[512];
+	unsigned char message[ETM_MAX_LENGTH];
 	_get_epg_event(e, (const char *)service_name,
 		      channel->chan_major, channel->chan_minor,
 		      physical_channel, channel->program,
