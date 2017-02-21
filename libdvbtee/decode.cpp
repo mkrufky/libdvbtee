@@ -1474,15 +1474,13 @@ void decode::dump_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
 
-	unsigned char message[ETM_MAX_LENGTH];
+	unsigned char message[ETM_MAX_LENGTH] = { 0 };
 
 	const char* etm = (const char *)get_decoded_ett(current_eit_x, (channel->source_id << 16) | (event->event_id << 2) | 0x02, message, sizeof(message));
-	if (message[0])
-		__log_printf(stderr, "\t%s\n", message);
 
 	__log_printf(stderr, "%04d-%02d-%02d %02d:%02d-%02d:%02d %s%s%s\n",
 		     tms.tm_year+1900, tms.tm_mon+1, tms.tm_mday,
-		     tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name, (etm) ? "\n" : "", (etm) ? etm : "");
+		     tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name, (message[0]) ? "\n" : "", (message[0]) ? (const char *)message : "");
 
 	if (reporter) {
 		reporter->epg_event((const char *)service_name,
