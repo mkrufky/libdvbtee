@@ -314,7 +314,9 @@ void parse::process_mgt(bool attach)
 			if (scan_mode)
 				break;
 #endif
-			ett_pids[iter->second.pid] = iter->first - 0x0200;
+			if ((eit_collection_limit == -1) || (eit_collection_limit >= iter->first - 0x0200)) {
+				ett_pids[iter->second.pid] = iter->first - 0x0200;
+			}
 			/* FALL THRU */
 		case 0x0004:            /* Channel ETT */
 			b_attach_demux  = true;
