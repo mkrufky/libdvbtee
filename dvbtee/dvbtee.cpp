@@ -296,6 +296,7 @@ void usage(bool help, char *myname)
 		"-n\tbind to a specific network interface\n  "
 		"-I\trequest a service and its associated PES streams by its service id\n  "
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
+		"-e\tenable ETT extended text tables (EPG descriptions, ATSC only)\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
 		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
 		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
@@ -347,6 +348,7 @@ int main(int argc, char **argv)
 	bool b_read_dvr = false;
 	bool b_scan     = false;
 	bool scan_epg   = false;
+	bool b_enable_ett    = false;
 	bool b_output_file   = false;
 	bool b_output_stdout = false;
 	bool b_serve    = false;
@@ -376,7 +378,7 @@ int main(int argc, char **argv)
 	int num_tuners           = -1;
 	unsigned int timeout     = 0;
 
-	unsigned int wait_event  = 0;
+	unsigned int wait_event  = -1;
 	int eit_limit            = -1;
 
 	tune *tuner = NULL;
@@ -404,7 +406,7 @@ int main(int argc, char **argv)
 	char hdhrname[256];
 	memset(&hdhrname, 0, sizeof(hdhrname));
 
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:n:T:i:I:js::S::E::o::O:d::H::qh?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:n:T:i:I:js::S::eE::o::O:d::H::qh?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -474,12 +476,17 @@ int main(int argc, char **argv)
 		case 'I': /* request a service by its service id */
 			strncpy(service_ids, optarg, sizeof(service_ids)-1);
 			break;
+		case 'e': /* enable ETT extended text tables (EPG descriptions, ATSC only) */
+			b_enable_ett = true;
+			wait_event = 0; /* specifically no timeout when trying to gather ETT */
+			break;
 		case 'E': /* enable EPG scan, optional arg to limit the number of EITs to parse */
 #if 0
 			b_scan = true; // FIXME
 #endif
 			scan_epg = true;
-			wait_event = FEED_EVENT_EPG;
+			if (wait_event < 0)
+				wait_event = FEED_EVENT_EPG;
 			eit_limit = (optarg) ? strtoul(optarg, NULL, 0) : -1;
 			if (eit_limit >= 0)
 				fprintf(stderr, "EIT LIMIT: %d...\n", eit_limit);
@@ -560,6 +567,7 @@ int main(int argc, char **argv)
 		if (tuner) {
 			context.tuners[context.tuners.size()] = tuner;
 			tuner->feeder.parser.limit_eit(eit_limit);
+			if (b_enable_ett) tuner->feeder.parser.enable_ett_collection();
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
 #if defined(_WIN32)
@@ -583,6 +591,7 @@ int main(int argc, char **argv)
 		}
 		if (new_tuner) {
 			new_tuner->feeder.parser.limit_eit(eit_limit);
+			if (b_enable_ett) new_tuner->feeder.parser.enable_ett_collection();
 			context.tuners[context.tuners.size()] = new_tuner;
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
@@ -640,6 +649,7 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(filename)) {
+		if (b_enable_ett) context._file_feeder.parser.enable_ett_collection();
 		if (0 <= context._file_feeder.open_file(filename)) {
 			int ret = context._file_feeder.start();
 			if (b_serve) goto exit;
@@ -653,6 +663,7 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(tcpipfeedurl)) {
+		if (b_enable_ett) context._file_feeder.parser.enable_ett_collection();
 		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
 			write_feed iface(context);
 			hlsfeed(tcpipfeedurl, &iface);
@@ -702,7 +713,7 @@ int main(int argc, char **argv)
 		if (b_serve) goto exit;
 		else {
 			if (0 == ret) {
-				tuner->feeder.wait_for_event_or_timeout(timeout, wait_event);
+				tuner->feeder.wait_for_event_or_timeout(timeout, (wait_event >= 0) ? wait_event : 0);
 				tuner->stop_feed();
 			}
 			if (channel) /* if we tuned the frontend ourselves then close it */

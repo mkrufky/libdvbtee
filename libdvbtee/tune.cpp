@@ -225,7 +225,7 @@ void* tune::scan_thread()
 				int timeout = (scan_epg) ? 16 : (fe_type == DVBTEE_FE_ATSC) ? 4 : 12;
 				while ((!f_kill_thread) && (timeout)) {
 					if (scan_epg)
-						feeder.wait_for_epg(1000);
+						feeder.wait_for_epg(feeder.parser.ett_collection_enabled() ? 0 : 1000);
 					else
 						feeder.wait_for_psip(1000);
 					timeout--;
