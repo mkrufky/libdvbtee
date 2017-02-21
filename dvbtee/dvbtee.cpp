@@ -378,7 +378,7 @@ int main(int argc, char **argv)
 	int num_tuners           = -1;
 	unsigned int timeout     = 0;
 
-	unsigned int wait_event  = -1;
+	int wait_event           = -1;
 	int eit_limit            = -1;
 
 	tune *tuner = NULL;
@@ -713,7 +713,7 @@ int main(int argc, char **argv)
 		if (b_serve) goto exit;
 		else {
 			if (0 == ret) {
-				tuner->feeder.wait_for_event_or_timeout(timeout, (wait_event >= 0) ? wait_event : 0);
+				tuner->feeder.wait_for_event_or_timeout(timeout, (wait_event >= 0) ? (unsigned int)wait_event : 0);
 				tuner->stop_feed();
 			}
 			if (channel) /* if we tuned the frontend ourselves then close it */
