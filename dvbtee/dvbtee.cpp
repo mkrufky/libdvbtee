@@ -723,6 +723,7 @@ int main(int argc, char **argv)
 	else
 	if (0 == context._file_feeder.parser.get_fed_pkt_count()) {
 		fprintf(stderr, "reading from STDIN\n");
+		if (b_enable_ett) context._file_feeder.parser.enable_ett_collection();
 		int ret = context._file_feeder.start_stdin();
 		if (b_serve) goto exit;
 		if (0 == ret) {
