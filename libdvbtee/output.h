@@ -32,44 +32,16 @@
 
 #include "listen.h"
 #include "rbuf.h"
+#include "outputbase.h"
 
 #define TUNER_RESOURCE_SHARING 0
 
-#if 1 // moved from parse.h
-typedef std::map<uint16_t, uint16_t> map_pidtype;
-#endif
 ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
-		    const struct sockaddr *dest_addr = NULL, socklen_t addrlen = 0);
+		    const struct sockaddr *dest_addr = NULL, int addrlen = 0);
 
 int stream_http_chunk(int socket, const uint8_t *buf, size_t length, const bool send_zero_length = false);
 
-enum output_options {
-	OUTPUT_NONE    = 0,
-	OUTPUT_PATPMT  = 1,
-	OUTPUT_PES     = 2,
-	OUTPUT_PSIP    = 4,
-};
-
-enum output_mimetype {
-	MIMETYPE_NONE,
-	MIMETYPE_OCTET_STREAM,
-	MIMETYPE_TEXT_PLAIN,
-	MIMETYPE_TEXT_HTML,
-};
-
 const std::string http_response(enum output_mimetype mimetype);
-
-#define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES)
-
-#define OUTPUT_STREAM_BUF_SIZE 188*7*198
-
-typedef int (*stream_callback)(void *, const uint8_t *, size_t);
-
-class output_stream_iface
-{
-public:
-	virtual int stream(const uint8_t *, size_t) = 0;
-};
 
 class output_stream_priv;
 
@@ -90,15 +62,15 @@ public:
 	void stop();
 	inline void stop_after_drain() { if (drain()) stop(); }
 	int change_file();
-        unsigned int pickup_target_file_index();
-        
-        void rotate(unsigned long int file, unsigned long int fseq) {
-            target_file_size_limit = file;
-            target_fseq_size_limit = fseq;
-        }
-        
+	unsigned int pickup_target_file_index();
+
+	void rotate(unsigned long int file, unsigned long int fseq) {
+		target_file_size_limit = file;
+		target_fseq_size_limit = fseq;
+	}
+
 	bool detect_printf_seq(const std::string&);
-        void cleanup_target_dir();
+	void cleanup_target_dir();
 	void close_file();
 
 	bool push(uint8_t*, int);
@@ -130,7 +102,7 @@ private:
         
 	char*             target_file_name;
 	unsigned int      target_file_name_index;
-        unsigned long int target_file_size_limit, target_fseq_size_limit;
+	unsigned long int target_file_size_limit, target_fseq_size_limit;
 
 	rbuf ringbuffer;
 
@@ -174,7 +146,7 @@ private:
 
 typedef std::map<unsigned int, output_stream> output_stream_map;
 
-class output : public socket_listen_iface
+class output : public output_base, public socket_listen_iface
 {
 public:
 	output();
@@ -205,10 +177,10 @@ public:
 	int add_http_server(int);
 
 	void set_options(enum output_options opt = OUTPUT_NONE) { options = opt; }
-        void rotate(unsigned long int file, unsigned long int fseq) {
-            file_size_limit = file;
-            fseq_size_limit = fseq;
-        }
+	void rotate(unsigned long int file, unsigned long int fseq) {
+		file_size_limit = file;
+		fseq_size_limit = fseq;
+	}
 
 	bool check();
 
@@ -240,7 +212,7 @@ private:
 
 	enum output_options options;
         
-        unsigned long int file_size_limit, fseq_size_limit;
+	unsigned long int file_size_limit, fseq_size_limit;
 
 	unsigned long int count_in, count_out;
 

@@ -194,11 +194,11 @@ void* tune::scan_thread()
 #else
 		if (channels.count(channel)) {
 #endif
-			fprintf(stderr, "ALREADY SCANNED CHANNEL %d\n", channel);
+			__log_printf(stderr, "ALREADY SCANNED CHANNEL %d\n", channel);
 			continue;
 		}
 
-		fprintf(stderr, "scan channel %d...\n", channel);
+		__log_printf(stderr, "scan channel %d...\n", channel);
 
 		if (m_iface) m_iface->scan_progress(&progress);
 
@@ -225,7 +225,7 @@ void* tune::scan_thread()
 				int timeout = (scan_epg) ? 16 : (fe_type == DVBTEE_FE_ATSC) ? 4 : 12;
 				while ((!f_kill_thread) && (timeout)) {
 					if (scan_epg)
-						feeder.wait_for_epg(1000);
+						feeder.wait_for_epg(feeder.parser.ett_collection_enabled() ? 0 : 1000);
 					else
 						feeder.wait_for_psip(1000);
 					timeout--;
@@ -343,7 +343,7 @@ int tune::scan_for_services(unsigned int mode, char *channel_list, bool epg, tun
 
 	if (wait_for_results) {
 		count += get_scan_results(true, p_iface);
-		fprintf(stderr, "found %d services\n", count);
+		__log_printf(stderr, "found %d services\n", count);
 	}
 	return 0;
 }
@@ -369,13 +369,13 @@ int tune::scan_for_services(unsigned int mode, unsigned int min, unsigned int ma
 			total_count += count;
 #if 0
 			for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
-				fprintf(stderr, "found ts_id %05d on channel %d\n", iter->second, iter->first);
+				__log_printf(stderr, "found ts_id %05d on channel %d\n", iter->second, iter->first);
 			channels.clear(); //
 #endif
-			fprintf(stderr, "found %d services\n", count);
+			__log_printf(stderr, "found %d services\n", count);
 		}
 	}
 	if (count != total_count)
-		fprintf(stderr, "found %d services in total\n", total_count);
+		__log_printf(stderr, "found %d services in total\n", total_count);
 	return 0;
 }

@@ -44,7 +44,7 @@ void pmt::store(const dvbpsi_pmt_t * const p_pmt)
 #define PMT_DBG 1
 {
 #if PMT_DBG
-	fprintf(stderr, "%s PMT: v%d, service_id %d, pcr_pid %d\n", __func__,
+	__log_printf(stderr, "%s PMT: v%d, service_id %d, pcr_pid %d\n", __func__,
 		p_pmt->i_version, p_pmt->i_program_number, p_pmt->i_pcr_pid);
 #endif
 	set("program", p_pmt->i_program_number);
@@ -61,7 +61,7 @@ void pmt::store(const dvbpsi_pmt_t * const p_pmt)
 
 	Array streams("pid");
 #if PMT_DBG
-	fprintf(stderr, "  es_pid | type\n");
+	__log_printf(stderr, "  es_pid | type\n");
 #endif
 	const dvbpsi_pmt_es_t * p_es = p_pmt->p_first_es;
 	while (p_es) {
@@ -117,7 +117,7 @@ pmtES::pmtES(decoded_pmt_t& decoded_pmt, Decoder *parent, const dvbpsi_pmt_es_t 
 		}
 	}
 
-	fprintf(stderr, "  %6x | 0x%02x (%s) | %s\n",
+	__log_printf(stderr, "  %6x | 0x%02x (%s) | %s\n",
 		p_es->i_pid, p_es->i_type,
 		streamtype_name(p_es->i_type),
 		iso639lang.c_str());
@@ -141,7 +141,7 @@ bool pmt::ingest(TableStore *s, const dvbpsi_pmt_t * const t, TableWatcher *w)
 	for (std::vector<Table*>::const_iterator it = pmts.begin(); it != pmts.end(); ++it) {
 		pmt *thisPMT = (pmt*)*it;
 		if (thisPMT->get<uint16_t>("program") == t->i_program_number) {
-			if (thisPMT->get<uint16_t>("version") == t->i_version) {
+			if (thisPMT->get<uint8_t>("version") == t->i_version) {
 				dPrintf("PMT v%d, service_id %d, pcr_pid %d: ALREADY DECODED", t->i_version, t->i_program_number, t->i_pcr_pid);
 				return false;
 			}

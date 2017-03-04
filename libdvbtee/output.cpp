@@ -147,7 +147,7 @@ const std::string http_response(enum output_mimetype mimetype)
 }
 
 ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
-		    const struct sockaddr *dest_addr, socklen_t addrlen)
+		    const struct sockaddr *dest_addr, int addrlen)
 {
 	if (sockfd < 0)
 		return sockfd;
@@ -176,10 +176,10 @@ ssize_t socket_send(int sockfd, const void *buf, size_t len, int flags,
 	return (ret > 0) ?
 #if 0
 		((dest_addr) && (addrlen)) ?
-			sendto(sockfd, buf, len, flags, dest_addr, addrlen) :
+			sendto(sockfd, buf, len, flags, dest_addr, (socklen_t) addrlen) :
 			send(sockfd, buf, len, flags) :
 #else
-		sendto(sockfd, (const char *)buf, len, flags|MSG_NOSIGNAL, dest_addr, addrlen) :
+		sendto(sockfd, (const char *)buf, len, flags|MSG_NOSIGNAL, dest_addr, (socklen_t) addrlen) :
 #endif
 		ret;
 }
@@ -255,6 +255,7 @@ output_stream::output_stream()
   , target_file_size_limit(0)
   , target_fseq_size_limit(0)
   , ringbuffer()
+  , priv(NULL)
   , stream_method(OUTPUT_STREAM_UDP)
   , count_in(0)
   , count_out(0)
@@ -262,7 +263,6 @@ output_stream::output_stream()
   , stream_cb(NULL)
   , stream_cb_priv(NULL)
   , have_pat(false)
-  , priv(NULL)
 {
 	dPrintf("()");
 	memset(&name, 0, sizeof(name));
@@ -477,8 +477,8 @@ bool output_stream::check()
 		if (pids.size()) {
 			dPrintf("(%d: %s) subscribed to the following pids:", sock, name);
 			for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
-				fprintf(stderr, "%d, ", iter->first);
-			fprintf(stderr, "\n");
+				__log_printf(stderr, "%d, ", iter->first);
+			__log_printf(stderr, "\n");
 		}
 #endif
 	}
@@ -530,7 +530,7 @@ bool output_stream::push(uint8_t* p_data, int size)
 int output_stream::stream(uint8_t* p_data, int size)
 {
 	int ret = -1;
-        
+
 	if ((!p_data) || (!size))
 		dPrintf("no data to stream!!!");
 	/* stream data to target */
@@ -548,15 +548,15 @@ int output_stream::stream(uint8_t* p_data, int size)
 		}
 		break;
 	case OUTPUT_STREAM_FILE:
-            //dPrintf("(sock: %d, size: %d, filesize: %lu, limit: %lu)", sock, size, get_file_size(sock), target_file_size_limit);
-            
-            if (
-                target_file_size_limit > 0
-                && ((unsigned)get_file_size(sock) + size) >= target_file_size_limit
-            ) {
-                change_file();
-            }
-            
+		//dPrintf("(sock: %d, size: %d, filesize: %lu, limit: %lu)", sock, size, get_file_size(sock), target_file_size_limit);
+
+		if (
+			target_file_size_limit > 0
+			&& ((unsigned)get_file_size(sock) + size) >= target_file_size_limit
+		) {
+			change_file();
+		}
+
 		ret = write(sock, p_data, size);
 		if (ret < 0) {
 			stop_without_wait();
@@ -608,176 +608,172 @@ void output_stream::close_file()
 }
 
 /**
-    Open or reopen file for output.
+	Open or reopen file for output.
 
-    @param char* output filename.
-    @return int 0 if file opened and -1 if open fails.
+	@param char* output filename.
+	@return int 0 if file opened and -1 if open fails.
 **/
 int output_stream::change_file()
 {
-    std::string new_name;
-    
-    new_name = target_file_name;
-    
-    if (target_file_size_limit > 0) {
-        dPrintf("rotate detected");
-        struct stat s;
-        
-        //TODO: check only once
-        if (stat(target_file_name, &s) != 0) {
-            dPrintf("Output directory not exists. Creating ...");
-            if (mkdir(target_file_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-                perror("Can't create output directory");
-                return -1;
-            }
-        }
-        
-        std::stringstream tmp_stream;
-        tmp_stream << target_file_name << "/";
-        tmp_stream << target_file_name_index << ".ts";
-        tmp_stream >> new_name;
-    }
+	std::string new_name;
 
-    if (sock >= 0) {
-        close(sock);
-        sock = -1;
-        
-        if (target_file_size_limit > 0) {
-            cleanup_target_dir();
-        }
-    }
-        
-    dPrintf("opening file %s...", new_name.c_str());
-    if (
-        (sock = open(new_name.c_str(), O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0
-    ) {
-        perror("open file failed");
-        return -1;
-    }
-    
-    target_file_name_index++;
-    return 0;
+	new_name = target_file_name;
+
+	if (target_file_size_limit > 0) {
+		dPrintf("rotate detected");
+		struct stat s;
+
+		//TODO: check only once
+		if (stat(target_file_name, &s) != 0) {
+			dPrintf("Output directory not exists. Creating ...");
+			if (mkdir(target_file_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+				perror("Can't create output directory");
+				return -1;
+			}
+		}
+
+		std::stringstream tmp_stream;
+		tmp_stream << target_file_name << "/";
+		tmp_stream << target_file_name_index << ".ts";
+		tmp_stream >> new_name;
+	}
+
+	if (sock >= 0) {
+		close(sock);
+		sock = -1;
+
+		if (target_file_size_limit > 0) {
+			cleanup_target_dir();
+		}
+	}
+
+	dPrintf("opening file %s...", new_name.c_str());
+	if (
+		(sock = open(new_name.c_str(), O_CREAT|O_WRONLY|O_TRUNC, S_IRWXU)) < 0
+	) {
+		perror("open file failed");
+		return -1;
+	}
+
+	target_file_name_index++;
+	return 0;
 }
 
 /**
-    Get file size by file descriptor 
+	Get file size by file descriptor 
 
-    @param int fd file descriptor
-    @return int file size
+	@param int fd file descriptor
+	@return int file size
 **/
 long output_stream::get_file_size(int fd)
 {
-    struct stat stat_buf;
-    int rc = fstat(fd, &stat_buf);
-    return rc == 0 ? stat_buf.st_size : -1;
+	struct stat stat_buf;
+	int rc = fstat(fd, &stat_buf);
+	return rc == 0 ? stat_buf.st_size : -1;
 }
 
 /**
-    Filter function for scandir
+	Filter function for scandir
 
-    @param  dirent d dir entry
-    @return int 0 to remove file from result
+	@param  dirent d dir entry
+	@return int 0 to remove file from result
 **/
 int filter_dir(const struct dirent *d)
 {
-    if (
-        strcmp(d->d_name, ".") == 0
-        || strcmp(d->d_name, "..") == 0
-    ) {
-        return 0;
-    }
-    
-    return 1;
+	if (
+		strcmp(d->d_name, ".") == 0
+		|| strcmp(d->d_name, "..") == 0
+	) {
+		return 0;
+	}
+	return 1;
 }
 
 unsigned int output_stream::pickup_target_file_index()
 {
-    struct dirent **namelist;
-    int n, i;
-    
-    n = scandir(target_file_name, &namelist, filter_dir, versionsort);
-    
-    
-    if (n < 0) {
-        perror("scandir");
-        return 0;
-    };
-    
-    std::string filename = namelist[n-1]->d_name;
-    
-    free(namelist);
-    
-    size_t lastdot = filename.find_last_of(".");
-    if (lastdot == std::string::npos) {
-        i = strtoul(filename.c_str(), NULL, 0);
-        
-    } else {        
-        i = strtoul(filename.substr(0, lastdot).c_str(), NULL, 0); 
-    }
-    
-    dPrintf("Index detected: %d", i);
-    
-    return (i + 1);
+	struct dirent **namelist;
+	int n, i;
+
+	n = scandir(target_file_name, &namelist, filter_dir, versionsort);
+
+	if (n < 0) {
+		perror("scandir");
+		return 0;
+	};
+
+	std::string filename = namelist[n-1]->d_name;
+
+	free(namelist);
+
+	size_t lastdot = filename.find_last_of(".");
+	if (lastdot == std::string::npos) {
+		i = strtoul(filename.c_str(), NULL, 0);
+	} else {        
+		i = strtoul(filename.substr(0, lastdot).c_str(), NULL, 0); 
+	}
+
+	dPrintf("Index detected: %d", i);
+
+	return (i + 1);
 }
 
 /**
-    Check output directory size and remove files with lowest indexes if needed
+	Check output directory size and remove files with lowest indexes if needed
 
-    @return void
+	@return void
 **/
 void output_stream::cleanup_target_dir()
 {
-    if (target_fseq_size_limit == 0) {
-        return;
-    }
-    
-    struct dirent **namelist;
-    int n, i;
-    
-    struct stat s;
-    unsigned long total_size = 0;
-    std::string path;
-    
-    n = scandir(target_file_name, &namelist, filter_dir, versionsort);
-    
-    if (n < 0) {
-        perror("scandir");
-        return;
-    };
-    
-    // Calculating dir total ...
-    for(i = 0;i < n; i++) {
-        path.assign(target_file_name);
-        path.append("/");
-        path.append(namelist[i]->d_name);
-        
-        if (stat(path.c_str(), &s) != 0) {
-            continue;
-        }
-        
-        total_size += s.st_size;
-    }
-    
-    //Removing files ...
-    i = 0;
-    while(i < n && total_size >= target_fseq_size_limit) {
-        path.assign(target_file_name);
-        path.append("/");
-        path.append(namelist[i]->d_name);
-        
-        i++;
-        
-        if (stat(path.c_str(), &s) != 0 || remove(path.c_str()) != 0) {
-            continue;
-        }
-        
-        
-        total_size -= s.st_size;
-        
-        dPrintf("Removed %s, total: %lu", path.c_str(), total_size);
-    }
-    
-    free(namelist);
+	if (target_fseq_size_limit == 0) {
+		return;
+	}
+
+	struct dirent **namelist;
+	int n, i;
+
+	struct stat s;
+	unsigned long total_size = 0;
+	std::string path;
+
+	n = scandir(target_file_name, &namelist, filter_dir, versionsort);
+
+	if (n < 0) {
+		perror("scandir");
+		return;
+	};
+
+	// Calculating dir total ...
+	for(i = 0;i < n; i++) {
+		path.assign(target_file_name);
+		path.append("/");
+		path.append(namelist[i]->d_name);
+
+		if (stat(path.c_str(), &s) != 0) {
+			continue;
+		}
+
+		total_size += s.st_size;
+	}
+
+	//Removing files ...
+	i = 0;
+	while(i < n && total_size >= target_fseq_size_limit) {
+		path.assign(target_file_name);
+		path.append("/");
+		path.append(namelist[i]->d_name);
+
+		i++;
+
+		if (stat(path.c_str(), &s) != 0 || remove(path.c_str()) != 0) {
+			continue;
+		}
+
+		total_size -= s.st_size;
+
+		dPrintf("Removed %s, total: %lu", path.c_str(), total_size);
+	}
+
+	free(namelist);
 }
 
 int output_stream::add(void* priv, stream_callback callback, map_pidtype &pids)
@@ -871,16 +867,16 @@ int output_stream::add(char* target, map_pidtype &pids)
 		close(sock);
 
 	if (b_file) {
-            target_file_name       = ip;
-            target_file_name_index = output_stream::pickup_target_file_index();
-            
-            if (change_file() < 0) {
-                return -1;
-            }
+		target_file_name       = ip;
+		target_file_name_index = output_stream::pickup_target_file_index();
 
-            ringbuffer.reset();
-            stream_method = OUTPUT_STREAM_FILE;
-            return set_pids(pids);
+		if (change_file() < 0) {
+			return -1;
+		}
+
+		ringbuffer.reset();
+		stream_method = OUTPUT_STREAM_FILE;
+		return set_pids(pids);
 	}
 
 	sock = socket(AF_INET, (b_tcp) ? SOCK_STREAM : SOCK_DGRAM, (b_tcp) ? IPPROTO_TCP : IPPROTO_UDP);
@@ -1129,8 +1125,8 @@ bool output::check()
 	if (pids.size()) {
 		dPrintf("subscribed to the following pids:");
 		for (map_pidtype::const_iterator iter = pids.begin(); iter != pids.end(); ++iter)
-			fprintf(stderr, "%d, ", iter->first);
-		fprintf(stderr, "\n");
+			__log_printf(stderr, "%d, ", iter->first);
+		__log_printf(stderr, "\n");
 	}
 #endif
 	ringbuffer.check();
@@ -1366,21 +1362,21 @@ int output::__add(char* target, map_pidtype &pids)
 {
 	int search_id = search(target);
 	if (search_id >= 0) {
-            dPrintf("target already exists #%d: %s", search_id, target);
-            return search_id;
+		dPrintf("target already exists #%d: %s", search_id, target);
+		return search_id;
 	}
 	int target_id = num_targets;
 
 	dPrintf("(%d->%s)", target_id, target);
-        
+
 	/* push data into output buffer */
         output_streams[target_id].rotate(file_size_limit, fseq_size_limit);
-        
+
 	int ret = output_streams[target_id].add(target, pids);
-	if (ret == 0) {
-            num_targets++;
-	} else
-            dPrintf("failed to add target #%d: %s", target_id, target);
+	if (ret == 0)
+		num_targets++;
+	else
+		dPrintf("failed to add target #%d: %s", target_id, target);
 
 	dPrintf("~(%d->%s)", target_id, target);
 

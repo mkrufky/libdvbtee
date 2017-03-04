@@ -24,8 +24,8 @@
 
 #include <string>
 
-#include "decode/decoder.h"
-#include "decode/descriptor/descriptor.h"
+#include "decoder.h"
+#include "descript.h"
 
 namespace dvbtee {
 
@@ -127,9 +127,9 @@ public:
 	{
 		std::vector<Table*> V = get(tableid);
 		ssize_t s = V.size();
-		if (s > 1) printf("TABLE: %02x %zu collected, something is wrong\n", tableid, s);
+		if (s > 1) __log_printf(stderr, "TABLE: %02x %zu collected, something is wrong\n", tableid, s);
 		if (s) {
-			printf("UPDATING TABLE %02x\n", tableid);
+			__log_printf(stderr, "UPDATING TABLE %02x\n", tableid);
 			C *t = (C*)V[s-1];
 			t->reset();
 			t->store(p_table);
@@ -219,7 +219,7 @@ public:
 	bool registerFactory(uint8_t, TableBaseFactory*);
 	const TableBaseFactory* getFactory(uint8_t) const;
 
-	int count() const;
+	std::vector<uint8_t> list() const;
 private:
 	TableRegistry();
 	~TableRegistry();

@@ -45,7 +45,7 @@ void pat::store(const dvbpsi_pat_t * const p_pat)
 {
 	if (!p_pat) return;
 #if PAT_DBG
-	fprintf(stderr, "%s PAT: v%d, ts_id: %d\n", __func__,
+	__log_printf(stderr, "%s PAT: v%d, ts_id: %d\n", __func__,
 		p_pat->i_version, p_pat->i_ts_id);
 #endif
 #if 1
@@ -87,7 +87,7 @@ patProgram::patProgram(Decoder *parent, const dvbpsi_pat_program_t * const p_pro
 {
 	if (!p_program) return;
 #if PAT_DBG
-	fprintf(stderr, "  %10d | %x\n",
+	__log_printf(stderr, "  %10d | %x\n",
 		p_program->i_number,
 		p_program->i_pid);
 #endif

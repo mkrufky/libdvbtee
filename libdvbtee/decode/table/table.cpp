@@ -86,7 +86,7 @@ bool TableRegistry::registerFactory(uint8_t tableid, TableBaseFactory *factory)
 
 	m_factories.insert( std::pair<uint8_t, const TableBaseFactory*>(tableid, factory) );
 #if DBG_DECODER_INSERTION
-	fprintf(stderr, "inserted 0x%02x, %p, %ld table decoders present\n", tableid, factory, m_factories.size());
+	__log_printf(stderr, "inserted 0x%02x, %p, %ld table decoders present\n", tableid, factory, m_factories.size());
 #endif
 	pthread_mutex_unlock(&m_mutex);
 	return true;
@@ -101,14 +101,16 @@ const TableBaseFactory* TableRegistry::getFactory(uint8_t tableid) const
 	return (it == m_factories.end()) ? NULL : it->second;
 }
 
-int TableRegistry::count() const
+std::vector<uint8_t> TableRegistry::list() const
 {
-	fprintf(stderr, "%ld table decoders present:", m_factories.size());
+	std::vector<uint8_t> v;
+	__log_printf(stderr, "%ld table decoders present:", m_factories.size());
 	for (std::map <uint8_t, const TableBaseFactory*>::const_iterator it = m_factories.begin(); it != m_factories.end(); ++it) {
-		fprintf(stderr, " 0x%02x", it->first);
+		__log_printf(stderr, " 0x%02x", it->first);
+		v.push_back(it->first);
 	}
-	fprintf(stderr, "\n");
-	return m_factories.size();
+	__log_printf(stderr, "\n");
+	return v;
 }
 
 TableRegistry::TableRegistry()

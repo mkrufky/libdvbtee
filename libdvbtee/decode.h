@@ -26,7 +26,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "decode/table/table.h"
+#include "table.h"
 
 #include "dvbpsi/pat.h"
 #include "dvbpsi/pmt.h"
@@ -220,6 +220,8 @@ typedef void (* decoded_atsc_eit_callback)(void* p_cb_data, uint8_t eit_x);
 #endif
 
 /* -- ETT -- */
+#define ETM_MAX_LENGTH 4096
+
 typedef struct decoded_atsc_ett_s
 {
 	uint8_t				version;
@@ -231,7 +233,7 @@ typedef struct decoded_atsc_ett_s
 	unsigned int			event_not_channel_id:2;
 #endif
 	uint16_t			etm_length;
-	uint8_t				etm[256/*4096*/];
+	uint8_t				etm[ETM_MAX_LENGTH];
 
 	decoded_atsc_ett_s() : version(0xff), etm_id(0xffffffff), etm_length(0) {}
 } decoded_atsc_ett_t;
@@ -317,6 +319,8 @@ public:
 			       );
 	~decode_network_service();
 
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
+
 #if !OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
@@ -337,6 +341,7 @@ private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 
 	decoded_sdt_t                   decoded_sdt;
 
@@ -369,6 +374,8 @@ public:
 	~decode_network();
 
 	decode_network_service *fetch_network_service(uint16_t ts_id);
+
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
 
 #if !OLD_DECODER
 	/* TableWatcher */
@@ -405,6 +412,7 @@ private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
@@ -467,6 +475,8 @@ public:
 
 	decode_network *fetch_network(uint16_t nw_id);
 
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
+
 #if !OLD_DECODER
 	/* TableWatcher */
 	void updateTable(uint8_t tId, dvbtee::decode::Table *table);
@@ -513,10 +523,11 @@ public:
 	const map_decoded_atsc_eit* get_decoded_atsc_eit() const { return decoded_atsc_eit; }
 	const map_decoded_eit*      get_decoded_eit() const;
 
-	unsigned char* get_decoded_ett(uint16_t etm_id, unsigned char *message, size_t sizeof_message); /* message must be an array of 256 unsigned char's */
+	unsigned char* get_decoded_ett(uint8_t current_eit_x, uint16_t etm_id, unsigned char *message, size_t sizeof_message); /* message must be an array of 256 unsigned char's */
 
 	uint8_t get_current_eit_x() const { return eit_x; }
 	uint8_t set_current_eit_x(uint8_t new_eit_x) { eit_x = new_eit_x; return eit_x; }
+	uint8_t set_current_ett_x(uint8_t new_ett_x) { ett_x = new_ett_x; return ett_x; }
 
 	uint16_t get_lcn(uint16_t) const;
 
@@ -524,11 +535,13 @@ public:
 
 	void dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
+	bool ett_x_complete(uint8_t current_ett_x);
 	bool got_all_eit(int limit = -1);
+	bool got_all_ett(int limit = -1);
 
 	void dump_epg(decode_report *reporter);
 
-	void dump_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter);
+	void dump_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter);
 	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter);
 
 	void set_physical_channel(unsigned int chan) { physical_channel = chan; }
@@ -538,6 +551,7 @@ private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 
 	uint16_t orig_network_id;
 	uint16_t      network_id;
@@ -552,13 +566,14 @@ private:
 	map_rcvd rcvd_pmt;
 
 	uint8_t eit_x;
+	uint8_t ett_x;
 
 	map_decoded_atsc_eit decoded_atsc_eit[128];
 #if 0
 	decoded_atsc_eit_callback atsc_eit_callback;
 #endif
 	//map_rcvd rcvd_eit;
-	map_decoded_atsc_ett decoded_ett;
+	map_decoded_atsc_ett decoded_ett[128];
 
 #if OLD_DECODER
 	desc descriptors;
@@ -575,7 +590,7 @@ private:
 	bool eit_x_complete_dvb_pf();
 
 
-	void get_epg_event(const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decoded_event_t *);
+	void get_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decoded_event_t *);
 	void get_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decoded_event_t *);
 
 	bool get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_event_t *e);

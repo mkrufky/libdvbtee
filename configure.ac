@@ -27,6 +27,10 @@ AM_CONDITIONAL([OLDDECODER], [test x$olddecoder = xtrue])
 AC_ARG_ENABLE([hdhr],
     AS_HELP_STRING([--disable-hdhr], [Disable HDHomeRun support]))
 
+AC_ARG_ENABLE([examples],
+    AS_HELP_STRING([--disable-examples], [Disable building example applications]))
+AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
+
 AC_ARG_ENABLE([dvbpsibuild],
 [  --enable-dvbpsibuild    Enable dvbpsi build],
 [case "${enableval}" in
@@ -209,7 +213,7 @@ AM_COND_IF([DVBPSIBUILD], [
 ])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h linux/dvb/frontend.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h stdint.h stdlib.h string.h sys/ioctl.h sys/time.h sys/timeb.h unistd.h ifaddrs.h sys/poll.h sys/socket.h linux/dvb/frontend.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -222,7 +226,7 @@ AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memchr memmove memset select socket stpcpy strchr strcspn strdup strerror strpbrk strrchr strspn strstr strtoul fcntl strtok_r timegm _mkgmtime inet_aton inet_pton InetPton])
+AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memset select socket strchr strdup strstr strtoul memchr memmove stpcpy strcspn strerror strpbrk strrchr strspn fcntl strtok_r timegm _mkgmtime inet_aton inet_pton InetPton])
 
 PKG_PROG_PKG_CONFIG([0.20])
 AM_CONDITIONAL([HAVE_PKG_CONFIG], [test "x$PKG_CONFIG" != "x"])
@@ -233,6 +237,13 @@ AS_IF([test "x$PKG_CONFIG" != "x"], [
 	                 libdvbtee_server.pc])
 ])
 
+AS_IF([test "x$enable_examples" != "xno"], [
+	AC_CONFIG_FILES([examples/parser_example/Makefile
+	                 examples/server_example/Makefile
+	                 examples/walk_hls/Makefile
+	                 examples/Makefile])
+])
+
 AC_CONFIG_FILES([Makefile
                  dvbtee/Makefile
                  libdvbtee/Makefile
@@ -240,10 +251,6 @@ AC_CONFIG_FILES([Makefile
                  libdvbtee/value/Makefile
                  libdvbtee_server/Makefile
                  tunerprovider/Makefile
-                 examples/parser_example/Makefile
-                 examples/server_example/Makefile
-                 examples/walk_hls/Makefile
-                 examples/Makefile
                  packaging/libdvbtee.spec])
 AC_OUTPUT
 

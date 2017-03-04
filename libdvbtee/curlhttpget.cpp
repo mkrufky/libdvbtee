@@ -22,6 +22,7 @@
 #include "dvbtee_config.h"
 #ifdef HAVE_LIBCURL
 #include "curlhttpget.h"
+#include "log.h"
 
 curlhttpget::curlhttpget(const char *url, curlhttpget_iface *iface, curlhttpget_info_t *info)
   : curl_handle(curl_easy_init())
@@ -55,7 +56,7 @@ void curlhttpget::getinfo(curlhttpget_info_t *info)
   info->total_time = 0.0;
   CURLcode res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME, &info->total_time);
   if (res == CURLE_OK)
-    fprintf(stderr, "%s: total time: %f\n", __func__, info->total_time);
+    __log_printf(stderr, "%s: total time: %f\n", __func__, info->total_time);
 }
 
 //static

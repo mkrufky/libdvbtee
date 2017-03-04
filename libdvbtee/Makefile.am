@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -I./decode -I./decode/table -I/usr/include/libhdhomerun -I/usr/lib/libhdhomerun -I/opt/local/include -pthread -D__STDC_FORMAT_MACROS
+AM_CXXFLAGS = -I./decode -I./decode/table -I./decode/descriptor -I/usr/include/libhdhomerun -I/usr/lib/libhdhomerun -I/opt/local/include -pthread -D__STDC_FORMAT_MACROS
 
 lib_LTLIBRARIES = libdvbtee.la
 
@@ -35,6 +35,7 @@ EXTRA_DIST = \
     listen.h \
     log.h \
     output.h \
+    outputbase.h \
     parse.h \
     rbuf.h \
     stats.h \
@@ -59,6 +60,7 @@ library_include_HEADERS = \
     listen.h \
     log.h \
     output.h \
+    outputbase.h \
     parse.h \
     rbuf.h \
     stats.h \

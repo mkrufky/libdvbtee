@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <map>
 
 #include "decode.h"
 #include "demux.h"
@@ -32,8 +33,8 @@
 
 /* update version number by updating the LIBDVBTEE_VERSION_FOO fields below */
 #define LIBDVBTEE_VERSION_A 0
-#define LIBDVBTEE_VERSION_B 4
-#define LIBDVBTEE_VERSION_C 6
+#define LIBDVBTEE_VERSION_B 5
+#define LIBDVBTEE_VERSION_C 3
 
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
@@ -46,10 +47,6 @@
 
 extern const char *parse_libdvbpsi_version;
 
-
-#define USE_STATIC_DECODE_MAP 1
-
-#include <map>
 
 #if !USING_DVBPSI_VERSION_0
 typedef void (*dvbpsi_detach_table_callback)(dvbpsi_t *, uint8_t, uint16_t);
@@ -134,8 +131,11 @@ public:
 class parse
 {
 public:
-	parse();
-	~parse();
+	__attribute__((deprecated)) parse(output_base&);
+	parse(output_base&, map_decoder&);
+	virtual ~parse();
+
+	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
 
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; }
 	uint16_t get_ts_id() const { return ts_id; }
@@ -187,7 +187,8 @@ public:
 	void set_epg_mode(bool onoff)  { epg_mode = onoff; }
 	void enable(bool onoff)  { enabled = onoff; }
 
-	void enable_ett_collection(bool onoff) { dont_collect_ett = !onoff; }
+	void enable_ett_collection(bool onoff = true) { dont_collect_ett = !onoff; }
+	bool ett_collection_enabled() const { return !dont_collect_ett; }
 
 	bool is_pmt_ready(uint16_t id = 0);
 	inline bool is_basic_psip_ready() { return ((has_pat) && (((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit)))); }
@@ -202,9 +203,9 @@ public:
 
 	void set_tsfilter_iface(tsfilter_iface &iface) { m_tsfilter_iface = &iface; }
 
-	static void dumpJson();
+	void dumpJson();
 
-	output out;
+	output_base& out;
 
 	bool check();
 	bool is_enabled() { return enabled; }
@@ -212,9 +213,12 @@ public:
 	stats statistics;
 	static int count_decoder_factories();
 private:
-#if !USE_STATIC_DECODE_MAP
-	map_decoder   decoders;
-#endif
+	map_decoder&   decoders;
+	dvbtee::decode::TableWatcher* subscribedTableWatcher;
+	decode& get_decoder(uint16_t ts_id);
+
+	void init();
+
 	static void take_pat(void*, dvbpsi_pat_t*);
 	static void take_pmt(void*, dvbpsi_pmt_t*);
 	static void take_eit(void*, dvbpsi_eit_t*);
@@ -300,6 +304,7 @@ private:
 
 //	uint8_t grab_next_eit(uint8_t current_eit_x);
 	map_pidtype eit_pids; /* pid, eit-x */
+	map_pidtype ett_pids; /* pid, ett-x */
 
 	int dumped_eit;
 	int eit_collection_limit;
@@ -328,6 +333,25 @@ private:
 	map_pidtype out_pids;
 
 	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&);
+};
+
+class privateParse: public parse
+{
+public:
+	privateParse();
+	virtual ~privateParse();
+private:
+	dummy_output outp;
+	map_decoder m_decoders;
+};
+
+class globalParse: public parse
+{
+public:
+	globalParse();
+	virtual ~globalParse();
+private:
+	dummy_output outp;
 };
 
 #endif //__PARSE_H__

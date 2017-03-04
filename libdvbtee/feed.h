@@ -48,9 +48,10 @@ public:
 	void stop();
 	int start();
 	int start_stdin();
-	int start_socket(char* source);
+	int start_socket(char* source, char* net_if = NULL);
 	int start_tcp_listener(uint16_t);
-	int start_udp_listener(uint16_t);
+	int start_udp_unbound_listener(uint16_t, char *ip = NULL);
+	int start_udp_listener(uint16_t, char* ip, char* net_if);
 
 	/* initialize for feed via functional interface */
 	int setup_feed(int prio);
@@ -62,6 +63,7 @@ public:
 	char* get_filename() { return filename; }
 	bool check();
 
+	output out;
 	parse parser;
 
 #define FEED_EVENT_PSIP 1

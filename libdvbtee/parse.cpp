@@ -33,9 +33,7 @@
 
 const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
 
-#if USE_STATIC_DECODE_MAP
-static map_decoder   decoders;
-#endif
+static map_decoder   global_static_decoders;
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_PARSE, fmt, ##arg)
 
@@ -103,12 +101,12 @@ void addpid(uint8_t pid)
 void printpids()
 {
 	unsigned int i = 0;
-	fprintf(stderr, "%s: ", __func__);
+	__log_printf(stderr, "%s: ", __func__);
 	while (i < pid_idx) {
-		fprintf(stderr, "%d(%04x) ", pids[i], pids[i]);
+		__log_printf(stderr, "%d(%04x) ", pids[i], pids[i]);
 		i++;
 	}
-	fprintf(stderr, "\n");
+	__log_printf(stderr, "\n");
 }
 #endif
 /* --- */
@@ -153,7 +151,7 @@ void parse::rewrite_pat()
 #endif
 	dvbpsi_pat_t pat;
 	dvbpsi_psi_section_t* p_section;
-	const decoded_pat_t *decoded_pat = decoders[ts_id].get_decoded_pat();
+	const decoded_pat_t *decoded_pat = get_decoder(ts_id).get_decoded_pat();
 
 	if (rewritten_pat_ver_offset == 0x1e)
 		rewritten_pat_ver_offset = 0;
@@ -218,7 +216,7 @@ bool parse::take_pat(dvbpsi_pat_t* p_pat, bool decoded)
 		return true;
 	}
 
-	process_pat(decoders[p_pat->i_ts_id].get_decoded_pat());
+	process_pat(get_decoder(p_pat->i_ts_id).get_decoded_pat());
 
 	rewrite_pat();
 
@@ -248,7 +246,7 @@ bool parse::take_pmt(dvbpsi_pmt_t* p_pmt, bool decoded)
 
 	if (!decoded) return true;
 
-	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+	const map_decoded_pmt* decoded_pmt = get_decoder(ts_id).get_decoded_pmt();
 
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(p_pmt->i_program_number);
 	if (iter_pmt != decoded_pmt->end())
@@ -282,11 +280,12 @@ bool parse::take_vct(dvbpsi_atsc_vct_t* p_vct, bool decoded)
 
 void parse::process_mgt(bool attach)
 {
-	const decoded_mgt_t* decoded_mgt = decoders[ts_id].get_decoded_mgt();
+	const decoded_mgt_t* decoded_mgt = get_decoder(ts_id).get_decoded_mgt();
 
 	bool b_expecting_vct = false;
 
 	eit_pids.clear();
+	ett_pids.clear();
 	if (!decoded_mgt)
 		fprintf(stderr, "%s: decoded_mgt is NULL!!!\n", __func__);
 	else for (map_decoded_mgt_tables::const_iterator iter =
@@ -311,9 +310,13 @@ void parse::process_mgt(bool attach)
 		case 0x0200 ... 0x027f: /* ETT-0 to ETT-127 */
 			if (dont_collect_ett)
 				break;
-
+#if 0
 			if (scan_mode)
 				break;
+#endif
+			if ((eit_collection_limit == -1) || (eit_collection_limit >= iter->first - 0x0200)) {
+				ett_pids[iter->second.pid] = iter->first - 0x0200;
+			}
 			/* FALL THRU */
 		case 0x0004:            /* Channel ETT */
 			b_attach_demux  = true;
@@ -579,11 +582,9 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 	case TID_ATSC_EIT:
 		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachEIT, dvbpsi_atsc_DetachEIT, take_eit, i_table_id, i_extension);
 		break;
-#ifdef ETT
 	case TID_ATSC_ETT:
 		attach_table_auto_detach_wrapper(container, dvbpsi_atsc_AttachETT, dvbpsi_atsc_DetachETT, take_ett, i_table_id, i_extension);
 		break;
-#endif
 	case TID_ATSC_STT:
 		attach_table_auto_detach_wrapper_noext(container, dvbpsi_atsc_AttachSTT, dvbpsi_atsc_DetachSTT, take_stt, i_table_id, i_extension);
 		break;
@@ -599,19 +600,6 @@ void parse::attach_table(dvbpsi_t *p_dvbpsi, uint8_t i_table_id, uint16_t i_exte
 	}
 }
 
-#if USE_STATIC_DECODE_MAP
-#define define_table_wrapper(a, b, c, d)				\
-void parse::a(void* p_this, b* p_table)					\
-{									\
-	parse* parser = (parse*)p_this;					\
-	if ((parser) &&							\
-	    (((parser->a(p_table, false)) && (parser->get_ts_id())) &&	\
-	     ((decoders[parser->get_ts_id()].a(p_table)) ||		\
-	      (!parser->d))))						\
-		parser->a(p_table, true);				\
-	c(p_table);							\
-}
-#else
 #define define_table_wrapper(a, b, c, d)				\
 void parse::a(void* p_this, b* p_table)					\
 {									\
@@ -623,7 +611,6 @@ void parse::a(void* p_this, b* p_table)					\
 		parser->a(p_table, true);				\
 	c(p_table);							\
 }
-#endif /* USE_STATIC_DECODE_MAP */
 
 #if USING_DVBPSI_VERSION_0
 #define dvbpsi_pat_delete dvbpsi_DeletePAT
@@ -672,9 +659,11 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 	if (!eit_x_complete(current_eit_x))
 		return current_eit_x;
 
-	map_decoded_mgt_tables::const_iterator iter = decoders[ts_id].get_decoded_mgt()->tables.find(0x0100 + current_eit_x);
+	decode &decoder = get_decoder(ts_id);
 
-	if (iter != decoders[ts_id].get_decoded_mgt()->tables.end()) {
+	map_decoded_mgt_tables::const_iterator iter = decoder.get_decoded_mgt()->tables.find(0x0100 + current_eit_x);
+
+	if (iter != decoder.get_decoded_mgt()->tables.end()) {
 		map_dvbpsi::const_iterator iter_demux = h_demux.find(iter->second.pid);
 		if (iter_demux != h_demux.end()) {
 			//dvbpsi_DetachDemux(h_demux[iter->second.pid]);
@@ -687,9 +676,9 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 		goto eit_complete;
 
 	//map_decoded_mgt_tables::const_iterator
-	iter = decoders[ts_id].get_decoded_mgt()->tables.find(0x0100 + current_eit_x + 1);
+	iter = decoder.get_decoded_mgt()->tables.find(0x0100 + current_eit_x + 1);
 
-	if (iter == decoders[ts_id].get_decoded_mgt()->tables.end())
+	if (iter == decoder.get_decoded_mgt()->tables.end())
 		goto eit_complete;
 
 	h_demux[iter->second.pid] = dvbpsi_AttachDemux(attach_table, this);
@@ -697,15 +686,40 @@ uint8_t parse::grab_next_eit(uint8_t current_eit_x)
 	/* the range is 0x00 thru 0x7f, so 0x80 indicates error */
 	return current_eit_x + 1;
 eit_complete:
-	fprintf(stderr, "%s: EIT COMPLETE: %d\n", __func__, current_eit_x);
+	__log_printf(stderr, "%s: EIT COMPLETE: %d\n", __func__, current_eit_x);
 	return 0x80; /* throw an error to signify last EIT */
 }
 #endif
 
 static bool hello = false;
 
-parse::parse()
-  : statistics(CLASS_MODULE)
+privateParse::privateParse()
+  : parse(outp, m_decoders)
+{
+	//
+}
+
+privateParse::~privateParse()
+{
+	//
+}
+
+globalParse::globalParse()
+  : parse(outp, global_static_decoders)
+{
+	//
+}
+
+globalParse::~globalParse()
+{
+	//
+}
+
+parse::parse(output_base& outp)
+  : out(outp)
+  , statistics(CLASS_MODULE)
+  , decoders(global_static_decoders)
+  , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
   , ts_id(0)
   , epg_mode(false)
@@ -725,6 +739,39 @@ parse::parse()
   , enabled(true)
   , rewritten_pat_ver_offset(0)
   , rewritten_pat_cont_ctr(0)
+{
+	init();
+}
+
+parse::parse(output_base& outp, map_decoder& supplied_decoders)
+  : out(outp)
+  , statistics(CLASS_MODULE)
+  , decoders(supplied_decoders)
+  , subscribedTableWatcher(NULL)
+  , fed_pkt_count(0)
+  , ts_id(0)
+  , epg_mode(false)
+  , scan_mode(false)
+  , dont_collect_ett(true)
+  , has_pat(false)
+  , has_mgt(false)
+  , has_vct(false)
+  , has_sdt(false)
+  , has_nit(false)
+  , expect_vct(true)
+  , dumped_eit(0)
+  , eit_collection_limit(-1)
+  , process_err_pkts(false)
+  , tei_count(0)
+  , m_tsfilter_iface(NULL)
+  , enabled(true)
+  , rewritten_pat_ver_offset(0)
+  , rewritten_pat_cont_ctr(0)
+{
+	init();
+}
+
+void parse::init()
 {
 	if (!hello)
 		fprintf(stdout, "# dvbtee v" LIBDVBTEE_VERSION
@@ -774,7 +821,7 @@ parse::~parse()
 #endif
 #if 1//DBG
 	if (fed_pkt_count)
-		fprintf(stderr, "%d packets read in total\n", fed_pkt_count);
+		__log_printf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
 	service_ids.clear();
 	rcvd_pmt.clear();
@@ -783,13 +830,19 @@ parse::~parse()
 
 int parse::count_decoder_factories()
 {
-	return
+	return 0
 #if !OLD_DECODER
-	dvbtee::decode::TableRegistry::instance().count() +
-	dvbtee::decode::DescriptorRegistry::instance().count();
-#else
-	0;
+	+ dvbtee::decode::TableRegistry::instance().list().size()
+	+ dvbtee::decode::DescriptorRegistry::instance().list().size()
 #endif
+	;
+}
+
+decode &parse::get_decoder(uint16_t ts_id)
+{
+	decode &d = decoders[ts_id];
+	d.subscribeTables(subscribedTableWatcher);
+	return d;
 }
 
 void parse::detach_demux()
@@ -858,12 +911,12 @@ void parse::cleanup()
 void parse::dumpJson()
 {
 	for (map_decoder::const_iterator it = decoders.begin(); it != decoders.end(); ++it) {
-		fprintf(stderr, "\nTSID#%04x: ", it->first);
+		__log_printf(stderr, "\nTSID#%04x: ", it->first);
 #if !OLD_DECODER
 		it->second.showChildren();
 #endif
 	}
-	fprintf(stderr, "\n");
+	__log_printf(stderr, "\n");
 
 	decode_network::dumpJson();
 }
@@ -950,6 +1003,8 @@ static const char * xine_chandump(parsed_channel_info_t *c)
 
 void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c)
 {
+	decode &decoder = get_decoder(ts_id);
+
 	//map_ts_elementary_streams::iterator iter_pmt_es = decoded_pmt->es_streams.find(program_number);
 	for (map_ts_elementary_streams::const_iterator iter_pmt_es = decoded_pmt->es_streams.begin();
 	     iter_pmt_es != decoded_pmt->es_streams.end(); ++iter_pmt_es)
@@ -985,9 +1040,9 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 		for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
 		c.service_name[7] = 0;
 	} else { // FIXME: use SDT info
-		c.lcn = decoders[ts_id].get_lcn(c.program_number);
+		c.lcn = decoder.get_lcn(c.program_number);
 
-		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoders[ts_id].get_decoded_sdt();
+		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoder.get_decoded_sdt();
 		if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
 			snprintf((char*)c.service_name, sizeof(c.service_name), "%s", decoded_sdt->services[c.program_number].service_name);
 		else {
@@ -1005,9 +1060,11 @@ unsigned int parse::xine_dump(uint16_t ts_id, channel_info_t* channel_info, pars
 
 	int count = 0;
 
-	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
-	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
-	const decoded_vct_t* decoded_vct = decoders[ts_id].get_decoded_vct();
+	decode &decoder = get_decoder(ts_id);
+
+	const decoded_pat_t* decoded_pat = decoder.get_decoded_pat();
+	const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
+	const decoded_vct_t* decoded_vct = decoder.get_decoded_vct();
 
 	fprintf(stdout, "\n# channel %d, %d, %s %s\n", c.physical_channel, c.freq, "", "");
 
@@ -1064,7 +1121,7 @@ unsigned int parse::xine_dump(parse_iface *iface)
 void parse::epg_dump(decode_report *reporter)
 {
 	map_chan_to_ts_id channels;
-	//fprintf(stderr, "%s(%d, %d)\n", __func__, channel_info.size(), channels.size());
+	//__log_printf(stderr, "%s(%d, %d)\n", __func__, channel_info.size(), channels.size());
 
 	for (map_channel_info::const_iterator iter = channel_info.begin(); iter != channel_info.end(); ++iter)
 		channels[iter->second.channel] = iter->first;
@@ -1074,7 +1131,7 @@ void parse::epg_dump(decode_report *reporter)
 
 	channels.clear();
 
-	//fprintf(stderr, "%s", str.c_str());
+	//__log_printf(stderr, "%s", str.c_str());
 
 	return;
 }
@@ -1089,12 +1146,14 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	if (!channel_info.count(requested_ts_id))
 		return false;
 
-	const map_decoded_pmt* decoded_pmt = decoders[requested_ts_id].get_decoded_pmt();
+	decode& decoder = get_decoder(requested_ts_id);
+
+	const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service);
 	if (iter_pmt == decoded_pmt->end())
 		return false;
 
-	const decoded_vct_t* decoded_vct = decoders[requested_ts_id].get_decoded_vct();
+	const decoded_vct_t* decoded_vct = decoder.get_decoded_vct();
 
 	channel_info_t *info = &channel_info[requested_ts_id];
 
@@ -1115,11 +1174,11 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	time(&last);
 
 	if (e0) {
-		decoders[requested_ts_id].get_epg_event(service, last, e0);
+		decoder.get_epg_event(service, last, e0);
 		last = e0->start_time + e0->length_sec + 1;
 	}
 	if (e1)
-		decoders[requested_ts_id].get_epg_event(service, last, e1);
+		decoder.get_epg_event(service, last, e1);
 
 	return true;
 }
@@ -1152,7 +1211,9 @@ bool parse::is_psip_ready()
 
 bool parse::is_epg_ready()
 {
-	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) && (decoders[get_ts_id()].got_all_eit(eit_collection_limit)))));
+	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) &&
+		((decoders[get_ts_id()].got_all_eit(eit_collection_limit)) &&
+		((dont_collect_ett) || (decoders[get_ts_id()].got_all_ett(eit_collection_limit)))))));
 }
 
 int parse::add_output(void* priv, stream_callback callback)
@@ -1323,12 +1384,14 @@ fail:
 
 void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
 {
-	const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
+	decode &decoder = get_decoder(ts_id);
+
+	const decoded_pat_t* decoded_pat = decoder.get_decoded_pat();
 	map_decoded_pat_programs::const_iterator iter_pat = decoded_pat->programs.find(service_id);
 	if (iter_pat != decoded_pat->programs.end())
 		pids[iter_pat->second] = 0;//FIXME
 
-	const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+	const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service_id);
 	if (iter_pmt != decoded_pmt->end()) {
 
@@ -1373,8 +1436,10 @@ void parse::set_service_ids(char *ids)
 	if (has_pat) {
 		rewrite_pat();
 
-		const decoded_pat_t* decoded_pat = decoders[ts_id].get_decoded_pat();
-		const map_decoded_pmt* decoded_pmt = decoders[ts_id].get_decoded_pmt();
+		decode &decoder = get_decoder(ts_id);
+
+		const decoded_pat_t* decoded_pat = decoder.get_decoded_pat();
+		const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
 
 		process_pat(decoded_pat);
 
@@ -1424,7 +1489,7 @@ void parse::set_ts_id(uint16_t new_ts_id)
 	dPrintf("(%04x|%d)\n", new_ts_id, new_ts_id);
 	ts_id = new_ts_id;
 	memcpy(&channel_info[ts_id], &new_channel_info, sizeof(channel_info_t));
-	decoders[ts_id].set_physical_channel(channel_info[ts_id].channel);
+	get_decoder(ts_id).set_physical_channel(channel_info[ts_id].channel);
 }
 
 uint16_t parse::get_ts_id(unsigned int channel)
@@ -1467,13 +1532,13 @@ int parse::feed(int count, uint8_t* p_data)
 			if (sync_offset == 188) {
 				sync_offset = 0;
 				i--;
-				fprintf(stderr, "\nSYNC LOSS\n\n");
+				__log_printf(stderr, "\nSYNC LOSS\n\n");
 			}
 			statistics.parse(p, &pkt_stats);
-			fprintf(stderr, ".\t");
+			__log_printf(stderr, ".\t");
 		}
 
-		if (sync_offset) fprintf(stderr, "\nSYNC LOSS\n\n");
+		if (sync_offset) __log_printf(stderr, "\nSYNC LOSS\n\n");
 #if 0
 		/* demux & statistics for entire read TS */
 		statistics.push(p, &pkt_stats);
@@ -1482,9 +1547,9 @@ int parse::feed(int count, uint8_t* p_data)
 		if (pkt_stats.tei) {
 #ifndef QUIET_TEI
 			if (!tei_count)
-				fprintf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
+				__log_printf(stderr, "\tTEI");//"%s: TEI detected, dropping packet\n", __func__);
 			else if (tei_count % 100 == 0)
-				fprintf(stderr, ".");
+				__log_printf(stderr, ".");
 #endif
 			tei_count++;
 			if (!process_err_pkts) continue;
@@ -1536,7 +1601,9 @@ int parse::feed(int count, uint8_t* p_data)
 			iter_eit = eit_pids.find(pkt_stats.pid);
 			if (iter_eit != eit_pids.end()) {
 
-				if (decoders[ts_id].eit_x_complete(iter_eit->second)) {
+				decode &decoder = get_decoder(ts_id);
+
+				if (decoder.eit_x_complete(iter_eit->second)) {
 					if (h_demux.count(iter_eit->first)) {
 #if USING_DVBPSI_VERSION_0
 						dvbpsi_DetachDemux(h_demux[iter_eit->first]);
@@ -1549,7 +1616,29 @@ int parse::feed(int count, uint8_t* p_data)
 					//epg_complete = (eit_pids.size() == 0);
 					continue;
 				}
-				decoders[ts_id].set_current_eit_x(iter_eit->second);
+				decoder.set_current_eit_x(iter_eit->second);
+				out_type = OUTPUT_PSIP;
+			}
+
+			map_pidtype::const_iterator iter_ett;
+			iter_ett = ett_pids.find(pkt_stats.pid);
+			if (iter_ett != ett_pids.end()) {
+
+				decode &decoder = get_decoder(ts_id);
+
+				if (decoder.ett_x_complete(iter_ett->second)) {
+					if (h_demux.count(iter_ett->first)) {
+#if USING_DVBPSI_VERSION_0
+						dvbpsi_DetachDemux(h_demux[iter_ett->first]);
+#else
+						h_demux[iter_ett->first].detach_demux();
+#endif
+						h_demux.erase(iter_ett->first);
+					}
+					ett_pids.erase(iter_ett->first);
+					continue;
+				}
+				decoder.set_current_ett_x(iter_ett->second);
 				out_type = OUTPUT_PSIP;
 			}
 
@@ -1590,8 +1679,9 @@ int parse::feed(int count, uint8_t* p_data)
 		fed_pkt_count++;
 	}
 #if 1//DBG
-	while (((decoders.count(ts_id)) && (decoders[ts_id].eit_x_complete(dumped_eit)))) {
-		decoders[ts_id].dump_eit_x(NULL, dumped_eit);
+	while ((((decoders.count(ts_id)) && (get_decoder(ts_id).eit_x_complete(dumped_eit)))) &&
+	       ((dont_collect_ett) || (get_decoder(ts_id).ett_x_complete(dumped_eit)))) {
+		get_decoder(ts_id).dump_eit_x(NULL, dumped_eit);
 		dumped_eit++;
 	}
 #endif
@@ -1612,7 +1702,7 @@ static void dvbpsi_message(dvbpsi_t *handle, const dvbpsi_msg_level_t level, con
 		default: /* do nothing */
 			return;
 	}
-	fprintf(stderr, "%s%s\n", status, msg);
+	__log_printf(stderr, "%s%s\n", status, msg);
 }
 
 dvbpsi_class::dvbpsi_class()

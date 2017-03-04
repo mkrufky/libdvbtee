@@ -40,14 +40,20 @@
 #define DBG_DVBPSI	1024
 
 extern unsigned int dbg;
+extern unsigned int dbg_info;
 
-void libdvbtee_set_debug_level(unsigned int debug);
+int libdvbtee_set_debug_level(unsigned int debug, unsigned int debug_info = 1);
+
+#define __log_printf(fd, fmt, arg...) do {				\
+	if (dbg_info)							\
+		fprintf(fd, fmt, ##arg);					\
+} while (0)
 
 #define __printf(fd, fmt, arg...) fprintf(fd, fmt, ##arg)
 
 #define __dPrintf(lvl, fmt, arg...) do {				\
 	if (dbg & lvl)							\
-		__printf(stderr, "%d %s::%s: " #fmt "\n",		\
+		__printf(stderr, "%d %s::%s: " fmt "\n",		\
 			 (int)time(NULL), CLASS_MODULE, __func__, ##arg);	\
 } while (0)
 

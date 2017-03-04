@@ -120,16 +120,19 @@ LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 -S          server mode, optional arg 1 for command server,
             2 for http stream server, 3 for both
 -i          pull local/remote tcp/udp port for data
+-n          bind to a specific network interface
 -I          request a service and its associated PES streams by its service id
 -E          enable EPG scan, optional arg to limit the number of EITs to parse
+-e          enable ETT extended text tables (EPG descriptions, ATSC only)
 -o          output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
+-O          output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
 -r[limit]   Rotate output file when size limit reached.
             Use together with -ofile... option.
             Limit specified in bytes, default is 1048576 (1 MB).
--O          output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
 -H          use a HdHomeRun device, optional arg to specify the device string
 -j          enable json output of decoded tables & descriptors
 -d          debug level
+-q          quiet most logging
 -h          display additional help
 ```
 #### Example Usage
@@ -157,6 +160,11 @@ To parse a captured file and filter out the PSIP data, saving the PAT/PMT and PE
 To parse a UDP stream for ten seconds:
 ```
   dvbtee -iudp://127.0.0.1:1234 -t10
+```
+
+To scan for services using the first connected tuner:
+```
+  dvbtee -s -a0
 ```
 
 To scan for ClearQAM services using 5 tuners optimized for speed and partial redundancy:
@@ -194,7 +202,7 @@ store PAT: v0, ts_id: 2011
            5 | 50
 store PMT: v12, service_id 3, pcr_pid 49
   es_pid | type
-      31 | 0x02 (Video MPEG-2) | 
+      31 | 0x02 (Video MPEG-2) |
       34 | 0x81 (Audio AC3 (ATSC)) | eng
       35 | 0x81 (Audio AC3 (ATSC)) | spa
       36 | 0x81 (Audio AC3 (ATSC)) | fre
@@ -216,16 +224,16 @@ store MGT: v6
     0x0203   | 0x1e03 |   6 | 1213
 store PMT: v12, service_id 5, pcr_pid 81
   es_pid | type
-      51 | 0x02 (Video MPEG-2) | 
+      51 | 0x02 (Video MPEG-2) |
       54 | 0x81 (Audio AC3 (ATSC)) | eng
 store PMT: v12, service_id 4, pcr_pid 65
   es_pid | type
-      41 | 0x02 (Video MPEG-2) | 
+      41 | 0x02 (Video MPEG-2) |
       44 | 0x81 (Audio AC3 (ATSC)) | eng
       45 | 0x81 (Audio AC3 (ATSC)) | spa
       46 | 0x81 (Audio AC3 (ATSC)) | fre
 
-# channel 13, 213000000,  
+# channel 13, 213000000,
 13.1-WNET-HD:213000000:8VSB:49:52:3
 13.2-KIDS:213000000:8VSB:65:68:4
 13.3-V-Me:213000000:8VSB:81:84:5

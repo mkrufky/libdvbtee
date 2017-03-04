@@ -47,7 +47,7 @@ void atsc_ett::store(const dvbpsi_atsc_ett_t * const p_ett)
 #if 1
 //	if ((decoded_ett.version == p_ett->i_version) &&
 //	    (decoded_ett.etm_id  == p_ett->i_etm_id)) {
-//		fprintf(stderr, "%s: v%d, ID %d: ALREADY DECODED\n", __func__,
+//		__log_printf(stderr, "%s: v%d, ID %d: ALREADY DECODED\n", __func__,
 //			p_ett->i_version, p_ett->i_etm_id);
 //		return false;
 //	}
@@ -64,12 +64,12 @@ void atsc_ett::store(const dvbpsi_atsc_ett_t * const p_ett)
 	       (sizeof(decoded_ett.etm) >= p_ett->i_etm_length) ?
 		       p_ett->i_etm_length : sizeof(decoded_ett.etm));
 
-	unsigned char message[512];
+	unsigned char message[ETM_MAX_LENGTH];
 	memset(message, 0, sizeof(message));
 
 	decode_multiple_string(decoded_ett.etm, decoded_ett.etm_length, message, sizeof(message));
 
-	fprintf(stderr, "%s ETT: v%d, ID: %d: %s\n", __func__,
+	__log_printf(stderr, "%s ETT: v%d, ID: %d: %s\n", __func__,
 		p_ett->i_version, p_ett->i_etm_id, message);
 
 	set("version", p_ett->i_version);

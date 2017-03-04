@@ -48,13 +48,13 @@ void atsc_eit::store(const dvbpsi_atsc_eit_t * const p_atsc_eit)
 //	if ((cur_atsc_eit.version   == p_atsc_eit->i_version) &&
 //	    (cur_atsc_eit.source_id == p_atsc_eit->i_source_id)) {
 //#if EIT_DBG
-//		fprintf(stderr, "EIT %s-%d: v%d, source_id %d: ALREADY DECODED\n", __func__,
+//		__log_printf(stderr, "EIT %s-%d: v%d, source_id %d: ALREADY DECODED\n", __func__,
 //			atsc_eit_x, p_atsc_eit->i_version, p_atsc_eit->i_source_id);
 //#endif
 //		return false;
 //	}
 #if EIT_DBG
-	fprintf(stderr, "%s EIT-%d: v%d, source_id %d\n", __func__,
+	__log_printf(stderr, "%s EIT-%d: v%d, source_id %d\n", __func__,
 		/*XXX: FIXME: atsc_eit_x*/0xff,
 		p_atsc_eit->i_version, p_atsc_eit->i_source_id);
 #endif
@@ -65,14 +65,14 @@ void atsc_eit::store(const dvbpsi_atsc_eit_t * const p_atsc_eit)
 			break;
 
 	if (iter_vct == decoded_vct.channels.end()) {
-		fprintf(stderr, "%s-%d: v%d, id:%d\n", __func__,
+		__log_printf(stderr, "%s-%d: v%d, id:%d\n", __func__,
 			atsc_eit_x, p_atsc_eit->i_version, p_atsc_eit->i_source_id);
 	} else {
 		unsigned char service_name[8] = { 0 };
 		for ( int i = 0; i < 7; ++i ) service_name[i] = iter_vct->second.short_name[i*2+1];
 		service_name[7] = 0;
 
-		fprintf(stderr, "%s-%d: v%d, id:%d - %d.%d: %s\n", __func__,
+		__log_printf(stderr, "%s-%d: v%d, id:%d - %d.%d: %s\n", __func__,
 			atsc_eit_x, p_atsc_eit->i_version, p_atsc_eit->i_source_id,
 			iter_vct->second.chan_major,
 			iter_vct->second.chan_minor,
@@ -139,7 +139,7 @@ atsc_eitEV::atsc_eitEV(decoded_atsc_eit_t &decoded_atsc_eit, Decoder *parent, co
 
 	struct tm tms = *localtime( &start );
 	struct tm tme = *localtime( &end  );
-	fprintf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
+	__log_printf(stderr, "  %02d:%02d - %02d:%02d : %s\n", tms.tm_hour, tms.tm_min, tme.tm_hour, tme.tm_min, name );
 #endif
 	set("eventId",       p_event->i_event_id);
 	set("startTime",     p_event->i_start_time);

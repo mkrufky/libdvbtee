@@ -51,7 +51,7 @@ void nit::store(const dvbpsi_nit_t * const p_nit)
 //		return false;
 //	}
 #if NIT_DBG
-	fprintf(stderr, "%s NIT: v%d, network_id %d\n", __func__,
+	__log_printf(stderr, "%s NIT: v%d, network_id %d\n", __func__,
 		p_nit->i_version, p_nit->i_network_id);
 #endif
 	decoded_nit.version    = p_nit->i_version;
@@ -69,7 +69,7 @@ void nit::store(const dvbpsi_nit_t * const p_nit)
 	const dvbpsi_nit_ts_t * p_ts = p_nit->p_first_ts;
 #if NIT_DBG
 	if (p_ts)
-		fprintf(stderr, "   ts_id | orig_network_id\n");
+		__log_printf(stderr, "   ts_id | orig_network_id\n");
 #endif
 	while (p_ts) {
 		nitTS *nitTs = new nitTS(decoded_nit, this, p_ts);
@@ -100,7 +100,7 @@ nitTS::nitTS(decoded_nit_t& decoded_nit, Decoder *parent, const dvbpsi_nit_ts_t 
 	cur_ts_list.orig_network_id = p_ts->i_orig_network_id;
 
 #if NIT_DBG
-	fprintf(stderr, "   %05d | %d\n",
+	__log_printf(stderr, "   %05d | %d\n",
 		cur_ts_list.ts_id,
 		cur_ts_list.orig_network_id);
 #endif
@@ -126,7 +126,7 @@ bool nit::ingest(TableStore *s, const dvbpsi_nit_t * const t, TableWatcher *w)
 	for (std::vector<Table*>::const_iterator it = nits.begin(); it != nits.end(); ++it) {
 		nit *thisNIT = (nit*)*it;
 		if (thisNIT->get<uint16_t>("networkId") == t->i_network_id) {
-			if (thisNIT->get<uint16_t>("version") == t->i_version) {
+			if (thisNIT->get<uint8_t>("version") == t->i_version) {
 				dPrintf("NIT v%d, network_id %d: ALREADY DECODED", t->i_version, t->i_network_id);
 				return false;
 			}

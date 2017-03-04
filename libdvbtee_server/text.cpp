@@ -88,7 +88,7 @@ const std::string xml_dump_epg_header_footer_callback(void *, bool header, bool 
 		if (channel)
 			str = "";
 		else
-			str = "<tv generator-info-name='dvbtee v"LIBDVBTEE_VERSION"'>\n";
+			str = "<tv generator-info-name='dvbtee v" LIBDVBTEE_VERSION "'>\n";
 	else
 		if (channel)
 			str = "";

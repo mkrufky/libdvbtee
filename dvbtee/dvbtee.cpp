@@ -39,6 +39,8 @@
 #endif
 #include "serve.h"
 
+static int __libdvbtee_lvl = libdvbtee_set_debug_level(0,1); // force info logging enabled
+
 typedef std::map<uint8_t, tune*> map_tuners;
 
 struct dvbtee_context
@@ -291,15 +293,18 @@ void usage(bool help, char *myname)
 		"-s\t\tscan, optional arg when using multiple tuners: \n\t1 for speed, 2 for redundancy, \n\t3 for speed AND redundancy, \n\t4 for optimized speed / partial redundancy\n  "
 		"-S\t\tserver mode, optional arg 1 for command server, \n\t2 for http stream server, 3 for both\n  "
 		"-i\t\tpull local/remote tcp/udp port for data\n  "
+		"-n\t\tbind to a specific network interface\n  "
 		"-I\t\trequest a service and its associated PES streams by its service id\n  "
 		"-E\t\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
+		"-e\t\tenable ETT extended text tables (EPG descriptions, ATSC only)\n  "
 		"-o\t\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
+		"-O\t\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
 		"-r[limit]\tRotate output file when size limit reached.\n\t\tUse together with -ofile... option \n\t\tLimit specified in bytes, default is 1048576 (1 MB).\n  "
 		"-l[limit]\tSet output files sequence size limit\n\t\tWorks only together with -r option\n\t\tLimit specified in bytes, default is unlimited.\n  "
-		"-O\t\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
 		"-H\t\tuse a HdHomeRun device, optional arg to specify the device string\n  "
 		"-j\t\tenable json output of decoded tables & descriptors%s\n  "
 		"-d\t\tdebug level\n  "
+		"-q\t\tquiet most logging\n  "
 		"-h\t\tdisplay additional help\n\n", f_count ? "" : " (feature disabled)");
 	if (help)
 		fprintf(stderr,
@@ -345,6 +350,7 @@ int main(int argc, char **argv)
 	bool b_read_dvr = false;
 	bool b_scan     = false;
 	bool scan_epg   = false;
+	bool b_enable_ett    = false;
 	bool b_output_file   = false;
 	bool b_output_stdout = false;
 	bool b_serve    = false;
@@ -353,6 +359,7 @@ int main(int argc, char **argv)
 	bool b_json     = false;
 	bool b_bitrate_stats = false;
 	bool b_hdhr     = false;
+	bool b_network_interface = false;
 
 	context.server = NULL;
 
@@ -373,12 +380,12 @@ int main(int argc, char **argv)
 	int num_tuners           = -1;
 	unsigned int timeout     = 0;
 
-	unsigned int wait_event  = 0;
+	int wait_event           = -1;
 	int eit_limit            = -1;
-        
-        unsigned long int output_file_size_limit = 0;
-        unsigned long int output_fseq_size_limit = 0;
-        
+
+	unsigned long int output_file_size_limit = 0;
+	unsigned long int output_fseq_size_limit = 0;
+
 	tune *tuner = NULL;
 
 	enum output_options out_opt = (enum output_options)-1;
@@ -392,6 +399,9 @@ int main(int argc, char **argv)
 	char tcpipfeedurl[2048];
 	memset(&tcpipfeedurl, 0, sizeof(tcpipfeedurl));
 
+	char network_interface[2048];
+	memset(&network_interface, 0, sizeof(network_interface));
+
 	char service_ids[64];
 	memset(&service_ids, 0, sizeof(service_ids));
 
@@ -401,7 +411,7 @@ int main(int argc, char **argv)
 	char hdhrname[256];
 	memset(&hdhrname, 0, sizeof(hdhrname));
 
-	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:T:i:I:js::S::E::o::O:r::l::d::H::h?")) != -1) {
+	while ((opt = getopt(argc, argv, "a:A:bc:C:f:F:t:n:T:i:I:js::S::eE::o::O:r::l::d::H::qh?")) != -1) {
 		switch (opt) {
 		case 'a': /* adapter */
 #ifdef USE_LINUXTV
@@ -428,7 +438,7 @@ int main(int argc, char **argv)
 			break;
 		case 'C': /* channel list | channel / scan max */
 			if (strstr(optarg, ","))
-				strncpy(channel_list, optarg, sizeof(channel_list));
+				strncpy(channel_list, optarg, sizeof(channel_list)-1);
 
 			/* if a list was provided, use the first item */
 			scan_max = strtoul(optarg, NULL, 0);
@@ -442,7 +452,7 @@ int main(int argc, char **argv)
 #endif
 			break;
 		case 'F': /* Filename */
-			strncpy(filename, optarg, sizeof(filename));
+			strncpy(filename, optarg, sizeof(filename)-1);
 			break;
 		case 't': /* timeout */
 			timeout = strtoul(optarg, NULL, 0);
@@ -457,22 +467,31 @@ int main(int argc, char **argv)
 			if (scan_method)
 				fprintf(stderr, "MULTISCAN: %d...\n", scan_method);
 			break;
+		case 'n': /* bind to specific interface */
+			strncpy(network_interface, optarg, sizeof(network_interface)-1);
+			b_network_interface = true;
+			break;
 		case 'S': /* server mode, optional arg 1 for command server, 2 for http stream server, 3 for both */
 			b_serve = true;
 			serv_flags = (optarg) ? strtoul(optarg, NULL, 0) : 0;
 			break;
 		case 'i': /* pull local/remote tcp/udp port for data */
-			strncpy(tcpipfeedurl, optarg, sizeof(tcpipfeedurl));
+			strncpy(tcpipfeedurl, optarg, sizeof(tcpipfeedurl)-1);
 			break;
 		case 'I': /* request a service by its service id */
-			strncpy(service_ids, optarg, sizeof(service_ids));
+			strncpy(service_ids, optarg, sizeof(service_ids)-1);
+			break;
+		case 'e': /* enable ETT extended text tables (EPG descriptions, ATSC only) */
+			b_enable_ett = true;
+			wait_event = 0; /* specifically no timeout when trying to gather ETT */
 			break;
 		case 'E': /* enable EPG scan, optional arg to limit the number of EITs to parse */
 #if 0
 			b_scan = true; // FIXME
 #endif
 			scan_epg = true;
-			wait_event = FEED_EVENT_EPG;
+			if (wait_event < 0)
+				wait_event = FEED_EVENT_EPG;
 			eit_limit = (optarg) ? strtoul(optarg, NULL, 0) : -1;
 			if (eit_limit >= 0)
 				fprintf(stderr, "EIT LIMIT: %d...\n", eit_limit);
@@ -486,32 +505,27 @@ int main(int argc, char **argv)
 				b_output_stdout = true;
 			break;
 		case 'r': /* rotate output file */
-                    if (!b_output_file) {
-                        break;
-                    }
-                    
-                    output_file_size_limit = 1048576; // 1MB default value
-                    
-                    if (optarg) {
-                        //TODO: detect human readable values
-                        //      (1M = 1 MB, 10K = 10KB, ...)
-                        output_file_size_limit = strtoul(optarg, NULL, 0);
-                    }
-                    
-                    break;
+			if (!b_output_file) {
+				break;
+			}
+			output_file_size_limit = 1048576; // 1MB default value
+
+			if (optarg) {
+				//TODO: detect human readable values
+				//      (1M = 1 MB, 10K = 10KB, ...)
+				output_file_size_limit = strtoul(optarg, NULL, 0);
+			}
+			break;
 		case 'l': /* limit size of output files sequence */
-                    if (output_file_size_limit == 0) {
-                        break;
-                    }
-                    
-                    
-                    if (optarg) {
-                        //TODO: detect human readable values
-                        //      (1M = 1 MB, 10K = 10KB, ...)
-                        output_fseq_size_limit = strtoul(optarg, NULL, 0);
-                    }
-                    
-                    break;
+			if (output_file_size_limit == 0) {
+				break;
+			}
+			if (optarg) {
+				//TODO: detect human readable values
+				//      (1M = 1 MB, 10K = 10KB, ...)
+				output_fseq_size_limit = strtoul(optarg, NULL, 0);
+			}
+			break;
 		case 'O': /* output options */
 			out_opt = (enum output_options)strtoul(optarg, NULL, 0);
 			break;
@@ -523,11 +537,14 @@ int main(int argc, char **argv)
 			break;
 		case 'H':
 			if (optarg)
-				strncpy(hdhrname, optarg, sizeof(hdhrname));
+				strncpy(hdhrname, optarg, sizeof(hdhrname)-1);
 			b_hdhr = true;
 			break;
 		case 'j':
 			b_json = true;
+			break;
+		case 'q':
+			libdvbtee_set_debug_level(0,0);
 			break;
 		case 'h':
 			b_help = true;
@@ -577,6 +594,7 @@ int main(int argc, char **argv)
 		if (tuner) {
 			context.tuners[context.tuners.size()] = tuner;
 			tuner->feeder.parser.limit_eit(eit_limit);
+			if (b_enable_ett) tuner->feeder.parser.enable_ett_collection();
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
 #if defined(_WIN32)
@@ -600,6 +618,7 @@ int main(int argc, char **argv)
 		}
 		if (new_tuner) {
 			new_tuner->feeder.parser.limit_eit(eit_limit);
+			if (b_enable_ett) new_tuner->feeder.parser.enable_ett_collection();
 			context.tuners[context.tuners.size()] = new_tuner;
 		} else {
 			fprintf(stderr, "ERROR allocating tuner %zu\n", context.tuners.size());
@@ -622,29 +641,27 @@ int main(int argc, char **argv)
 	}
                 
 	if (b_output_file) {
-            fprintf(stderr, "output_file_size_limit: %lu, output_fseq_size_limit: %lu\n", output_file_size_limit, output_fseq_size_limit);
-            
-            
-            if (b_READ_TUNER) { // FIXME
-                for (
-                    map_tuners::const_iterator iter = context.tuners.begin();
-                    iter != context.tuners.end();
-                    ++iter
-                ) {
-                    iter->second->feeder.parser.out.rotate(
-                        output_file_size_limit, output_fseq_size_limit
-                    );
-                    
-                    iter->second->feeder.parser.add_output(outfilename);
-                }
-            } else {
-                context._file_feeder.parser.out.rotate(
-                    output_file_size_limit, output_fseq_size_limit
-                );
-                context._file_feeder.parser.add_output(outfilename);
-            }
+		fprintf(stderr, "output_file_size_limit: %lu, output_fseq_size_limit: %lu\n", output_file_size_limit, output_fseq_size_limit);
+
+		if (b_READ_TUNER) { // FIXME
+			for (
+				map_tuners::const_iterator iter = context.tuners.begin();
+				iter != context.tuners.end();
+				++iter
+			) {
+				iter->second->feeder.parser.out.rotate(
+					output_file_size_limit, output_fseq_size_limit
+				);
+				iter->second->feeder.parser.add_output(outfilename);
+			}
+		} else {
+			context._file_feeder.parser.out.rotate(
+				output_file_size_limit, output_fseq_size_limit
+			);
+			context._file_feeder.parser.add_output(outfilename);
+		}
 	} // if (b_output_file)
-                
+
 	if (b_output_stdout) {
 		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
@@ -675,6 +692,7 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(filename)) {
+		if (b_enable_ett) context._file_feeder.parser.enable_ett_collection();
 		if (0 <= context._file_feeder.open_file(filename)) {
 			int ret = context._file_feeder.start();
 			if (b_serve) goto exit;
@@ -688,11 +706,12 @@ int main(int argc, char **argv)
 	}
 
 	if (strlen(tcpipfeedurl)) {
+		if (b_enable_ett) context._file_feeder.parser.enable_ett_collection();
 		if (0 == strncmp(tcpipfeedurl, "http", 4)) {
 			write_feed iface(context);
 			hlsfeed(tcpipfeedurl, &iface);
 		} else {
-			int ret = context._file_feeder.start_socket(tcpipfeedurl);
+			int ret = context._file_feeder.start_socket(tcpipfeedurl, (b_network_interface) ? network_interface : NULL);
 			if (b_serve) goto exit;
 			if (0 <= ret) {
 				context._file_feeder.wait_for_streaming_or_timeout(timeout);
@@ -737,7 +756,7 @@ int main(int argc, char **argv)
 		if (b_serve) goto exit;
 		else {
 			if (0 == ret) {
-				tuner->feeder.wait_for_event_or_timeout(timeout, wait_event);
+				tuner->feeder.wait_for_event_or_timeout(timeout, (wait_event >= 0) ? (unsigned int)wait_event : 0);
 				tuner->stop_feed();
 			}
 			if (channel) /* if we tuned the frontend ourselves then close it */
@@ -747,6 +766,7 @@ int main(int argc, char **argv)
 	else
 	if (0 == context._file_feeder.parser.get_fed_pkt_count()) {
 		fprintf(stderr, "reading from STDIN\n");
+		if (b_enable_ett) context._file_feeder.parser.enable_ett_collection();
 		int ret = context._file_feeder.start_stdin();
 		if (b_serve) goto exit;
 		if (0 == ret) {
@@ -768,7 +788,11 @@ exit:
 		stop_server(&context);
 	}
 	if (b_json) {
-		parse::dumpJson();
+
+		if (tuner)
+			tuner->feeder.parser.dumpJson();
+		else
+			context._file_feeder.parser.dumpJson();
 	}
 	cleanup(&context);
 #if defined(_WIN32)

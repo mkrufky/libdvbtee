@@ -245,7 +245,7 @@ int linuxtv_tuner::open_fe()
 		goto fail;
 	}
 
-	fprintf(stderr, "%s: using %s\n", __func__, filename);
+	__log_printf(stderr, "%s: using %s\n", __func__, filename);
 
 	switch (fe_info.type) {
 	case FE_ATSC:
@@ -277,7 +277,7 @@ dvbtee_fe_status_t linuxtv_tuner::fe_status()
 		return (dvbtee_fe_status_t)0;
 	}
 
-	fprintf(stderr, "%s%s%s%s%s ",
+	__log_printf(stderr, "%s%s%s%s%s ",
 		(status & FE_HAS_SIGNAL)  ? "S" : "",
 		(status & FE_HAS_CARRIER) ? "C" : "",
 		(status & FE_HAS_VITERBI) ? "V" : "",
@@ -331,7 +331,7 @@ int linuxtv_tuner::start_feed()
 			goto fail_demux;
 		}
 	}
-	fprintf(stderr, "%s: using %s\n", __func__, filename);
+	__log_printf(stderr, "%s: using %s\n", __func__, filename);
 #if 0
 #define BUFSIZE_0x2000 (188*((384*1024)/188))
 	if (ioctl(demux_fd, DMX_SET_BUFFER_SIZE, BUFSIZE_0x2000) < 0)
@@ -425,7 +425,7 @@ bool linuxtv_tuner::tune_atsc(dvbtee_fe_modulation_t modulation, unsigned int ch
 		fprintf(stderr, "linuxtv_tuner: FE_SET_FRONTEND failed\n");
 		return false;
 	}
-	else fprintf(stderr, "tuned to %d\n", fe_params.frequency);
+	else __log_printf(stderr, "tuned to %d\n", fe_params.frequency);
 
 	return true;
 }
@@ -449,7 +449,7 @@ bool linuxtv_tuner::tune_dvbt(unsigned int channel)
 		fprintf(stderr, "linuxtv_tuner: FE_SET_FRONTEND failed\n");
 		return false;
 	}
-	else fprintf(stderr, "tuned to %d\n", fe_params.frequency);
+	else __log_printf(stderr, "tuned to %d\n", fe_params.frequency);
 
 	return true;
 }
@@ -501,7 +501,7 @@ void linuxtv_tuner::add_filter(uint16_t pid)
 			goto fail_demux;
 		}
 	}
-	fprintf(stderr, "%s: using %s\n", __func__, filename);
+	__log_printf(stderr, "%s: using %s\n", __func__, filename);
 #if 0
 #define BUFSIZE_PID (188*((384*1024)/188))
 	if (ioctl(filtered_pids[pid], DMX_SET_BUFFER_SIZE, BUFSIZE_PID) < 0)

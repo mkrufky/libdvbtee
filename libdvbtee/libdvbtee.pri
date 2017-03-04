@@ -41,6 +41,7 @@ HEADERS += \
     listen.h \
     log.h \
     output.h \
+    outputbase.h \
     parse.h \
     rbuf.h \
     stats.h \

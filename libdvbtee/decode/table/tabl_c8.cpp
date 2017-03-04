@@ -49,7 +49,7 @@ void vct::store(const dvbpsi_atsc_vct_t * const p_vct)
 	uint16_t __ts_id = p_vct->i_extension;
 #endif
 #if VCT_DBG
-	fprintf(stderr, "%s VCT: v%d, ts_id %d, b_cable_vct %d\n", __func__,
+	__log_printf(stderr, "%s VCT: v%d, ts_id %d, b_cable_vct %d\n", __func__,
 		p_vct->i_version, __ts_id, p_vct->b_cable_vct);
 #endif
 	set("version", p_vct->i_version);
@@ -69,7 +69,7 @@ void vct::store(const dvbpsi_atsc_vct_t * const p_vct)
 	const dvbpsi_atsc_vct_channel_t *p_channel = p_vct->p_first_channel;
 #if VCT_DBG
 	if (p_channel)
-		fprintf(stderr, "  channel | service_id | source_id | service_name\n");
+		__log_printf(stderr, "  channel | service_id | source_id | service_name\n");
 #endif
 	while (p_channel) {
 		vctCh *channel = new vctCh(decoded_vct, this, p_channel);
@@ -102,7 +102,7 @@ bool vct::ingest(TableStore *s, const dvbpsi_atsc_vct_t * const t, TableWatcher 
 	for (std::vector<Table*>::const_iterator it = vcts.begin(); it != vcts.end(); ++it) {
 		vct *thisVCT = (vct*)*it;
 		if (thisVCT->get<uint16_t>("tsId") == __ts_id) {
-			if (thisVCT->get<uint16_t>("version") == t->i_version) {
+			if (thisVCT->get<uint8_t>("version") == t->i_version) {
 				dPrintf("VCT v%d, ts_id %d: ALREADY DECODED", t->i_version, __ts_id);
 				return false;
 			}
@@ -206,7 +206,7 @@ vctCh::vctCh(decoded_vct_t &decoded_vct, Decoder *parent, const dvbpsi_atsc_vct_
 
 	set("serviceName", (char *)service_name);
 #if VCT_DBG
-	fprintf(stderr, "  %5d.%d | %10d | %9d | %s | %s\n",
+	__log_printf(stderr, "  %5d.%d | %10d | %9d | %s | %s\n",
 		cur_channel.chan_major,
 		cur_channel.chan_minor,
 		cur_channel.program,
