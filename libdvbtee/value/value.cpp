@@ -72,7 +72,6 @@ const T& Value<T>::get() const
 #endif
 	m_value;
 }
-}
 
 template class Value<int>;
 template class Value<long>;
@@ -89,6 +88,8 @@ template class Value<bool>;
 template class Value<double>;
 template class Value<Array>;
 template class Value<Object>;
+
+}
 
 ValueBase::ValueBase(const std::type_info& type, std::string name)
  : m_type(type)
