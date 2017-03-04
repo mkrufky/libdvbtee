@@ -92,6 +92,7 @@ public:
 	virtual int add_http_server(int) = 0;
 
 	virtual void set_options(enum output_options opt = OUTPUT_NONE) = 0;
+	virtual void rotate(unsigned long int file, unsigned long int fseq) = 0;
 
 	virtual bool check() = 0;
 
@@ -124,6 +125,7 @@ public:
 	virtual int add_http_server(int) { return 0; }
 
 	virtual void set_options(enum output_options opt = OUTPUT_NONE) { }
+	virtual void rotate(unsigned long int file, unsigned long int fseq) { }
 
 	virtual bool check() { return 0; }
 
