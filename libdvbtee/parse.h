@@ -354,4 +354,8 @@ private:
 	dummy_output outp;
 };
 
+/* deprecated: */
+typedef PrivateParse privateParse;
+typedef  GlobalParse globalParse;
+
 #endif //__PARSE_H__
