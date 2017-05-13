@@ -271,7 +271,6 @@ int rbuf::__get_write_ptr(void** p)
 	int available = (idx_read <= idx_write) ? capacity - idx_write : idx_read - idx_write;
 
 	if (available <= 0) {
-		pthread_mutex_unlock(&mutex);
 		return available;
 	}
 	*p = &p_data[idx_write];
