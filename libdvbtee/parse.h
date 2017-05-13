@@ -335,21 +335,21 @@ private:
 	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&);
 };
 
-class privateParse: public parse
+class PrivateParse: public parse
 {
 public:
-	privateParse();
-	virtual ~privateParse();
+	PrivateParse();
+	virtual ~PrivateParse();
 private:
 	dummy_output outp;
 	map_decoder m_decoders;
 };
 
-class globalParse: public parse
+class GlobalParse: public parse
 {
 public:
-	globalParse();
-	virtual ~globalParse();
+	GlobalParse();
+	virtual ~GlobalParse();
 private:
 	dummy_output outp;
 };

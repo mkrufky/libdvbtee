@@ -693,24 +693,24 @@ eit_complete:
 
 static bool hello = false;
 
-privateParse::privateParse()
+PrivateParse::PrivateParse()
   : parse(outp, m_decoders)
 {
 	//
 }
 
-privateParse::~privateParse()
+PrivateParse::~PrivateParse()
 {
 	//
 }
 
-globalParse::globalParse()
+GlobalParse::GlobalParse()
   : parse(outp, global_static_decoders)
 {
 	//
 }
 
-globalParse::~globalParse()
+GlobalParse::~GlobalParse()
 {
 	//
 }
