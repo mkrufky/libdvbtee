@@ -29,13 +29,14 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <string.h>
 
 #include "log.h"
 #include "serve.h"
 #include "text.h"
+#include "dvbtee_config.h"
 
 unsigned int dbg_serve = (dbg & DBG_SERVE) ? DBG_SERVE : 0;
 
@@ -1190,8 +1191,12 @@ bool serve_client::cmd_tuner_scan_channels_save()
 		  filepath);
 
 	if (stat(dir, &st) != 0) {
+#ifdef HAVE_MKDIR
+		if (mkdir(dir, 0777) < 0) {
+#else
 		sprintf(cmd_buf, "mkdir -p %s", dir);
 		if (system(cmd_buf) < 0) {
+#endif
 			perror("could not create ~/.dvbtee/");
 			cli_print("error: could not create %s!\n", dir);
 		}
