@@ -1044,8 +1044,11 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, parse_iface *iface)
 	char filepath[/*strlen(dir)+strlen(slashchannelsconf)*/78] = { 0 };
 
 	//snprintf(dir, strlen(dir), "%s%s", homedir, subdir);
-	memcpy(dir, homedir, strlen(homedir));
-	memcpy(dir + strlen(homedir), subdir, strlen(subdir) + 1);
+	size_t homedir_len = strlen(homedir);
+	size_t buf_avail   = sizeof(dir) - (strlen(subdir) + 1);
+	size_t to_copy_len = (homedir_len > buf_avail) ? buf_avail : homedir_len;
+	memcpy(dir, homedir, to_copy_len);
+	memcpy(dir + to_copy_len, subdir, strlen(subdir) + 1);
 	//snprintf(filepath, strlen(filepath), "%s%s", dir, slashchannelsconf);
 	memcpy(filepath, dir, strlen(dir));
 	memcpy(filepath + strlen(dir), slashchannelsconf, strlen(slashchannelsconf) + 1);
