@@ -1172,8 +1172,11 @@ bool serve_client::cmd_tuner_scan_channels_save()
 	serve_parser_iface chandump_disk_iface(*this, true);
 
 	//snprintf(dir, strlen(dir), "%s%s", homedir, subdir);
-	memcpy(dir, homedir, strlen(homedir));
-	memcpy(dir + strlen(homedir), subdir, strlen(subdir) + 1);
+	size_t homedir_len = strlen(homedir);
+	size_t buf_avail   = sizeof(dir) - (strlen(subdir) + 1);
+	size_t to_copy_len = (homedir_len > buf_avail) ? buf_avail : homedir_len;
+	memcpy(dir, homedir, to_copy_len);
+	memcpy(dir + to_copy_len, subdir, strlen(subdir) + 1);
 	//snprintf(filepath, strlen(filepath), "%s%s", dir, slashchannelsconf);
 	memcpy(filepath, dir, strlen(dir));
 	memcpy(filepath + strlen(dir), slashchannelsconf, strlen(slashchannelsconf) + 1);
