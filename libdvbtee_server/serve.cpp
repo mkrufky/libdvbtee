@@ -1166,7 +1166,6 @@ bool serve::cmd_config_channels_conf_load(tune* tuner, parse_iface *iface)
 
 bool serve_client::cmd_tuner_scan_channels_save()
 {
-	char cmd_buf[32] = { 0 };
 	char *homedir = getenv ("HOME");
 	const char *subdir = "/.dvbtee";
 	const char *slashchannelsconf = "/channels.conf";
@@ -1190,11 +1189,18 @@ bool serve_client::cmd_tuner_scan_channels_save()
 		  filepath);
 
 #ifdef HAVE_MKDIR
-	mkdir(dir, 0777);
+	if (mkdir(dir, 0777) < 0) {
 #else
+	char cmd_buf[32] = { 0 };
 	sprintf(cmd_buf, "mkdir -p %s", dir);
-	system(cmd_buf);
+	if (system(cmd_buf) < 0) {
 #endif
+		struct stat st;
+		if (stat(dir, &st) != 0) {
+			perror("could not create ~/.dvbtee/");
+			cli_print("error: could not create %s!\n", dir);
+		}
+	}
 
 	int channels_fd = creat(filepath, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (channels_fd < 0) {
