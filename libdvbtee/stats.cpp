@@ -38,6 +38,7 @@ stats::stats(const char *caller)
   , streamtime_priv(NULL)
   , statistics_cb(NULL)
   , statistics_priv(NULL)
+  , statistics_iface(NULL)
 {
 	dPrintf("(%s)", parent);
 }
@@ -107,6 +108,10 @@ void stats::show(bool per_sec)
 {
 	if (statistics_cb) {
 		statistics_cb(statistics_priv, statistics, discontinuities, tei_count, per_sec);
+		return;
+	}
+	if (statistics_iface) {
+		statistics_iface->stats(statistics, discontinuities, tei_count, per_sec);
 		return;
 	}
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
