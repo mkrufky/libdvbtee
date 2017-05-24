@@ -108,10 +108,11 @@ void stats::show(bool per_sec)
 {
 	if (statistics_cb) {
 		statistics_cb(statistics_priv, statistics, discontinuities, tei_count, per_sec);
-		return;
 	}
 	if (statistics_iface) {
 		statistics_iface->stats(statistics, discontinuities, tei_count, per_sec);
+	}
+	if (statistics_cb || statistics_iface) {
 		return;
 	}
 	for (stats_map::const_iterator iter = statistics.begin(); iter != statistics.end(); ++iter) {
