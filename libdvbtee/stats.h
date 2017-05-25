@@ -95,6 +95,8 @@ public:
 	void push(int c, const uint8_t *p, pkt_stats_t *pkt_stats = NULL) { for(int i = 0; i < c; i++) push(p+i*188, pkt_stats); }
 	void push(const uint8_t *p, pkt_stats_t *pkt_stats = NULL);
 
+	void show_stats() { show(false); }
+
 	pkt_stats_t *parse(const uint8_t *p, pkt_stats_t *pkt_stats);
 private:
 	stats_map statistics;
