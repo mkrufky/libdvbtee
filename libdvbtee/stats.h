@@ -74,7 +74,7 @@ typedef void (*statistics_callback)(void *priv, stats_map &bitrates, stats_map &
 class stats_iface
 {
 public:
-	virtual void stats(stats_map &bitrates, stats_map &discontinuities, uint64_t tei_count, bool per_sec) = 0;
+	virtual void stats(const stats_map &bitrates, const stats_map &discontinuities, const uint64_t tei_count, const bool per_sec) = 0;
 };
 
 class stats
