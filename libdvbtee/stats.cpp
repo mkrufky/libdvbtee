@@ -86,12 +86,12 @@ char *stats_scale_unit(char *b, size_t n, uint64_t x)
 	memset(b, 0, n);
 
 	if (x >= 1000000) {
-#if 0
-		if ((x % 1000000) < 100)
+#if 1
+		if ((x % 1000000) < 1000)
 			snprintf(b, n, "%3" PRIu64 ".%03" PRIu64 " m", x / 1000000, x % 1000000);
 		else
 #endif
-			snprintf(b, n, "%3" PRIu64 ".%03" PRIu64 " m", x / 1000000, x % 1000000);
+			snprintf(b, n, "%3" PRIu64 ".%03" PRIu64 " m", x / 1000000, x % 1000);
 	} else if (x >= 1000) {
 #if 0
 		if ((x % 1000) < 100)
