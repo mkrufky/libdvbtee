@@ -43,7 +43,39 @@ static int __libdvbtee_lvl = libdvbtee_set_debug_level(0,1); // force info loggi
 
 typedef std::map<uint8_t, tune*> map_tuners;
 
-struct dvbtee_context
+class Bitrates: public stats_iface {
+  void stats(const stats_map &bitrates,
+             const stats_map &discontinuities,
+             const uint64_t tei_count,
+             const bool per_sec)
+  {
+    /* display the bitrates for each pid, followed by special pid 0x2000 for the full TS */
+    for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
+         char a[16];
+         char b[16];
+         fprintf(stderr, "pid %04x %5" PRIu64 " p%s  %sb%s  %sbit\n",
+                 iter->first, iter->second / 188, (per_sec) ? "/s" : "",
+                 stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
+                 stats_scale_unit(b, sizeof(b), iter->second * 8));
+    }
+
+    for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter) {
+         uint64_t thisBitrate = bitrates.at(iter->first);
+         fprintf(stderr, "pid %04x\t%" PRIu64 " discontinuities (%" PRIu64 "%%)\n",
+                 iter->first, iter->second,
+                 ((!iter->second) || (!thisBitrate)) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (thisBitrate / 188)));
+    }
+
+    if (tei_count) {
+            uint64_t fullBitrate = bitrates.at(0x2000);
+            fprintf(stderr, "tei count: %" PRIu64 " (%" PRIu64 "%%)\n", tei_count, (!fullBitrate) ? 0 : (18800 * tei_count / fullBitrate));
+    }
+
+    fprintf(stderr,"\n");
+  }
+};
+
+struct dvbtee_context: public Bitrates
 {
 	feed _file_feeder;
 	map_tuners tuners;
@@ -149,28 +181,6 @@ void signal_callback_handler(int signum)
 	cleanup(context, true);
 
 	exit(signum);
-}
-
-
-static void bitrate_stats(void *priv, stats_map &bitrates, stats_map &discontinuities, uint64_t tei_count, bool per_sec)
-{
-	(void)priv;
-	/* display the bitrates for each pid, followed by special pid 0x2000 for the full TS */
-	for (stats_map::const_iterator iter = bitrates.begin(); iter != bitrates.end(); ++iter) {
-		char a[16];
-		char b[16];
-		fprintf(stderr, "pid %04x %5" PRIu64 " p%s  %sb%s  %sbit\n",
-			iter->first, iter->second / 188, (per_sec) ? "/s" : "",
-			stats_scale_unit(a, sizeof(a), iter->second), (per_sec) ? "/s" : "",
-			stats_scale_unit(b, sizeof(b), iter->second * 8));
-	}
-	for (stats_map::const_iterator iter = discontinuities.begin(); iter != discontinuities.end(); ++iter)
-		fprintf(stderr, "pid %04x\t%" PRIu64 " discontinuities (%" PRIu64 "%%)\n", iter->first, iter->second, ((!iter->second) || (!bitrates[iter->first])) ? 0 : (!bitrates.count(iter->first)) ? 0 : (100 * iter->second / (bitrates[iter->first] / 188)));
-
-	if (tei_count)
-		fprintf(stderr, "tei count: %" PRIu64 " (%" PRIu64 "%%)\n", tei_count, (!bitrates[0x2000]) ? 0 : (18800 * tei_count / bitrates[0x2000]));
-
-	fprintf(stderr,"\n");
 }
 
 
@@ -608,9 +618,9 @@ int main(int argc, char **argv)
 	if (b_bitrate_stats) {
 		if (b_READ_TUNER) // FIXME
 			for (map_tuners::const_iterator iter = context.tuners.begin(); iter != context.tuners.end(); ++iter)
-				iter->second->feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
+				iter->second->feeder.parser.statistics.set_statistics_iface(&context);
 		else
-			context._file_feeder.parser.statistics.set_statistics_callback(bitrate_stats, &context);
+			context._file_feeder.parser.statistics.set_statistics_iface(&context);
 	}
 	if (b_output_file) {
 		if (b_READ_TUNER) // FIXME
