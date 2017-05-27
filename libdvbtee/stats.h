@@ -87,7 +87,7 @@ public:
 	stats& operator= (const stats&);
 #endif
 	void set_streamtime_callback(streamtime_callback cb, void *priv) { streamtime_cb = cb; streamtime_priv = priv; }
-	void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; }
+	__attribute__((deprecated)) void set_statistics_callback(statistics_callback cb, void *priv) { statistics_cb = cb; statistics_priv = priv; }
 	void set_statistics_iface(stats_iface *iface) { statistics_iface = iface; }
 
 	void push_pid(const uint16_t pid) { push_pid(188, pid); }
