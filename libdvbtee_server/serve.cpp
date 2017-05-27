@@ -1188,7 +1188,7 @@ bool serve_client::cmd_tuner_scan_channels_save()
 		  "waiting for channel scan to complete and " : "",
 		  filepath);
 
-#ifdef HAVE_MKDIR
+#if !defined(_WIN32) && defined(HAVE_MKDIR)
 	if (mkdir(dir, 0777) < 0) {
 #else
 	char cmd_buf[32] = { 0 };
