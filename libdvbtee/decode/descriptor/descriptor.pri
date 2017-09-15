@@ -3,7 +3,8 @@ INCLUDEPATH += $$PWD
 DESCRIPTOR_REQ_DVBPSI_V0_2_SOURCES = \
     $$PWD/desc_0a.cpp \
     $$PWD/desc_48.cpp \
-    $$PWD/desc_4d.cpp
+    $$PWD/desc_4d.cpp \
+    $$PWD/desc_4e.cpp
 
 DESCRIPTOR_REQ_DVBPSI_V1_SOURCES = \
     $$DESCRIPTOR_REQ_DVBPSI_V0_2_SOURCES \
@@ -28,6 +29,7 @@ HEADERS += \
     $$PWD/desc_0a.h \
     $$PWD/desc_48.h \
     $$PWD/desc_4d.h \
+    $$PWD/desc_4e.h \
     $$PWD/desc_62.h \
     $$PWD/desc_81.h \
     $$PWD/desc_83.h \

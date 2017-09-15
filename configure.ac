@@ -175,6 +175,12 @@ AM_COND_IF([DVBPSIBUILD], [
   AM_CONDITIONAL([DR4D], [test x$DR4D = xtrue])
 ])
 AM_COND_IF([DVBPSIBUILD], [
+  AM_CONDITIONAL([DR4E], [true])
+], [
+  AC_CHECK_FUNC([dvbpsi_DecodeExtendedEventDr],[DR4E=true],[DR4E=false])
+  AM_CONDITIONAL([DR4E], [test x$DR4E = xtrue])
+])
+AM_COND_IF([DVBPSIBUILD], [
   AM_CONDITIONAL([DR62], [true])
 ], [
   AC_CHECK_FUNC([dvbpsi_DecodeFrequencyListDr],[DR62=true],[DR62=false])
