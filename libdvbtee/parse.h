@@ -330,9 +330,8 @@ private:
 
 	bool enabled;
 
-	uint8_t pat_pkt[188];
+	ReWrittenPacket rewritten_pat;
 
-	uint8_t rewritten_pat_ver_offset, rewritten_pat_cont_ctr;
 	void rewrite_pat();
 	void process_pat(const decoded_pat_t *);
 	void process_pmt(const decoded_pmt_t *);

@@ -153,18 +153,18 @@ void parse::rewrite_pat()
 	dvbpsi_psi_section_t* p_section;
 	const decoded_pat_t *decoded_pat = get_decoder(ts_id).get_decoded_pat();
 
-	if (rewritten_pat_ver_offset == 0x1e)
-		rewritten_pat_ver_offset = 0;
+	if (rewritten_pat.ver_offset == 0x1e)
+		rewritten_pat.ver_offset = 0;
 
-	dvbpsi_pat_init(&pat, ts_id, 0x1f & (++rewritten_pat_ver_offset + decoded_pat->version), 1);
+	dvbpsi_pat_init(&pat, ts_id, 0x1f & (++rewritten_pat.ver_offset + decoded_pat->version), 1);
 
 	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
 		dvbpsi_pat_program_add(&pat, iter->first, ((decoded_pat_t *) decoded_pat)->programs[iter->first]);
 
 	p_section = dvbpsi_pat_sections_generate(dvbpsi.get_handle(), &pat, 0);
-	pat_pkt[0] = 0x47;
-	pat_pkt[1] = pat_pkt[2] = pat_pkt[3] = 0x00;
-	writePSI(pat_pkt, p_section);
+	rewritten_pat.pkt[0] = 0x47;
+	rewritten_pat.pkt[1] = rewritten_pat.pkt[2] = rewritten_pat.pkt[3] = 0x00;
+	writePSI(rewritten_pat.pkt, p_section);
 	dvbpsi_DeletePSISections(p_section);
 	dvbpsi_pat_empty(&pat);
 }
@@ -737,8 +737,6 @@ parse::parse(output_base& outp)
   , tei_count(0)
   , m_tsfilter_iface(NULL)
   , enabled(true)
-  , rewritten_pat_ver_offset(0)
-  , rewritten_pat_cont_ctr(0)
 {
 	init();
 }
@@ -765,8 +763,6 @@ parse::parse(output_base& outp, map_decoder& supplied_decoders)
   , tei_count(0)
   , m_tsfilter_iface(NULL)
   , enabled(true)
-  , rewritten_pat_ver_offset(0)
-  , rewritten_pat_cont_ctr(0)
 {
 	init();
 }
@@ -1478,8 +1474,8 @@ bool parse::check()
 		dumped_eit,
 		eit_collection_limit,
 		process_err_pkts ? "processing error packets, " : "",
-		rewritten_pat_ver_offset,
-		rewritten_pat_cont_ctr);
+		rewritten_pat.ver_offset,
+		rewritten_pat.cont_ctr);
 
 	return out.check();
 }
@@ -1565,8 +1561,8 @@ int parse::feed(int count, uint8_t* p_data)
 			send_pkt = (service_ids.size()) ? false : true;
 			out_type = OUTPUT_PATPMT;
 			if (!send_pkt) {
-				pat_pkt[3] = (0x0f & ++rewritten_pat_cont_ctr) | 0x10;
-				out.push(pat_pkt, out_type);
+				rewritten_pat.pkt[3] = (0x0f & ++rewritten_pat.cont_ctr) | 0x10;
+				out.push(rewritten_pat.pkt, out_type);
 			}
 			break;
 		case PID_ATSC:
