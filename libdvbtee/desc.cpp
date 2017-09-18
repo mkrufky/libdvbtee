@@ -438,6 +438,9 @@ void desc::decode(dvbpsi_descriptor_t* p_descriptor)
 		case DT_ShortEvent:
 			short_event(p_descriptor);
 			break;
+		case DT_ExtendedEvent:
+			extended_event(p_descriptor);
+			break;
 		case DT_FrequencyList:
 			freq_list(p_descriptor);
 			break;
