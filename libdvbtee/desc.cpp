@@ -150,8 +150,8 @@ bool desc::extended_event(dvbpsi_descriptor_t* p_descriptor)
 	dvbpsi_extended_event_dr_t* dr = dvbpsi_DecodeExtendedEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return false;
 
-	_4e->descriptor_number = dr->i_descriptor_number;
-	_4e->last_descriptor_number = dr->i_last_descriptor_number;
+	_4e.descriptor_number = dr->i_descriptor_number;
+	_4e.last_descriptor_number = dr->i_last_descriptor_number;
 	memcpy(_4e.lang, dr->i_iso_639_code, 3);
 	get_descriptor_text(dr->i_text, dr->i_text_length, _4e.text);
 
