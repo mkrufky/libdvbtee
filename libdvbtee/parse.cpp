@@ -1804,3 +1804,16 @@ void dvbpsi_class::set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint1
 	tables[idx].table_id_ext = ext;
 }
 #endif
+
+ReWrittenPacket::ReWrittenPacket()
+ : ver_offset(0)
+ , cont_ctr(0)
+{
+	pkt[0] = 0x47;
+	pkt[1] = pkt[2] = pkt[3] = 0x00;
+}
+
+ReWrittenPacket::~ReWrittenPacket()
+{
+	//
+}

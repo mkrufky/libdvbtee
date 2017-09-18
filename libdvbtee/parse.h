@@ -94,6 +94,16 @@ typedef std::map<uint16_t, decode> map_decoder;
 typedef std::map<uint16_t, uint16_t> map_pidtype;
 #endif
 
+class ReWrittenPacket
+{
+public:
+	ReWrittenPacket();
+	virtual ~ReWrittenPacket();
+
+	uint8_t pkt[188];
+	uint8_t ver_offset, cont_ctr;
+};
+
 typedef struct {
 	unsigned int channel;
 	uint32_t frequency;
