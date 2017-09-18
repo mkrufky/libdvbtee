@@ -39,6 +39,7 @@
 #include "dvbpsi/dr_0a.h" /* ISO639 language descriptor */
 #include "dvbpsi/dr_48.h" /* service descriptor */
 #include "dvbpsi/dr_4d.h" /* short event descriptor */
+#include "dvbpsi/dr_4e.h" /* extended event descriptor */
 #if DVBPSI_SUPPORTS_DR_81_86_A0_A1
 #include "dvbpsi/dr_62.h" /* frequency list descriptor */
 #include "dvbpsi/dr_81.h" /* AC-3 Audio descriptor */
@@ -55,6 +56,7 @@
 #define DT_ISO639Language             0x0a
 #define DT_Service                    0x48
 #define DT_ShortEvent                 0x4d
+#define DT_ExtendedEvent              0x4e
 #define DT_Teletext                   0x56
 #define DT_FrequencyList              0x62
 #define DT_Ac3Audio                   0x81
@@ -136,6 +138,24 @@ bool desc::short_event(dvbpsi_descriptor_t* p_descriptor)
 	get_descriptor_text(dr->i_text, dr->i_text_length, _4d.text);
 
 	dPrintf("%s, %s, %s", _4d.lang, _4d.name, _4d.text);
+
+	return true;
+}
+
+bool desc::extended_event(dvbpsi_descriptor_t* p_descriptor)
+{
+	if (p_descriptor->i_tag != DT_ExtendedEvent)
+		return false;
+
+	dvbpsi_extended_event_dr_t* dr = dvbpsi_ExtendedShortEventDr(p_descriptor);
+	if (desc_dr_failed(dr)) return false;
+
+	_4e->descriptor_number = dr->i_descriptor_number;
+	_4e->last_descriptor_number = dr->i_last_descriptor_number;
+	memcpy(_4e.lang, dr->i_iso_639_code, 3);
+	get_descriptor_text(dr->i_text, dr->i_text_length, _4e.text);
+
+	dPrintf("%s, %s", _4e.lang, _4e.text);
 
 	return true;
 }
