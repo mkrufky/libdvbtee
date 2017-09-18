@@ -36,7 +36,7 @@ using namespace valueobj;
 
 static std::string DESC_NAME = "DR[4E]";
 
-#define DESC_TAG 0x4E
+#define DESC_TAG 0x4e
 
 desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
  : Descriptor(parent, DESC_NAME, p_descriptor)
