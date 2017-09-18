@@ -147,7 +147,7 @@ bool desc::extended_event(dvbpsi_descriptor_t* p_descriptor)
 	if (p_descriptor->i_tag != DT_ExtendedEvent)
 		return false;
 
-	dvbpsi_extended_event_dr_t* dr = dvbpsi_ExtendedShortEventDr(p_descriptor);
+	dvbpsi_extended_event_dr_t* dr = dvbpsi_DecodeExtendedEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return false;
 
 	_4e->descriptor_number = dr->i_descriptor_number;
