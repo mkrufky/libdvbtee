@@ -89,7 +89,7 @@ private:
 	bool iso639language(dvbpsi_descriptor_t*);
 	bool service(dvbpsi_descriptor_t*);
 	bool short_event(dvbpsi_descriptor_t*);
-	bool extended_event(dvbpsi_descriptor_t*)
+	bool extended_event(dvbpsi_descriptor_t*);
 	bool freq_list(dvbpsi_descriptor_t*);
 	bool ac3_audio(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
