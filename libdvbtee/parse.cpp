@@ -736,6 +736,7 @@ parse::parse(output_base& outp)
   , process_err_pkts(false)
   , tei_count(0)
   , m_tsfilter_iface(NULL)
+  , rewritten_pat(this)
   , enabled(true)
 {
 	init();
@@ -762,6 +763,7 @@ parse::parse(output_base& outp, map_decoder& supplied_decoders)
   , process_err_pkts(false)
   , tei_count(0)
   , m_tsfilter_iface(NULL)
+  , rewritten_pat(this)
   , enabled(true)
 {
 	init();
@@ -1801,8 +1803,9 @@ void dvbpsi_class::set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint1
 }
 #endif
 
-ReWrittenPacket::ReWrittenPacket()
- : ver_offset(0)
+ReWrittenPacket::ReWrittenPacket(parse *parser)
+ : parser(parser)
+ , ver_offset(0)
  , cont_ctr(0)
 {
 	pkt[0] = 0x47;
