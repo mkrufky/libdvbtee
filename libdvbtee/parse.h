@@ -102,8 +102,14 @@ public:
 	ReWrittenPacket(parse*);
 	virtual ~ReWrittenPacket();
 
+	void add_service_pids(uint16_t service_id, map_pidtype &pids);
+	void add_service_pids(char* service_ids, map_pidtype &pids);
+	void add_service_pids(map_pidtype &pids);
+
 	uint8_t pkt[188];
 	uint8_t ver_offset, cont_ctr;
+
+	map_pidtype service_ids; // ignore the type name used here
 private:
 	parse *parser;
 };
@@ -156,10 +162,6 @@ public:
 	uint16_t get_ts_id(unsigned int channel);
 
 	bool get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0 = NULL, decoded_event_t *e1 = NULL);
-
-	void add_service_pids(uint16_t service_id, map_pidtype &pids);
-	void add_service_pids(char* service_ids, map_pidtype &pids);
-	void add_service_pids(map_pidtype &pids);
 
 	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); }
 
@@ -227,6 +229,7 @@ public:
 	stats statistics;
 	static int count_decoder_factories();
 private:
+friend class ReWrittenPacket;
 	map_decoder&   decoders;
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 	decode& get_decoder(uint16_t ts_id);
@@ -283,7 +286,7 @@ private:
 	unsigned int xine_dump(uint16_t, channel_info_t*, parse_iface *);
 
 	void set_ts_id(uint16_t);
-	void set_service_id(uint16_t id) { service_ids[id] = 0; }
+	void set_service_id(uint16_t id) { rewritten_pat.service_ids[id] = 0; }
 	void detach_demux();
 
 	channel_info_t new_channel_info;
@@ -303,7 +306,6 @@ private:
 	time_t stream_time;
 #endif
 	uint16_t ts_id;
-	map_pidtype service_ids; // ignore the type name used here
 
 	bool epg_mode;
 	bool scan_mode;

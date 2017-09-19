@@ -138,7 +138,7 @@ bool parse::take_tot(dvbpsi_tot_t* p_tot, bool decoded)
 
 void parse::rewrite_pat()
 {
-	if (0 == service_ids.size())
+	if (0 == rewritten_pat.service_ids.size())
 		return;
 
 #if !USING_DVBPSI_VERSION_0
@@ -158,7 +158,7 @@ void parse::rewrite_pat()
 
 	dvbpsi_pat_init(&pat, ts_id, 0x1f & (++rewritten_pat.ver_offset + decoded_pat->version), 1);
 
-	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
+	for (map_pidtype::const_iterator iter = rewritten_pat.service_ids.begin(); iter != rewritten_pat.service_ids.end(); ++iter)
 		dvbpsi_pat_program_add(&pat, iter->first, ((decoded_pat_t *) decoded_pat)->programs[iter->first]);
 
 	p_section = dvbpsi_pat_sections_generate(dvbpsi.get_handle(), &pat, 0);
@@ -175,7 +175,7 @@ void parse::process_pat(const decoded_pat_t *decoded_pat)
 	for (map_decoded_pat_programs::const_iterator iter = decoded_pat->programs.begin();
 	     iter != decoded_pat->programs.end(); ++iter)
 		if (iter->first > 0) {// FIXME: > 0 ???
-			if ((!service_ids.size()) || (service_ids.count(iter->first)))  {
+			if ((!rewritten_pat.service_ids.size()) || (rewritten_pat.service_ids.count(iter->first)))  {
 #if USING_DVBPSI_VERSION_0
 				h_pmt[iter->second] = dvbpsi_AttachPMT(iter->first, take_pmt, this);
 #else
@@ -802,7 +802,7 @@ void parse::init()
 	dvbpsi_AttachDemux(h_demux[PID_TOT].get_handle(), attach_table, this);//if !scan_mode
 #endif
 
-	service_ids.clear();
+	rewritten_pat.service_ids.clear();
 	rcvd_pmt.clear();
 	out_pids.clear();
 }
@@ -821,7 +821,7 @@ parse::~parse()
 	if (fed_pkt_count)
 		__log_printf(stderr, "%d packets read in total\n", fed_pkt_count);
 #endif
-	service_ids.clear();
+	rewritten_pat.service_ids.clear();
 	rcvd_pmt.clear();
 	out_pids.clear();
 }
@@ -876,7 +876,7 @@ void parse::detach_demux()
 #endif
 
 	clear_filters();
-	service_ids.clear();
+	rewritten_pat.service_ids.clear();
 	rcvd_pmt.clear();
 	payload_pids.clear();
 	out_pids.clear();
@@ -1217,21 +1217,21 @@ bool parse::is_epg_ready()
 int parse::add_output(void* priv, stream_callback callback)
 {
 	map_pidtype pids;
-	add_service_pids(pids);
+	rewritten_pat.add_service_pids(pids);
 	return add_output(priv, callback, pids);
 }
 
 int parse::add_output(int socket, unsigned int method)
 {
 	map_pidtype pids;
-	add_service_pids(pids);
+	rewritten_pat.add_service_pids(pids);
 	return add_output(socket, method, pids);
 }
 
 int parse::add_output(char* target)
 {
 	map_pidtype pids;
-	add_service_pids(pids);
+	rewritten_pat.add_service_pids(pids);
 	return add_output(target, pids);
 }
 
@@ -1239,7 +1239,7 @@ int parse::add_output(void* priv, stream_callback callback, uint16_t service)
 {
 	map_pidtype pids;
 	if (service)
-		add_service_pids(service, pids);
+		rewritten_pat.add_service_pids(service, pids);
 
 	return add_output(priv, callback, pids);
 }
@@ -1248,7 +1248,7 @@ int parse::add_output(int socket, unsigned int method, uint16_t service)
 {
 	map_pidtype pids;
 	if (service)
-		add_service_pids(service, pids);
+		rewritten_pat.add_service_pids(service, pids);
 
 	return add_output(socket, method, pids);
 }
@@ -1257,7 +1257,7 @@ int parse::add_output(char* target, uint16_t service)
 {
 	map_pidtype pids;
 	if (service)
-		add_service_pids(service, pids);
+		rewritten_pat.add_service_pids(service, pids);
 
 	return add_output(target, pids);
 }
@@ -1266,7 +1266,7 @@ int parse::add_output(void* priv, stream_callback callback, char* services)
 {
 	map_pidtype pids;
 	if (services)
-		add_service_pids(services, pids);
+		rewritten_pat.add_service_pids(services, pids);
 
 	return add_output(priv, callback, pids);
 }
@@ -1275,7 +1275,7 @@ int parse::add_output(int socket, unsigned int method, char* services)
 {
 	map_pidtype pids;
 	if (services)
-		add_service_pids(services, pids);
+		rewritten_pat.add_service_pids(services, pids);
 
 	return add_output(socket, method, pids);
 }
@@ -1284,7 +1284,7 @@ int parse::add_output(char* target, char* services)
 {
 	map_pidtype pids;
 	if (services)
-		add_service_pids(services, pids);
+		rewritten_pat.add_service_pids(services, pids);
 
 	return add_output(target, pids);
 }
@@ -1340,7 +1340,7 @@ fail:
 int parse::add_stdout()
 {
 	map_pidtype pids;
-	add_service_pids(pids);
+	rewritten_pat.add_service_pids(pids);
 	return add_stdout(pids);
 }
 
@@ -1348,7 +1348,7 @@ int parse::add_stdout(uint16_t service)
 {
 	map_pidtype pids;
 	if (service)
-		add_service_pids(service, pids);
+		rewritten_pat.add_service_pids(service, pids);
 
 	return add_stdout(pids);
 }
@@ -1357,7 +1357,7 @@ int parse::add_stdout(char* services)
 {
 	map_pidtype pids;
 	if (services)
-		add_service_pids(services, pids);
+		rewritten_pat.add_service_pids(services, pids);
 
 	return add_stdout(pids);
 }
@@ -1380,9 +1380,9 @@ fail:
 
 #define CHAR_CMD_COMMA ","
 
-void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
+void ReWrittenPacket::add_service_pids(uint16_t service_id, map_pidtype &pids)
 {
-	decode &decoder = get_decoder(ts_id);
+	decode &decoder = parser->get_decoder(parser->get_ts_id());
 
 	const decoded_pat_t* decoded_pat = decoder.get_decoded_pat();
 	map_decoded_pat_programs::const_iterator iter_pat = decoded_pat->programs.find(service_id);
@@ -1400,7 +1400,7 @@ void parse::add_service_pids(uint16_t service_id, map_pidtype &pids)
 	}
 }
 
-void parse::add_service_pids(char* service_ids, map_pidtype &pids)
+void ReWrittenPacket::add_service_pids(char* service_ids, map_pidtype &pids)
 {
 	char *save, *id = (service_ids) ? strtok_r(service_ids, CHAR_CMD_COMMA, &save) : NULL;
 
@@ -1411,7 +1411,7 @@ void parse::add_service_pids(char* service_ids, map_pidtype &pids)
 		if (service_ids) add_service_pids(strtoul(service_ids, NULL, 0), pids);
 }
 
-void parse::add_service_pids(map_pidtype &pids)
+void ReWrittenPacket::add_service_pids(map_pidtype &pids)
 {
 	if (!service_ids.size()) return;
 	for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter)
@@ -1422,7 +1422,7 @@ void parse::set_service_ids(char *ids)
 {
 	char *save, *id = (ids) ? strtok_r(ids, CHAR_CMD_COMMA, &save) : NULL;
 
-	service_ids.clear();
+	rewritten_pat.service_ids.clear();
 	payload_pids.clear();
 
 	if (id) while (id) {
@@ -1441,7 +1441,7 @@ void parse::set_service_ids(char *ids)
 
 		process_pat(decoded_pat);
 
-		for (map_pidtype::const_iterator iter = service_ids.begin(); iter != service_ids.end(); ++iter) {
+		for (map_pidtype::const_iterator iter = rewritten_pat.service_ids.begin(); iter != rewritten_pat.service_ids.end(); ++iter) {
 			map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(iter->first);
 			if (iter_pmt != decoded_pmt->end())
 				process_pmt(&iter_pmt->second);
@@ -1560,7 +1560,7 @@ int parse::feed(int count, uint8_t* p_data)
 #else
 			h_pat.packet_push(p);
 #endif
-			send_pkt = (service_ids.size()) ? false : true;
+			send_pkt = (rewritten_pat.service_ids.size()) ? false : true;
 			out_type = OUTPUT_PATPMT;
 			if (!send_pkt) {
 				rewritten_pat.pkt[3] = (0x0f & ++rewritten_pat.cont_ctr) | 0x10;
