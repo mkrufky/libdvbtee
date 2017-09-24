@@ -213,6 +213,7 @@ public:
 	stats statistics;
 	static int count_decoder_factories();
 private:
+friend class decode;
 	map_decoder&   decoders;
 	map_network_decoder& networks;
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;

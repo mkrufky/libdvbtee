@@ -551,7 +551,7 @@ private:
 	dvbtee::decode::TableStore store;
 #endif
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
-	map_network_decoder networks; // FIXME - make a ref
+	map_network_decoder& networks;
 
 	uint16_t orig_network_id;
 	uint16_t      network_id;

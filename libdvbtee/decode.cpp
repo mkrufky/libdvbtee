@@ -46,6 +46,8 @@
 #include "log.h"
 #define CLASS_MODULE "decode"
 
+#include "parse.h"
+
 bool fshowtime;
 
 #define dPrintf(fmt, arg...)					\
@@ -275,6 +277,7 @@ bool decode_network::updateNIT(dvbtee::decode::Table *table)
 
 decode::decode(parse* p)
   : m_parser(p)
+  , networks(p->networks)
 #if OLD_DECODER
   , orig_network_id(0)
 #else
