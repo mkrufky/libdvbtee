@@ -359,6 +359,9 @@ private:
 
 typedef std::map<uint16_t, decode_network_service*> map_decoded_network_services;
 
+class decode_network;
+typedef std::map<uint16_t, decode_network*> map_network_decoder;
+
 class decode_network
 #if !OLD_DECODER
  : public dvbtee::decode::LinkedDecoder, dvbtee::decode::TableWatcher
@@ -404,7 +407,7 @@ public:
 	dvbtee::decode::DescriptorStore descriptors;
 #endif
 
-	static void dumpJson();
+	static void dumpJson(map_network_decoder &networks);
 	void dumpJsonServices();
 
 	uint16_t orig_network_id;
@@ -417,8 +420,6 @@ private:
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
 };
-
-typedef std::map<uint16_t, decode_network*> map_network_decoder;
 
 typedef struct
 {
@@ -550,6 +551,7 @@ private:
 	dvbtee::decode::TableStore store;
 #endif
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
+	map_network_decoder networks; // FIXME - make a ref
 
 	uint16_t orig_network_id;
 	uint16_t      network_id;

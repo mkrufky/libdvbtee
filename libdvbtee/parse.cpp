@@ -921,7 +921,7 @@ void parse::dumpJson()
 	}
 	__log_printf(stderr, "\n");
 
-	decode_network::dumpJson();
+	decode_network::dumpJson(networks);
 }
 
 void parse::reset_filters()

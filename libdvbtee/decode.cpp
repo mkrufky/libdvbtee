@@ -76,8 +76,6 @@ decode_report::~decode_report()
 #endif
 }
 
-static map_network_decoder   networks;
-
 decode_network_service::decode_network_service(
 #if !OLD_DECODER
 					       Decoder *parent, std::string &name
@@ -2146,7 +2144,7 @@ void decode_network::dumpJsonServices()
 	__log_printf(stderr, "\n");
 }
 
-void decode_network::dumpJson()
+void decode_network::dumpJson(map_network_decoder &networks)
 {
 	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it) {
 		__log_printf(stderr, "\nNET_ID#%04x: ", it->first);
