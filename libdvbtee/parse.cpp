@@ -607,7 +607,7 @@ void parse::a(void* p_this, b* p_table)					\
 	parse* parser = (parse*)p_this;					\
 	if ((parser) &&							\
 	    (((parser->a(p_table, false)) && (parser->get_ts_id())) &&	\
-	     ((parser->decoders[parser->get_ts_id()].a(p_table)) ||	\
+	     ((parser->get_decoder(parser->get_ts_id()).a(p_table)) ||	\
 	      (!parser->d))))						\
 		parser->a(p_table, true);				\
 	c(p_table);							\
