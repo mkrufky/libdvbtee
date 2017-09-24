@@ -61,11 +61,21 @@
 #include "desc.h"
 #endif
 
-#ifndef USE_OWN_NETWORK_DECODERS
-#define USE_OWN_NETWORK_DECODERS 0
+#include <map>
+
+#ifdef _MSC_VER
+# define DVBTEE_HAS_CPLUSPLUS_11 (_MSC_VER >= 1800)
+#else
+# define DVBTEE_HAS_CPLUSPLUS_11 (__cplusplus >= 201103L)
 #endif
 
-#include <map>
+#ifndef USE_OWN_NETWORK_DECODERS
+#if !DVBTEE_HAS_CPLUSPLUS_11
+#define USE_OWN_NETWORK_DECODERS 1
+#else
+#define USE_OWN_NETWORK_DECODERS 0
+#endif
+#endif
 
 /* -- PAT -- */
 typedef std::map<uint16_t, uint16_t> map_decoded_pat_programs; /* program number, pid */
@@ -472,7 +482,11 @@ class decode
 #endif
 {
 public:
+#if !DVBTEE_HAS_CPLUSPLUS_11
+	decode();
+#else
 	decode(parse *);
+#endif
 	~decode();
 
 	decode_network *fetch_network(uint16_t nw_id);

@@ -847,9 +847,12 @@ decode &parse::get_decoder(uint16_t ts_id)
 	if (it != decoders.end()) {
 		return it->second;
 	}
-
+#if DVBTEE_HAS_CPLUSPLUS_11
 	decoders.emplace(ts_id, this);
 	decode &d = decoders.at(ts_id);
+#else
+	decode &d = decoders[ts_id];
+#endif
 	d.subscribeTables(subscribedTableWatcher);
 	return d;
 }

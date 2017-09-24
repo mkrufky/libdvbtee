@@ -275,8 +275,15 @@ bool decode_network::updateNIT(dvbtee::decode::Table *table)
 }
 #endif
 
+#if !DVBTEE_HAS_CPLUSPLUS_11
+static GlobalParse static_parser;
+
+decode::decode()
+  : m_parser(&static_parser)
+#else
 decode::decode(parse* p)
   : m_parser(p)
+#endif
 #if !USE_OWN_NETWORK_DECODERS
   , networks(p->networks)
 #endif
