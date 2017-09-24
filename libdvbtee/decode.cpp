@@ -2097,19 +2097,19 @@ const decode_network* decode::get_decoded_network() const
 
 uint16_t decode::get_lcn(uint16_t service_id) const
 {
-#if OLD_DECODER
-	return networks.count(network_id) ? networks[network_id]->descriptors.lcn[service_id]: 0;
-#else
 	uint16_t lcn = 0;
 
 	// XXX: FIXME: must refactor decode::get_lcn() & LCN descriptor 0x83
 	map_network_decoder::const_iterator it = networks.find(network_id);
 	if (it != networks.end()) {
+#if OLD_DECODER
+		lcn = it->second->descriptors.lcn[service_id];
+#else
 		const dvbtee::decode::Descriptor *d = it->second->descriptors.last(0x83);
 		if (d) lcn = d->get<uint16_t>(service_id);
+#endif
 	}
 	return lcn;
-#endif
 }
 
 const map_decoded_eit* decode::get_decoded_eit() const
