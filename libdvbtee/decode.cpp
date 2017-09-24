@@ -277,7 +277,9 @@ bool decode_network::updateNIT(dvbtee::decode::Table *table)
 
 decode::decode(parse* p)
   : m_parser(p)
+#if !USE_OWN_NETWORK_DECODERS
   , networks(p->networks)
+#endif
 #if OLD_DECODER
   , orig_network_id(0)
 #else

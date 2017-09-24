@@ -61,6 +61,10 @@
 #include "desc.h"
 #endif
 
+#ifndef USE_OWN_NETWORK_DECODERS
+#define USE_OWN_NETWORK_DECODERS 0
+#endif
+
 #include <map>
 
 /* -- PAT -- */
@@ -551,7 +555,11 @@ private:
 	dvbtee::decode::TableStore store;
 #endif
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
+#if USE_OWN_NETWORK_DECODERS
+	map_network_decoder networks;
+#else
 	map_network_decoder& networks;
+#endif
 
 	uint16_t orig_network_id;
 	uint16_t      network_id;
