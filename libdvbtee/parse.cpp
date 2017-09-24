@@ -34,6 +34,7 @@
 const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
 
 static map_decoder   global_static_decoders;
+static map_network_decoder   global_static_network_decoders;
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_PARSE, fmt, ##arg)
 
@@ -694,7 +695,7 @@ eit_complete:
 static bool hello = false;
 
 PrivateParse::PrivateParse()
-  : parse(outp, m_decoders)
+  : parse(outp, m_decoders, m_networks)
 {
 	//
 }
@@ -705,7 +706,7 @@ PrivateParse::~PrivateParse()
 }
 
 GlobalParse::GlobalParse()
-  : parse(outp, global_static_decoders)
+  : parse(outp, global_static_decoders, global_static_network_decoders)
 {
 	//
 }
@@ -719,6 +720,7 @@ parse::parse(output_base& outp)
   : out(outp)
   , statistics(CLASS_MODULE)
   , decoders(global_static_decoders)
+  , networks(global_static_network_decoders)
   , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
   , ts_id(0)
@@ -743,10 +745,11 @@ parse::parse(output_base& outp)
 	init();
 }
 
-parse::parse(output_base& outp, map_decoder& supplied_decoders)
+parse::parse(output_base& outp, map_decoder& supplied_decoders, map_network_decoder& supplied_networks)
   : out(outp)
   , statistics(CLASS_MODULE)
   , decoders(supplied_decoders)
+  , networks(supplied_networks)
   , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
   , ts_id(0)
