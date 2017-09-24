@@ -843,6 +843,11 @@ int parse::count_decoder_factories()
 
 decode &parse::get_decoder(uint16_t ts_id)
 {
+	map_decoder::iterator it = decoders.find(ts_id);
+	if (it != decoders.end()) {
+		return it->second;
+	}
+
 	decode &d = decoders[ts_id];
 	d.subscribeTables(subscribedTableWatcher);
 	return d;
