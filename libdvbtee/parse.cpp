@@ -1137,7 +1137,7 @@ void parse::epg_dump(decode_report *reporter)
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		if (decoders.count(iter->second)) decoders[iter->second].dump_epg(reporter);
+		if (decoders.count(iter->second)) get_decoder(iter->second).dump_epg(reporter);
 
 	channels.clear();
 
@@ -1222,8 +1222,8 @@ bool parse::is_psip_ready()
 bool parse::is_epg_ready()
 {
 	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) &&
-		((decoders[get_ts_id()].got_all_eit(eit_collection_limit)) &&
-		((dont_collect_ett) || (decoders[get_ts_id()].got_all_ett(eit_collection_limit)))))));
+		((get_decoder(get_ts_id()).got_all_eit(eit_collection_limit)) &&
+		((dont_collect_ett) || (get_decoder(get_ts_id()).got_all_ett(eit_collection_limit)))))));
 }
 
 int parse::add_output(void* priv, stream_callback callback)
