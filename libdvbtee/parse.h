@@ -318,6 +318,7 @@ private:
 	void add_filter(uint16_t pid) { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(pid); }
 	void clear_filters() { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(0xffff); }
 	void reset_filters();
+	void clear_decoded_networks();
 
 	bool enabled;
 

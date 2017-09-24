@@ -934,6 +934,13 @@ void parse::reset_filters()
 	add_filter(PID_EIT);
 }
 
+void parse::clear_decoded_networks()
+{
+	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it)
+		delete it->second;
+	networks.clear();
+}
+
 void parse::reset()
 {
 	dPrintf("()");

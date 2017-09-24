@@ -78,13 +78,6 @@ decode_report::~decode_report()
 
 static map_network_decoder   networks;
 
-void clear_decoded_networks()
-{
-	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it)
-		delete it->second;
-	networks.clear();
-}
-
 decode_network_service::decode_network_service(
 #if !OLD_DECODER
 					       Decoder *parent, std::string &name

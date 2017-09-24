@@ -420,8 +420,6 @@ private:
 
 typedef std::map<uint16_t, decode_network*> map_network_decoder;
 
-void clear_decoded_networks();
-
 typedef struct
 {
 	std::string channel_name;
