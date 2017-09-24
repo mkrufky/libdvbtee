@@ -848,7 +848,8 @@ decode &parse::get_decoder(uint16_t ts_id)
 		return it->second;
 	}
 
-	decode &d = decoders[ts_id];
+	decoders.emplace(ts_id, this);
+	decode &d = decoders.at(ts_id);
 	d.subscribeTables(subscribedTableWatcher);
 	return d;
 }

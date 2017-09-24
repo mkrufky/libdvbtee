@@ -273,11 +273,12 @@ bool decode_network::updateNIT(dvbtee::decode::Table *table)
 }
 #endif
 
-decode::decode()
+decode::decode(parse* p)
+  : m_parser(p)
 #if OLD_DECODER
-  : orig_network_id(0)
+  , orig_network_id(0)
 #else
-  : NullDecoder()
+  , NullDecoder()
   , store(this)
   , subscribedTableWatcher(NULL)
   , orig_network_id(0)
@@ -335,82 +336,6 @@ decode::~decode()
 	for (int i = 0; i < 128; i++) {
 		decoded_ett[i].clear();
 	}
-}
-
-decode::decode(const decode&)
-#if !OLD_DECODER
- : NullDecoder()
- , store(this)
- , subscribedTableWatcher(NULL)
-#endif
-{
-	dPrintf("(copy)");
-
-	for (int i = 0; i < 128; i++) {
-		for (map_decoded_atsc_eit::iterator iter =
-			decoded_atsc_eit[i].begin();
-		     iter != decoded_atsc_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_atsc_eit[i].clear();
-	}
-
-	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
-	     iter != decoded_pmt.end(); ++iter)
-		iter->second.es_streams.clear();
-
-	decoded_pmt.clear();
-	rcvd_pmt.clear();
-
-	for (int i = 0; i < 128; i++) {
-		decoded_ett[i].clear();
-	}
-
-	orig_network_id = 0;
-	network_id = 0;
-	stream_time = (time_t)0;
-	eit_x = 0;
-	ett_x = 0;
-	physical_channel = 0;
-}
-
-decode& decode::operator= (const decode& cSource)
-{
-	dPrintf("(operator=)");
-
-	//store?
-
-	if (this == &cSource)
-		return *this;
-
-	for (int i = 0; i < 128; i++) {
-		for (map_decoded_atsc_eit::iterator iter =
-			decoded_atsc_eit[i].begin();
-		     iter != decoded_atsc_eit[i].end(); ++iter)
-			iter->second.events.clear();
-
-		decoded_atsc_eit[i].clear();
-	}
-
-	for (map_decoded_pmt::iterator iter = decoded_pmt.begin();
-	     iter != decoded_pmt.end(); ++iter)
-		iter->second.es_streams.clear();
-
-	decoded_pmt.clear();
-	rcvd_pmt.clear();
-
-	for (int i = 0; i < 128; i++) {
-		decoded_ett[i].clear();
-	}
-
-	orig_network_id = 0;
-	network_id = 0;
-	stream_time = (time_t)0;
-	eit_x = 0;
-	ett_x = 0;
-	physical_channel = 0;
-
-	return *this;
 }
 
 decode_network *decode::fetch_network(uint16_t nw_id)

@@ -460,17 +460,16 @@ public:
 	virtual void print(const char *, ...) = 0;
 };
 
+class parse;
+
 class decode
 #if !OLD_DECODER
  : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 #endif
 {
 public:
-	decode();
+	decode(parse *);
 	~decode();
-
-	decode(const decode&);
-	decode& operator= (const decode&);
 
 	decode_network *fetch_network(uint16_t nw_id);
 
@@ -547,6 +546,7 @@ public:
 
 	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e);
 private:
+	parse* m_parser;
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
