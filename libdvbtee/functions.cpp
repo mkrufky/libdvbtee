@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <iconv.h>
 
 #include "atsctext.h"
 
@@ -300,4 +301,21 @@ char *escape_quotes(char *str) {
 	}
 	*pbuf = '\0';
 	return buf;
+}
+
+/* Translate ISO6937 encoded string into UTF-8 */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *translate_iso6937(char *str) {
+    char *out = (char *)malloc(strlen((const char *)str) * 6 + 1);
+
+    char *iconv_in = (char *) &str[0];
+    char *iconv_out = (char *) &out[0];
+    size_t iconv_in_s = strlen((const char *)str);
+    size_t iconv_out_s = iconv_in_s * 6 + 1;
+
+    iconv_t conv = iconv_open("UTF-8", "ISO6937");
+    iconv(conv, &iconv_in, &iconv_in_s, &iconv_out, &iconv_out_s);
+    iconv_close(conv);
+
+    return out;
 }
