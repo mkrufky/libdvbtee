@@ -564,20 +564,20 @@ public:
 
 	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e);
 private:
-	parse* m_parser;
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
 #endif
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
+
+	uint16_t orig_network_id;
+	uint16_t      network_id;
+
+	parse* m_parser;
 #if USE_OWN_NETWORK_DECODERS
 	map_network_decoder networks;
 #else
 	map_network_decoder& networks;
 #endif
-
-	uint16_t orig_network_id;
-	uint16_t      network_id;
-
 	time_t stream_time;
 
 	decoded_pat_t   decoded_pat;

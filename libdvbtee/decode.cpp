@@ -279,23 +279,26 @@ bool decode_network::updateNIT(dvbtee::decode::Table *table)
 static GlobalParse static_parser;
 
 decode::decode()
-  : m_parser(&static_parser)
 #else
 decode::decode(parse* p)
-  : m_parser(p)
-#endif
-#if !USE_OWN_NETWORK_DECODERS
-  , networks(p->networks)
 #endif
 #if OLD_DECODER
-  , orig_network_id(0)
+  : orig_network_id(0)
 #else
-  , NullDecoder()
+  : NullDecoder()
   , store(this)
   , subscribedTableWatcher(NULL)
   , orig_network_id(0)
 #endif
   , network_id(0)
+#if !DVBTEE_HAS_CPLUSPLUS_11
+  , m_parser(&static_parser)
+#else
+  , m_parser(p)
+#endif
+#if !USE_OWN_NETWORK_DECODERS
+  , networks(p->networks)
+#endif
   , stream_time((time_t)0)
   , eit_x(0)
   , ett_x(0)
