@@ -845,7 +845,9 @@ decode &parse::get_decoder(uint16_t ts_id)
 {
 	map_decoder::iterator it = decoders.find(ts_id);
 	if (it != decoders.end()) {
-		return it->second;
+		decode &d = it->second;
+		d.subscribeTables(subscribedTableWatcher);
+		return d;
 	}
 #if DVBTEE_HAS_CPLUSPLUS_11
 	decoders.emplace(ts_id, this);
