@@ -1183,7 +1183,7 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	return true;
 }
 
-bool parse::is_pmt_ready(uint16_t id)
+bool parse::is_pmt_ready(uint16_t id) const
 {
 #if 0
 	return (has_pat && decoders[get_ts_id()].complete_pmt());
@@ -1191,7 +1191,7 @@ bool parse::is_pmt_ready(uint16_t id)
 	if ((!has_pat) || (!rcvd_pmt.size()))
 		return false;
 
-	if (id) return (rcvd_pmt.count(id) && rcvd_pmt[id]);
+	if (id) return (rcvd_pmt.count(id) && rcvd_pmt.at(id));
 
 	for (map_rcvd::const_iterator iter = rcvd_pmt.begin(); iter != rcvd_pmt.end(); ++iter)
 		if ((iter->first) && (!iter->second)) {
@@ -1204,7 +1204,7 @@ bool parse::is_pmt_ready(uint16_t id)
 
 }
 
-bool parse::is_psip_ready()
+bool parse::is_psip_ready() const
 {
 	return ((is_basic_psip_ready()) && ((decoders.count(get_ts_id())) && (is_pmt_ready())));
 }
