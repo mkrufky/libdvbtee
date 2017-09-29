@@ -234,9 +234,9 @@ decode_network_service *decode_network::fetch_network_service(uint16_t ts_id)
 #endif
 						 );
 		decoded_network_services[ts_id] = ret;
-
-		ret->subscribeTables(subscribedTableWatcher);
 	}
+
+	ret->subscribeTables(subscribedTableWatcher);
 
 	return ret;
 }
@@ -368,9 +368,9 @@ decode_network *decode::fetch_network(uint16_t nw_id)
 #endif
 					 );
 		networks[nw_id] = ret;
-
-		ret->subscribeTables(subscribedTableWatcher);
 	}
+
+	ret->subscribeTables(subscribedTableWatcher);
 
 	return ret;
 }
