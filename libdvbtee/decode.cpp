@@ -354,10 +354,13 @@ decode::~decode()
 }
 
 decode::decode(const decode& d)
-#if !OLD_DECODER
- : NullDecoder()
- , store(this)
- , subscribedTableWatcher(NULL)
+#if OLD_DECODER
+  : orig_network_id(0)
+#else
+  : NullDecoder()
+  , store(this)
+  , subscribedTableWatcher(NULL)
+  , orig_network_id(0)
 #endif
 #if !DVBTEE_HAS_CPLUSPLUS_11
   , m_parser(&static_parser)
