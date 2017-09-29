@@ -489,6 +489,9 @@ public:
 #endif
 	~decode();
 
+	decode(const decode&);
+	decode& operator= (const decode&);
+
 	decode_network *fetch_network(uint16_t nw_id);
 
 	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
