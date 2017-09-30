@@ -1848,7 +1848,7 @@ void decode::dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_
 #endif
 }
 
-void decode::dump_epg_atsc(decode_report *reporter, uint16_t source_id)
+void decode::dump_epg_atsc(decode_report *reporter, uint16_t source_id) const
 {
 	unsigned int eit_num = 0;
 
