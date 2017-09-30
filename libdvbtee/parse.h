@@ -193,7 +193,7 @@ public:
 	bool is_pmt_ready(uint16_t id = 0) const;
 	inline bool is_basic_psip_ready() const { return ((has_pat) && (((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit)))); }
 	bool is_psip_ready() const;
-	bool is_epg_ready();
+	bool is_epg_ready() const;
 
 	void cleanup();
 
@@ -217,6 +217,7 @@ friend class decode;
 	map_decoder&   decoders;
 	map_network_decoder& networks;
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
+	decode* get_decoder_if_exists(uint16_t ts_id) const;
 	decode& get_decoder(uint16_t ts_id);
 
 	void init();

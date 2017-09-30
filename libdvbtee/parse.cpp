@@ -841,6 +841,17 @@ int parse::count_decoder_factories()
 	;
 }
 
+decode* parse::get_decoder_if_exists(uint16_t ts_id) const
+{
+	map_decoder::iterator it = decoders.find(ts_id);
+	if (it != decoders.end()) {
+		decode &d = it->second;
+		d.subscribeTables(subscribedTableWatcher);
+		return &d;
+	}
+	return NULL;
+}
+
 decode &parse::get_decoder(uint16_t ts_id)
 {
 	map_decoder::iterator it = decoders.find(ts_id);
@@ -1230,16 +1241,17 @@ bool parse::is_psip_ready() const
 	return ((is_basic_psip_ready()) && ((decoders.count(get_ts_id())) && (is_pmt_ready())));
 }
 
-bool parse::is_epg_ready()
+bool parse::is_epg_ready() const
 {
 	if (!decoders.count(get_ts_id()))
 		return false;
 
-	decode &decoder = get_decoder(get_ts_id());
+	decode *decoder = get_decoder_if_exists(get_ts_id());
 
-	return ((is_psip_ready()) &&
-		(((decoder.got_all_eit(eit_collection_limit)) &&
-		 ((dont_collect_ett) || (decoder.got_all_ett(eit_collection_limit))))));
+	return ((decoder) &&
+	        (is_psip_ready()) &&
+		(((decoder->got_all_eit(eit_collection_limit)) &&
+		 ((dont_collect_ett) || (decoder->got_all_ett(eit_collection_limit))))));
 }
 
 int parse::add_output(void* priv, stream_callback callback)
