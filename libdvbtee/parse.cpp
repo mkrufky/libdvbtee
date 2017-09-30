@@ -1232,11 +1232,14 @@ bool parse::is_psip_ready() const
 
 bool parse::is_epg_ready()
 {
+	if (!decoders.count(get_ts_id()))
+		return false;
+
 	decode &decoder = get_decoder(get_ts_id());
 
-	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) &&
-		((decoder.got_all_eit(eit_collection_limit)) &&
-		((dont_collect_ett) || (decoder.got_all_ett(eit_collection_limit)))))));
+	return ((is_psip_ready()) &&
+		(((decoder.got_all_eit(eit_collection_limit)) &&
+		 ((dont_collect_ett) || (decoder.got_all_ett(eit_collection_limit))))));
 }
 
 int parse::add_output(void* priv, stream_callback callback)
