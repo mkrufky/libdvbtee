@@ -248,8 +248,9 @@ char to_hex(char code) {
 
 /* Returns a url-encoded version of str */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *url_encode(char *str) {
-	char *pstr = str, *buf = (char *)malloc(strlen(str) * 3 + 1), *pbuf = buf;
+char *url_encode(const char *str) {
+	const char *pstr = str;
+	char *buf = (char *)malloc(strlen(str) * 3 + 1), *pbuf = buf;
 	while (*pstr) {
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~')
 			*pbuf++ = *pstr;
@@ -269,8 +270,9 @@ char *url_encode(char *str) {
 
 /* Returns a url-decoded version of str */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *url_decode(char *str) {
-	char *pstr = str, *buf = (char *)malloc(strlen(str) + 1), *pbuf = buf;
+char *url_decode(const char *str) {
+	const char *pstr = str;
+	char *buf = (char *)malloc(strlen(str) + 1), *pbuf = buf;
 	while (*pstr) {
 		if (*pstr == '%') {
 			if (pstr[1] && pstr[2]) {
