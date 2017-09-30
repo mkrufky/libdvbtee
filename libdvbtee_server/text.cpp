@@ -266,7 +266,7 @@ const std::string xml_dump_epg_event_callback(void *, decoded_event_t *e)
 	str.append("'>\n");
 	str.append("<title lang='en'>");
 #if 1
-	char *hstr = url_encode((char *)e->name.c_str());
+	char *hstr = url_encode(e->name.c_str());
 	str.append(hstr);
 	free(hstr);
 #else
@@ -276,7 +276,7 @@ const std::string xml_dump_epg_event_callback(void *, decoded_event_t *e)
 #if 1
 	str.append("<desc lang='en'>");
 #if 1
-	hstr = url_encode((char *)e->text.c_str());
+	hstr = url_encode(e->text.c_str());
 	str.append(hstr);
 	free(hstr);
 #else
@@ -454,7 +454,7 @@ const std::string xml_dump_channels(void *, parsed_channel_info_t *c)
 	str.append(channelno);
 	str.append(" ");
 #if 1
-	char *hstr = url_encode((char *)c->service_name);
+	char *hstr = url_encode((const char *)c->service_name);
 	str.append(hstr);
 	free(hstr);
 #else
@@ -466,7 +466,7 @@ const std::string xml_dump_channels(void *, parsed_channel_info_t *c)
 	str.append("</display-name>\n");
 	str.append("<display-name>");
 #if 1
-	hstr = url_encode((char *)c->service_name);
+	hstr = url_encode((const char *)c->service_name);
 	str.append(hstr);
 	free(hstr);
 #else

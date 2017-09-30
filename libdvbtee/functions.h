@@ -85,8 +85,8 @@ time_t atsc_datetime_utc(uint32_t in_time);
 
 int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text, size_t sizeof_text);
 
-char *url_encode(char *str);
-char *escape_quotes(char *str);
+char *url_encode(const char *str);
+char *escape_quotes(const char *str);
 char *translate_iso6937(char *str);
 
 #endif /* __FUNCTIONS_H__ */
