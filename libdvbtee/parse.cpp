@@ -933,7 +933,7 @@ void parse::cleanup()
 	channel_info.clear();
 }
 
-void parse::dumpJson()
+void parse::dumpJson() const
 {
 	for (map_decoder::const_iterator it = decoders.begin(); it != decoders.end(); ++it) {
 		__log_printf(stderr, "\nTSID#%04x: ", it->first);

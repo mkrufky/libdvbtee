@@ -203,7 +203,7 @@ public:
 
 	void set_tsfilter_iface(tsfilter_iface &iface) { m_tsfilter_iface = &iface; }
 
-	void dumpJson();
+	void dumpJson() const;
 
 	output_base& out;
 
