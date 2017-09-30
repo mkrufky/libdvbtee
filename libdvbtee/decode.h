@@ -423,7 +423,7 @@ public:
 #endif
 
 	static void dumpJson(map_network_decoder &networks);
-	void dumpJsonServices();
+	void dumpJsonServices() const;
 
 	uint16_t orig_network_id;
 private:

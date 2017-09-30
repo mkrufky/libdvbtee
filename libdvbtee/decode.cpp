@@ -2163,7 +2163,7 @@ const decoded_nit_t* decode::get_decoded_nit() const
 	//return networks.count(network_id) ? networks[network_id].get_decoded_nit() : NULL;
 }
 
-void decode_network::dumpJsonServices()
+void decode_network::dumpJsonServices() const
 {
 	for (map_decoded_network_services::const_iterator it = decoded_network_services.begin(); it != decoded_network_services.end(); ++it) {
 		__log_printf(stderr, "\nNET_SVC_ID#%04x: ", it->first);
