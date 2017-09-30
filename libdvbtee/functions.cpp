@@ -306,7 +306,7 @@ char *escape_quotes(char *str) {
 /* Translate ISO6937 encoded string into UTF-8 */
 /* IMPORTANT: be sure to free() the returned string after use */
 char *translate_iso6937(char *str) {
-    char *out = (char *)malloc(strlen((const char *)str) * 6 + 1);
+    char *out = (char *)calloc(sizeof(char), strlen((const char *)str) * 6 + 1);
 
     char *iconv_in = (char *) &str[0];
     char *iconv_out = (char *) &out[0];
