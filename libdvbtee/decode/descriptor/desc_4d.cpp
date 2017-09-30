@@ -58,14 +58,14 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)name, '"')) {
-		char* escaped = escape_quotes((char*)name);
+		char* escaped = escape_quotes((const char*)name);
 		set("name", std::string(escaped));
 		free(escaped);
 	} else {
 		set("name", std::string((char*)name));
 	}
 	if (strchr((char*)text, '"')) {
-		char* escaped = escape_quotes((char*)text);
+		char* escaped = escape_quotes((const char*)text);
 		set("text", std::string(escaped));
 		free(escaped);
 	} else {

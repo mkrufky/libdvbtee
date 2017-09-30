@@ -58,7 +58,7 @@ desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)text, '"')) {
-		char* escaped = escape_quotes((char*)text);
+		char* escaped = escape_quotes((const char*)text);
 		set("text", std::string(escaped));
 		free(escaped);
 	} else {

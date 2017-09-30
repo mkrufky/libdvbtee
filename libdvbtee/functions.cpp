@@ -290,8 +290,9 @@ char *url_decode(char *str) {
 
 /* Returns a quote-escaped version of str */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *escape_quotes(char *str) {
-	char *pstr = str, *buf = (char *)malloc(strlen(str) * 2 + 1), *pbuf = buf;
+char *escape_quotes(const char *str) {
+	const char *pstr = str;
+	char *buf = (char *)malloc(strlen(str) * 2 + 1), *pbuf = buf;
 	while (*pstr) {
 		if (*pstr == '"')
 			*pbuf++ = '\\';
