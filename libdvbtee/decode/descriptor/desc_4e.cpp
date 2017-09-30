@@ -46,27 +46,27 @@ desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	dvbpsi_extended_event_dr_t* dr = dvbpsi_DecodeExtendedEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
-	unsigned char text[256];
+	unsigned char encoded_text[256];
 	unsigned char lang[4] = { 0 };
 
 	for (unsigned int i = 0; i < 3; i++) lang[i] = dr->i_iso_639_code[i];
-	get_descriptor_text(dr->i_text, dr->i_text_length, text);
+	get_descriptor_text(dr->i_text, dr->i_text_length, encoded_text);
 
 	set("descriptor_number", dr->i_descriptor_number);
 	set("last_descriptor_number", dr->i_last_descriptor_number);
 	set("lang", std::string((const char*)lang));
 
-	unsigned char *text_t = (unsigned char *)translate_iso6937((char *)text);
+	unsigned char *text = (unsigned char *)translate_iso6937((char *)encoded_text);
 
 	/* FIXME: we should escape these strings on output rather than on store */
-	if (strchr((char*)text_t, '"')) {
-		char* escaped = escape_quotes((char*)text_t);
+	if (strchr((char*)text, '"')) {
+		char* escaped = escape_quotes((char*)text);
 		set("text", std::string(escaped));
 		free(escaped);
 	} else {
-		set("text", std::string((char*)text_t));
+		set("text", std::string((char*)text));
 	}
-	free(text_t);
+	free(text);
 
 	dPrintf("%s", toJson().c_str());
 

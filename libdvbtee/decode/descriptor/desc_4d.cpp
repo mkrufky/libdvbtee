@@ -46,36 +46,36 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
-	unsigned char name[256];
-	unsigned char text[256];
+	unsigned char encoded_name[256];
+	unsigned char encoded_text[256];
 	unsigned char lang[4] = { 0 };
 
 	for (unsigned int i = 0; i < 3; i++) lang[i] = dr->i_iso_639_code[i];
-	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, name);
-	get_descriptor_text(dr->i_text, dr->i_text_length, text);
+	get_descriptor_text(dr->i_event_name, dr->i_event_name_length, encoded_name);
+	get_descriptor_text(dr->i_text, dr->i_text_length, encoded_text);
 
 	set("lang", std::string((const char*)lang));
 
-	unsigned char *name_t = (unsigned char *)translate_iso6937((char *)name);
-	unsigned char *text_t = (unsigned char *)translate_iso6937((char *)text);
+	unsigned char *name = (unsigned char *)translate_iso6937((char *)encoded_name);
+	unsigned char *text = (unsigned char *)translate_iso6937((char *)encoded_text);
 
 	/* FIXME: we should escape these strings on output rather than on store */
-	if (strchr((char*)name_t, '"')) {
-		char* escaped = escape_quotes((char*)name_t);
+	if (strchr((char*)name, '"')) {
+		char* escaped = escape_quotes((char*)name);
 		set("name", std::string(escaped));
 		free(escaped);
 	} else {
-		set("name", std::string((char*)name_t));
+		set("name", std::string((char*)name));
 	}
-	free(name_t);
-	if (strchr((char*)text_t, '"')) {
-		char* escaped = escape_quotes((char*)text_t);
+	free(name);
+	if (strchr((char*)text, '"')) {
+		char* escaped = escape_quotes((char*)text);
 		set("text", std::string(escaped));
 		free(escaped);
 	} else {
-		set("text", std::string((char*)text_t));
+		set("text", std::string((char*)text));
 	}
-	free(text_t);
+	free(text);
 
 	dPrintf("%s", toJson().c_str());
 
