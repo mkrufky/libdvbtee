@@ -56,7 +56,7 @@ desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	set("last_descriptor_number", dr->i_last_descriptor_number);
 	set("lang", std::string((const char*)lang));
 
-    unsigned char *text_t = (unsigned char *)translate_iso6937((char *)text);
+	unsigned char *text_t = (unsigned char *)translate_iso6937((char *)text);
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)text_t, '"')) {
