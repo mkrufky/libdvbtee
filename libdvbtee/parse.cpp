@@ -1152,7 +1152,7 @@ unsigned int parse::xine_dump(parse_iface *iface)
 	return count;
 }
 
-void parse::epg_dump(decode_report *reporter)
+void parse::epg_dump(decode_report *reporter) const
 {
 	map_chan_to_ts_id channels;
 	//__log_printf(stderr, "%s(%d, %d)\n", __func__, channel_info.size(), channels.size());
@@ -1161,7 +1161,7 @@ void parse::epg_dump(decode_report *reporter)
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		if (decoders.count(iter->second)) get_decoder(iter->second).dump_epg(reporter);
+		if (decoders.count(iter->second)) get_decoder_if_exists(iter->second)->dump_epg(reporter);
 
 	channels.clear();
 

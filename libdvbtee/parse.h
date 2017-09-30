@@ -178,7 +178,7 @@ public:
 	int add_stdout(char*);
 
 	unsigned int xine_dump(parse_iface *iface = NULL); /* full channel dump  */
-	void epg_dump(decode_report *reporter = NULL); /* full channel dump  */
+	void epg_dump(decode_report *reporter = NULL) const; /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
 	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; }
