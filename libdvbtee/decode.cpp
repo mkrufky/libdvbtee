@@ -1831,7 +1831,7 @@ void decode::dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t ser
 	return;
 }
 
-void decode::dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id)
+void decode::dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id) const
 {
 #if DBG
 	__log_printf(stderr, "%s-%d\n", __func__, eit_x);
