@@ -34,6 +34,7 @@
 const char *parse_libdvbpsi_version = EXPAND_AND_QUOTE(DVBPSI_VERSION);
 
 static map_decoder   global_static_decoders;
+static map_network_decoder   global_static_network_decoders;
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_PARSE, fmt, ##arg)
 
@@ -606,7 +607,7 @@ void parse::a(void* p_this, b* p_table)					\
 	parse* parser = (parse*)p_this;					\
 	if ((parser) &&							\
 	    (((parser->a(p_table, false)) && (parser->get_ts_id())) &&	\
-	     ((parser->decoders[parser->get_ts_id()].a(p_table)) ||	\
+	     ((parser->get_decoder(parser->get_ts_id()).a(p_table)) ||	\
 	      (!parser->d))))						\
 		parser->a(p_table, true);				\
 	c(p_table);							\
@@ -694,7 +695,7 @@ eit_complete:
 static bool hello = false;
 
 PrivateParse::PrivateParse()
-  : parse(outp, m_decoders)
+  : parse(outp, m_decoders, m_networks)
 {
 	//
 }
@@ -705,7 +706,7 @@ PrivateParse::~PrivateParse()
 }
 
 GlobalParse::GlobalParse()
-  : parse(outp, global_static_decoders)
+  : parse(outp, global_static_decoders, global_static_network_decoders)
 {
 	//
 }
@@ -719,6 +720,7 @@ parse::parse(output_base& outp)
   : out(outp)
   , statistics(CLASS_MODULE)
   , decoders(global_static_decoders)
+  , networks(global_static_network_decoders)
   , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
   , ts_id(0)
@@ -743,10 +745,11 @@ parse::parse(output_base& outp)
 	init();
 }
 
-parse::parse(output_base& outp, map_decoder& supplied_decoders)
+parse::parse(output_base& outp, map_decoder& supplied_decoders, map_network_decoder& supplied_networks)
   : out(outp)
   , statistics(CLASS_MODULE)
   , decoders(supplied_decoders)
+  , networks(supplied_networks)
   , subscribedTableWatcher(NULL)
   , fed_pkt_count(0)
   , ts_id(0)
@@ -840,7 +843,18 @@ int parse::count_decoder_factories()
 
 decode &parse::get_decoder(uint16_t ts_id)
 {
+	map_decoder::iterator it = decoders.find(ts_id);
+	if (it != decoders.end()) {
+		decode &d = it->second;
+		d.subscribeTables(subscribedTableWatcher);
+		return d;
+	}
+#if DVBTEE_HAS_CPLUSPLUS_11
+	decoders.emplace(ts_id, this);
+	decode &d = decoders.at(ts_id);
+#else
 	decode &d = decoders[ts_id];
+#endif
 	d.subscribeTables(subscribedTableWatcher);
 	return d;
 }
@@ -918,7 +932,7 @@ void parse::dumpJson()
 	}
 	__log_printf(stderr, "\n");
 
-	decode_network::dumpJson();
+	decode_network::dumpJson(networks);
 }
 
 void parse::reset_filters()
@@ -929,6 +943,13 @@ void parse::reset_filters()
 	add_filter(PID_SDT);
 	add_filter(PID_TOT);
 	add_filter(PID_EIT);
+}
+
+void parse::clear_decoded_networks()
+{
+	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it)
+		delete it->second;
+	networks.clear();
 }
 
 void parse::reset()
@@ -1127,7 +1148,7 @@ void parse::epg_dump(decode_report *reporter)
 		channels[iter->second.channel] = iter->first;
 
 	for (map_chan_to_ts_id::const_iterator iter = channels.begin(); iter != channels.end(); ++iter)
-		if (decoders.count(iter->second)) decoders[iter->second].dump_epg(reporter);
+		if (decoders.count(iter->second)) get_decoder(iter->second).dump_epg(reporter);
 
 	channels.clear();
 
@@ -1211,9 +1232,11 @@ bool parse::is_psip_ready() const
 
 bool parse::is_epg_ready()
 {
+	decode &decoder = get_decoder(get_ts_id());
+
 	return ((is_psip_ready()) && ((decoders.count(get_ts_id()) &&
-		((decoders[get_ts_id()].got_all_eit(eit_collection_limit)) &&
-		((dont_collect_ett) || (decoders[get_ts_id()].got_all_ett(eit_collection_limit)))))));
+		((decoder.got_all_eit(eit_collection_limit)) &&
+		((dont_collect_ett) || (decoder.got_all_ett(eit_collection_limit)))))));
 }
 
 int parse::add_output(void* priv, stream_callback callback)

@@ -63,6 +63,20 @@
 
 #include <map>
 
+#ifdef _MSC_VER
+# define DVBTEE_HAS_CPLUSPLUS_11 (_MSC_VER >= 1800)
+#else
+# define DVBTEE_HAS_CPLUSPLUS_11 (__cplusplus >= 201103L)
+#endif
+
+#ifndef USE_OWN_NETWORK_DECODERS
+#if !DVBTEE_HAS_CPLUSPLUS_11
+#define USE_OWN_NETWORK_DECODERS 1
+#else
+#define USE_OWN_NETWORK_DECODERS 0
+#endif
+#endif
+
 /* -- PAT -- */
 typedef std::map<uint16_t, uint16_t> map_decoded_pat_programs; /* program number, pid */
 
@@ -359,6 +373,9 @@ private:
 
 typedef std::map<uint16_t, decode_network_service*> map_decoded_network_services;
 
+class decode_network;
+typedef std::map<uint16_t, decode_network*> map_network_decoder;
+
 class decode_network
 #if !OLD_DECODER
  : public dvbtee::decode::LinkedDecoder, dvbtee::decode::TableWatcher
@@ -404,7 +421,7 @@ public:
 	dvbtee::decode::DescriptorStore descriptors;
 #endif
 
-	static void dumpJson();
+	static void dumpJson(map_network_decoder &networks);
 	void dumpJsonServices();
 
 	uint16_t orig_network_id;
@@ -417,10 +434,6 @@ private:
 	map_decoded_network_services decoded_network_services;
 	decoded_nit_t   decoded_nit;
 };
-
-typedef std::map<uint16_t, decode_network*> map_network_decoder;
-
-void clear_decoded_networks();
 
 typedef struct
 {
@@ -461,13 +474,19 @@ public:
 	virtual void print(const char *, ...) = 0;
 };
 
+class parse;
+
 class decode
 #if !OLD_DECODER
  : public dvbtee::decode::NullDecoder, dvbtee::decode::TableWatcher
 #endif
 {
 public:
+#if !DVBTEE_HAS_CPLUSPLUS_11
 	decode();
+#else
+	decode(parse *);
+#endif
 	~decode();
 
 	decode(const decode&);
@@ -556,6 +575,12 @@ private:
 	uint16_t orig_network_id;
 	uint16_t      network_id;
 
+	parse* m_parser;
+#if USE_OWN_NETWORK_DECODERS
+	map_network_decoder networks;
+#else
+	map_network_decoder& networks;
+#endif
 	time_t stream_time;
 
 	decoded_pat_t   decoded_pat;

@@ -46,6 +46,8 @@
 #include "log.h"
 #define CLASS_MODULE "decode"
 
+#include "parse.h"
+
 bool fshowtime;
 
 #define dPrintf(fmt, arg...)					\
@@ -74,15 +76,6 @@ decode_report::~decode_report()
 #if DBG
 	dPrintf("()");
 #endif
-}
-
-static map_network_decoder   networks;
-
-void clear_decoded_networks()
-{
-	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it)
-		delete it->second;
-	networks.clear();
 }
 
 decode_network_service::decode_network_service(
@@ -241,9 +234,9 @@ decode_network_service *decode_network::fetch_network_service(uint16_t ts_id)
 #endif
 						 );
 		decoded_network_services[ts_id] = ret;
-
-		ret->subscribeTables(subscribedTableWatcher);
 	}
+
+	ret->subscribeTables(subscribedTableWatcher);
 
 	return ret;
 }
@@ -282,7 +275,13 @@ bool decode_network::updateNIT(dvbtee::decode::Table *table)
 }
 #endif
 
+#if !DVBTEE_HAS_CPLUSPLUS_11
+static GlobalParse static_parser;
+
 decode::decode()
+#else
+decode::decode(parse* p)
+#endif
 #if OLD_DECODER
   : orig_network_id(0)
 #else
@@ -292,6 +291,14 @@ decode::decode()
   , orig_network_id(0)
 #endif
   , network_id(0)
+#if !DVBTEE_HAS_CPLUSPLUS_11
+  , m_parser(&static_parser)
+#else
+  , m_parser(p)
+#endif
+#if !USE_OWN_NETWORK_DECODERS
+  , networks(p->networks)
+#endif
   , stream_time((time_t)0)
   , eit_x(0)
   , ett_x(0)
@@ -346,11 +353,22 @@ decode::~decode()
 	}
 }
 
-decode::decode(const decode&)
-#if !OLD_DECODER
- : NullDecoder()
- , store(this)
- , subscribedTableWatcher(NULL)
+decode::decode(const decode& d)
+#if OLD_DECODER
+  : orig_network_id(0)
+#else
+  : NullDecoder()
+  , store(this)
+  , subscribedTableWatcher(NULL)
+  , orig_network_id(0)
+#endif
+#if !DVBTEE_HAS_CPLUSPLUS_11
+  , m_parser(&static_parser)
+#else
+  , m_parser(d.m_parser)
+#endif
+#if !USE_OWN_NETWORK_DECODERS
+  , networks(d.m_parser->networks)
 #endif
 {
 	dPrintf("(copy)");
@@ -437,9 +455,9 @@ decode_network *decode::fetch_network(uint16_t nw_id)
 #endif
 					 );
 		networks[nw_id] = ret;
-
-		ret->subscribeTables(subscribedTableWatcher);
 	}
+
+	ret->subscribeTables(subscribedTableWatcher);
 
 	return ret;
 }
@@ -2106,19 +2124,19 @@ const decode_network* decode::get_decoded_network() const
 
 uint16_t decode::get_lcn(uint16_t service_id) const
 {
-#if OLD_DECODER
-	return networks.count(network_id) ? networks[network_id]->descriptors.lcn[service_id]: 0;
-#else
 	uint16_t lcn = 0;
 
 	// XXX: FIXME: must refactor decode::get_lcn() & LCN descriptor 0x83
 	map_network_decoder::const_iterator it = networks.find(network_id);
 	if (it != networks.end()) {
+#if OLD_DECODER
+		lcn = it->second->descriptors.lcn[service_id];
+#else
 		const dvbtee::decode::Descriptor *d = it->second->descriptors.last(0x83);
 		if (d) lcn = d->get<uint16_t>(service_id);
+#endif
 	}
 	return lcn;
-#endif
 }
 
 const map_decoded_eit* decode::get_decoded_eit() const
@@ -2153,7 +2171,7 @@ void decode_network::dumpJsonServices()
 	__log_printf(stderr, "\n");
 }
 
-void decode_network::dumpJson()
+void decode_network::dumpJson(map_network_decoder &networks)
 {
 	for (map_network_decoder::const_iterator it = networks.begin(); it != networks.end(); ++it) {
 		__log_printf(stderr, "\nNET_ID#%04x: ", it->first);

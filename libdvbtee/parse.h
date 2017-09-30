@@ -132,7 +132,7 @@ class parse
 {
 public:
 	__attribute__((deprecated)) parse(output_base&);
-	parse(output_base&, map_decoder&);
+	parse(output_base&, map_decoder&, map_network_decoder &supplied_networks);
 	virtual ~parse();
 
 	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
@@ -213,7 +213,9 @@ public:
 	stats statistics;
 	static int count_decoder_factories();
 private:
+friend class decode;
 	map_decoder&   decoders;
+	map_network_decoder& networks;
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
 	decode& get_decoder(uint16_t ts_id);
 
@@ -317,6 +319,7 @@ private:
 	void add_filter(uint16_t pid) { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(pid); }
 	void clear_filters() { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(0xffff); }
 	void reset_filters();
+	void clear_decoded_networks();
 
 	bool enabled;
 
@@ -343,6 +346,7 @@ public:
 private:
 	dummy_output outp;
 	map_decoder m_decoders;
+	map_network_decoder m_networks;
 };
 
 class GlobalParse: public parse
