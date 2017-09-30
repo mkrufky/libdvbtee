@@ -2125,7 +2125,6 @@ const decode_network* decode::get_decoded_network() const
 {
 	map_network_decoder::const_iterator it = networks.find(orig_network_id);
 	return (it == networks.end()) ? NULL : it->second;
-	//return networks.count(orig_network_id) ? &networks[orig_network_id] : NULL;
 }
 
 uint16_t decode::get_lcn(uint16_t service_id) const
