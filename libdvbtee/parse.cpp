@@ -841,7 +841,7 @@ int parse::count_decoder_factories()
 	;
 }
 
-decode* parse::get_decoder_if_exists(uint16_t ts_id) const
+const decode* parse::get_decoder_if_exists(uint16_t ts_id) const
 {
 	map_decoder::iterator it = decoders.find(ts_id);
 	if (it != decoders.end()) {
@@ -1071,7 +1071,7 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 		for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
 		c.service_name[7] = 0;
 	} else { // FIXME: use SDT info
-		decode *decoder = get_decoder_if_exists(ts_id);
+		const decode *decoder = get_decoder_if_exists(ts_id);
 		if (!decoder) return;
 
 		c.lcn = decoder->get_lcn(c.program_number);
@@ -1180,7 +1180,7 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	if (!channel_info.count(requested_ts_id))
 		return false;
 
-	decode* decoder = get_decoder_if_exists(requested_ts_id);
+	const decode* decoder = get_decoder_if_exists(requested_ts_id);
 	if (!decoder)
 		return false;
 
@@ -1250,7 +1250,7 @@ bool parse::is_epg_ready() const
 	if (!decoders.count(get_ts_id()))
 		return false;
 
-	decode *decoder = get_decoder_if_exists(get_ts_id());
+	const decode *decoder = get_decoder_if_exists(get_ts_id());
 
 	return ((decoder) &&
 	        (is_psip_ready()) &&

@@ -217,7 +217,7 @@ friend class decode;
 	map_decoder&   decoders;
 	map_network_decoder& networks;
 	dvbtee::decode::TableWatcher* subscribedTableWatcher;
-	decode* get_decoder_if_exists(uint16_t ts_id) const;
+	const decode* get_decoder_if_exists(uint16_t ts_id) const;
 	decode& get_decoder(uint16_t ts_id);
 
 	void init();
