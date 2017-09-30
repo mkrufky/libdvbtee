@@ -2064,7 +2064,7 @@ bool decode::ett_x_complete(uint8_t current_ett_x) const
 	return !etm_missing;
 }
 
-bool decode::got_all_eit(int limit)
+bool decode::got_all_eit(int limit) const
 {
 	if (decoded_mgt.tables.size() == 0) {
 		const decoded_nit_t* decoded_nit = get_decoded_nit();
@@ -2089,7 +2089,7 @@ bool decode::got_all_eit(int limit)
 	return true;
 }
 
-bool decode::got_all_ett(int limit)
+bool decode::got_all_ett(int limit) const
 {
 	// returning true for now if DVBT
 	if (decoded_mgt.tables.size() == 0) {
