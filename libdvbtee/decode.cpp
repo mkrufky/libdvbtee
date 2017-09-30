@@ -2115,6 +2115,12 @@ bool decode::got_all_ett(int limit)
 	return true;
 }
 
+const decode_network_service* decode_network::get_decoded_network_service(uint16_t ts_id) const
+{
+	map_decoded_network_services::const_iterator it = decoded_network_services.find(ts_id);
+	return (it == decoded_network_services.end()) ? NULL : it->second;
+}
+
 const decode_network* decode::get_decoded_network() const
 {
 	map_network_decoder::const_iterator it = networks.find(orig_network_id);

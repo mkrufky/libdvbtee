@@ -391,6 +391,7 @@ public:
 	~decode_network();
 
 	decode_network_service *fetch_network_service(uint16_t ts_id);
+	const decode_network_service* get_decoded_network_service(uint16_t) const;
 
 	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
 
