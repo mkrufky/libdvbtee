@@ -412,8 +412,8 @@ public:
 	const decoded_nit_t*   get_decoded_nit() const { return &decoded_nit; }
 	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) const;
 
-	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id]->eit_x_complete_dvb_sched(current_eit_x) : false; }
-	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? decoded_network_services[ts_id]->eit_x_complete_dvb_pf() : false; }
+	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? fetch_network_service(ts_id)->eit_x_complete_dvb_sched(current_eit_x) : false; }
+	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? fetch_network_service(ts_id)->eit_x_complete_dvb_pf() : false; }
 
 #if OLD_DECODER
 	desc descriptors;
