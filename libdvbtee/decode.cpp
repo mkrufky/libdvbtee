@@ -1895,13 +1895,15 @@ void decode::dump_epg(decode_report *reporter)
 	return;
 }
 
-unsigned char * decode::get_decoded_ett(uint8_t current_eit_x, uint16_t etm_id, unsigned char *message, size_t sizeof_message)
+unsigned char * decode::get_decoded_ett(uint8_t current_eit_x, uint16_t etm_id, unsigned char *message, size_t sizeof_message) const
 {
 	memset(message, 0, sizeof_message);
 
-	if (decoded_ett[current_eit_x].count(etm_id)) {
+	const map_decoded_atsc_ett& current_decoded_atsc_ett = decoded_ett[current_eit_x];
 
-		decoded_atsc_ett_t &cur_ett = decoded_ett[current_eit_x][etm_id];
+	if (current_decoded_atsc_ett.count(etm_id)) {
+
+		const decoded_atsc_ett_t &cur_ett = current_decoded_atsc_ett.at(etm_id);
 
 		decode_multiple_string(cur_ett.etm,
 				       cur_ett.etm_length,
