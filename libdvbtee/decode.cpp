@@ -1872,7 +1872,7 @@ void decode::dump_epg_dvb(decode_report *reporter, uint16_t service_id) const
 	return;
 }
 
-void decode::dump_epg(decode_report *reporter)
+void decode::dump_epg(decode_report *reporter) const
 {
 	if (reporter) reporter->epg_header_footer(true, false);
 

@@ -559,7 +559,7 @@ public:
 	bool got_all_eit(int limit = -1) const;
 	bool got_all_ett(int limit = -1) const;
 
-	void dump_epg(decode_report *reporter);
+	void dump_epg(decode_report *reporter) const;
 
 	void dump_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter) const;
 	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter) const;
