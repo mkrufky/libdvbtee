@@ -1493,7 +1493,7 @@ void parse::set_service_ids(char *ids)
 	}
 }
 
-bool parse::check()
+bool parse::check() const
 {
 	dPrintf("(%s) "
 		"fed packets: %d, "

@@ -207,7 +207,7 @@ public:
 
 	output_base& out;
 
-	bool check();
+	bool check() const;
 	bool is_enabled() const { return enabled; }
 
 	stats statistics;
