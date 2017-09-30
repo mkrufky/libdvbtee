@@ -1742,7 +1742,7 @@ bool decode::get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t
 	return false;
 }
 
-void decode::dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id)
+void decode::dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id) const
 {
 #if 1//DBG
 	__log_printf(stderr, "%s-%d\n", __func__, eit_x);
@@ -1764,8 +1764,10 @@ void decode::dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t so
 			service_name);
 #endif
 		map_decoded_atsc_eit_events::const_iterator iter_eit;
-		for (iter_eit = decoded_atsc_eit[eit_x][iter_vct->second.source_id].events.begin();
-		     iter_eit != decoded_atsc_eit[eit_x][iter_vct->second.source_id].events.end();
+		const map_decoded_atsc_eit& decoded_eit_x = decoded_atsc_eit[eit_x];
+		// FIXME:  CHANGE TO CONST_ITERATOR -- THIS IS DANGEROUS!!
+		for (iter_eit = ((map_decoded_atsc_eit&)decoded_eit_x)[iter_vct->second.source_id].events.begin();
+		     iter_eit != ((map_decoded_atsc_eit&)decoded_eit_x)[iter_vct->second.source_id].events.end();
 		     ++iter_eit) {
 #if 0
 			time_t start = atsc_datetime_utc(iter_eit->second.start_time /*+ (60 * tz_offset)*/);

@@ -605,7 +605,7 @@ private:
 	desc descriptors;
 #endif
 
-	void dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
+	void dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0) const;
 	void dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0) const;
 
 	void dump_epg_atsc(decode_report *reporter, uint16_t source_id);
