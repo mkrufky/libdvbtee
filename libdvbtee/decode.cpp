@@ -1973,20 +1973,15 @@ bool decode::complete_pmt() const
 #endif
 }
 
-bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
+bool decode::eit_x_complete_atsc(uint8_t current_eit_x) const
 {
-#if 1
-	return ((decoded_vct.channels.size()) &&
-		((decoded_atsc_eit[current_eit_x].size()) &&
-		 (decoded_atsc_eit[current_eit_x].size() == decoded_vct.channels.size())));
-#else
-	bool ret = ((decoded_vct.channels.size()) &&
-		((decoded_atsc_eit[current_eit_x].size()) &&
-		 (decoded_atsc_eit[current_eit_x].size() == decoded_vct.channels.size())));
-	fprintf(stderr, "%s(%d):%s- decoded_vct.channels.size() = %d, decoded_atsc_eit[current_eit_x].size() = %d\n",
-		__func__, current_eit_x, (ret) ? "true" : "false", decoded_vct.channels.size(), decoded_atsc_eit[current_eit_x].size());
-	return ret;
-#endif
+	if (!decoded_vct.channels.size())
+		return false;
+
+	const map_decoded_atsc_eit &current_decoded_atsc_eit = decoded_atsc_eit[current_eit_x];
+
+	return (((current_decoded_atsc_eit.size()) &&
+		 (current_decoded_atsc_eit.size() == decoded_vct.channels.size())));
 }
 
 bool decode::eit_x_complete_dvb_pf() const
