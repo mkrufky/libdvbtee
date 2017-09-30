@@ -566,7 +566,7 @@ public:
 
 	void set_physical_channel(unsigned int chan) { physical_channel = chan; }
 
-	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e);
+	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e) const;
 private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
@@ -616,11 +616,11 @@ private:
 	bool eit_x_complete_dvb_pf() const;
 
 
-	void get_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decoded_event_t *);
-	void get_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decoded_event_t *);
+	void get_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decoded_event_t *) const;
+	void get_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decoded_event_t *) const;
 
-	bool get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_event_t *e);
-	bool get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_event_t *e);
+	bool get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_event_t *e) const;
+	bool get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_event_t *e) const;
 
 	unsigned int physical_channel;
 };

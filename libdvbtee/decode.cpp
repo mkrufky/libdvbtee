@@ -1544,7 +1544,7 @@ void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_
 	return;
 }
 
-void decode::get_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decoded_event_t *e)
+void decode::get_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decoded_event_t *e) const
 {
 #if 1//DBG
 	__log_printf(stderr, "%s\n", __func__);
@@ -1578,7 +1578,7 @@ void decode::get_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *c
 	return;
 }
 
-void decode::get_epg_event(const decoded_sdt_service_t *service, const decoded_eit_event_t *event, decoded_event_t *e)
+void decode::get_epg_event(const decoded_sdt_service_t *service, const decoded_eit_event_t *event, decoded_event_t *e) const
 {
 #if 1//DBG
 	__log_printf(stderr, "%s\n", __func__);
@@ -1604,7 +1604,7 @@ void decode::get_epg_event(const decoded_sdt_service_t *service, const decoded_e
 	return;
 }
 
-bool decode::get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_event_t *e)
+bool decode::get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_event_t *e) const
 {
 #if 1//DBG
 	__log_printf(stderr, "%s\n", __func__);
@@ -1630,7 +1630,7 @@ bool decode::get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_eve
 			iter_vct->second.chan_minor,
 			service_name);
 #endif
-		decoded_atsc_eit_t &cur_atsc_eit = decoded_atsc_eit[eit_num][iter_vct->second.source_id];
+		const decoded_atsc_eit_t &cur_atsc_eit = decoded_atsc_eit[eit_num].at(iter_vct->second.source_id); // checked in while loop
 		map_decoded_atsc_eit_events::const_iterator iter_eit;
 		for (iter_eit = cur_atsc_eit.events.begin();
 		     iter_eit != cur_atsc_eit.events.end();
@@ -1661,7 +1661,7 @@ bool decode::get_epg_event_atsc(uint16_t source_id, time_t showtime, decoded_eve
 	return false;
 }
 
-bool decode::get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_event_t *e)
+bool decode::get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_event_t *e) const
 {
 #if 1//DBG
 	__log_printf(stderr, "%s\n", __func__);
@@ -1719,7 +1719,7 @@ bool decode::get_epg_event_dvb(uint16_t service_id, time_t showtime, decoded_eve
 	return false;
 }
 
-bool decode::get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e)
+bool decode::get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e) const
 {
 #if 1//DBG
 	__log_printf(stderr, "%s\n", __func__);
