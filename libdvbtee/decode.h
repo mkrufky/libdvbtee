@@ -554,7 +554,7 @@ public:
 	const decode_network*  get_decoded_network(uint16_t) const;
 
 	void dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
-	bool eit_x_complete(uint8_t current_eit_x);
+	bool eit_x_complete(uint8_t current_eit_x) const;
 	bool ett_x_complete(uint8_t current_ett_x);
 	bool got_all_eit(int limit = -1);
 	bool got_all_ett(int limit = -1);
