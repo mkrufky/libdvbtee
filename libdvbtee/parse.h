@@ -208,7 +208,7 @@ public:
 	output_base& out;
 
 	bool check();
-	bool is_enabled() { return enabled; }
+	bool is_enabled() const { return enabled; }
 
 	stats statistics;
 	static int count_decoder_factories();
