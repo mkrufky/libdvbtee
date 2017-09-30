@@ -1999,17 +1999,21 @@ bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 	return networks.count(orig_network_id) ? fetch_network(orig_network_id)->eit_x_complete_dvb_sched(decoded_pat.ts_id, current_eit_x) : false;
 }
 
-bool decode_network_service::eit_x_complete_dvb_pf()
+bool decode_network_service::eit_x_complete_dvb_pf() const
 {
 	uint8_t current_eit_x = 0;
 
-	return ((decoded_sdt.services.size()) &&
-		(((decoded_eit[current_eit_x].size())
+	if (!decoded_sdt.services.size())
+		return false;
+
+	const map_decoded_eit &current_decoded_eit = decoded_eit[current_eit_x];
+
+	return ((((current_decoded_eit.size())
 #if 0
 		  || (!services_w_eit_pf)
 #endif
 		  ) &&
-		 (decoded_eit[current_eit_x].size() == services_w_eit_pf)));
+		 (current_decoded_eit.size() == services_w_eit_pf)));
 }
 
 bool decode_network_service::eit_x_complete_dvb_sched(uint8_t current_eit_x)
