@@ -1469,7 +1469,7 @@ void decode_report::epg_event(const char * channel_name,
 }
 
 
-void decode::dump_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decode_report *reporter)
+void decode::dump_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *channel, const decoded_atsc_eit_event_t *event, decode_report *reporter) const
 {
 	unsigned char service_name[8] = { 0 };
 	for ( int i = 0; i < 7; ++i ) service_name[i] = channel->short_name[i*2+1];
@@ -1513,7 +1513,7 @@ void decode::dump_epg_event(uint8_t current_eit_x, const decoded_vct_channel_t *
 	return;
 }
 
-void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_eit_event_t *event, decode_report *reporter)
+void decode::dump_epg_event(const decoded_sdt_service_t *service, const decoded_eit_event_t *event, decode_report *reporter) const
 {
 	__log_printf(stderr, "%s: id:%d - %d: %s\t", __func__,
 		service->service_id,
@@ -1787,7 +1787,7 @@ void decode::dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t so
 	return;
 }
 
-void decode::dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t service_id)
+void decode::dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t service_id) const
 {
 #if 1//DBG
 	__log_printf(stderr, "%s-%d\n", __func__, eit_x);

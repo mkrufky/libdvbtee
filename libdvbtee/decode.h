@@ -561,8 +561,8 @@ public:
 
 	void dump_epg(decode_report *reporter);
 
-	void dump_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter);
-	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter);
+	void dump_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decode_report *reporter) const;
+	void dump_epg_event(const decoded_sdt_service_t*, const decoded_eit_event_t*, decode_report *reporter) const;
 
 	void set_physical_channel(unsigned int chan) { physical_channel = chan; }
 
@@ -606,7 +606,7 @@ private:
 #endif
 
 	void dump_eit_x_atsc(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
-	void dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
+	void dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0) const;
 
 	void dump_epg_atsc(decode_report *reporter, uint16_t source_id);
 	void dump_epg_dvb(decode_report *reporter, uint16_t source_id);
