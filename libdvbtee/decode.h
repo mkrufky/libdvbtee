@@ -345,7 +345,7 @@ public:
 	bool take_eit(const dvbpsi_eit_t * const, uint8_t);
 	bool take_sdt(const dvbpsi_sdt_t * const);
 
-	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
+	bool eit_x_complete_dvb_sched(uint8_t current_eit_x) const;
 	bool eit_x_complete_dvb_pf() const;
 
 	const decoded_sdt_t* get_decoded_sdt() const { return &decoded_sdt; }

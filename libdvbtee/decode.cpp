@@ -2016,15 +2016,19 @@ bool decode_network_service::eit_x_complete_dvb_pf() const
 		 (current_decoded_eit.size() == services_w_eit_pf)));
 }
 
-bool decode_network_service::eit_x_complete_dvb_sched(uint8_t current_eit_x)
+bool decode_network_service::eit_x_complete_dvb_sched(uint8_t current_eit_x) const
 {
-	return ((decoded_sdt.services.size()) &&
-		(((decoded_eit[current_eit_x].size())
+	if (!decoded_sdt.services.size())
+		return false;
+
+	const map_decoded_eit &current_decoded_eit = decoded_eit[current_eit_x];
+
+	return ((((current_decoded_eit.size())
 #if 0
 		  || (!services_w_eit_sched)
 #endif
 		  ) &&
-		 (decoded_eit[current_eit_x].size() == services_w_eit_sched)));
+		 (current_decoded_eit.size() == services_w_eit_sched)));
 }
 
 
