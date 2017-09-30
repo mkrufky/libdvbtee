@@ -413,8 +413,8 @@ public:
 	const decoded_nit_t*   get_decoded_nit() const { return &decoded_nit; }
 	const map_decoded_eit* get_decoded_eit(uint16_t ts_id) const;
 
-	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) { return decoded_network_services.count(ts_id) ? fetch_network_service(ts_id)->eit_x_complete_dvb_sched(current_eit_x) : false; }
-	bool eit_x_complete_dvb_pf(uint16_t ts_id) { return decoded_network_services.count(ts_id) ? fetch_network_service(ts_id)->eit_x_complete_dvb_pf() : false; }
+	bool eit_x_complete_dvb_sched(uint16_t ts_id, uint8_t current_eit_x) const { return decoded_network_services.count(ts_id) ? get_decoded_network_service(ts_id)->eit_x_complete_dvb_sched(current_eit_x) : false; }
+	bool eit_x_complete_dvb_pf(uint16_t ts_id) const { return decoded_network_services.count(ts_id) ? get_decoded_network_service(ts_id)->eit_x_complete_dvb_pf() : false; }
 
 #if OLD_DECODER
 	desc descriptors;
@@ -551,7 +551,7 @@ public:
 
 	uint16_t get_lcn(uint16_t) const;
 
-	const decode_network*  get_decoded_network() const;
+	const decode_network*  get_decoded_network(uint16_t) const;
 
 	void dump_eit_x(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0);
 	bool eit_x_complete(uint8_t current_eit_x);
@@ -612,8 +612,8 @@ private:
 	void dump_epg_dvb(decode_report *reporter, uint16_t source_id);
 
 	bool eit_x_complete_atsc(uint8_t current_eit_x);
-	bool eit_x_complete_dvb_sched(uint8_t current_eit_x);
-	bool eit_x_complete_dvb_pf();
+	bool eit_x_complete_dvb_sched(uint8_t current_eit_x) const;
+	bool eit_x_complete_dvb_pf() const;
 
 
 	void get_epg_event(uint8_t, const decoded_vct_channel_t*, const decoded_atsc_eit_event_t*, decoded_event_t *);

@@ -1989,14 +1989,14 @@ bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
 #endif
 }
 
-bool decode::eit_x_complete_dvb_pf()
+bool decode::eit_x_complete_dvb_pf() const
 {
-	return networks.count(orig_network_id) ? fetch_network(orig_network_id)->eit_x_complete_dvb_pf(decoded_pat.ts_id) : false;
+	return networks.count(orig_network_id) ? get_decoded_network(orig_network_id)->eit_x_complete_dvb_pf(decoded_pat.ts_id) : false;
 }
 
-bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
+bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x) const
 {
-	return networks.count(orig_network_id) ? fetch_network(orig_network_id)->eit_x_complete_dvb_sched(decoded_pat.ts_id, current_eit_x) : false;
+	return networks.count(orig_network_id) ? get_decoded_network(orig_network_id)->eit_x_complete_dvb_sched(decoded_pat.ts_id, current_eit_x) : false;
 }
 
 bool decode_network_service::eit_x_complete_dvb_pf() const
@@ -2129,9 +2129,9 @@ const decode_network_service* decode_network::get_decoded_network_service(uint16
 	return (it == decoded_network_services.end()) ? NULL : it->second;
 }
 
-const decode_network* decode::get_decoded_network() const
+const decode_network* decode::get_decoded_network(uint16_t network_id) const
 {
-	map_network_decoder::const_iterator it = networks.find(orig_network_id);
+	map_network_decoder::const_iterator it = networks.find(network_id);
 	return (it == networks.end()) ? NULL : it->second;
 }
 
