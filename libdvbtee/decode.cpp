@@ -2033,16 +2033,19 @@ bool decode::eit_x_complete(uint8_t current_eit_x) const
 		((current_eit_x == 0) ? eit_x_complete_dvb_pf() : eit_x_complete_dvb_sched(current_eit_x)));
 }
 
-bool decode::ett_x_complete(uint8_t current_ett_x)
+bool decode::ett_x_complete(uint8_t current_ett_x) const
 {
 	if (!eit_x_complete_atsc(current_ett_x))
 		return false;
 
 	int etm_missing = 0;
 
+	const map_decoded_atsc_eit &current_decoded_atsc_eit = decoded_atsc_eit[current_ett_x];
+	const map_decoded_atsc_ett &current_decoded_atsc_ett = decoded_ett[current_ett_x];
+
 	for (map_decoded_atsc_eit::const_iterator iter =
-		decoded_atsc_eit[current_ett_x].begin();
-	     iter != decoded_atsc_eit[current_ett_x].end(); ++iter) {
+		current_decoded_atsc_eit.begin();
+	     iter != current_decoded_atsc_eit.end(); ++iter) {
 		for (map_decoded_atsc_eit_events::const_iterator event_iter =
 			iter->second.events.begin();
 		     event_iter != iter->second.events.end(); ++event_iter) {
@@ -2051,7 +2054,7 @@ bool decode::ett_x_complete(uint8_t current_ett_x)
 
 				uint32_t event_id = event_iter->second.event_id;
 				uint32_t etm_id = (iter->second.source_id << 16) | (event_id << 2) | 0x02;
-				if (!decoded_ett[current_ett_x].count(etm_id)) {
+				if (!current_decoded_atsc_ett.count(etm_id)) {
 				        etm_missing++;
 				}
 			}
