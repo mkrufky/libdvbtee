@@ -1991,12 +1991,12 @@ bool decode::eit_x_complete_atsc(uint8_t current_eit_x)
 
 bool decode::eit_x_complete_dvb_pf()
 {
-	return networks.count(orig_network_id) ? networks[orig_network_id]->eit_x_complete_dvb_pf(decoded_pat.ts_id) : false;
+	return networks.count(orig_network_id) ? fetch_network(orig_network_id)->eit_x_complete_dvb_pf(decoded_pat.ts_id) : false;
 }
 
 bool decode::eit_x_complete_dvb_sched(uint8_t current_eit_x)
 {
-	return networks.count(orig_network_id) ? networks[orig_network_id]->eit_x_complete_dvb_sched(decoded_pat.ts_id, current_eit_x) : false;
+	return networks.count(orig_network_id) ? fetch_network(orig_network_id)->eit_x_complete_dvb_sched(decoded_pat.ts_id, current_eit_x) : false;
 }
 
 bool decode_network_service::eit_x_complete_dvb_pf()
