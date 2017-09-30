@@ -1033,10 +1033,8 @@ static const char * xine_chandump(parsed_channel_info_t *c)
 	return NULL;
 }
 
-void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c)
+void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decoded_pmt, const decoded_vct_t* decoded_vct, parsed_channel_info_t& c) const
 {
-	decode &decoder = get_decoder(ts_id);
-
 	//map_ts_elementary_streams::iterator iter_pmt_es = decoded_pmt->es_streams.find(program_number);
 	for (map_ts_elementary_streams::const_iterator iter_pmt_es = decoded_pmt->es_streams.begin();
 	     iter_pmt_es != decoded_pmt->es_streams.end(); ++iter_pmt_es)
@@ -1065,6 +1063,7 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 	c.lcn = 0;
 	c.major = 0;
 	c.minor = 0;
+
 	map_decoded_vct_channels::const_iterator iter_vct = decoded_vct->channels.find(c.program_number);
 	if (iter_vct != decoded_vct->channels.end()) {
 		c.major = iter_vct->second.chan_major;
@@ -1072,11 +1071,14 @@ void parse::parse_channel_info(const uint16_t ts_id, const decoded_pmt_t* decode
 		for ( int i = 0; i < 7; ++i ) c.service_name[i] = iter_vct->second.short_name[i*2+1];
 		c.service_name[7] = 0;
 	} else { // FIXME: use SDT info
-		c.lcn = decoder.get_lcn(c.program_number);
+		decode *decoder = get_decoder_if_exists(ts_id);
+		if (!decoder) return;
 
-		decoded_sdt_t *decoded_sdt = (decoded_sdt_t*)decoder.get_decoded_sdt();
+		c.lcn = decoder->get_lcn(c.program_number);
+
+		const decoded_sdt_t *decoded_sdt = decoder->get_decoded_sdt();
 		if ((decoded_sdt) && (decoded_sdt->services.count(c.program_number)))
-			snprintf((char*)c.service_name, sizeof(c.service_name), "%s", decoded_sdt->services[c.program_number].service_name);
+			snprintf((char*)c.service_name, sizeof(c.service_name), "%s", decoded_sdt->services.at(c.program_number).service_name);
 		else {
 			snprintf((char*)c.service_name, sizeof(c.service_name), "%04d_UNKNOWN", c.program_number);
 		}
@@ -1168,7 +1170,7 @@ void parse::epg_dump(decode_report *reporter)
 	return;
 }
 
-bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0, decoded_event_t *e1)
+bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0, decoded_event_t *e1) const
 {
 	if (!service)
 		return false;
@@ -1178,21 +1180,23 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	if (!channel_info.count(requested_ts_id))
 		return false;
 
-	decode& decoder = get_decoder(requested_ts_id);
+	decode* decoder = get_decoder_if_exists(requested_ts_id);
+	if (!decoder)
+		return false;
 
-	const map_decoded_pmt* decoded_pmt = decoder.get_decoded_pmt();
+	const map_decoded_pmt* decoded_pmt = decoder->get_decoded_pmt();
 	map_decoded_pmt::const_iterator iter_pmt = decoded_pmt->find(service);
 	if (iter_pmt == decoded_pmt->end())
 		return false;
 
-	const decoded_vct_t* decoded_vct = decoder.get_decoded_vct();
+	const decoded_vct_t* decoded_vct = decoder->get_decoded_vct();
 
-	channel_info_t *info = &channel_info[requested_ts_id];
+	const channel_info_t& info = channel_info.at(requested_ts_id); // checked above
 
 	if (c) {
-		c->physical_channel = info->channel;
-		c->freq             = info->frequency;
-		c->modulation       = info->modulation;
+		c->physical_channel = info.channel;
+		c->freq             = info.frequency;
+		c->modulation       = info.modulation;
 		//
 		c->program_number   = service;
 		c->apid = 0;
@@ -1206,11 +1210,11 @@ bool parse::get_stream_info(unsigned int channel, uint16_t service, parsed_chann
 	time(&last);
 
 	if (e0) {
-		decoder.get_epg_event(service, last, e0);
+		decoder->get_epg_event(service, last, e0);
 		last = e0->start_time + e0->length_sec + 1;
 	}
 	if (e1)
-		decoder.get_epg_event(service, last, e1);
+		decoder->get_epg_event(service, last, e1);
 
 	return true;
 }
@@ -1530,7 +1534,7 @@ void parse::set_ts_id(uint16_t new_ts_id)
 	get_decoder(ts_id).set_physical_channel(channel_info[ts_id].channel);
 }
 
-uint16_t parse::get_ts_id(unsigned int channel)
+uint16_t parse::get_ts_id(unsigned int channel) const
 {
 	if (!channel)
 		return get_ts_id();

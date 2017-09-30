@@ -139,9 +139,9 @@ public:
 
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; }
 	uint16_t get_ts_id() const { return ts_id; }
-	uint16_t get_ts_id(unsigned int channel);
+	uint16_t get_ts_id(unsigned int channel) const;
 
-	bool get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0 = NULL, decoded_event_t *e1 = NULL);
+	bool get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0 = NULL, decoded_event_t *e1 = NULL) const;
 
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
 	void add_service_pids(char* service_ids, map_pidtype &pids);
@@ -336,7 +336,7 @@ friend class decode;
 #endif
 	map_pidtype out_pids;
 
-	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&);
+	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&) const;
 };
 
 class PrivateParse: public parse
