@@ -1859,7 +1859,7 @@ void decode::dump_epg_atsc(decode_report *reporter, uint16_t source_id) const
 	return;
 }
 
-void decode::dump_epg_dvb(decode_report *reporter, uint16_t service_id)
+void decode::dump_epg_dvb(decode_report *reporter, uint16_t service_id) const
 {
 	unsigned int eit_num = 0;
 

@@ -609,7 +609,7 @@ private:
 	void dump_eit_x_dvb(decode_report *reporter, uint8_t eit_x, uint16_t source_id = 0) const;
 
 	void dump_epg_atsc(decode_report *reporter, uint16_t source_id) const;
-	void dump_epg_dvb(decode_report *reporter, uint16_t source_id);
+	void dump_epg_dvb(decode_report *reporter, uint16_t source_id) const;
 
 	bool eit_x_complete_atsc(uint8_t current_eit_x) const;
 	bool eit_x_complete_dvb_sched(uint8_t current_eit_x) const;
