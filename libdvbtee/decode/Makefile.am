@@ -69,6 +69,9 @@ endif DR48
 if DR4D
 libdvbtee_decode_la_SOURCES += descriptor/desc_4d.cpp descriptor/desc_4d.h
 endif DR4D
+if DR4E
+libdvbtee_decode_la_SOURCES += descriptor/desc_4e.cpp descriptor/desc_4e.h
+endif DR4E
 
 # requires libdvbpsi v1.x.x
 if DR62

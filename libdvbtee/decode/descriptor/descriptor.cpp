@@ -32,6 +32,7 @@ using namespace valueobj;
 #include "desc_0a.h"
 #include "desc_48.h"
 #include "desc_4d.h"
+#include "desc_4e.h"
 #include "desc_62.h"
 #include "desc_81.h"
 #include "desc_83.h"
@@ -44,6 +45,7 @@ static void load()
 	desc_0a::__load();
 	desc_48::__load();
 	desc_4d::__load();
+	desc_4e::__load();
 	desc_62::__load();
 	desc_81::__load();
 	desc_83::__load();

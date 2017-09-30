@@ -43,6 +43,14 @@ typedef struct
 
 typedef struct
 {
+	uint8_t       descriptor_number;
+	uint8_t       last_descriptor_number;
+	unsigned char lang[4];
+	unsigned char text[256];
+} dr4e_t;
+
+typedef struct
+{
 	uint8_t       stream_type;
 	uint16_t      elementary_pid;
 	unsigned char iso_639_code[3];
@@ -71,6 +79,7 @@ public:
 	map_dr0a _0a;
 
 	dr4d_t _4d;
+	dr4e_t _4e;
 
 	map_dra1 _a1;
 
@@ -80,6 +89,7 @@ private:
 	bool iso639language(dvbpsi_descriptor_t*);
 	bool service(dvbpsi_descriptor_t*);
 	bool short_event(dvbpsi_descriptor_t*);
+	bool extended_event(dvbpsi_descriptor_t*);
 	bool freq_list(dvbpsi_descriptor_t*);
 	bool ac3_audio(dvbpsi_descriptor_t*);
 	bool _lcn(dvbpsi_descriptor_t*);
