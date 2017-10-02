@@ -36,6 +36,8 @@
 #include "value/array.h"
 #include "value/object.h"
 
+class parse;
+
 #define DBG_DECODER_INSERTION 0
 
 namespace dvbtee {
@@ -60,6 +62,7 @@ protected:
 	virtual int getMapIndex() const = 0;
 	Decoder *getParent() { return m_parent; }
 	void setValid(bool v) { m_valid = v; }
+	parse *getParser();
 
 private:
 	Decoder *m_parent;

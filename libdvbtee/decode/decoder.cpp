@@ -22,6 +22,8 @@
 #include "decoder.h"
 #include "log.h"
 
+#include "decode.h"
+
 using namespace dvbtee::decode;
 using namespace valueobj;
 
@@ -96,6 +98,15 @@ void Decoder::showChildren() const
 #endif
 	}
 	__log_printf(stderr, "%s\n", decoders.toJson().c_str());
+}
+
+parse *Decoder::getParser()
+{
+	Decoder *d = this;
+	while (d->getParent()) d = d->getParent();
+	::decode *dec = (::decode*)d;
+
+	return dec->getParser();
 }
 
 int Decoder::linkChild(int idx, Decoder *d)
