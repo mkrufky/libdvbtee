@@ -568,7 +568,7 @@ public:
 
 	bool get_epg_event(uint16_t service_id, time_t showtime, decoded_event_t *e) const;
 
-	parse* getParser() const { return m_parser; }
+	const parse* getParser() const { return m_parser; }
 private:
 #if !OLD_DECODER
 	dvbtee::decode::TableStore store;
