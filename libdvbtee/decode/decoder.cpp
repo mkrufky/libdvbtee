@@ -104,7 +104,7 @@ const ::decode *Decoder::getDecode() const
 {
 	const Decoder *d = this;
 	while (d->getParent()) d = d->getParent();
-	const ::decode *dec = (const ::decode*)d;
+	return (const ::decode*)d;
 }
 
 const parse *Decoder::getParser() const
