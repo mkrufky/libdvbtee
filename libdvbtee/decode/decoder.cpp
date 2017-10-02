@@ -100,13 +100,16 @@ void Decoder::showChildren() const
 	__log_printf(stderr, "%s\n", decoders.toJson().c_str());
 }
 
-const parse *Decoder::getParser() const
+const ::decode *Decoder::getDecode() const
 {
 	const Decoder *d = this;
 	while (d->getParent()) d = d->getParent();
-	const ::decode *dec = (::decode*)d;
+	return (const ::decode*)d;
+}
 
-	return dec->getParser();
+const parse *Decoder::getParser() const
+{
+	return getDecode()->getParser();
 }
 
 int Decoder::linkChild(int idx, Decoder *d)

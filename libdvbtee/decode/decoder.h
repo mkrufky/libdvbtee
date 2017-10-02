@@ -37,6 +37,7 @@
 #include "value/object.h"
 
 class parse;
+class decode;
 
 #define DBG_DECODER_INSERTION 0
 
@@ -62,6 +63,7 @@ protected:
 	virtual int getMapIndex() const = 0;
 	Decoder *getParent() const { return m_parent; }
 	void setValid(bool v) { m_valid = v; }
+	const ::decode *getDecode() const;
 	const parse *getParser() const;
 
 private:
