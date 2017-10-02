@@ -100,11 +100,11 @@ void Decoder::showChildren() const
 	__log_printf(stderr, "%s\n", decoders.toJson().c_str());
 }
 
-parse *Decoder::getParser()
+const parse *Decoder::getParser() const
 {
-	Decoder *d = this;
+	const Decoder *d = this;
 	while (d->getParent()) d = d->getParent();
-	::decode *dec = (::decode*)d;
+	const ::decode *dec = (::decode*)d;
 
 	return dec->getParser();
 }

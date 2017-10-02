@@ -60,9 +60,9 @@ public:
 
 protected:
 	virtual int getMapIndex() const = 0;
-	Decoder *getParent() { return m_parent; }
+	Decoder *getParent() const { return m_parent; }
 	void setValid(bool v) { m_valid = v; }
-	parse *getParser();
+	const parse *getParser() const;
 
 private:
 	Decoder *m_parent;
