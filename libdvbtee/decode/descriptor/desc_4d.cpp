@@ -26,6 +26,7 @@
 #include "dvbpsi/dr_4d.h" /* short event descriptor */
 
 #include "functions.h"
+#include "parse.h"
 
 #define CLASS_MODULE "[short event]"
 
@@ -43,6 +44,8 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 {
 	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
+	bool b_translate_iso6937 = getParser()->iso6937_translation_enabled();
+
 	dvbpsi_short_event_dr_t* dr = dvbpsi_DecodeShortEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
@@ -56,8 +59,8 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	set("lang", std::string((const char*)lang));
 
-	unsigned char *name = (unsigned char *)translate_iso6937((char *)encoded_name);
-	unsigned char *text = (unsigned char *)translate_iso6937((char *)encoded_text);
+	unsigned char *name = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_name) : encoded_name;
+	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)name, '"')) {
@@ -67,7 +70,8 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	} else {
 		set("name", std::string((char*)name));
 	}
-	free(name);
+	if (b_translate_iso6937) free(name);
+
 	if (strchr((char*)text, '"')) {
 		char* escaped = escape_quotes((const char*)text);
 		set("text", std::string(escaped));
@@ -75,7 +79,7 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	} else {
 		set("text", std::string((char*)text));
 	}
-	free(text);
+	if (b_translate_iso6937) free(text);
 
 	dPrintf("%s", toJson().c_str());
 

@@ -190,6 +190,9 @@ public:
 	void enable_ett_collection(bool onoff = true) { dont_collect_ett = !onoff; }
 	bool ett_collection_enabled() const { return !dont_collect_ett; }
 
+	void enable_iso6937_translation(bool onoff = true) { disable_iso6937 = !onoff; }
+	bool iso6937_translation_enabled() const { return !disable_iso6937; }
+
 	bool is_pmt_ready(uint16_t id = 0) const;
 	inline bool is_basic_psip_ready() const { return ((has_pat) && (((has_mgt) && ((has_vct) || (!expect_vct))) || ((has_sdt) && (has_nit)))); }
 	bool is_psip_ready() const;
@@ -296,6 +299,7 @@ friend class decode;
 
 	bool epg_mode;
 	bool scan_mode;
+	bool disable_iso6937;
 	bool dont_collect_ett;
 	bool has_pat;
 	bool has_mgt;
