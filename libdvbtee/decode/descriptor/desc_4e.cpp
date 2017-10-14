@@ -26,6 +26,7 @@
 #include "dvbpsi/dr_4e.h" /* extended event descriptor */
 
 #include "functions.h"
+#include "parse.h"
 
 #define CLASS_MODULE "[extended event]"
 
@@ -43,18 +44,22 @@ desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 {
 	if (!desc_check_tag(getTag(), DESC_TAG)) return;
 
+	bool b_translate_iso6937 = getParser()->iso6937_translation_enabled();
+
 	dvbpsi_extended_event_dr_t* dr = dvbpsi_DecodeExtendedEventDr(p_descriptor);
 	if (desc_dr_failed(dr)) return;
 
-	unsigned char text[256];
+	unsigned char encoded_text[256];
 	unsigned char lang[4] = { 0 };
 
 	for (unsigned int i = 0; i < 3; i++) lang[i] = dr->i_iso_639_code[i];
-	get_descriptor_text(dr->i_text, dr->i_text_length, text);
+	get_descriptor_text(dr->i_text, dr->i_text_length, encoded_text);
 
 	set("descriptor_number", dr->i_descriptor_number);
 	set("last_descriptor_number", dr->i_last_descriptor_number);
 	set("lang", std::string((const char*)lang));
+
+	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)text, '"')) {
@@ -64,6 +69,7 @@ desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	} else {
 		set("text", std::string((char*)text));
 	}
+	if (b_translate_iso6937) free(text);
 
 	dPrintf("%s", toJson().c_str());
 
