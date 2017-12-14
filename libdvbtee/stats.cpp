@@ -32,6 +32,8 @@
 
 #define pcr_printf(fd, fmt, arg...) if (dbg & (DBG_STATS | DBG_TIME)) __log_printf(fd, fmt, ##arg)
 
+#define compute_pcr_time() ({ pcr_base * 300 + pcr_ext; })
+
 stats::stats(const char *caller)
   : tei_count(0)
   , __timenow(0)
@@ -260,7 +262,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.PCR, &pcr_base, &pcr_ext);
-			pcr_printf(stderr, " PCR: PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d\n", hdr.pid, pcr_base, pcr_ext);
+			pcr_printf(stderr, " PCR: PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d => %" PRIu64 "\n", hdr.pid, pcr_base, pcr_ext, compute_pcr_time());
 
 #if DBG
 			stats_map::const_iterator iter = last_pcr_base.find(hdr.pid);
