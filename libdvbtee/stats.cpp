@@ -200,6 +200,22 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats, pkt_hdr_t &h
 				adapt.splicing_countdown = q[0];
 				q ++;
 			}
+#if DBG
+			if (!adapt.tp_priv_data && !adapt.field_ext) {
+				if (q - 1 > p + 4 + adapt.field_length) {
+					__log_printf(stderr, "INVALID ADAPTATION FIELD LENGTH!!!\n");
+				}
+			}
+			else
+			{
+				if (adapt.tp_priv_data) {
+					__log_printf(stderr, "adapt.tp_priv_data\n");
+				}
+				if (adapt.field_ext) {
+					__log_printf(stderr, "adapt.field_ext\n");
+				}
+			}
+#endif
 		}
 
 		pkt_stats->sync_loss = (hdr.sync_byte != 0x47) ? true : false;
