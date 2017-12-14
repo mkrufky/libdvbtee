@@ -186,16 +186,18 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats, pkt_hdr_t &h
 			adapt.tp_priv_data   = (q[1] & 0x02) >> 1;
 			adapt.field_ext      = (q[1] & 0x01) >> 0;
 
+			q += 2;
+
 			if (adapt.pcr) {
-				memcpy(adapt.PCR, &q[2], 6);
-				q += 4;
+				memcpy(adapt.PCR, &q[0], 6);
+				q += 6;
 			}
 			if (adapt.opcr) {
-				memcpy(adapt.OPCR, &q[2], 6);
-				q += 4;
+				memcpy(adapt.OPCR, &q[0], 6);
+				q += 6;
 			}
 			if (adapt.splicing_point) {
-				adapt.splicing_countdown = q[2];
+				adapt.splicing_countdown = q[0];
 				q ++;
 			}
 		}
