@@ -30,6 +30,8 @@
 
 #define dPrintf(fmt, arg...) __dPrintf(DBG_STATS, "(%s) " fmt, parent, ##arg)
 
+#define pcr_printf(fd, fmt, arg...) if (dbg & (DBG_STATS | DBG_TIME)) __log_printf(fd, fmt, ##arg)
+
 stats::stats(const char *caller)
   : tei_count(0)
   , __timenow(0)
@@ -258,7 +260,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.PCR, &pcr_base, &pcr_ext);
-			if (dbg & DBG_STATS) __log_printf(stderr, "PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d\n", hdr.pid, pcr_base, pcr_ext);
+			pcr_printf(stderr, " PCR: PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d\n", hdr.pid, pcr_base, pcr_ext);
 
 #if DBG
 			stats_map::const_iterator iter = last_pcr_base.find(hdr.pid);
@@ -273,7 +275,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.OPCR, &pcr_base, &pcr_ext);
-			if (dbg & DBG_STATS) __log_printf(stderr, "PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d\n", hdr.pid, pcr_base, pcr_ext);
+			pcr_printf(stderr, "OPCR: PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d\n", hdr.pid, pcr_base, pcr_ext);
 		}
 		if (adapt.splicing_point) {
 			dPrintf("PID: 0x%04x, splicing countdown: %d", hdr.pid, adapt.splicing_countdown);
