@@ -32,7 +32,10 @@
 
 #define pcr_printf(fd, fmt, arg...) if (dbg & (DBG_STATS | DBG_TIME)) __log_printf(fd, fmt, ##arg)
 
-#define compute_pcr_time(base, ext) ({ base * 300 + ext; })
+static inline uint64_t compute_pcr_time(uint64_t& base, unsigned int& ext)
+{
+	return base * 300 + ext;
+}
 
 stats::stats(const char *caller)
   : tei_count(0)
