@@ -277,7 +277,7 @@ void stats::push(const uint8_t *p, pkt_stats_t *pkt_stats)
 			unsigned int pcr_ext;
 
 			parse_pcr(adapt.OPCR, &pcr_base, &pcr_ext);
-			pcr_printf(stderr, "OPCR: PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d\n", hdr.pid, pcr_base, pcr_ext);
+			pcr_printf(stderr, "OPCR: PID: 0x%04x, PCR base: %" PRIu64 ", ext: %d => %" PRIu64 "\n", hdr.pid, pcr_base, pcr_ext, compute_pcr_time());
 		}
 		if (adapt.splicing_point) {
 			dPrintf("PID: 0x%04x, splicing countdown: %d", hdr.pid, adapt.splicing_countdown);
