@@ -188,11 +188,11 @@ pkt_stats_t *stats::parse(const uint8_t *p, pkt_stats_t *pkt_stats, pkt_hdr_t &h
 
 			if (adapt.pcr) {
 				memcpy(adapt.PCR, &q[2], 6);
-				q += 6;
+				q += 4;
 			}
 			if (adapt.opcr) {
 				memcpy(adapt.OPCR, &q[2], 6);
-				q += 6;
+				q += 4;
 			}
 			if (adapt.splicing_point) {
 				adapt.splicing_countdown = q[2];
