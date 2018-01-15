@@ -234,7 +234,6 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([gethostname inet_ntoa localtime_r memset select socket strchr strdup strstr strtoul memchr memmove mkdir stpcpy strcspn strerror strpbrk strrchr strspn fcntl strtok_r timegm _mkgmtime inet_aton inet_pton InetPton])
 
-PKG_PROG_PKG_CONFIG([0.20])
 AM_CONDITIONAL([HAVE_PKG_CONFIG], [test "x$PKG_CONFIG" != "x"])
 AC_SUBST(HAVE_PKG_CONFIG)
 
