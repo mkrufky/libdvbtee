@@ -23,6 +23,7 @@
 #define __LINUXTV_TUNER_H__
 
 #include "tune.h"
+#include "dvb-vb2.h"
 
 #if 0
 #include <map>
@@ -33,7 +34,7 @@ static map_chan_to_ts_id channels;
 typedef std::map<uint16_t, int> filtered_pid_map; /* pid, fd */
 typedef std::map<unsigned int, bool> channel_map; /* channel, found? */
 
-class linuxtv_tuner: public tune, public tsfilter_iface
+class linuxtv_tuner: public tune, public tsfilter_iface, public feed_pull_iface
 {
 public:
 	linuxtv_tuner();
@@ -55,6 +56,8 @@ public:
 	bool check();
 
 	void addfilter(uint16_t);
+
+	int pull();
 private:
 	void add_filter(uint16_t);
 	void clear_filters();
@@ -82,6 +85,8 @@ private:
 	filtered_pid_map filtered_pids;
 
 	int open_available_tuner(unsigned int max_adap = 8, unsigned int max_fe = 3);
+
+	stream_ctx *sc;
 };
 
 #endif /*__LINUXTV_TUNER_H__ */

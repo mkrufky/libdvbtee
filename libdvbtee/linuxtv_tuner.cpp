@@ -33,6 +33,8 @@
 #include <linux/dvb/dmx.h>
 
 #include "linuxtv_tuner.h"
+#include "dvb-vb2.h"
+
 #include "log.h"
 #define CLASS_MODULE "linuxtv_tuner"
 
@@ -94,6 +96,7 @@ linuxtv_tuner::linuxtv_tuner()
   , fe_id(-1)
   , demux_id(-1)
   , dvr_id(-1)
+  , sc(NULL)
 {
 	dPrintf("()");
 	filtered_pids.clear();
@@ -115,6 +118,7 @@ linuxtv_tuner::linuxtv_tuner(const linuxtv_tuner& linuxtv)
   , fe_id(-1)
   , demux_id(-1)
   , dvr_id(-1)
+  , sc(NULL)
 {
 	dPrintf("(copy)");
 
@@ -137,6 +141,7 @@ linuxtv_tuner& linuxtv_tuner::operator= (const linuxtv_tuner& cSource)
 	fe_id = -1;
 	demux_id = -1;
 	dvr_id = -1;
+	sc = NULL;
 
 	return *this;
 }
@@ -308,11 +313,48 @@ uint16_t linuxtv_tuner::get_snr()
 void linuxtv_tuner::stop_feed()
 {
 	tune::stop_feed();
+	if (sc) {
+		stream_deinit(sc);
+		delete sc;
+		sc = NULL;
+	}
 	close_demux();
+}
+
+int linuxtv_tuner::pull()
+{
+	ssize_t actual;
+	struct dmx_buffer b;
+	memset(&b, 0, sizeof(b));
+
+	int ret = stream_dqbuf(sc, &b);
+	if (ret < 0) {
+		dPrintf("stream_dqbuf: %d", ret);
+		sc->error = 1;
+		return -1;
+	} else {
+		sc->buf_flag[b.index] = 0;
+		actual = b.bytesused;
+
+		feeder.push(b.bytesused, sc->buf[b.index]);
+	}
+
+	/**enqueue the buffer again*/
+	if (!ret) {
+		if (stream_qbuf(sc, b.index) < 0) {
+			sc->error = 1;
+			return -1;
+		} else {
+			sc->buf_flag[b.index] = 1;
+		}
+	}
+
+	return actual;
 }
 
 int linuxtv_tuner::start_feed()
 {
+	int ret;
 	char filename[80]; // max path length??
 
 	dPrintf("()");
@@ -338,6 +380,38 @@ int linuxtv_tuner::start_feed()
 		perror("DMX_SET_BUFFER_SIZE failed");
 #endif
 	struct dmx_pes_filter_params pesfilter;
+	memset(&pesfilter, 0, sizeof(pesfilter));
+
+	pesfilter.pid = 0x2000;
+	pesfilter.input = DMX_IN_FRONTEND;
+	pesfilter.output = DMX_OUT_TSDEMUX_TAP;
+	pesfilter.pes_type = DMX_PES_OTHER;
+	pesfilter.flags = DMX_IMMEDIATE_START;
+
+	if (ioctl(demux_fd, DMX_SET_PES_FILTER, &pesfilter) < 0) {
+		perror("DMX_SET_PES_FILTER failed");
+		goto fail_filter;
+	}
+
+	sleep(1); // FIXME
+
+	sc = new stream_ctx;
+	ret = stream_init(sc, demux_fd, STREAM_BUF_CNT, (188*(4096/188)));
+	if (ret < 0) {
+		delete sc;
+		sc = NULL;
+		perror("stream_init failed");//: error %d, %s\n", errno, strerror(errno));
+		goto fail_mmap;
+	}
+
+	if (0 == feeder.pull(this)) {
+		state |= TUNE_STATE_FEED;
+		return 0;
+	}
+
+fail_mmap:
+	stream_deinit(sc);
+
 	memset(&pesfilter, 0, sizeof(pesfilter));
 
 	pesfilter.pid = 0x2000;
@@ -512,7 +586,7 @@ void linuxtv_tuner::add_filter(uint16_t pid)
 
 	pesfilter.pid = pid;
 	pesfilter.input = DMX_IN_FRONTEND;
-	pesfilter.output = DMX_OUT_TS_TAP;
+	pesfilter.output = (sc) ? DMX_OUT_TSDEMUX_TAP : DMX_OUT_TS_TAP;
 	pesfilter.pes_type = DMX_PES_OTHER;
 	pesfilter.flags = DMX_IMMEDIATE_START;
 
