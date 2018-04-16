@@ -97,18 +97,6 @@ int stream_qbuf(struct stream_ctx *sc, int idx);
 int stream_dqbuf(struct stream_ctx *sc,
 		 struct dmx_buffer *buf);
 /**
- * sream_expbuf - Exports a buffer specified by buf argument
- *
- * @param sc		Context for streaming management
- *			Pointer to &struct stream_ctx
- * @param idx		Index of the buffer
- *
- * @return At return, it returns a negative value if error or
- * zero on success.
- */
-int stream_expbuf(struct stream_ctx *sc,
-		  int idx);
-/**
  * stream_init - Requests number of buffers from memory
  * Gets pointer to the buffers from driver, mmaps those buffers
  * and stores them in an array
@@ -133,21 +121,6 @@ int stream_init(struct stream_ctx *sc,
  * @param sc		Pointer to &struct stream_ctx
  */
 void stream_deinit(struct stream_ctx *sc);
-/**
- * stream_to_file - Implements enqueue and dequeue logic
- * First enqueues all the available buffers then dequeues
- * one buffer, again enqueues it and so on.
- *
- * @param in_fd		File descriptor of the streaming device
- * @param out_fd	File descriptor of output file
- * @param timeout	Timeout in seconds
- * @param dbg_level	Debug flag
- * @param exit_flag	Flag to exit
- *
- * @return void
- */
-void stream_to_file(struct dvb_v5_fe_parms *parms, int in_fd, int out_fd,
-		    int timeout, int dbg_level, int *exit_flag);
 
 #ifdef __cplusplus
 }

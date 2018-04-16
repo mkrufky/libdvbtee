@@ -155,22 +155,6 @@ int stream_dqbuf(struct stream_ctx *sc,
 	return ret;
 }
 
-int stream_expbuf(struct stream_ctx *sc, int idx)
-{
-	int ret;
-	struct dmx_exportbuffer exp;
-	memzero(exp);
-	exp.index = idx;
-	ret = ioctl(sc->in_fd, DMX_EXPBUF, &exp);
-	if (ret) {
-		dvb_perror("DMX_EXPBUF failed");
-		return ret;
-	}
-	sc->exp_fd[idx] = exp.fd;
-	dvb_loginfo("Export buffer %d (fd=%d)", idx, sc->exp_fd[idx]);
-	return ret;
-}
-
 int stream_init(struct stream_ctx *sc,
 		int in_fd, int buf_cnt, int buf_size)
 {
@@ -256,63 +240,4 @@ void stream_deinit(struct stream_ctx *sc)
 	}
 
 	return;
-}
-
-void stream_to_file(int in_fd, int out_fd,
-		    int timeout, int dbg_level, int *exit_flag)
-{
-	struct stream_ctx sc;
-	int ret, n;
-	long long int rc = 0LL;
-
-	ret = stream_init(&sc, in_fd, STREAM_BUF_CNT,
-			  STREAM_BUF_SIZ);
-	if (ret < 0) {
-		dvb_perror("Failed to setup buffers");
-		sc.error = 1;
-		return;
-	}
-	dvb_loginfo("started memory-mapped streaming");
-
-	while (!*exit_flag  && !sc.error) {
-		n = 0;
-		/* find empty buffer */
-		while (n < sc.buf_cnt && sc.buf_flag[n])
-			n++;
-
-		if (n >= sc.buf_cnt) {
-			struct dmx_buffer b;
-
-			/* dequeue the buffer */
-			memzero(b);
-			ret = stream_dqbuf(&sc, &b);
-			if (ret < 0) {
-				sc.error = 1;
-				break;
-			}
-
-			sc.buf_flag[b.index] = 0;
-			if (out_fd >= 0) {
-				ret = write(out_fd, sc.buf[b.index],
-					    b.bytesused);
-				if (ret < 0) {
-					dvb_perror("Write failed");
-					break;
-				}
-			}
-			rc += b.bytesused;
-		} else {
-			/* enqueue the buffer */
-			ret = stream_qbuf(&sc, n);
-			if (ret < 0)
-				sc.error = 1;
-			else
-				sc.buf_flag[n] = 1;
-		}
-	}
-	if (dbg_level < 2 && timeout) {
-		dvb_loginfo("copied %lld bytes (%lld Kbytes/sec)",
-			    rc, rc / (1024 * timeout));
-	}
-	stream_deinit(&sc);
 }
