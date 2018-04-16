@@ -396,7 +396,7 @@ int linuxtv_tuner::start_feed()
 	sleep(1); // FIXME
 
 	sc = new stream_ctx;
-	ret = stream_init(sc, demux_fd, STREAM_BUF_CNT, (188*(4096/188)));
+	ret = stream_init(sc, demux_fd, 10, (188*(4096/188)));
 	if (ret < 0) {
 		delete sc;
 		sc = NULL;

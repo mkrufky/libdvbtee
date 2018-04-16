@@ -23,15 +23,6 @@
 
 #include <stdint.h>
 #include <linux/dvb/dmx.h>
-#if 1
-typedef void (*dvb_logfunc)(int level, const char *fmt, ...) __attribute__ (( format( printf, 2, 3 )));
-#define MAX_DELIVERY_SYSTEMS      20
-#define MAX_STREAM_BUF_CNT       10
-#define STREAM_BUF_CNT (10)
-#define DVB_MAX_PAYLOAD_PACKET_SIZE 4096
-#define STREAM_BUF_SIZ (DVB_MAX_PAYLOAD_PACKET_SIZE)
-#include <linux/dvb/frontend.h>
-#endif
 
 /**
  * @file dvb-vb2.h

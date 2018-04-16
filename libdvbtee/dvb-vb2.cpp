@@ -55,9 +55,6 @@
 #include <libdvbv5/dvb-dev.h>
 #endif
 
-/**These 2 params are for DVR*/
-#define STREAM_BUF_CNT (10)
-#define STREAM_BUF_SIZ (188*1024)
 /*Sleep time for retry, in case ioctl fails*/
 #define SLEEP_US	1000
 
