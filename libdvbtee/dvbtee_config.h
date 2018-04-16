@@ -29,6 +29,39 @@
 #ifdef HAVE_LINUX_DVB_FRONTEND_H
 #if HAVE_LINUX_DVB_FRONTEND_H
 #define USE_LINUXTV
+#include <linux/dvb/dmx.h>
+#ifndef DMX_DQBUF
+#include <stdint.h>
+struct dmx_buffer {
+	uint32_t			index;
+	uint32_t			bytesused;
+	uint32_t			offset;
+	uint32_t			length;
+	uint32_t			flags;
+	uint32_t			count;
+};
+struct dmx_requestbuffers {
+	uint32_t			count;
+	uint32_t			size;
+};
+struct dmx_exportbuffer {
+	uint32_t		index;
+	uint32_t		flags;
+	uint32_t		fd;
+};
+enum dmx_buffer_flags {
+	DMX_BUFFER_FLAG_HAD_CRC32_DISCARD		= 1 << 0,
+	DMX_BUFFER_FLAG_TEI				= 1 << 1,
+	DMX_BUFFER_PKT_COUNTER_MISMATCH			= 1 << 2,
+	DMX_BUFFER_FLAG_DISCONTINUITY_DETECTED		= 1 << 3,
+	DMX_BUFFER_FLAG_DISCONTINUITY_INDICATOR		= 1 << 4,
+};
+#define DMX_REQBUFS              _IOWR('o', 60, struct dmx_requestbuffers)
+#define DMX_QUERYBUF             _IOWR('o', 61, struct dmx_buffer)
+#define DMX_EXPBUF               _IOWR('o', 62, struct dmx_exportbuffer)
+#define DMX_QBUF                 _IOWR('o', 63, struct dmx_buffer)
+#define DMX_DQBUF                _IOWR('o', 64, struct dmx_buffer)
+#endif
 #endif
 #endif
 
