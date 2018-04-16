@@ -23,6 +23,8 @@
  * Implements videobuf2 streaming APIs for DVB
  *****************************************************************************/
 
+#include "dvbtee_config.h"
+#ifdef USE_LINUXTV
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -238,3 +240,4 @@ void stream_deinit(struct stream_ctx *sc)
 
 	return;
 }
+#endif
