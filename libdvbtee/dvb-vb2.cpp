@@ -173,7 +173,7 @@ int stream_init(struct stream_ctx *sc,
 
 	ret = xioctl(in_fd, DMX_REQBUFS, &req);
 	if (ret) {
-		dvb_perror("DMX_REQBUFS failed");
+		//dvb_perror("DMX_REQBUFS failed");
 		return ret;
 	}
 

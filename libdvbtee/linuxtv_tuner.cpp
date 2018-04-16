@@ -398,7 +398,8 @@ int linuxtv_tuner::start_feed()
 	sc = new stream_ctx;
 	ret = stream_init(sc, demux_fd, 10, (188*(4096/188)));
 	if (ret < 0) {
-		perror("stream_init failed");//: error %d, %s\n", errno, strerror(errno));
+		// DMX_REQBUFS / mmap() failed?  failover to using read()
+		//perror("stream_init failed");//: error %d, %s\n", errno, strerror(errno));
 		goto fail_mmap;
 	}
 
