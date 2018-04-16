@@ -398,8 +398,6 @@ int linuxtv_tuner::start_feed()
 	sc = new stream_ctx;
 	ret = stream_init(sc, demux_fd, 10, (188*(4096/188)));
 	if (ret < 0) {
-		delete sc;
-		sc = NULL;
 		perror("stream_init failed");//: error %d, %s\n", errno, strerror(errno));
 		goto fail_mmap;
 	}
@@ -411,6 +409,8 @@ int linuxtv_tuner::start_feed()
 
 fail_mmap:
 	stream_deinit(sc);
+	delete sc;
+	sc = NULL;
 
 	memset(&pesfilter, 0, sizeof(pesfilter));
 
