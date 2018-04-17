@@ -170,6 +170,7 @@ int linuxtv_tuner::close_fe() {
 }
 
 int linuxtv_tuner::close_demux() {
+	clear_filters();
 	if (demux_fd >= 0) close(demux_fd);
 	demux_fd = -1;
 	cur_chan = 0;
