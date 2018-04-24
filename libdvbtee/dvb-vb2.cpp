@@ -25,6 +25,16 @@
 
 #include "dvbtee_config.h"
 #ifdef USE_LINUXTV
+#include "dvb-vb2.h"
+#include "log.h"
+#define CLASS_MODULE "dvbvb2"
+
+#define dPrintf(fmt, arg...) __dPrintf(DBG_TUNE, fmt, ##arg)
+
+#define dvb_perror perror
+#define dvb_loginfo dPrintf
+#define dvb_logerr dPrintf
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
@@ -40,22 +50,6 @@
 #include <config.h>
 
 #include <sys/mman.h>
-
-#if 1
-#include "dvb-vb2.h"
-#include "log.h"
-#define CLASS_MODULE "dvbvb2"
-
-#define dPrintf(fmt, arg...) __dPrintf(DBG_TUNE, fmt, ##arg)
-
-#define dvb_perror perror
-#define dvb_loginfo dPrintf
-#define dvb_logerr dPrintf
-#else
-#include <libdvbv5/dvb-log.h>
-#include <libdvbv5/dvb-vb2.h>
-#include <libdvbv5/dvb-dev.h>
-#endif
 
 /*Sleep time for retry, in case ioctl fails*/
 #define SLEEP_US	1000
