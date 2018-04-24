@@ -104,7 +104,11 @@ int stream_dqbuf(struct stream_ctx *sc,
 		 struct dmx_buffer *buf)
 {
 	static int64_t count = -1;
+#ifdef DVB_VB2_LOG_FLAGS
 	int ret, flags;
+#else
+	int ret;
+#endif
 
 	ret = xioctl(sc->in_fd, DMX_DQBUF, buf);
 	if (ret < 0) {
@@ -117,6 +121,7 @@ int stream_dqbuf(struct stream_ctx *sc,
 
 	count = buf->count;
 
+#ifdef DVB_VB2_LOG_FLAGS
 	if (!buf->flags)
 		return ret;
 
@@ -144,6 +149,7 @@ int stream_dqbuf(struct stream_ctx *sc,
 	}
 	if (flags)
 		dvb_logerr("Unknown error: 0x%04x", flags);
+#endif
 
 	return ret;
 }
