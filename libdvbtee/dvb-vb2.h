@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  * Or, point your browser to http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
-#ifndef _LIBVB2_H
-#define _LIBVB2_H
+#ifndef __DVB_VB2_H__
+#define __DVB_VB2_H__
 
 #include <stdint.h>
 #include <linux/dvb/dmx.h>
@@ -117,4 +117,4 @@ void stream_deinit(struct stream_ctx *sc);
 }
 #endif
 
-#endif
+#endif /* __DVB_VB2_H__ */
