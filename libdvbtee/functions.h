@@ -88,5 +88,6 @@ int decode_multiple_string(const uint8_t* data, uint8_t len, unsigned char* text
 char *url_encode(const char *str);
 char *escape_quotes(const char *str);
 char *translate_iso6937(char *str);
+char *translate_iso8859(char *str);
 
 #endif /* __FUNCTIONS_H__ */
