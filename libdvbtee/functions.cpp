@@ -378,6 +378,7 @@ const char *detect_encoding(unsigned char *input, size_t *prefix) {
     case 0x11: return "ucs-2";
     case 0x12: return "KSC_5601";
     case 0x13: return "gb2312";
+    case 0x14: return "iso-10646-1";
   }
   return NULL;
 }
