@@ -59,10 +59,16 @@ desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	set("last_descriptor_number", dr->i_last_descriptor_number);
 	set("lang", std::string((const char*)lang));
 
-/*
-	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
-*/
-	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_iso8859((char *)encoded_text) : encoded_text;
+	size_t prefix;
+	const char *encoding = detect_encoding(encoded_text, &prefix);
+	unsigned char *text;
+	if (encoding) {
+		set("original_encoding", std::string(encoding));
+
+		text = (b_translate_iso6937) ? (unsigned char *)translate((char *)encoded_text, encoding) : encoded_text;
+	} else {
+		text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
+	}
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)text, '"')) {

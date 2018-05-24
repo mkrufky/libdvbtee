@@ -59,12 +59,19 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	set("lang", std::string((const char*)lang));
 
-/*
-	unsigned char *name = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_name) : encoded_name;
-	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
-*/
-	unsigned char *name = (b_translate_iso6937) ? (unsigned char *)translate_iso8859((char *)encoded_name) : encoded_name;
-	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_iso8859((char *)encoded_text) : encoded_text;
+	size_t prefix;
+	const char *encoding = detect_encoding(encoded_text, &prefix);
+	unsigned char *name;
+	unsigned char *text;
+	if (encoding) {
+		set("original_encoding", std::string(encoding));
+
+		name = (b_translate_iso6937) ? (unsigned char *)translate((char *)encoded_name, encoding) : encoded_name;
+		text = (b_translate_iso6937) ? (unsigned char *)translate((char *)encoded_text, encoding) : encoded_text;
+	} else {
+		name = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_name) : encoded_name;
+		text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
+	}
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)name, '"')) {
