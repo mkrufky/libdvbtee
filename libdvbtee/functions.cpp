@@ -308,7 +308,7 @@ char *escape_quotes(const char *str) {
 
 /* Translate encoded string into UTF-8 */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *translate(char *str, const char *encoding) {
+char *translate(unsigned char *str, const char *encoding) {
     size_t iconv_in_s = strlen((const char *)str);
     size_t iconv_out_s = iconv_in_s * 6 + 1;
 
@@ -380,8 +380,8 @@ const char *detect_encoding(unsigned char *input, size_t *prefix) {
 
 /* Translate encoded string into UTF-8 */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *translate_auto(char *str) {
+char *translate_auto(unsigned char *str) {
 	size_t prefix;
-	const char *encoding = detect_encoding((unsigned char *)str, &prefix);
+	const char *encoding = detect_encoding(str, &prefix);
 	return translate(&str[prefix], encoding ? encoding :"ISO6937");
 }
