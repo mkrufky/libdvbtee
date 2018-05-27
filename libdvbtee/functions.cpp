@@ -324,22 +324,6 @@ char *translate(char *str, const char *encoding) {
     return out;
 }
 
-char *translate_auto(char *str);
-
-/* Translate ISO6937 encoded string into UTF-8 */
-/* IMPORTANT: be sure to free() the returned string after use */
-char *translate_iso6937(char *str) {
-	return translate_auto(str);
-//    return translate(str, "ISO6937");
-}
-
-/* Translate ISO8859 encoded string into UTF-8 */
-/* IMPORTANT: be sure to free() the returned string after use */
-char *translate_iso8859(char *str) {
-	return translate_auto(str);
-//    return translate(str, "ISO8859");
-}
-
 /* Thanks to Aman Gupta:
  * https://github.com/mkrufky/node-dvbtee/issues/25#issuecomment-391823070
  */
@@ -392,10 +376,10 @@ const char *detect_encoding(unsigned char *input, size_t *prefix) {
   printf("\ndetect encoding: %c %c %c from: %s, %lu returns %s\n",
     input[0], input[1], input[2], input, *prefix, ret);
   return ret;
-  //return  "iso-8859-5";
 }
 
-
+/* Translate encoded string into UTF-8 */
+/* IMPORTANT: be sure to free() the returned string after use */
 char *translate_auto(char *str) {
 	size_t prefix;
 	const char *encoding = detect_encoding((unsigned char *)str, &prefix);

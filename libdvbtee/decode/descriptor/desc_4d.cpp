@@ -59,8 +59,8 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 
 	set("lang", std::string((const char*)lang));
 
-	unsigned char *name = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_name) : encoded_name;
-	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
+	unsigned char *name = (b_translate_iso6937) ? (unsigned char *)translate_auto((char *)encoded_name) : encoded_name;
+	unsigned char *text = (b_translate_iso6937) ? (unsigned char *)translate_auto((char *)encoded_text) : encoded_text;
 
 	/* FIXME: we should escape these strings on output rather than on store */
 	if (strchr((char*)name, '"')) {
