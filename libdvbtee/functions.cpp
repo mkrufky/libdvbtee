@@ -391,8 +391,8 @@ const char *detect_encoding(unsigned char *input, size_t *prefix) {
   const char *ret = __detect_encoding(input, prefix);
   printf("\ndetect encoding: %c %c %c from: %s, %lu returns %s\n",
     input[0], input[1], input[2], input, *prefix, ret);
-  //return ret;
-  return  "iso-8859-5";
+  return ret;
+  //return  "iso-8859-5";
 }
 
 
