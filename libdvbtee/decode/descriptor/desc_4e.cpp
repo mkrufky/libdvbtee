@@ -60,10 +60,10 @@ desc_4e::desc_4e(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	set("lang", std::string((const char*)lang));
 
 	size_t prefix;
-	const char *encoding = detect_encoding(encoded_text, &prefix);
+	const char *encoding = detect_encoding((unsigned char *)encoded_text, &prefix);
 	unsigned char *text;
 	if (encoding) {
-		set("original_encoding", std::string(encoding));
+		set("original_encoding", std::string((const char *)encoding));
 
 		text = (b_translate_iso6937) ? (unsigned char *)translate((char *)encoded_text, encoding) : encoded_text;
 	} else {

@@ -60,17 +60,23 @@ desc_4d::desc_4d(Decoder *parent, dvbpsi_descriptor_t *p_descriptor)
 	set("lang", std::string((const char*)lang));
 
 	size_t prefix;
-	const char *encoding = detect_encoding(encoded_text, &prefix);
+	const char *encoding = detect_encoding((unsigned char *)encoded_text, &prefix);
 	unsigned char *name;
 	unsigned char *text;
 	if (encoding) {
-		set("original_encoding", std::string(encoding));
+		set("original_text_encoding", std::string((const char *)encoding));
 
-		name = (b_translate_iso6937) ? (unsigned char *)translate((char *)encoded_name, encoding) : encoded_name;
 		text = (b_translate_iso6937) ? (unsigned char *)translate((char *)encoded_text, encoding) : encoded_text;
 	} else {
-		name = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_name) : encoded_name;
 		text = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_text) : encoded_text;
+	}
+	encoding = detect_encoding((unsigned char *)encoded_name, &prefix);
+	if (encoding) {
+		set("original_name_encoding", std::string((const char *)encoding));
+
+		name = (b_translate_iso6937) ? (unsigned char *)translate((char *)encoded_name, encoding) : encoded_name;
+	} else {
+		name = (b_translate_iso6937) ? (unsigned char *)translate_iso6937((char *)encoded_name) : encoded_name;
 	}
 
 	/* FIXME: we should escape these strings on output rather than on store */
