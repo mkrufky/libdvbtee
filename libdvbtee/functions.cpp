@@ -85,10 +85,7 @@ unsigned char* get_descriptor_text(unsigned char* desc, uint8_t len, unsigned ch
 {
 	unsigned char* p = text;
 	for (int i = 0; i < len; i++, desc++) {
-		if (*desc == ':')
-			*text++ = ' ';
-		else if (*desc >= 0x20 && (*desc < 0x80 || *desc > 0x9f))
-			*text++ = *desc;
+		*text++ = *desc;
 	}
 	*text = 0;
 	return p;
