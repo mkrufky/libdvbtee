@@ -327,7 +327,7 @@ char *translate(unsigned char *str, const char *encoding) {
 /* Thanks to Aman Gupta:
  * https://github.com/mkrufky/node-dvbtee/issues/25#issuecomment-391823070
  */
-const char *__detect_encoding(unsigned char *input, size_t *prefix) {
+const char *detect_encoding(unsigned char *input, size_t *prefix) {
   *prefix = 0;
   if (input[0] >= 0x20) return NULL;
   if (input[0] == 0x10 && input[1] == 0x0) {
@@ -370,13 +370,6 @@ const char *__detect_encoding(unsigned char *input, size_t *prefix) {
   }
   *prefix = 0;
   return NULL;
-}
-
-const char *detect_encoding(unsigned char *input, size_t *prefix) {
-  const char *ret = __detect_encoding(input, prefix);
-  printf("\ndetect encoding: %c %c %c from: %s, %lu returns %s\n",
-    input[0], input[1], input[2], input, *prefix, ret);
-  return ret;
 }
 
 /* Translate encoded string into UTF-8 */
