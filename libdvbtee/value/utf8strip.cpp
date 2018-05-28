@@ -43,7 +43,7 @@ std::string wstripped(std::string in)
 	std::wstring win = converter.from_bytes(in);
 	size_t len = win.length()*sizeof(wchar_t);
 	wchar_t out[len] = { 0 };
-	memcpy((void*)out, win.c_str(), len);
+	memcpy((void*)out, win.data(), len);
 	out[len] = 0;
 	wstrip(out);
 	std::wstring wout = std::wstring(&out[0]);
