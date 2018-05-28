@@ -353,7 +353,7 @@ const char *detect_encoding(unsigned char *input, size_t *prefix) {
     case 0x05: return "iso-8859-9";
     case 0x06: return "iso-8859-10";
     case 0x07: return "iso-8859-11";
-    case 0x08: return NULL;
+    case 0x08: return "iso-8859-12";
     case 0x09: return "iso-8859-13";
     case 0x0a: return "iso-8859-14";
     case 0x0b: return "iso-8859-15";
