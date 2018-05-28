@@ -83,12 +83,9 @@ void dump_descriptors(const char* str, dvbpsi_descriptor_t* descriptors)
 
 unsigned char* get_descriptor_text(unsigned char* desc, uint8_t len, unsigned char* text)
 {
-	unsigned char* p = text;
-	for (int i = 0; i < len; i++, desc++) {
-		*text++ = *desc;
-	}
-	*text = 0;
-	return p;
+	memcpy(text, desc, len);
+	text[len] = 0;
+	return text;
 }
 
 //-----------------------------------------------------------------------------
