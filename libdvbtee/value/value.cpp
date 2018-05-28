@@ -25,6 +25,7 @@
 #include "array.h"
 #include "object.h"
 #include "value-macros.h"
+#include "utf8strip.h"
 
 using namespace valueobj;
 
@@ -189,5 +190,5 @@ TO_JSON_TPL_PRIMITIVE(unsigned long long)
 TO_JSON_TPL_PRIMITIVE(unsigned short)
 TO_JSON_TPL(unsigned char, (unsigned int)VALUE)
 TO_JSON_TPL_PRIMITIVE(double)
-TO_JSON_TPL(std::string, "\"" << VALUE << "\"")
+TO_JSON_TPL(std::string, "\"" << wstripped(VALUE) << "\"")
 TO_JSON_TPL(bool, ((VALUE) ? "true" : "false"))
