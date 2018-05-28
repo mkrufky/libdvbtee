@@ -36,7 +36,7 @@ void wstrip(wchar_t * str)
 	*ptr = '\0';
 }
 
-std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+std::wstring_convert< std::codecvt_utf8_utf16<wchar_t> > converter;
 
 std::string wstripped(std::string in)
 {
