@@ -83,15 +83,9 @@ void dump_descriptors(const char* str, dvbpsi_descriptor_t* descriptors)
 
 unsigned char* get_descriptor_text(unsigned char* desc, uint8_t len, unsigned char* text)
 {
-	unsigned char* p = text;
-	for (int i = 0; i < len; i++, desc++) {
-		if (*desc == ':')
-			*text++ = ' ';
-		else if (*desc >= 0x20 && (*desc < 0x80 || *desc > 0x9f))
-			*text++ = *desc;
-	}
-	*text = 0;
-	return p;
+	memcpy(text, desc, len);
+	text[len] = 0;
+	return text;
 }
 
 //-----------------------------------------------------------------------------
@@ -306,9 +300,9 @@ char *escape_quotes(const char *str) {
 	return buf;
 }
 
-/* Translate ISO6937 encoded string into UTF-8 */
+/* Translate encoded string into UTF-8 */
 /* IMPORTANT: be sure to free() the returned string after use */
-char *translate_iso6937(char *str) {
+char *translate(unsigned char *str, const char *encoding) {
     size_t iconv_in_s = strlen((const char *)str);
     size_t iconv_out_s = iconv_in_s * 6 + 1;
 
@@ -317,9 +311,67 @@ char *translate_iso6937(char *str) {
     char *iconv_in = (char *) &str[0];
     char *iconv_out = (char *) &out[0];
 
-    iconv_t conv = iconv_open("UTF-8", "ISO6937");
+    iconv_t conv = iconv_open("UTF-8", encoding);
     iconv(conv, &iconv_in, &iconv_in_s, &iconv_out, &iconv_out_s);
     iconv_close(conv);
 
     return out;
+}
+
+/* Thanks to Aman Gupta:
+ * https://github.com/mkrufky/node-dvbtee/issues/25#issuecomment-391823070
+ */
+const char *detect_encoding(unsigned char *input, size_t *prefix) {
+  *prefix = 0;
+  if (input[0] >= 0x20) return NULL;
+  if (input[0] == 0x10 && input[1] == 0x0) {
+    *prefix = 3;
+    switch (input[2]) {
+      case 0x01: return "iso-8859-1";
+      case 0x02: return "iso-8859-2";
+      case 0x03: return "iso-8859-3";
+      case 0x04: return "iso-8859-4";
+      case 0x05: return "iso-8859-5";
+      case 0x06: return "iso-8859-6";
+      case 0x07: return "iso-8859-7";
+      case 0x08: return "iso-8859-8";
+      case 0x09: return "iso-8859-9";
+      case 0x0a: return "iso-8859-10";
+      case 0x0b: return "iso-8859-11";
+      case 0x0c: return "iso-8859-12";
+      case 0x0d: return "iso-8859-13";
+      case 0x0e: return "iso-8859-14";
+      case 0x0f: return "iso-8859-15";
+    }
+  }
+  *prefix = 1;
+  switch (input[0]) {
+    case 0x01: return "iso-8859-5";
+    case 0x02: return "iso-8859-6";
+    case 0x03: return "iso-8859-7";
+    case 0x04: return "iso-8859-8";
+    case 0x05: return "iso-8859-9";
+    case 0x06: return "iso-8859-10";
+    case 0x07: return "iso-8859-11";
+    case 0x08: return "iso-8859-12";
+    case 0x09: return "iso-8859-13";
+    case 0x0a: return "iso-8859-14";
+    case 0x0b: return "iso-8859-15";
+    case 0x11: return "ucs-2";       /* "iso-10646-1" ? Basic Multilingual Plane of ISO/IEC 10646-1 */
+    case 0x12: return "KSC_5601";    /* "KSC5601-1987" */
+    case 0x13: return "gb2312";      /* "GB-2312-1980" */
+    case 0x14: return "iso-10646-1"; /* Big5 subset of ISO/IEC 10646-1 */
+    case 0x15: return "utf-8";
+  }
+  *prefix = 0;
+  return NULL;
+}
+
+/* Translate encoded string into UTF-8 */
+/* IMPORTANT: be sure to free() the returned string after use */
+char *translate_auto(unsigned char *str) {
+	size_t prefix;
+	const char *encoding = detect_encoding(str, &prefix);
+	/* We used to use "ISO6937" by default, but "iso-8859-1" seems much better */
+	return translate(&str[prefix], encoding ? encoding : "iso-8859-1");
 }
