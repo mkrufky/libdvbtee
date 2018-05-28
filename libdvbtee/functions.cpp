@@ -371,5 +371,6 @@ const char *detect_encoding(unsigned char *input, size_t *prefix) {
 char *translate_auto(unsigned char *str) {
 	size_t prefix;
 	const char *encoding = detect_encoding(str, &prefix);
-	return translate(&str[prefix], encoding ? encoding :"ISO6937");
+	/* We used to use "ISO6937" by default, but "iso-8859-1" seems much better */
+	return translate(&str[prefix], encoding ? encoding : "iso-8859-1");
 }
