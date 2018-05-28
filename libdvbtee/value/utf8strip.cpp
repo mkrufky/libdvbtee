@@ -42,9 +42,13 @@ std::string wstripped(std::string in)
 {
 	std::wstring win = converter.from_bytes(in);
 	size_t len = win.length()*sizeof(wchar_t);
+#if 0
 	wchar_t out[len] = { 0 };
 	memcpy((void*)out, win.data(), len);
 	out[len] = 0;
+#else
+	wchar_t *out = (wchar_t *)win.data();
+#endif
 	wstrip(out);
 	std::wstring wout = std::wstring(&out[0]);
 	std::string retval = converter.to_bytes(wout);
