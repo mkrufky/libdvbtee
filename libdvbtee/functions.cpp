@@ -357,10 +357,11 @@ const char *detect_encoding(unsigned char *input, size_t *prefix) {
     case 0x09: return "iso-8859-13";
     case 0x0a: return "iso-8859-14";
     case 0x0b: return "iso-8859-15";
-    case 0x11: return "ucs-2";
-    case 0x12: return "KSC_5601";
-    case 0x13: return "gb2312";
-    case 0x14: return "iso-10646-1";
+    case 0x11: return "ucs-2";       /* "iso-10646-1" ? Basic Multilingual Plane of ISO/IEC 10646-1 */
+    case 0x12: return "KSC_5601";    /* "KSC5601-1987" */
+    case 0x13: return "gb2312";      /* "GB-2312-1980" */
+    case 0x14: return "iso-10646-1"; /* Big5 subset of ISO/IEC 10646-1 */
+    case 0x15: return "utf-8";
   }
   *prefix = 0;
   return NULL;
