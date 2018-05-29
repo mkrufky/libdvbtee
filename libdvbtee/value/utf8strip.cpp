@@ -72,7 +72,7 @@ std::string wstripped(std::string in)
 	return retval;
 #else
 	// FIXME: read https://www.gnu.org/software/libc/manual/html_node/Setting-the-Locale.html
-	setlocale(LC_ALL, "en_US.utf8"); // FIXME: only run once & test in configure.ac
+	setlocale(LC_ALL, ""); // FIXME: only run once & test in configure.ac
 
 	std::mbstate_t state = std::mbstate_t();
 	std::size_t olen = 1 + std::wcsrtombs(NULL, (const wchar_t**)&out, 0, &state);
