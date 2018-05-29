@@ -55,7 +55,7 @@ std::string wstripped(std::string in)
 	wstrip(out);
 
 	std::mbstate_t state = std::mbstate_t();
-	std::size_t olen = 1 + std::wcsrtombs(nullptr, (const wchar_t**)&out, 0, &state);
+	std::size_t olen = 1 + std::wcsrtombs(NULL, (const wchar_t**)&out, 0, &state);
 	std::vector<char> mbstr(olen);
 	std::setlocale(LC_ALL, "en_US.utf8"); // FIXME: only run once
 	std::wcsrtombs(&mbstr[0], (const wchar_t**)&out, mbstr.size(), &state);
