@@ -18,14 +18,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#define USE_CODECVT 0
 
 #include <locale>
-#include <stdlib.h>
 #include <string.h>
-#include <vector>
 #include "utf8strip.h"
 
+#if USE_CODECVT
+#include <codecvt>
+
+std::wstring_convert< std::codecvt_utf8_utf16<wchar_t> > converter;
+#else
+#include <stdlib.h>
+#include <vector>
+
 wchar_t *to_wide(const char *str);
+#endif
 
 void wstrip(wchar_t * str)
 {
@@ -41,9 +49,13 @@ void wstrip(wchar_t * str)
 
 std::string wstripped(std::string in)
 {
+#if USE_CODECVT
+	std::wstring win = converter.from_bytes(in);
+#else
 	wchar_t *_win = to_wide((char*)in.data());
 	std::wstring win(_win);
 	free(_win);
+#endif
 	size_t len = win.length()*sizeof(wchar_t);
 #if 0
 	wchar_t out[len] = { 0 };
@@ -54,6 +66,11 @@ std::string wstripped(std::string in)
 #endif
 	wstrip(out);
 
+#if USE_CODECVT
+	std::wstring wout = std::wstring(&out[0]);
+	std::string retval = converter.to_bytes(wout);
+	return retval;
+#else
 	// FIXME: read https://www.gnu.org/software/libc/manual/html_node/Setting-the-Locale.html
 	setlocale(LC_ALL, "en_US.utf8"); // FIXME: only run once & test in configure.ac
 
@@ -62,4 +79,5 @@ std::string wstripped(std::string in)
 	std::vector<char> mbstr(olen);
 	std::wcsrtombs(&mbstr[0], (const wchar_t**)&out, mbstr.size(), &state); // FIXME: test in configure.ac
 	return std::string(&mbstr[0]);
+#endif
 }
