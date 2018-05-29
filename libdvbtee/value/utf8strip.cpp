@@ -20,6 +20,7 @@
  *****************************************************************************/
 
 #include <locale>
+#include <stdlib.h>
 #include <string.h>
 #include <vector>
 #include "utf8strip.h"
