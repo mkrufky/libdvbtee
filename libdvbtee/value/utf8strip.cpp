@@ -20,9 +20,11 @@
  *****************************************************************************/
 
 #include <locale>
-#include <codecvt>
 #include <string.h>
+#include <vector>
 #include "utf8strip.h"
+
+wchar_t *to_wide(const char *str);
 
 void wstrip(wchar_t * str)
 {
@@ -36,11 +38,11 @@ void wstrip(wchar_t * str)
 	*ptr = '\0';
 }
 
-std::wstring_convert< std::codecvt_utf8_utf16<wchar_t> > converter;
-
 std::string wstripped(std::string in)
 {
-	std::wstring win = converter.from_bytes(in);
+	wchar_t *_win = to_wide((char*)in.data());
+	std::wstring win(_win);
+	free(_win);
 	size_t len = win.length()*sizeof(wchar_t);
 #if 0
 	wchar_t out[len] = { 0 };
@@ -50,7 +52,11 @@ std::string wstripped(std::string in)
 	wchar_t *out = (wchar_t *)win.data();
 #endif
 	wstrip(out);
-	std::wstring wout = std::wstring(&out[0]);
-	std::string retval = converter.to_bytes(wout);
-	return retval;
+
+	std::mbstate_t state = std::mbstate_t();
+	std::size_t olen = 1 + std::wcsrtombs(nullptr, (const wchar_t**)&out, 0, &state);
+	std::vector<char> mbstr(olen);
+	std::setlocale(LC_ALL, "en_US.utf8"); // FIXME: only run once
+	std::wcsrtombs(&mbstr[0], (const wchar_t**)&out, mbstr.size(), &state);
+	return std::string(&mbstr[0]);
 }
