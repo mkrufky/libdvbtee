@@ -28,11 +28,6 @@
 #include <codecvt>
 
 std::wstring_convert< std::codecvt_utf8_utf16<wchar_t> > converter;
-#else
-#include <stdlib.h>
-#include <vector>
-
-wchar_t *to_wide(const char *str);
 #endif
 
 void wstrip(wchar_t * str)
@@ -47,23 +42,51 @@ void wstrip(wchar_t * str)
 	*ptr = '\0';
 }
 
+std::wstring to_wide(std::string external)
+{
+    // from: http://en.cppreference.com/w/cpp/locale/codecvt/in
+    std::locale::global(std::locale("en_US.utf8"));
+    auto& f = std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t>>(std::locale());
+
+    // note that the following can be done with wstring_convert
+    std::mbstate_t mb = std::mbstate_t(); // initial shift state
+    std::wstring internal(external.size(), '\0');
+    const char* from_next;
+    wchar_t* to_next;
+    f.in(mb, &external[0], &external[external.size()], from_next,
+             &internal[0], &internal[internal.size()], to_next);
+    // error checking skipped for brevity
+    internal.resize(to_next - &internal[0]);
+    return internal;
+}
+
+std::string to_narrow(std::wstring internal)
+{
+    // from: http://en.cppreference.com/w/cpp/locale/codecvt/out
+    std::locale::global(std::locale("en_US.utf8"));
+    auto& f = std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t>>(std::locale());
+
+    // note that the following can be done with wstring_convert
+    std::mbstate_t mb{}; // initial shift state
+    std::string external(internal.size() * f.max_length(), '\0');
+    const wchar_t* from_next;
+    char* to_next;
+    f.out(mb, &internal[0], &internal[internal.size()], from_next,
+              &external[0], &external[external.size()], to_next);
+    // error checking skipped for brevity
+    external.resize(to_next - &external[0]);
+    return external;
+}
+
 std::string wstripped(std::string in)
 {
 #if USE_CODECVT
 	std::wstring win = converter.from_bytes(in);
 #else
-	wchar_t *_win = to_wide((char*)in.data());
-	std::wstring win(_win);
-	free(_win);
+	std::wstring win = to_wide(in);
 #endif
-	size_t len = win.length()*sizeof(wchar_t);
-#if 0
-	wchar_t out[len] = { 0 };
-	memcpy((void*)out, win.data(), len);
-	out[len] = 0;
-#else
+
 	wchar_t *out = (wchar_t *)win.data();
-#endif
 	wstrip(out);
 
 #if USE_CODECVT
@@ -71,13 +94,6 @@ std::string wstripped(std::string in)
 	std::string retval = converter.to_bytes(wout);
 	return retval;
 #else
-	// FIXME: read https://www.gnu.org/software/libc/manual/html_node/Setting-the-Locale.html
-	setlocale(LC_ALL, ""); // FIXME: only run once & test in configure.ac
-
-	std::mbstate_t state = std::mbstate_t();
-	std::size_t olen = 1 + std::wcsrtombs(NULL, (const wchar_t**)&out, 0, &state);
-	std::vector<char> mbstr(olen);
-	std::wcsrtombs(&mbstr[0], (const wchar_t**)&out, mbstr.size(), &state); // FIXME: test in configure.ac
-	return std::string(&mbstr[0]);
+	return to_narrow(out);
 #endif
 }
