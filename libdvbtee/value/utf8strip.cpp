@@ -57,6 +57,7 @@ std::string wstripped(std::string in)
 	std::mbstate_t state = std::mbstate_t();
 	std::size_t olen = 1 + std::wcsrtombs(NULL, (const wchar_t**)&out, 0, &state);
 	std::vector<char> mbstr(olen);
+	// FIXME: read https://www.gnu.org/software/libc/manual/html_node/Setting-the-Locale.html
 	setlocale(LC_ALL, "en_US.utf8"); // FIXME: only run once & test in configure.ac
 	std::wcsrtombs(&mbstr[0], (const wchar_t**)&out, mbstr.size(), &state); // FIXME: test in configure.ac
 	return std::string(&mbstr[0]);
