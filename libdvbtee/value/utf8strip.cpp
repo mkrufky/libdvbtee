@@ -45,7 +45,7 @@ void wstrip(wchar_t * str)
 std::wstring to_wide(std::string external)
 {
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/in
-    std::locale::global(std::locale("en_US.utf8"));
+    std::locale::global(std::locale(""));
     const std::codecvt<wchar_t, char, std::mbstate_t> &f =
 	  std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t> >(std::locale());
 
@@ -64,7 +64,7 @@ std::wstring to_wide(std::string external)
 std::string to_narrow(std::wstring internal)
 {
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/out
-    std::locale::global(std::locale("en_US.utf8"));
+    std::locale::global(std::locale(""));
     const std::codecvt<wchar_t, char, std::mbstate_t> &f =
 	  std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t> >(std::locale());
 
