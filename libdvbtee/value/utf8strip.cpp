@@ -32,18 +32,21 @@ std::wstring_convert< std::codecvt_utf8_utf16<wchar_t> > converter;
 
 void wstrip(wchar_t * str)
 {
-	unsigned wchar_t *ptr, *s = (unsigned wchar_t*)str;
-	ptr = s;
-	while (*s != '\0') {
-		if ((int)*s >= 0x20)
-			*(ptr++) = *s;
-		s++;
-	}
-	*ptr = '\0';
+    unsigned wchar_t *ptr, *s = (unsigned wchar_t*)str;
+    ptr = s;
+    while (*s != '\0') {
+        if ((int)*s >= 0x20)
+            *(ptr++) = *s;
+        s++;
+    }
+    *ptr = '\0';
 }
 
 std::wstring to_wide(std::string external)
 {
+#if USE_CODECVT
+    return converter.from_bytes(external);
+#else
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/in
     std::locale::global(std::locale(""));
     const std::codecvt<wchar_t, char, std::mbstate_t> &f =
@@ -59,10 +62,14 @@ std::wstring to_wide(std::string external)
     // error checking skipped for brevity
     internal.resize(to_next - &internal[0]);
     return internal;
+#endif
 }
 
 std::string to_narrow(std::wstring internal)
 {
+#if USE_CODECVT
+    return converter.to_bytes(internal);
+#else
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/out
     std::locale::global(std::locale(""));
     const std::codecvt<wchar_t, char, std::mbstate_t> &f =
@@ -78,24 +85,15 @@ std::string to_narrow(std::wstring internal)
     // error checking skipped for brevity
     external.resize(to_next - &external[0]);
     return external;
+#endif
 }
 
 std::string wstripped(std::string in)
 {
-#if USE_CODECVT
-	std::wstring win = converter.from_bytes(in);
-#else
-	std::wstring win = to_wide(in);
-#endif
+    std::wstring win = to_wide(in);
 
-	wchar_t *out = (wchar_t *)win.data();
-	wstrip(out);
+    wchar_t *out = (wchar_t *)win.data();
+    wstrip(out);
 
-#if USE_CODECVT
-	std::wstring wout = std::wstring(&out[0]);
-	std::string retval = converter.to_bytes(wout);
-	return retval;
-#else
-	return to_narrow(out);
-#endif
+    return to_narrow(out);
 }
