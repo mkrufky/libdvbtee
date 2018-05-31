@@ -18,14 +18,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#define USE_CODECVT 0
+#define USE_WSTRING_CONVERT 0
 
 #include <locale>
 #include <string.h>
 #include "utf8strip.h"
 #include "../dvbtee_config.h"
 
-#if USE_CODECVT
+#if USE_WSTRING_CONVERT
 #include <codecvt>
 
 std::wstring_convert< std::codecvt_utf8_utf16<wchar_t> > converter;
@@ -45,7 +45,7 @@ void wstrip(wchar_t * str)
 
 std::wstring to_wide(std::string external)
 {
-#if USE_CODECVT
+#if USE_WSTRING_CONVERT
     return converter.from_bytes(external);
 #else
 #if !defined(_WIN32)
@@ -76,7 +76,7 @@ std::wstring to_wide(std::string external)
 
 std::string to_narrow(std::wstring internal)
 {
-#if USE_CODECVT
+#if USE_WSTRING_CONVERT
     return converter.to_bytes(internal);
 #else
 #if !defined(_WIN32)
