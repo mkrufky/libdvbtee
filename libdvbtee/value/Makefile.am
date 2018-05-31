@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libvalueobj.la
 
-libvalueobj_la_SOURCES = value.cpp object.cpp array.cpp
+libvalueobj_la_SOURCES = value.cpp object.cpp array.cpp utf8strip.cpp
 
 EXTRA_DIST=value.h object.h array.h
 
