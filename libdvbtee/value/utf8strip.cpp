@@ -46,7 +46,8 @@ std::wstring to_wide(std::string external)
 {
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/in
     std::locale::global(std::locale("en_US.utf8"));
-    auto& f = std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t> >(std::locale());
+    const std::codecvt<wchar_t, char, std::mbstate_t> &f =
+	  std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t> >(std::locale());
 
     // note that the following can be done with wstring_convert
     std::mbstate_t mb = std::mbstate_t(); // initial shift state
@@ -64,7 +65,8 @@ std::string to_narrow(std::wstring internal)
 {
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/out
     std::locale::global(std::locale("en_US.utf8"));
-    auto& f = std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t> >(std::locale());
+    const std::codecvt<wchar_t, char, std::mbstate_t> &f =
+	  std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t> >(std::locale());
 
     // note that the following can be done with wstring_convert
     std::mbstate_t mb{}; // initial shift state
