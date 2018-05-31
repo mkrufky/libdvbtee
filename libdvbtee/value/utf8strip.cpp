@@ -23,6 +23,7 @@
 #include <locale>
 #include <string.h>
 #include "utf8strip.h"
+#include "../dvbtee_config.h"
 
 #if USE_CODECVT
 #include <codecvt>
@@ -47,6 +48,7 @@ std::wstring to_wide(std::string external)
 #if USE_CODECVT
     return converter.from_bytes(external);
 #else
+#if !defined(_WIN32)
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/in
     std::locale::global(std::locale(""));
     const std::codecvt<wchar_t, char, std::mbstate_t> &f =
@@ -62,6 +64,13 @@ std::wstring to_wide(std::string external)
     // error checking skipped for brevity
     internal.resize(to_next - &internal[0]);
     return internal;
+#else
+    // WINBASEAPI int WINAPI MultiByteToWideChar (UINT CodePage, DWORD dwFlags, LPCCH lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar);
+    int Newlength = MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, external.c_str(), -1, NULL, 0);
+    std::wstring NewString(Newlength + 1, 0);
+    int Newresult = MultiByteToWideChar(CP_ACP, WC_COMPOSITECHECK, external.c_str(), -1, &NewString[0],Newlength + 1);
+	return NewString;
+#endif
 #endif
 }
 
@@ -70,6 +79,7 @@ std::string to_narrow(std::wstring internal)
 #if USE_CODECVT
     return converter.to_bytes(internal);
 #else
+#if !defined(_WIN32)
     // from: http://en.cppreference.com/w/cpp/locale/codecvt/out
     std::locale::global(std::locale(""));
     const std::codecvt<wchar_t, char, std::mbstate_t> &f =
@@ -85,6 +95,12 @@ std::string to_narrow(std::wstring internal)
     // error checking skipped for brevity
     external.resize(to_next - &external[0]);
     return external;
+#else
+    int Newlength = WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, internal.c_str(), -1, NULL, 0,  NULL, NULL);
+    std::string NewString(Newlength + 1, 0);
+    int Newresult = WideCharToMultiByte(CP_ACP, WC_COMPOSITECHECK, internal.c_str(), -1, &NewString[0],Newlength + 1,  NULL, NULL);
+	return NewString;
+#endif
 #endif
 }
 
