@@ -1,0 +1,61 @@
+{
+  "name": "libdvbtee_parser",
+  "version": "0.0.0",
+  "description": "MPEG2 transport stream parser for Node.js with support for television broadcast PSIP tables",
+  "author": "Michael Ira Krufky <mkrufky@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mkrufky/libdvbtee.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mkrufky/libdvbtee/issues"
+  },
+  "keywords": [
+    "dvb-psi",
+    "atsc",
+    "dvb",
+    "dvbt",
+    "dvb-t",
+    "psi",
+    "psip",
+    "mpeg2",
+    "mpegts",
+    "m2ts",
+    "ts",
+    "transport-stream",
+    "transport",
+    "stream",
+    "tv",
+    "dtv",
+    "digital",
+    "television",
+    "pat",
+    "pmt",
+    "sdt",
+    "vct",
+    "mgt",
+    "nit",
+    "eit",
+    "ett",
+    "stt",
+    "tdt",
+    "tot",
+    "epg",
+    "table",
+    "tables",
+    "descriptor",
+    "descriptors",
+    "parser"
+  ],
+  "main": "include_dirs.js",
+  "scripts": {
+    "preinstall": "npm install git-clone mkdirp rimraf && node scripts/prepare-build.js && node scripts/configure-build.js"
+  },
+  "dependencies": {
+    "git-clone": "^0.1.0",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.2"
+  },
+  "gypfile": true
+}
