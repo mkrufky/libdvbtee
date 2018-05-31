@@ -318,25 +318,6 @@ char *translate(unsigned char *str, const char *encoding) {
     return out;
 }
 
-/* Translate encoded string into UTF-8 */
-/* IMPORTANT: be sure to free() the returned string after use */
-wchar_t *to_wide(const char *str) {
-    size_t iconv_in_s = strlen(str);
-    size_t iconv_out_s = iconv_in_s * sizeof(wchar_t)* 6 + 1;
-
-    wchar_t *out = (wchar_t *)calloc(sizeof(wchar_t), iconv_out_s);
-
-    char *iconv_in = (char *) &str[0];
-    //wchar_t *iconv_out = (wchar_t *) &out[0];
-	char *iconv_out = (char *) &out[0];
-
-    iconv_t conv = iconv_open("WCHAR_T", "UTF-8");
-    iconv(conv, &iconv_in, &iconv_in_s, &iconv_out, &iconv_out_s);
-    iconv_close(conv);
-
-    return out;
-}
-
 /* Thanks to Aman Gupta:
  * https://github.com/mkrufky/node-dvbtee/issues/25#issuecomment-391823070
  */
