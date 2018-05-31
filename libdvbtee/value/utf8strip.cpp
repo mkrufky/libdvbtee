@@ -69,7 +69,7 @@ std::string to_narrow(std::wstring internal)
 	  std::use_facet<std::codecvt<wchar_t, char, std::mbstate_t> >(std::locale());
 
     // note that the following can be done with wstring_convert
-    std::mbstate_t mb{}; // initial shift state
+    std::mbstate_t mb = std::mbstate_t(); // initial shift state
     std::string external(internal.size() * f.max_length(), '\0');
     const wchar_t* from_next;
     char* to_next;
