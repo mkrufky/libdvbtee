@@ -28,6 +28,21 @@
 #define USE_WSTRING_CONVERT 0
 #endif
 
+#if !USE_WSTRING_CONVERT
+/* FIXME:
+ * v8::JSON::Parse blows up if we try to do this using anything other than
+ * `std::wstring_convert`, so for now, provide a no-op wstripped() otherwise
+ */
+
+std::string wstripped(std::string in)
+{
+    return in;
+}
+#else
+/* The outer `#if !USE_WSTRING_CONVERT` is a "temporary hack"
+ * we check again below for compatibility
+ */
+
 #if USE_WSTRING_CONVERT
 #include <codecvt>
 
@@ -116,3 +131,4 @@ std::string wstripped(std::string in)
 
     return to_narrow(out);
 }
+#endif
