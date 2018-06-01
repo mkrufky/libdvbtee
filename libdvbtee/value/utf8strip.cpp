@@ -18,12 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#define USE_WSTRING_CONVERT 0
 
 #include <locale>
 #include <string.h>
 #include "utf8strip.h"
 #include "../dvbtee_config.h"
+
+#ifndef USE_WSTRING_CONVERT
+#define USE_WSTRING_CONVERT 0
+#endif
 
 #if USE_WSTRING_CONVERT
 #include <codecvt>
