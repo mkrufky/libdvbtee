@@ -1,6 +1,7 @@
 .dntrc
 .travis.yml
 .npmignore
+.dont_del
 appveyor.yml
 cpplint.py
 doc/.build.sh
@@ -10,6 +11,5 @@ examples/
 tunerprovider/
 packaging/
 *.sh
-*.dont_del
 *.pc.in
 *.pro
