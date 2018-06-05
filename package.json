@@ -52,7 +52,7 @@
   "scripts": {
     "preinstall": "npm install git-clone mkdirp rimraf && node scripts/prepare-build.js && node scripts/configure-build.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "git-clone": "^0.1.0",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.6.2"
