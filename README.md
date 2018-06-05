@@ -17,6 +17,10 @@ through UDP, TCP, HTTP, DMA and various other mechanisms.
 `libdvbtee_server` allows for these features to be controlled from an http
 session or command line interface, and can be used to control multiple tuners.
 
+`libdvbtee_parser` is a library built from [libdvbtee](https://github.com/mkrufky/libdvbtee) sources for use by [node-dvbtee](https://www.npmjs.com/package/dvbtee)
+`libdvbtee_parser` is hosted within the same git development repository as `libdvbtee` and as such,
+they share this same single README.md file.
+
 The dvbtee executable application provides a variety of features, including:
 scanning, tuning, EPG browsing, receive incoming network streams,
 stream out network streams, manage multiple tuners, and more...
