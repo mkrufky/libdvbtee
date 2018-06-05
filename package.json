@@ -51,6 +51,7 @@
   ],
   "main": "include_dirs.js",
   "scripts": {
+    "install": "node-gyp rebuild -j 8",
     "preinstall": "npm install git-clone mkdirp rimraf && node scripts/prepare-build.js && node scripts/configure-build.js"
   },
   "devDependencies": {
