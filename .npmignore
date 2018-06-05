@@ -1,0 +1,15 @@
+.dntrc
+.travis.yml
+.npmignore
+appveyor.yml
+cpplint.py
+doc/.build.sh
+*.patch
+deb/
+examples/
+tunerprovider/
+packaging/
+*.sh
+*.dont_del
+*.pc.in
+*.pro
