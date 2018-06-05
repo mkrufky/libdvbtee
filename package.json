@@ -2,6 +2,7 @@
   "name": "libdvbtee_parser",
   "version": "0.6.4",
   "description": "MPEG2 transport stream parser library with support for television broadcast PSIP tables",
+  "readme": "libdvbtee_parser is a library built from [libdvbtee](https://github.com/mkrufky/libdvbtee) sources for use by [node-dvbtee](https://www.npmjs.com/package/dvbtee)",
   "author": "Michael Ira Krufky <mkrufky@gmail.com>",
   "license": "MIT",
   "repository": {
