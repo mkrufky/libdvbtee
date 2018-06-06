@@ -8,6 +8,7 @@ doc/.build.sh
 *.patch
 deb/
 examples/
+libdvbtee_server/
 tunerprovider/
 packaging/
 *.sh
