@@ -3,7 +3,7 @@
   "version": "0.6.4",
   "description": "MPEG2 transport stream parser library with support for television broadcast PSIP tables",
   "author": "Michael Ira Krufky <mkrufky@gmail.com>",
-  "license": "MIT",
+  "license": "LGPL-2.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/mkrufky/libdvbtee.git"
