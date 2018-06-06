@@ -85,4 +85,20 @@ enum dmx_buffer_flags {
 #endif
 #endif
 
+#ifndef USE_WSTRING_CONVERT
+#define USE_WSTRING_CONVERT 0
+#endif
+
+#ifndef USE_DVBTEE_WSTRIP
+#define USE_DVBTEE_WSTRIP 0
+#if USE_WSTRING_CONVERT
+#undef USE_DVBTEE_WSTRIP
+#define USE_DVBTEE_WSTRIP 1
+#endif /* USE_WSTRING_CONVERT */
+#ifdef _WIN32
+#undef USE_DVBTEE_WSTRIP
+#define USE_DVBTEE_WSTRIP 1
+#endif /* _WIN32 */
+#endif /* USE_DVBTEE_WSTRIP */
+
 #endif //__DVBTEE_CONFIG_H__

@@ -24,22 +24,6 @@
 #include "utf8strip.h"
 #include "../dvbtee_config.h"
 
-#ifndef USE_WSTRING_CONVERT
-#define USE_WSTRING_CONVERT 0
-#endif
-
-#ifndef USE_DVBTEE_WSTRIP
-#define USE_DVBTEE_WSTRIP 0
-#if USE_WSTRING_CONVERT
-#undef USE_DVBTEE_WSTRIP
-#define USE_DVBTEE_WSTRIP 1
-#endif /* USE_WSTRING_CONVERT */
-#if defined(_WIN32)
-#undef USE_DVBTEE_WSTRIP
-#define USE_DVBTEE_WSTRIP 1
-#endif /* defined(_WIN32) */
-#endif /* USE_DVBTEE_WSTRIP */
-
 #if !USE_DVBTEE_WSTRIP
 /* FIXME:
  * v8::JSON::Parse blows up if we try to do this using anything other than
