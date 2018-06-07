@@ -95,10 +95,6 @@ enum dmx_buffer_flags {
 #undef USE_DVBTEE_WSTRIP
 #define USE_DVBTEE_WSTRIP 1
 #endif /* USE_WSTRING_CONVERT */
-#if defined(_WIN32)
-#undef USE_DVBTEE_WSTRIP
-#define USE_DVBTEE_WSTRIP 1
-#endif /* defined(_WIN32) */
 #endif /* USE_DVBTEE_WSTRIP */
 
 #endif //__DVBTEE_CONFIG_H__
