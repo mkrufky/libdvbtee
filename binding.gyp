@@ -36,6 +36,7 @@
     ],
     'defines': [
       'PIC',
+      'USE_WSTRING_CONVERT',
       'FORCE_DECODER_LINKAGE'
     ],
   },
@@ -116,6 +117,10 @@
             'xcode_settings': {
               'MACOSX_DEPLOYMENT_TARGET': '10.7',
               'CLANG_CXX_LIBRARY': 'libc++',
+              'OTHER_CFLAGS': [
+                '-std=c++11',
+                '-stdlib=libc++'
+              ],
               'OTHER_LDFLAGS': [
                 '-L/opt/local/lib'
               ],
@@ -127,6 +132,9 @@
             }
           }
         ]
+      ],
+      'cflags': [
+        '-std=c++11'
       ],
       'cflags_cc!': [
         '-fno-rtti',
