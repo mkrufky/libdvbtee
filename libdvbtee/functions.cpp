@@ -29,7 +29,7 @@
 #include "functions.h"
 //#include "dvbtee_config.h"
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #ifndef HAVE_TIMEGM
 #ifdef HAVE__MKGMTIME
 #define timegm _mkgmtime

@@ -77,7 +77,7 @@ enum dmx_buffer_flags {
 #endif
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <ws2tcpip.h>
 
 #ifndef HAVE_STRTOK_R
@@ -95,10 +95,10 @@ enum dmx_buffer_flags {
 #undef USE_DVBTEE_WSTRIP
 #define USE_DVBTEE_WSTRIP 1
 #endif /* USE_WSTRING_CONVERT */
-#ifdef _WIN32
+#if defined(_WIN32)
 #undef USE_DVBTEE_WSTRIP
 #define USE_DVBTEE_WSTRIP 1
-#endif /* _WIN32 */
+#endif /* defined(_WIN32) */
 #endif /* USE_DVBTEE_WSTRIP */
 
 #endif //__DVBTEE_CONFIG_H__
