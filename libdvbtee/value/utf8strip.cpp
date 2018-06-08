@@ -24,6 +24,28 @@
 #include "utf8strip.h"
 #include "../dvbtee_config.h"
 
+void strip(char * str)
+{
+    unsigned char *ptr, *s = (unsigned char*)str;
+    ptr = s;
+    while (*s != '\0') {
+        if ((int)*s >= 0x20)
+            *(ptr++) = *s;
+        s++;
+    }
+    *ptr = '\0';
+}
+
+std::string wstripped(std::string in)
+{
+    char *out = (char *)in.data();
+    strip(out);
+
+    return out;
+}
+
+#if 0
+
 #if !USE_DVBTEE_WSTRIP
 /* FIXME:
  * v8::JSON::Parse blows up if we try to do this using anything other than
@@ -127,4 +149,5 @@ std::string wstripped(std::string in)
 
     return to_narrow(out);
 }
+#endif
 #endif
