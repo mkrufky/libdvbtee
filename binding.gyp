@@ -52,6 +52,7 @@
 #       'libdvbtee/curlhttpget.cpp',
         'libdvbtee/decode.cpp',
 #       'libdvbtee/demux.cpp',
+#       'libdvbtee/dvb-vb2.cpp',
 #       'libdvbtee/feed.cpp',
         'libdvbtee/functions.cpp',
 #       'libdvbtee/hdhr_tuner.cpp',
