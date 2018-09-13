@@ -18,6 +18,7 @@ SOURCES += \
     channels.cpp \
     decode.cpp \
     demux.cpp \
+    dvb-vb2.cpp \
     feed.cpp \
     functions.cpp \
     listen.cpp \
@@ -36,6 +37,7 @@ HEADERS += \
     channels.h \
     decode.h \
     demux.h \
+    dvb-vb2.h \
     feed.h \
     functions.h \
     listen.h \
