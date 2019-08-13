@@ -36,6 +36,8 @@
     ],
     'defines': [
       'PIC',
+      '_FILE_OFFSET_BITS=64',
+      '_LARGEFILE_SOURCE',
       'FORCE_DECODER_LINKAGE'
     ],
   },
