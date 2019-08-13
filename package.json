@@ -1,6 +1,6 @@
 {
   "name": "libdvbtee_parser",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "MPEG2 transport stream parser library with support for television broadcast PSIP tables",
   "author": "Michael Ira Krufky <mkrufky@gmail.com>",
   "license": "LGPL-2.1",

@@ -1,1 +1,1 @@
-m4_define([DVBTEE_VERSION],[0.6.6])
+m4_define([DVBTEE_VERSION],[0.6.7])
