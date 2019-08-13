@@ -31,7 +31,8 @@ else
 fi
 
 ./bootstrap
-./configure --prefix=${DVBTEE_ROOT}/usr/ --enable-static --with-pic
+./configure --prefix=${DVBTEE_ROOT}/usr/ --enable-static --with-pic CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
+
 cd ..
 
 make -C libdvbpsi -j
@@ -50,9 +51,9 @@ else
 fi
 
 if [ -e .staticlib ]; then
-    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS=-I${DVBTEE_ROOT}/usr/include/dvbpsi/ LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@" --with-pic --enable-static --disable-shared
+    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS="-I${DVBTEE_ROOT}/usr/include/dvbpsi/ -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE" LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@" --with-pic --enable-static --disable-shared
 else
-    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS=-I${DVBTEE_ROOT}/usr/include/dvbpsi/ LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@" --with-pic
+    LD_LIBRARY_PATH=${DVBTEE_ROOT}/usr/lib ./configure CPPFLAGS="-I${DVBTEE_ROOT}/usr/include/dvbpsi/ -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE" LDFLAGS="-L${DVBTEE_ROOT}/usr/lib/ -ldvbpsi" --enable-dvbpsibuild "$@" --with-pic
 fi
 
 if [ -e .clean ]; then
