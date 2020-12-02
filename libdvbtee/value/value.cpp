@@ -179,6 +179,26 @@ ReferencedValueUndefined::~ReferencedValueUndefined()
 	ValueBase::operator --();
 }
 
+std::string json_escape(std::string in) {
+	char replace_with[3];
+	for(size_t i = 0; i < in.length(); i++) {
+		// find next double quote or backslash to escape
+		size_t found = in.find_first_of("\"\\", i);
+		if (found != std::string::npos) {
+			// escape it by prepending the found character with a backslash
+			snprintf(replace_with, sizeof(replace_with), "\\%c", in[found]);
+			in.replace(found, 1, replace_with);
+			// skip ahead after what was just replaced
+			i = found+1;
+		}
+		else {
+			// no more characters to escape
+			break;
+		}
+	}
+	return in;
+}
+
 TO_JSON_TPL_PRIMITIVE(int)
 TO_JSON_TPL_PRIMITIVE(long)
 TO_JSON_TPL_PRIMITIVE(long long)
@@ -190,5 +210,5 @@ TO_JSON_TPL_PRIMITIVE(unsigned long long)
 TO_JSON_TPL_PRIMITIVE(unsigned short)
 TO_JSON_TPL(unsigned char, (unsigned int)VALUE)
 TO_JSON_TPL_PRIMITIVE(double)
-TO_JSON_TPL(std::string, "\"" << wstripped(VALUE) << "\"")
+TO_JSON_TPL(std::string, "\"" << json_escape(wstripped(VALUE)) << "\"")
 TO_JSON_TPL(bool, ((VALUE) ? "true" : "false"))
