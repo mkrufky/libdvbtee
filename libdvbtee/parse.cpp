@@ -244,6 +244,26 @@ void parse::process_pmt(const decoded_pmt_t *pmt)
 	{
 		/* if we're going to stream a program, make sure its pid is coming thru */
 		payload_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+
+		/* identify audio / video pids separately */
+		switch (iter_pmt_es->second.type)
+		{
+		case ST_VideoMpeg1:
+		case ST_VideoMpeg4:
+		case ST_VideoH264:
+		case ST_ATSC_VideoMpeg2:
+		case ST_VideoMpeg2:
+			video_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+			break;
+		case ST_AudioMpeg1:
+		case ST_AudioMpeg2:
+		case ST_AudioAAC_ADTS:
+		case ST_AudioAAC_LATM:
+		case ST_ATSC_AudioEAC3:
+		case ST_ATSC_AudioAC3:
+			audio_pids[iter_pmt_es->second.pid] = iter_pmt_es->second.type;
+			break;
+		}
 		add_filter(iter_pmt_es->second.pid);
 	}
 }

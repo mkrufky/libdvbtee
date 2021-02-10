@@ -328,7 +328,7 @@ private:
 
 	bool process_err_pkts;
 	unsigned int tei_count;
-	map_pidtype payload_pids;
+	map_pidtype payload_pids, audio_pids, video_pids;
 
 	tsfilter_iface *m_tsfilter_iface;
 	void add_filter(uint16_t pid)
