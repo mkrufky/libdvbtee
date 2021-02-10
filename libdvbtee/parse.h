@@ -40,28 +40,29 @@
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
 
 /* Machine readible LIBDVBTEE version */
-#define LIBDVBTEE_VERSION_INT  ((LIBDVBTEE_VERSION_A<<16)+(LIBDVBTEE_VERSION_B<<8)+LIBDVBTEE_VERSION_C)
+#define LIBDVBTEE_VERSION_INT ((LIBDVBTEE_VERSION_A << 16) + (LIBDVBTEE_VERSION_B << 8) + LIBDVBTEE_VERSION_C)
 
 /* Human readible LIBDVBTEE version */
-#define LIBDVBTEE_VERSION EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_A) "." EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_B) "." EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_C)
+#define LIBDVBTEE_VERSION EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_A) \
+"." EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_B) "." EXPAND_AND_QUOTE(LIBDVBTEE_VERSION_C)
 
 extern const char *parse_libdvbpsi_version;
-
 
 #if !USING_DVBPSI_VERSION_0
 typedef void (*dvbpsi_detach_table_callback)(dvbpsi_t *, uint8_t, uint16_t);
 
-typedef struct {
+typedef struct
+{
 	dvbpsi_detach_table_callback detach_cb;
-	uint8_t  table_id;
+	uint8_t table_id;
 	uint16_t table_id_ext;
 } detach_table_t;
 
 typedef std::map<uint32_t, detach_table_t> detach_table_map;
 
 #define attach_table_auto_detach(class, attach, detach, callback, id, ext) \
-  if (attach(class->get_handle(), id, ext, callback, this)) class->set_detach(detach, id, ext)
-
+	if (attach(class->get_handle(), id, ext, callback, this))              \
+	class->set_detach(detach, id, ext)
 
 class dvbpsi_class
 {
@@ -69,17 +70,18 @@ public:
 	dvbpsi_class();
 	~dvbpsi_class();
 
-	dvbpsi_class(const dvbpsi_class&);
-	dvbpsi_class& operator= (const dvbpsi_class&);
+	dvbpsi_class(const dvbpsi_class &);
+	dvbpsi_class &operator=(const dvbpsi_class &);
 
-	bool packet_push(uint8_t* p_data);
-	dvbpsi_t* get_handle() { return handle; }
+	bool packet_push(uint8_t *p_data);
+	dvbpsi_t *get_handle() { return handle; }
 	void set_detach(dvbpsi_detach_table_callback cb, uint8_t id, uint16_t ext);
 	void detach_demux();
 
 	void purge();
+
 private:
-	dvbpsi_t* handle;
+	dvbpsi_t *handle;
 	detach_table_map tables;
 	void detach_tables();
 };
@@ -94,7 +96,8 @@ typedef std::map<uint16_t, decode> map_decoder;
 typedef std::map<uint16_t, uint16_t> map_pidtype;
 #endif
 
-typedef struct {
+typedef struct
+{
 	unsigned int channel;
 	uint32_t frequency;
 	const char *modulation;
@@ -107,8 +110,8 @@ public:
 	virtual void addfilter(uint16_t) = 0;
 };
 
-
-typedef struct {
+typedef struct
+{
 	uint16_t lcn;
 	uint16_t major;
 	uint16_t minor;
@@ -127,15 +130,14 @@ public:
 	virtual void chandump(parsed_channel_info_t *) = 0;
 };
 
-
 class parse
 {
 public:
-	__attribute__((deprecated)) parse(output_base&);
-	parse(output_base&, map_decoder&, map_network_decoder &supplied_networks);
+	__attribute__((deprecated)) parse(output_base &);
+	parse(output_base &, map_decoder &, map_network_decoder &supplied_networks);
 	virtual ~parse();
 
-	void subscribeTables(dvbtee::decode::TableWatcher* tw) { subscribedTableWatcher = tw; }
+	void subscribeTables(dvbtee::decode::TableWatcher *tw) { subscribedTableWatcher = tw; }
 
 	unsigned int get_fed_pkt_count() const { return fed_pkt_count; }
 	uint16_t get_ts_id() const { return ts_id; }
@@ -144,48 +146,52 @@ public:
 	bool get_stream_info(unsigned int channel, uint16_t service, parsed_channel_info_t *c, decoded_event_t *e0 = NULL, decoded_event_t *e1 = NULL) const;
 
 	void add_service_pids(uint16_t service_id, map_pidtype &pids);
-	void add_service_pids(char* service_ids, map_pidtype &pids);
+	void add_service_pids(char *service_ids, map_pidtype &pids);
 	void add_service_pids(map_pidtype &pids);
 
 	void reset_output_pids(int target_id = -1) { out.reset_pids(target_id); }
 
 	void set_service_ids(char *ids);
 
-	int feed(int, uint8_t*);
+	int feed(int, uint8_t *);
 	void reset();
 	void stop();
 	void stop(int);
 
-	int add_output(char*);
+	int add_output(char *);
 	int add_output(int, unsigned int);
-	int add_output(void* priv, stream_callback);
+	int add_output(void *priv, stream_callback);
 
-	int add_output(char*, map_pidtype&);
-	int add_output(int, unsigned int, map_pidtype&);
-	int add_output(void* priv, stream_callback, map_pidtype&);
+	int add_output(char *, map_pidtype &);
+	int add_output(int, unsigned int, map_pidtype &);
+	int add_output(void *priv, stream_callback, map_pidtype &);
 
-	int add_output(char*, uint16_t);
+	int add_output(char *, uint16_t);
 	int add_output(int, unsigned int, uint16_t);
-	int add_output(void* priv, stream_callback, uint16_t);
+	int add_output(void *priv, stream_callback, uint16_t);
 
-	int add_output(char*, char*);
-	int add_output(int, unsigned int, char*);
-	int add_output(void* priv, stream_callback, char*);
+	int add_output(char *, char *);
+	int add_output(int, unsigned int, char *);
+	int add_output(void *priv, stream_callback, char *);
 
 	int add_stdout();
-	int add_stdout(map_pidtype&);
+	int add_stdout(map_pidtype &);
 	int add_stdout(uint16_t);
-	int add_stdout(char*);
+	int add_stdout(char *);
 
-	unsigned int xine_dump(parse_iface *iface = NULL); /* full channel dump  */
+	unsigned int xine_dump(parse_iface *iface = NULL);	 /* full channel dump  */
 	void epg_dump(decode_report *reporter = NULL) const; /* full channel dump  */
 
 	void set_channel_info(unsigned int channel, uint32_t frequency, const char *modulation)
-	{ new_channel_info.channel = channel; new_channel_info.frequency = frequency; new_channel_info.modulation = modulation; }
+	{
+		new_channel_info.channel = channel;
+		new_channel_info.frequency = frequency;
+		new_channel_info.modulation = modulation;
+	}
 
 	void set_scan_mode(bool onoff) { scan_mode = onoff; }
-	void set_epg_mode(bool onoff)  { epg_mode = onoff; }
-	void enable(bool onoff)  { enabled = onoff; }
+	void set_epg_mode(bool onoff) { epg_mode = onoff; }
+	void enable(bool onoff) { enabled = onoff; }
 
 	void enable_ett_collection(bool onoff = true) { dont_collect_ett = !onoff; }
 	bool ett_collection_enabled() const { return !dont_collect_ett; }
@@ -208,71 +214,75 @@ public:
 
 	void dumpJson() const;
 
-	output_base& out;
+	output_base &out;
 
 	bool check() const;
 	bool is_enabled() const { return enabled; }
 
 	stats statistics;
 	static int count_decoder_factories();
+
 private:
-friend class decode;
-	map_decoder&   decoders;
-	map_network_decoder& networks;
-	dvbtee::decode::TableWatcher* subscribedTableWatcher;
-	const decode* get_decoder_if_exists(uint16_t ts_id) const;
-	decode& get_decoder(uint16_t ts_id);
+	friend class decode;
+	map_decoder &decoders;
+	map_network_decoder &networks;
+	dvbtee::decode::TableWatcher *subscribedTableWatcher;
+	const decode *get_decoder_if_exists(uint16_t ts_id) const;
+	decode &get_decoder(uint16_t ts_id);
 
 	void init();
 
-	static void take_pat(void*, dvbpsi_pat_t*);
-	static void take_pmt(void*, dvbpsi_pmt_t*);
-	static void take_eit(void*, dvbpsi_eit_t*);
-	static void take_nit_actual(void*, dvbpsi_nit_t*);
-	static void take_nit_other(void*,  dvbpsi_nit_t*);
-	static void take_sdt_actual(void*, dvbpsi_sdt_t*);
-	static void take_sdt_other(void*,  dvbpsi_sdt_t*);
-	static void take_tot(void*, dvbpsi_tot_t*);
+	static void take_pat(void *, dvbpsi_pat_t *);
+	static void take_pmt(void *, dvbpsi_pmt_t *);
+	static void take_eit(void *, dvbpsi_eit_t *);
+	static void take_nit_actual(void *, dvbpsi_nit_t *);
+	static void take_nit_other(void *, dvbpsi_nit_t *);
+	static void take_sdt_actual(void *, dvbpsi_sdt_t *);
+	static void take_sdt_other(void *, dvbpsi_sdt_t *);
+	static void take_tot(void *, dvbpsi_tot_t *);
 #if !USING_DVBPSI_VERSION_0
-	static void take_vct(void*, dvbpsi_atsc_vct_t*);
-	static void take_eit(void*, dvbpsi_atsc_eit_t*);
-	static void take_ett(void*, dvbpsi_atsc_ett_t*);
-	static void take_stt(void*, dvbpsi_atsc_stt_t*);
-	static void take_mgt(void*, dvbpsi_atsc_mgt_t*);
+	static void take_vct(void *, dvbpsi_atsc_vct_t *);
+	static void take_eit(void *, dvbpsi_atsc_eit_t *);
+	static void take_ett(void *, dvbpsi_atsc_ett_t *);
+	static void take_stt(void *, dvbpsi_atsc_stt_t *);
+	static void take_mgt(void *, dvbpsi_atsc_mgt_t *);
 #endif
 
 #if USING_DVBPSI_VERSION_0
-	static void attach_table(void*, dvbpsi_handle, uint8_t, uint16_t);
+	static void attach_table(void *, dvbpsi_handle, uint8_t, uint16_t);
 #else
-	static void attach_table(dvbpsi_t*, uint8_t, uint16_t, void *);
-	static void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c, void *d) { attach_table(a->get_handle(), b, c, d); }
+	static void attach_table(dvbpsi_t *, uint8_t, uint16_t, void *);
+	static void attach_table(dvbpsi_class *a, uint8_t b, uint16_t c, void *d) { attach_table(a->get_handle(), b, c, d); }
 #endif
 
-	bool take_pat(dvbpsi_pat_t*, bool);
-	bool take_pmt(dvbpsi_pmt_t*, bool);
-	bool take_eit(dvbpsi_eit_t*, bool);
-	bool take_nit_actual(dvbpsi_nit_t*, bool);
-	bool take_nit_other(dvbpsi_nit_t*,  bool);
-	bool take_sdt_actual(dvbpsi_sdt_t*, bool);
-	bool take_sdt_other(dvbpsi_sdt_t*,  bool);
-	bool take_tot(dvbpsi_tot_t*, bool);
+	bool take_pat(dvbpsi_pat_t *, bool);
+	bool take_pmt(dvbpsi_pmt_t *, bool);
+	bool take_eit(dvbpsi_eit_t *, bool);
+	bool take_nit_actual(dvbpsi_nit_t *, bool);
+	bool take_nit_other(dvbpsi_nit_t *, bool);
+	bool take_sdt_actual(dvbpsi_sdt_t *, bool);
+	bool take_sdt_other(dvbpsi_sdt_t *, bool);
+	bool take_tot(dvbpsi_tot_t *, bool);
 #if !USING_DVBPSI_VERSION_0
-	bool take_vct(dvbpsi_atsc_vct_t*, bool);
-	bool take_eit(dvbpsi_atsc_eit_t*, bool);
-	bool take_ett(dvbpsi_atsc_ett_t*, bool);
-	bool take_stt(dvbpsi_atsc_stt_t*, bool);
-	bool take_mgt(dvbpsi_atsc_mgt_t*, bool);
+	bool take_vct(dvbpsi_atsc_vct_t *, bool);
+	bool take_eit(dvbpsi_atsc_eit_t *, bool);
+	bool take_ett(dvbpsi_atsc_ett_t *, bool);
+	bool take_stt(dvbpsi_atsc_stt_t *, bool);
+	bool take_mgt(dvbpsi_atsc_mgt_t *, bool);
 #endif
 
 #if USING_DVBPSI_VERSION_0
 	void attach_table(dvbpsi_handle, uint8_t, uint16_t);
 #else
-	void attach_table(dvbpsi_t*, uint8_t, uint16_t);
-	void attach_table(dvbpsi_class* a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); }
+	void attach_table(dvbpsi_t *, uint8_t, uint16_t);
+	void attach_table(dvbpsi_class *a, uint8_t b, uint16_t c) { attach_table(a->get_handle(), b, c); }
 #endif
 
-	unsigned int xine_dump(uint16_t ts_id, parse_iface *iface) { return xine_dump(ts_id, &channel_info[ts_id], iface); }
-	unsigned int xine_dump(uint16_t, channel_info_t*, parse_iface *);
+	unsigned int xine_dump(uint16_t ts_id, parse_iface *iface)
+	{
+		return xine_dump(ts_id, &channel_info[ts_id], iface);
+	}
+	unsigned int xine_dump(uint16_t, channel_info_t *, parse_iface *);
 
 	void set_ts_id(uint16_t);
 	void set_service_id(uint16_t id) { service_ids[id] = 0; }
@@ -286,10 +296,10 @@ friend class decode;
 #if USING_DVBPSI_VERSION_0
 	dvbpsi_handle h_pat;
 #else
-	dvbpsi_class  h_pat;
+	dvbpsi_class h_pat;
 #endif
-	map_dvbpsi    h_pmt;
-	map_dvbpsi    h_demux;
+	map_dvbpsi h_pmt;
+	map_dvbpsi h_demux;
 
 #if 0
 	time_t stream_time;
@@ -309,7 +319,7 @@ friend class decode;
 	bool expect_vct;
 	map_rcvd rcvd_pmt;
 
-//	uint8_t grab_next_eit(uint8_t current_eit_x);
+	//	uint8_t grab_next_eit(uint8_t current_eit_x);
 	map_pidtype eit_pids; /* pid, eit-x */
 	map_pidtype ett_pids; /* pid, ett-x */
 
@@ -321,8 +331,16 @@ friend class decode;
 	map_pidtype payload_pids;
 
 	tsfilter_iface *m_tsfilter_iface;
-	void add_filter(uint16_t pid) { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(pid); }
-	void clear_filters() { if (m_tsfilter_iface) m_tsfilter_iface->addfilter(0xffff); }
+	void add_filter(uint16_t pid)
+	{
+		if (m_tsfilter_iface)
+			m_tsfilter_iface->addfilter(pid);
+	}
+	void clear_filters()
+	{
+		if (m_tsfilter_iface)
+			m_tsfilter_iface->addfilter(0xffff);
+	}
 	void reset_filters();
 	void clear_decoded_networks();
 
@@ -340,31 +358,33 @@ friend class decode;
 #endif
 	map_pidtype out_pids;
 
-	void parse_channel_info(const uint16_t, const decoded_pmt_t*, const decoded_vct_t*, parsed_channel_info_t&) const;
+	void parse_channel_info(const uint16_t, const decoded_pmt_t *, const decoded_vct_t *, parsed_channel_info_t &) const;
 };
 
-class PrivateParse: public parse
+class PrivateParse : public parse
 {
 public:
 	PrivateParse();
 	virtual ~PrivateParse();
+
 private:
 	dummy_output outp;
 	map_decoder m_decoders;
 	map_network_decoder m_networks;
 };
 
-class GlobalParse: public parse
+class GlobalParse : public parse
 {
 public:
 	GlobalParse();
 	virtual ~GlobalParse();
+
 private:
 	dummy_output outp;
 };
 
 /* deprecated: */
 typedef PrivateParse privateParse;
-typedef  GlobalParse globalParse;
+typedef GlobalParse globalParse;
 
 #endif //__PARSE_H__
