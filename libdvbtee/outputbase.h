@@ -37,24 +37,25 @@
 typedef std::map<uint16_t, uint16_t> map_pidtype;
 #endif
 
-enum output_options {
-	OUTPUT_NONE    = 0,
-	OUTPUT_PATPMT  = 1,
-	OUTPUT_PES     = 2,
-	OUTPUT_PSIP    = 4,
+enum output_options
+{
+	OUTPUT_NONE = 0,
+	OUTPUT_PATPMT = 1,
+	OUTPUT_PES = 2,
+	OUTPUT_PSIP = 4,
 };
 
-enum output_mimetype {
+enum output_mimetype
+{
 	MIMETYPE_NONE,
 	MIMETYPE_OCTET_STREAM,
 	MIMETYPE_TEXT_PLAIN,
 	MIMETYPE_TEXT_HTML,
 };
 
-
 #define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES)
 
-#define OUTPUT_STREAM_BUF_SIZE 188*7*198
+#define OUTPUT_STREAM_BUF_SIZE 188 * 7 * 198
 
 typedef int (*stream_callback)(void *, const uint8_t *, size_t);
 
@@ -74,18 +75,18 @@ public:
 	virtual void stop() = 0;
 	virtual void stop(int) = 0;
 
-	virtual bool push(uint8_t* p_data, int size) = 0;
-	virtual bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE) = 0;
+	virtual bool push(uint8_t *p_data, int size) = 0;
+	virtual bool push(uint8_t *p_data, enum output_options opt = OUTPUT_NONE) = 0;
 
-	virtual int add(char* target) = 0;
+	virtual int add(char *target) = 0;
 	virtual int add(int socket, unsigned int method) = 0;
-	virtual int add(void* priv, stream_callback callback) = 0;
+	virtual int add(void *priv, stream_callback callback) = 0;
 	virtual int add(output_stream_iface *iface) = 0;
 	virtual int add_stdout() = 0;
 
-	virtual int add(char* target, map_pidtype &pids) = 0;
+	virtual int add(char *target, map_pidtype &pids) = 0;
 	virtual int add(int socket, unsigned int method, map_pidtype &pids) = 0;
-	virtual int add(void* priv, stream_callback callback, map_pidtype &pids) = 0;
+	virtual int add(void *priv, stream_callback callback, map_pidtype &pids) = 0;
 	virtual int add(output_stream_iface *iface, map_pidtype &pids) = 0;
 	virtual int add_stdout(map_pidtype &pids) = 0;
 
@@ -95,39 +96,39 @@ public:
 
 	virtual bool check() = 0;
 
-	virtual int get_pids(map_pidtype&) = 0;
+	virtual int get_pids(map_pidtype &) = 0;
 	virtual void reset_pids(int target_id) = 0;
 };
 
-class dummy_output: public output_base
+class dummy_output : public output_base
 {
 public:
 	virtual int start() { return 0; }
 	virtual void stop() {}
 	virtual void stop(int) {}
 
-	virtual bool push(uint8_t* p_data, int size) { return true; }
-	virtual bool push(uint8_t* p_data, enum output_options opt = OUTPUT_NONE) { return true; }
+	virtual bool push(uint8_t *p_data, int size) { return true; }
+	virtual bool push(uint8_t *p_data, enum output_options opt = OUTPUT_NONE) { return true; }
 
-	virtual int add(char* target) { return 0; }
+	virtual int add(char *target) { return 0; }
 	virtual int add(int socket, unsigned int method) { return 0; }
-	virtual int add(void* priv, stream_callback callback) { return 0; }
+	virtual int add(void *priv, stream_callback callback) { return 0; }
 	virtual int add(output_stream_iface *iface) { return 0; }
 	virtual int add_stdout() { return 0; }
 
-	virtual int add(char* target, map_pidtype &pids) { return 0; }
+	virtual int add(char *target, map_pidtype &pids) { return 0; }
 	virtual int add(int socket, unsigned int method, map_pidtype &pids) { return 0; }
-	virtual int add(void* priv, stream_callback callback, map_pidtype &pids) { return 0; }
+	virtual int add(void *priv, stream_callback callback, map_pidtype &pids) { return 0; }
 	virtual int add(output_stream_iface *iface, map_pidtype &pids) { return 0; }
 	virtual int add_stdout(map_pidtype &pids) { return 0; }
 
 	virtual int add_http_server(int) { return 0; }
 
-	virtual void set_options(enum output_options opt = OUTPUT_NONE) { }
+	virtual void set_options(enum output_options opt = OUTPUT_NONE) {}
 
 	virtual bool check() { return 0; }
 
-	virtual int get_pids(map_pidtype&) { return 0; }
+	virtual int get_pids(map_pidtype &) { return 0; }
 	virtual void reset_pids(int target_id) {}
 };
 
