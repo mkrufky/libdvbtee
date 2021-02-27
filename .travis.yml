@@ -260,5 +260,6 @@ before_install:
         brew update;
         brew uninstall libtool;
         brew install libtool;
-        brew install libdvbpsi libhdhomerun;
+        brew install libdvbpsi;
+        brew install --build-from-source libhdhomerun;
     fi
