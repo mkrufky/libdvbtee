@@ -1752,6 +1752,20 @@ int parse::feed(int count, uint8_t *p_data)
 					break;
 				}
 
+				if (audio_pids.count(pkt_stats.pid))
+				{
+					send_pkt = true;
+					out_type = (output_options)(OUTPUT_PES | OUTPUT_A);
+					break;
+				}
+
+				if (video_pids.count(pkt_stats.pid))
+				{
+					send_pkt = true;
+					out_type = (output_options)(OUTPUT_PES | OUTPUT_V);
+					break;
+				}
+
 				if ((payload_pids.count(pkt_stats.pid)) ||
 					(out_pids.count(pkt_stats.pid)))
 				{

@@ -129,7 +129,7 @@ LD_LIBRARY_PATH=libdvbtee:libdvbtee_server dvbtee/dvbtee < mpegfile.ts
 -E      enable EPG scan, optional arg to limit the number of EITs to parse
 -e      enable ETT extended text tables (EPG descriptions, ATSC only)
 -o      output filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234
--O      output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP
+-O      output options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP, 8 = AUDIO, 16 = VIDEO
 -H      use a HdHomeRun device, optional arg to specify the device string
 -j      enable json output of decoded tables & descriptors
 -d      debug level

@@ -43,6 +43,8 @@ enum output_options
 	OUTPUT_PATPMT = 1,
 	OUTPUT_PES = 2,
 	OUTPUT_PSIP = 4,
+	OUTPUT_A = 8,
+	OUTPUT_V = 16,
 };
 
 enum output_mimetype
@@ -53,7 +55,7 @@ enum output_mimetype
 	MIMETYPE_TEXT_HTML,
 };
 
-#define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES)
+#define OUTPUT_AV (OUTPUT_PATPMT | OUTPUT_PES | OUTPUT_A | OUTPUT_V)
 
 #define OUTPUT_STREAM_BUF_SIZE 188 * 7 * 198
 

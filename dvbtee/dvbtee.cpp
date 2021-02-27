@@ -308,7 +308,7 @@ void usage(bool help, char *myname)
 		"-E\tenable EPG scan, optional arg to limit the number of EITs to parse\n  "
 		"-e\tenable ETT extended text tables (EPG descriptions, ATSC only)\n  "
 		"-o\toutput filtered data, optional arg is a filename / URI, ie udp://127.0.0.1:1234\n  "
-		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP\n  "
+		"-O\toutput options: (or-able) 1 = PAT/PMT, 2 = PES, 4 = PSIP, 8 = AUDIO, 16 = VIDEO\n  "
 		"-H\tuse a HdHomeRun device, optional arg to specify the device string\n  "
 		"-j\tenable json output of decoded tables & descriptors%s\n  "
 		"-d\tdebug level\n  "
