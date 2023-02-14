@@ -35,6 +35,12 @@ and press enter.
 Michael Ira Krufky  
 mkrufky at linuxtv dot org
 
+#### Install dependencies.
+These packages may be named differently on your system. Below is instructions for Debian:
+```
+sudo apt install build-essential git automake libtool pkg-config libdvbpsi-dev
+```
+
 #### How to build / run
 The recommended way to build libdvbtee is by using the `build-auto.sh` script:
 ```
