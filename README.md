@@ -35,10 +35,10 @@ and press enter.
 Michael Ira Krufky  
 mkrufky at linuxtv dot org
 
-#### Install dependencies.
-These packages may be named differently on your system. Below is instructions for Debian:
+#### Install dependencies
+These packages may be named differently on your system. Below is instruction for Debian:
 ```
-sudo apt install build-essential git automake libtool pkg-config libdvbpsi-dev
+sudo apt install build-essential git automake pkg-config libtool libdvbpsi-dev
 ```
 
 #### How to build / run
