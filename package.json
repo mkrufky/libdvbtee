@@ -6,7 +6,7 @@
   "license": "LGPL-2.1",
   "repository": {
     "type": "git",
-    "url": "git://github.com/mkrufky/libdvbtee.git"
+    "url": "https://github.com/mkrufky/libdvbtee.git"
   },
   "bugs": {
     "url": "https://github.com/mkrufky/libdvbtee/issues"

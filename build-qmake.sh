@@ -45,7 +45,7 @@ if [ -e libdvbpsi/bootstrap ]; then
     cd libdvbpsi
 else
     rm -rf libdvbpsi
-    git clone git://github.com/mkrufky/libdvbpsi.git
+    git clone https://github.com/mkrufky/libdvbpsi.git
     cd libdvbpsi
     touch .dont_del
 fi

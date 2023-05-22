@@ -8,7 +8,7 @@ var cloneLibdvbpsi = function() {
     return fs.stat(libdvbpsiDir+'/bootstrap', function(err, stats) {
         if (err) {
             return rimraf(libdvbpsiDir, function() {
-                return clone('git://github.com/mkrufky/libdvbpsi.git', libdvbpsiDir, {'shallow': true}, function() {
+                return clone('https://github.com/mkrufky/libdvbpsi.git', libdvbpsiDir, {'shallow': true}, function() {
                     return fs.writeFileSync(libdvbpsiDir+'/.dont_del', 0)
                 })
             })
